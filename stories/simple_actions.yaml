@@ -1,0 +1,7 @@
+---
+story:
+  _actions:
+    gather:
+      - print: You gathered stuff.
+  _content:
+    - print: The story ran.

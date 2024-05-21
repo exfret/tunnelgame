@@ -1,0 +1,23 @@
+---
+vars:
+  - name: test_true
+    value: true
+  - name: test_false
+    value: false
+story:
+  _content:
+    - print: This is the start of the program.
+    - print: We are now going to test the true variable.
+    - if: test_true
+      then:
+        - print: We entered the first if statement.
+      else:
+        - error:
+    - print: We are outside the first 'if' statement. (Make sure we also entered it!)
+    - if: test_false
+      then:
+        - error:
+      else:
+        - print: We entered the second if statement.
+    - print: We are outside the second 'if' statement. (Make sure we also entered it!)
+    - print: This is the end of the program.

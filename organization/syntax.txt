@@ -1,0 +1,7 @@
+GAME --> dict
+    (!) story: BLOCK
+            Note: This initial BLOCK must contain content; sub-blocks do not
+
+BLOCK --> dict of BLOCK_ID to BLOCK
+    If key is "_content", then the corresponding value is instead CONTENT
+

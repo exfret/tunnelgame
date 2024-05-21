@@ -1,0 +1,8 @@
+8. Add variable sensing elsewhere, like costs
+7. I think I used 'int' where I should have used 'double' or something such. Fix this.
+6. Blocks can be lists now (replacement for _content)
+5. Make automatic syntax checking from YAML file
+4. Catch exceptions from eval, for things like if statements assume falseness, for set statements don't modify
+3. No keyword needed to do choices, just type them
+2. Unify actions and choices with actions as just "default choices"
+1. Checking that story is formatted correctly

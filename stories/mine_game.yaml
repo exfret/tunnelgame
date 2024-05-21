@@ -1,0 +1,28 @@
+---
+vars:
+  - name: reeds
+    value: 0
+  - name: stone
+    value: 0
+  - name: wood
+    value: 0
+  - name: wooden_pickaxe
+    value: 0
+story:
+  _actions:
+    chop:
+      - print: You chopped 1 wood.
+      - set: wood
+        to: wood + 1
+      - if: len(_args) >= 1 and _args[0] == "birch"
+        then:
+          - print: The wood is of type "birch".
+    craft:
+      - print: You crafted something. Who knows what.
+      # TODO: Ability to craft args of what to craft
+    gather:
+      - print: You gathered 2 reeds.
+      - set: reeds
+        to: reeds + 2
+  _content:
+    - print: Running the story does nothing. Keep doing actions.

@@ -1,0 +1,59 @@
+---
+vars:
+  - berries: 0
+  - temp: 0
+  - wood: 0
+story:
+  _content:
+    - print: The story has only begun!
+  Buy:
+    _content:
+      - if: len(_args) == 0
+        then:
+          - print: You need to say what you're buying! For example, "buy wooden_pickaxe".
+        else:
+          - if: _args[0] == "wooden_pickaxe"
+            then:
+              - if: wood >= 5
+                then:
+                  - set: wood
+                    to: wood - 5
+                  - print: You bought a wooden pickaxe.
+                else:
+                  - print: You don't have the wood.
+            else:
+              - print: Sorry, only wooden pickaxes are in stock.
+  Chop:
+    _content:
+      - set: temp
+        to: random.randint(2, 5)
+      - set: wood
+        to: wood + temp
+      - print: You chopped {temp} wood. You now have {wood} wood.
+  Gather:
+    _content:
+      - set: temp
+        to: random.randint(7, 12)
+      - set: berries
+        to: berries + temp
+      - print: You gathered {temp} berries. You now have {berries} berries.
+  Shop:
+    _content:
+      - print: wooden_pickaxe A wooden pickaxe (costs 5 wood).
+  _footer:
+    - choice: buy
+      text: Buy something from the shop
+      effects:
+        - goto: /Buy
+    - choice: chop
+      text: Chop some wood
+      effects:
+        - goto: /Chop
+    - choice: gather
+      text: Gather berries
+      effects:
+        - goto: /Gather
+    - choice: shop
+      text: See what's in the shop
+      effects:
+        - goto: /Shop

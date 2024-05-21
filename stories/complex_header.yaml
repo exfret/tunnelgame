@@ -1,0 +1,19 @@
+---
+story:
+  _header:
+    - print: This is a header that will print every time.
+  _content:
+    - print: The story started.
+    - goto: /Block1
+  Block1:
+    _header:
+      - choice: continue
+        effects:
+          - goto: /Block2
+    _content:
+      - print: You're in block 1
+  Block2:
+    _header:
+      - print: This is another header.
+    _content:
+      - print: Okay, that's the end of the program.

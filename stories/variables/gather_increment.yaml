@@ -1,0 +1,15 @@
+---
+vars:
+  - name: wood
+    value: 0
+story:
+  _actions:
+    gather:
+      - print: You gathered wood.
+      - set: wood
+        to: wood + 1
+      - if: wood >= 2
+        then:
+          - print: You have at least 2 wood now. Congrats!
+  _content:
+    - print: The story ran.
