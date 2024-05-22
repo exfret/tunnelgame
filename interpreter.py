@@ -283,8 +283,6 @@ def step(game, state):
         pass
     elif "print" in curr_node:
         do_print(curr_node["print"], state)
-
-        return True
     elif "random" in curr_node:
         possibilities_list = []
         total_weight = 0

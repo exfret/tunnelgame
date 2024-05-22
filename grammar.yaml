@@ -1,0 +1,48 @@
+---
+START:
+  type: dict
+  mandatory:
+    story: STORY
+  optional:
+    vars: VARS
+VARS:
+  type: list
+  elements: VAR
+VAR: # Has special built-in checking
+  type: dict
+  other: _value
+STORY:
+  type: dict
+  mandatory:
+    _content: CONTENT
+  other: BLOCK
+BLOCK:
+  type: union
+  members:
+    - DICT_BLOCK
+    - LIST_BLOCK
+DICT_BLOCK: # Has special built-in checking
+  type: dict
+  optional:
+    _content: CONTENT
+  other: BLOCK
+LIST_BLOCK:
+  type: list
+  elements: INSTR
+CONTENT:
+  type: list
+  elements: INSTR
+INSTR:
+  type: union
+  members:
+    - _text
+    - IF
+    - PRINT
+IF:
+  type: dict
+  mandatory:
+    if: _expr
+PRINT:
+  type: dict
+  mandatory:
+    print: _text

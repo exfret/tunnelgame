@@ -7,7 +7,7 @@ import interpreter
 import gameparser
 
 with open(
-    "/Users/kylehess/Documents/programs/tunnelgame/stories/mine_game_2.yaml", "r"
+    "/Users/kylehess/Documents/programs/tunnelgame/stories/basic_syntax/hello_world.yaml", "r"
 ) as file:
     game = yaml.safe_load(file)
 
@@ -18,6 +18,11 @@ state = {
     "vars": {},
     "visits": {}
 }
+
+gameparser.add_vars(game, state)
+gameparser.parse(game, state)
+
+exit()
 
 # verify also creates vars on the fly, so it needs the state
 gameparser.verify(game, state)

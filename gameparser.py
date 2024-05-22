@@ -1,5 +1,6 @@
 import math
 import random
+import yaml
 
 # TODO: Check addresses in program are valid
 
@@ -173,6 +174,99 @@ def story_verify(node, context, state):
             else:
                 raise InvalidTagError("Node of type PASS with unrecognized tags: " + str(node))
     # TODO: Finish
+
+def add_vars(game, state):
+    if not ("vars" in game):
+        return
+    
+    if not isinstance(game["vars"], list):
+        IncorrectTypeError("VARS is not a list.")
+
+    for var in game["vars"]:
+        if not isinstance(var, dict):
+            IncorrectTypeError("VAR not a dict")
+
+        if len(var) != 1:
+            InvalidTagError("Extra tags in VAR specification.")
+
+        var_name = ""
+        for key, val in var.items(): # TODO: Check that vars have valid names (no leading underscores/name conflicts)
+            var_name = key
+            var_val = val
+        state["vars"]["var_name"] = var_val
+
+        # Add special variables
+        state["vars"]["random"] = random
+        state["vars"]["random"]["rand"] = lambda num: random.randint(1, num)
+        state["vars"]["math"] = math
+        state["vars"]["floor"] = math.floor
+        state["vars"]["ceil"] = math.ceil
+        state["vars"]["pow"] = math.pow
+
+def parse_node(node, state, grammar, context):
+    if context == "_expr":
+        if isinstance(node, str):
+            # Try to eval the node to make sure it works
+            # TODO: Add variable sensing
+            eval(node, {}, state["vars"])
+        else:
+            IncorrectTypeError("Node with context " + context + " is of incorrect type.")
+    elif context == "_text":
+        if isinstance(node, str):
+            return
+        else:
+            IncorrectTypeError("Node with context " + context + " is of incorrect type.")
+    elif context == "_value":
+        if isinstance(node, (str, int, bool, float)):
+            return
+        else:
+            IncorrectTypeError("Node with context " + context + " is of incorrect type.")
+
+    curr_rule = grammar[context]
+
+    # First, check the type of the node
+    if curr_rule["type"] == "dict":
+        if not isinstance(node, dict):
+            raise IncorrectTypeError("Node with context " + context + " is of incorrect type.")
+        
+        if "mandatory" in curr_rule:
+            for mandatory_key in curr_rule["mandatory"].keys():
+                if not mandatory_key in node:
+                    raise MissingRequiredTagError("Node with context " + context + " is missing required tag: " + key)
+        for key, val in node.items():
+            if "mandatory" in curr_rule and key in curr_rule["mandatory"]:
+                parse_node(node[key], state, grammar, curr_rule["mandatory"][key])
+            elif "optional" in curr_rule and key in curr_rule["optional"]:
+                parse_node(node[key], state, grammar, curr_rule["optional"][key])
+            elif "other" in curr_rule:
+                parse_node(node[key], state, grammar, curr_rule["other"])
+            else:
+                raise InvalidTagError("Node with context " + context + " has invalid tag: " + key)
+    elif curr_rule["type"] == "list":
+        if not isinstance(node, list):
+            raise IncorrectTypeError("Node with context " + context + " is of incorrect type.")
+        
+        for element in node:
+            parse_node(element, state, grammar, curr_rule["elements"])
+    elif curr_rule["type"] == "union":
+        could_be_parsed = False
+        for member in curr_rule["members"]:
+            try:
+                parse_node(node, state, grammar, member)
+                could_be_parsed = True
+                break
+            except Exception as e:
+                continue
+        if not could_be_parsed:
+            raise InvalidDisjunctError("Could not instantiate union node of type " + context + " as any of its member types.")
+
+def parse(game, state):
+    with open(
+        "/Users/kylehess/Documents/programs/tunnelgame/grammar.yaml", "r"
+    ) as file:
+        grammar = yaml.safe_load(file)
+    
+    parse_node(game, state, grammar, "START")
 
 def verify(game, state):
     # Check for story tag
