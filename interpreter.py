@@ -117,7 +117,7 @@ def get_next_bookmark(game, bookmark):
     else:
         return bookmark[1:] + (get_next_call_stack(game, bookmark[0]),)
 
-def get_parent_block(game, addr):
+def get_parent_block(game, addr, state):
     node = get_instr(game["story"], addr)
 
     is_content = False
@@ -128,19 +128,20 @@ def get_parent_block(game, addr):
                 if val == node and key == "_content":
                     is_content = True
 
-    if "_type" in node and node["_type"] == "BLOCK":
+    node_types = state["metadata"]["node_types"][("story",) + addr] # TODO: Remove backwards compatibility quirk (need to add "story" to address)
+    if "STORY" in node_types or "BLOCK" in node_types:
         return addr
     # Check for list blocks
     # TODO: Make this more elegant, maybe metadate for what's a list and not
     elif (not is_content) and addr != () and isinstance(get_instr(game["story"], addr[:-1]), dict) and ("_type" in get_instr(game["story"], addr[:-1])) and isinstance(node, list):
         return addr
     else:
-        return get_parent_block(game, addr[:-1])
+        return get_parent_block(game, addr[:-1], state)
 
-def parse_addr(game, curr_addr, addr_id):
+def parse_addr(game, curr_addr, addr_id, state):
     curr_path = tuple(addr_id.split("/"))
 
-    curr_addr = get_parent_block(game, curr_addr)
+    curr_addr = get_parent_block(game, curr_addr, state)
 
     for index in curr_path:
         # This usually happens when there is an initial / so go to root
@@ -149,7 +150,7 @@ def parse_addr(game, curr_addr, addr_id):
         elif index == ".":
             pass
         elif index == "..":
-            curr_addr = get_parent_block(game, curr_addr)[:-1]
+            curr_addr = get_parent_block(game, curr_addr, state)[:-1]
         else:
             curr_addr = curr_addr + (index,)
     
@@ -214,6 +215,23 @@ def step(game, state):
         text = ""
         if "text" in curr_node:
             text = curr_node["text"]
+        if "require" in curr_node:
+            if text != "":
+                text += " "
+            text += "\033[0m[\033[38;2;255;165;0mRequired:\033[0m "
+
+            # TODO: Make this conform to standards allowing expressions
+            require_list = curr_node["require"].split(",")
+            for requirement in require_list:
+                parsed_requirement = requirement.split()
+
+                text += parsed_requirement[0] + " " + parsed_requirement[1] + ", "
+
+                if state["vars"][parsed_requirement[1]] < int(parsed_requirement[0]):
+                    missing_list.append(parsed_requirement[1])
+
+            text = text[:-2]
+            text += "]"
         if "cost" in curr_node:
             if text != "":
                 text += " "
@@ -235,7 +253,7 @@ def step(game, state):
 
         effect_address = get_curr_addr(state) + ("effects", 0)
         if isinstance(curr_node["effects"], str):
-            effect_address = parse_addr(game, get_curr_addr(state), curr_node["effects"])
+            effect_address = parse_addr(game, get_curr_addr(state), curr_node["effects"], state)
 
         state["choices"][curr_node["choice"]] = {"text": text, "address": effect_address, "missing": missing_list, "modifications": modify_list, "choice_address": get_curr_addr(state)}
     elif "error" in curr_node:
@@ -249,7 +267,7 @@ def step(game, state):
 
                 return True
     elif "goto" in curr_node:
-        set_curr_addr(state, parse_addr(game, get_curr_addr(state), curr_node["goto"]))
+        set_curr_addr(state, parse_addr(game, get_curr_addr(state), curr_node["goto"], state))
 
         return True
     elif "if" in curr_node:
@@ -285,6 +303,15 @@ def step(game, state):
         do_print(curr_node["print"], state)
     elif "random" in curr_node:
         possibilities_list = []
+
+        if isinstance(curr_node["random"], str):
+            for id in curr_node["random"].split(","):
+                possibilities_list.append(id.strip())
+            
+            set_curr_addr(state, parse_addr(game, get_curr_addr(state), possibilities_list[random.randint(0, len(possibilities_list) - 1)], state))
+
+            return True
+
         total_weight = 0
         for key in curr_node["random"].keys():
             spec = key.split()
@@ -300,7 +327,10 @@ def step(game, state):
         for possibility in possibilities_list:
             curr_weight += possibility[0]
             if curr_weight >= target_weight:
-                set_curr_addr(state, get_curr_addr(state) + ("random", possibility[1], 0))
+                if curr_node["random"][possibility[1]] is None:
+                    set_curr_addr(state, parse_addr(game, get_curr_addr(state), possibility[1].split()[-1], state))
+                else:
+                    set_curr_addr(state, get_curr_addr(state) + ("random", possibility[1], 0))
                 
                 return True
     elif "set" in curr_node:

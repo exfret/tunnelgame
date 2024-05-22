@@ -2,6 +2,8 @@ import math
 import random
 import yaml
 
+import addressing
+
 # TODO: Check addresses in program are valid
 
 class InvalidDisjunctError(Exception):
@@ -13,7 +15,16 @@ class InvalidTagError(Exception):
 class IncorrectTypeError(Exception):
     pass
 
+class GrammarParsingError(Exception):
+    pass
+
+class MissingReferenceError(Exception):
+    pass
+
 class MissingRequiredTagError(Exception):
+    pass
+
+class WrongFormattingError(Exception):
     pass
 
 def story_verify(node, context, state):
@@ -193,34 +204,105 @@ def add_vars(game, state):
         for key, val in var.items(): # TODO: Check that vars have valid names (no leading underscores/name conflicts)
             var_name = key
             var_val = val
-        state["vars"]["var_name"] = var_val
+        state["vars"][var_name] = var_val
 
         # Add special variables
         state["vars"]["random"] = random
-        state["vars"]["random"]["rand"] = lambda num: random.randint(1, num)
+        state["vars"]["rand"] = lambda num: random.randint(1, num)
         state["vars"]["math"] = math
         state["vars"]["floor"] = math.floor
         state["vars"]["ceil"] = math.ceil
         state["vars"]["pow"] = math.pow
 
-def parse_node(node, state, grammar, context):
-    if context == "_expr":
+def parse_node(game, node, state, grammar, context, address):
+    if not (address in state["metadata"]["node_types"]):
+        state["metadata"]["node_types"][address] = {}
+    state["metadata"]["node_types"][address][context] = True
+
+    if context == "_addr":
+        # Try to access this address to ensure it's valid
+        addressing.parse_addr(game, address, node)
+    elif context == "_expr":
         if isinstance(node, str):
             # Try to eval the node to make sure it works
             # TODO: Add variable sensing
             eval(node, {}, state["vars"])
         else:
-            IncorrectTypeError("Node with context " + context + " is of incorrect type.")
+            raise IncorrectTypeError("Node with context " + context + " is of incorrect type.")
+    elif context == "_addr_list":
+        if not isinstance(node, str):
+            raise IncorrectTypeError("Node with context " + context + " is of incorrect type.")
+        else:
+            for id in node.split(","):
+                parse_node(game, id.strip(), state, grammar, "_addr", address)
+    elif context == "_null":
+        if not (node is None):
+            raise IncorrectTypeError("Node with context " + context + " is of incorrect type.")
+    elif context == "_requirement_specification": # TODO: Rename to '_amount_specification' or something similar
+        specs = []
+        paren_state = 0
+        last_index = 0
+        for index, char in enumerate(node):
+            if char == "(":
+                if paren_state == 0:
+                    specs.append(node[last_index:index])
+                    last_index = index
+
+                paren_state += 1
+            elif char == ")":
+                paren_state -= 1
+                if paren_state == 0:
+                    specs.append(node[last_index:index + 1])
+                    last_index = index + 1
+        specs.append(node[last_index:])
+
+        real_specs = []
+        for spec in specs:
+            if spec[-1] != ")":
+                for substring in spec.split(","):
+                    for subsubstring in substring.split():
+                        real_specs.append(subsubstring)
+            else:
+                real_specs.append(spec)
+        
+        for index, real_spec in enumerate(real_specs):
+            if index % 2 == 0:
+                if real_spec[-1] == ")":
+                    parse_node(game, real_spec, state, grammar, "_expr", address)
+                else:
+                    real_spec_split = real_spec.split("-")
+
+                    if len(real_spec_split) == 1:
+                        try:
+                            float(real_spec_split[0])
+                        except ValueError:
+                            raise IncorrectTypeError("Non-numerical string for requirement amount.")
+                    elif len(real_spec_split) == 2: # TODO: Error on requirements/costs
+                        try:
+                            float(real_spec_split[0])
+                            float(real_spec_split[1])
+                        except ValueError:
+                            raise IncorrectTypeError("Non-numerical string for requirement amount.")
+                    else:
+                        raise WrongFormattingError("Wrong number of -'s in requirement amount.")
+            elif index % 2 == 1:
+                if not (real_spec in state["vars"]):
+                    raise MissingReferenceError("Referenced variable not declared.")
     elif context == "_text":
-        if isinstance(node, str):
-            return
-        else:
-            IncorrectTypeError("Node with context " + context + " is of incorrect type.")
+        if not isinstance(node, str):
+            raise IncorrectTypeError("Node with context " + context + " is of incorrect type.")
     elif context == "_value":
-        if isinstance(node, (str, int, bool, float)):
-            return
-        else:
-            IncorrectTypeError("Node with context " + context + " is of incorrect type.")
+        if not isinstance(node, (str, int, bool, float)):
+            raise IncorrectTypeError("Node with context " + context + " is of incorrect type.")
+    elif context[0] == "_":
+        raise GrammarParsingError("Node with incorrect terminal context " + context)
+    
+    # Return if this is just a terminal node
+    if context[0] == "_":
+        return
+
+    if not (context in grammar):
+        GrammarParsingError("Undefined context " + context)
 
     curr_rule = grammar[context]
 
@@ -232,33 +314,35 @@ def parse_node(node, state, grammar, context):
         if "mandatory" in curr_rule:
             for mandatory_key in curr_rule["mandatory"].keys():
                 if not mandatory_key in node:
-                    raise MissingRequiredTagError("Node with context " + context + " is missing required tag: " + key)
+                    raise MissingRequiredTagError("Node with context " + context + " is missing required tag: " + mandatory_key)
         for key, val in node.items():
             if "mandatory" in curr_rule and key in curr_rule["mandatory"]:
-                parse_node(node[key], state, grammar, curr_rule["mandatory"][key])
+                parse_node(game, node[key], state, grammar, curr_rule["mandatory"][key], address + (key,))
             elif "optional" in curr_rule and key in curr_rule["optional"]:
-                parse_node(node[key], state, grammar, curr_rule["optional"][key])
+                parse_node(game, node[key], state, grammar, curr_rule["optional"][key], address + (key,))
             elif "other" in curr_rule:
-                parse_node(node[key], state, grammar, curr_rule["other"])
+                parse_node(game, node[key], state, grammar, curr_rule["other"], address + (key,))
             else:
                 raise InvalidTagError("Node with context " + context + " has invalid tag: " + key)
     elif curr_rule["type"] == "list":
         if not isinstance(node, list):
             raise IncorrectTypeError("Node with context " + context + " is of incorrect type.")
         
-        for element in node:
-            parse_node(element, state, grammar, curr_rule["elements"])
+        for index, element in enumerate(node):
+            parse_node(game, element, state, grammar, curr_rule["elements"], address + (index,))
     elif curr_rule["type"] == "union":
         could_be_parsed = False
         for member in curr_rule["members"]:
             try:
-                parse_node(node, state, grammar, member)
+                parse_node(game, node, state, grammar, member, address)
                 could_be_parsed = True
                 break
             except Exception as e:
                 continue
         if not could_be_parsed:
             raise InvalidDisjunctError("Could not instantiate union node of type " + context + " as any of its member types.")
+    else:
+        GrammarParsingError("Invalid type key for grammar rule.")
 
 def parse(game, state):
     with open(
@@ -266,7 +350,7 @@ def parse(game, state):
     ) as file:
         grammar = yaml.safe_load(file)
     
-    parse_node(game, state, grammar, "START")
+    parse_node(game, game, state, grammar, "START", ())
 
 def verify(game, state):
     # Check for story tag

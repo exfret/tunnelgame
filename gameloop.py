@@ -7,13 +7,14 @@ import interpreter
 import gameparser
 
 with open(
-    "/Users/kylehess/Documents/programs/tunnelgame/stories/basic_syntax/hello_world.yaml", "r"
+    "/Users/kylehess/Documents/programs/tunnelgame/stories/exploration_basic.yaml", "r"
 ) as file:
     game = yaml.safe_load(file)
 
 state = {
     "choices": {"start": {"text": "Start the game", "address": ("_content", 0)}}, # Dict of choice ID's to new locations and descriptions
     "bookmark": (), # bookmark is a queue (tuple) of call stacks (tuples) containing addresses (tuples)
+    "metadata": {"node_types": {}},
     "settings": {"show_flavor_text": "once"},
     "vars": {},
     "visits": {}
@@ -22,11 +23,9 @@ state = {
 gameparser.add_vars(game, state)
 gameparser.parse(game, state)
 
-exit()
-
 # verify also creates vars on the fly, so it needs the state
-gameparser.verify(game, state)
-gameparser.init_vars(game, state)
+# gameparser.verify(game, state)
+# gameparser.init_vars(game, state)
 
 os.system("clear")
 

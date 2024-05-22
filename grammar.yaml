@@ -36,13 +36,47 @@ INSTR:
   type: union
   members:
     - _text
+    - CHOICE
+    - GOTO
     - IF
     - PRINT
+    - RANDOM
+CHOICE:
+  type: dict
+  mandatory:
+    choice: _text
+    effects: CONTENT
+  optional:
+    require: _requirement_specification
 IF:
   type: dict
   mandatory:
     if: _expr
+    then: CONTENT
+  optional:
+    else: CONTENT
+GOTO:
+  type: dict
+  mandatory:
+    goto: _addr
 PRINT:
   type: dict
   mandatory:
     print: _text
+RANDOM:
+  type: dict
+  mandatory:
+    random: RANDOM_EVENTS_SPEC
+RANDOM_EVENTS_SPEC:
+  type: union
+  members:
+    - _addr_list
+    - RANDOM_EVENT_DICT
+RANDOM_EVENT_DICT:
+  type: dict
+  other: RANDOM_EVENT
+RANDOM_EVENT:
+  type: union
+  members:
+    - _null
+    - CONTENT

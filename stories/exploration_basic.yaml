@@ -1,0 +1,17 @@
+---
+vars:
+  - torch: 0
+story:
+  _content:
+    - goto: explore
+  explore:
+    _content:
+      - random: cave, springs
+    cave:
+      - You come across a rock formation jutting up from the ground. Between the rocks is an entrance to a cave. You can barely see inside.
+      - choice: go_inside
+        require: 1 torch
+        effects:
+          - You go inside.
+    springs:
+      - You spot a stream of water coming up from a bubbling source in the ground. Upon further inspection, the water is cold and crisp.
