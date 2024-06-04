@@ -1,8 +1,30 @@
+Currently:
+ * Finishing writing examples/User Guide
+ * Writing gosub
+
+52. Check that grammar disjuncts aren't ambiguous
+51. Figure out how to deal with array-valued types
+50. Finish view class implementation for command line
+49. Introduce type annotations
+48. Recursive searching for block names if there's a unique block with that name or closest one
+47. no_flavor alternative text
+46. Variables that are temporary/only relevant within a block, then they're not set anymore/block variables
+45. Better gameparser interaction with _args
+44. Location tracking/where playing "is" between choices (idea: "Location" storypoint commands)
+43. Automatic log of variable changes
+42. Interrupts if commands take too long (maybe test if the number of visits goes up too high).
+41. Pausing on repeat commands when, for example, you no longer have the materials for something, so it doesn't just spam console (maybe also a "max" option)
+40. Search command to search for a place
+39. Make _content a root type
+38. Local _vars on top of blocks
+37. Add special lib var that is a library accessible to expressions but doesn't get saved with the state
+36. Autosaves and overwrite confirmation
+35. Write a semantics spec (once I get syntax more nailed down)
+34. User guide
 33. Use config file to name game and state globals
 32. For implementing UI, do purely text based commands with passed in print/display functions
 31. Write exploration story
 30. More complicated parsing system; add metadata into game itself and use this to make saving/loading more robust
-29. Basic saving/loading functionality
 28. Attach function handlers during parsing
 27. Debug commands for messing with the state in all sorts of ways
 26. Cost checking with passed args
@@ -21,15 +43,16 @@
 9. More specific error parsing messages
 8. Add variable sensing elsewhere, like costs
 7. I think I used 'int' where I should have used 'double' or something such. Fix this.
-6. Blocks can be lists now (replacement for _content)
 4. Catch exceptions from eval, for things like if statements assume falseness, for set statements don't modify
-3. No keyword needed to do choices, just type them
 2. Unify actions and choices with actions as just "default choices"
 
 DONE
+29. Basic saving/loading functionality
 25. randint import as randint
 17. Require tag for choices
 16. Highlight for new choices
 11. Basic implementation of compound/multi-word choices w/ args
+6. Blocks can be lists now (replacement for _content)
 5. Make automatic syntax checking from YAML file
+3. No keyword needed to do choices, just type them
 1. Checking that story is formatted correctly

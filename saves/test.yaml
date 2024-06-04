@@ -1,0 +1,163 @@
+choices: {}
+bookmark: !!python/tuple []
+file_data:
+  filename: ''
+metadata:
+  node_types:
+    !!python/tuple []:
+      START: true
+    ? !!python/tuple
+    - vars
+    : VARS: true
+    ? !!python/tuple
+    - vars
+    - 0
+    : VAR: true
+    ? !!python/tuple
+    - vars
+    - 0
+    - torch
+    : _value: true
+    ? !!python/tuple
+    - story
+    : STORY: true
+    ? !!python/tuple
+    - story
+    - _content
+    : CONTENT: true
+    ? !!python/tuple
+    - story
+    - _content
+    - 0
+    : INSTR: true
+      _text: true
+      CHOICE: true
+      GOTO: true
+    ? !!python/tuple
+    - story
+    - _content
+    - 0
+    - goto
+    : _addr: true
+    ? !!python/tuple
+    - story
+    - explore
+    : BLOCK: true
+      DICT_BLOCK: true
+    ? !!python/tuple
+    - story
+    - explore
+    - _content
+    : CONTENT: true
+    ? !!python/tuple
+    - story
+    - explore
+    - _content
+    - 0
+    : INSTR: true
+      _text: true
+      CHOICE: true
+      GOTO: true
+      IF: true
+      PRINT: true
+      RANDOM: true
+    ? !!python/tuple
+    - story
+    - explore
+    - _content
+    - 0
+    - random
+    : RANDOM_EVENTS_SPEC: true
+      _addr_list: true
+      _addr: true
+    ? !!python/tuple
+    - story
+    - explore
+    - cave
+    : BLOCK: true
+      DICT_BLOCK: true
+      LIST_BLOCK: true
+    ? !!python/tuple
+    - story
+    - explore
+    - cave
+    - 0
+    : INSTR: true
+      _text: true
+    ? !!python/tuple
+    - story
+    - explore
+    - cave
+    - 1
+    : INSTR: true
+      _text: true
+      CHOICE: true
+    ? !!python/tuple
+    - story
+    - explore
+    - cave
+    - 1
+    - choice
+    : _text: true
+    ? !!python/tuple
+    - story
+    - explore
+    - cave
+    - 1
+    - require
+    : _requirement_specification: true
+    ? !!python/tuple
+    - story
+    - explore
+    - cave
+    - 1
+    - effects
+    : CONTENT: true
+    ? !!python/tuple
+    - story
+    - explore
+    - cave
+    - 1
+    - effects
+    - 0
+    : INSTR: true
+      _text: true
+    ? !!python/tuple
+    - story
+    - explore
+    - springs
+    : BLOCK: true
+      DICT_BLOCK: true
+      LIST_BLOCK: true
+    ? !!python/tuple
+    - story
+    - explore
+    - springs
+    - 0
+    : INSTR: true
+      _text: true
+settings:
+  show_flavor_text: once
+vars:
+  torch: 0
+  random: !!python/module:random ''
+  rand: !!python/name:gameparser.%3Clambda%3E ''
+  math: !!python/module:math ''
+  floor: !!python/name:math.floor ''
+  ceil: !!python/name:math.ceil ''
+  pow: !!python/name:math.pow ''
+visits:
+  ? !!python/tuple
+  - _content
+  - 0
+  : 1
+  ? !!python/tuple
+  - explore
+  - _content
+  - 0
+  : 1
+  ? !!python/tuple
+  - explore
+  - springs
+  - 0
+  : 1

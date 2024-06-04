@@ -1,7 +1,9 @@
+from config import game, state
+
 class InvalidAddressError(Exception):
     pass
 
-def get_instr(curr_node, addr):
+def get_node(addr, curr_node = game):
     if addr == ():
         return curr_node
     
@@ -14,7 +16,10 @@ def get_instr(curr_node, addr):
     if isinstance(curr_node, list) and (addr[0] >= len(curr_node) or addr[0] < -len(curr_node)):
         raise InvalidAddressError("Address has numerical index that is out of range.")
 
-    return get_instr(curr_node[addr[0]], addr[1:]) # TODO: Check map/address compatibility
+    return get_node(addr[1:], curr_node[addr[0]]) # TODO: Check map/address compatibility
+
+def make_bookmark(address):
+    return (address,)
 
 def get_block_part(curr_addr, index):
     if curr_addr == () or curr_addr[0] != "story":
@@ -49,11 +54,11 @@ def parse_addr(game, curr_addr, addr_id):
         else:
             curr_addr = curr_addr + (index,)
 
-    node = get_instr(game, curr_addr)
+    node = get_node(curr_addr)
 
     if isinstance(node, list):
         return curr_addr + (0,)
     elif isinstance(node, dict) and ("_content" in node):
-        return curr_addr + ("_content",)
+        return curr_addr + ("_content", 0)
     else:
         raise InvalidAddressError("Attempt to goto block without content.")

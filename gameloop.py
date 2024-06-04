@@ -1,33 +1,23 @@
 # Standard imports
 import os
+import pickle
 import yaml
 
 # Local imports
+import addressing
 import interpreter
 import gameparser
 
-with open(
-    "/Users/kylehess/Documents/programs/tunnelgame/stories/exploration_basic.yaml", "r"
-) as file:
-    game = yaml.safe_load(file)
-
-state = {
-    "choices": {"start": {"text": "Start the game", "address": ("_content", 0)}}, # Dict of choice ID's to new locations and descriptions
-    "bookmark": (), # bookmark is a queue (tuple) of call stacks (tuples) containing addresses (tuples)
-    "metadata": {"node_types": {}},
-    "settings": {"show_flavor_text": "once"},
-    "vars": {},
-    "visits": {}
-}
+# Config imports
+from config import game, state
 
 gameparser.add_vars(game, state)
+gameparser.add_module_vars(state)
 gameparser.parse(game, state)
 
 # verify also creates vars on the fly, so it needs the state
 # gameparser.verify(game, state)
 # gameparser.init_vars(game, state)
-
-os.system("clear")
 
 def print_choices(state):
     print("\n        Choices are as follows...")
@@ -48,27 +38,48 @@ def print_choices(state):
             missing_text = missing_text[:-2]
             print(missing_text)
 
-autostart = True
-
-if autostart:
+def make_choice(game, state, new_addr, command = "start"):
     state["bookmark"] = ()
-    interpreter.make_bookmark(game, state, state["choices"]["start"]["address"])
+    interpreter.make_bookmark(game, state, new_addr)
     state["choices"] = {}
+
+    # Populate the state vars with args
+    state["vars"]["_args"] = []
+    for arg in command[1:]:
+        state["vars"]["_args"].append(arg)
+
+    os.system("clear")
 
     while interpreter.step(game, state):
         pass
 
     print_choices(state)
 
+autostart = True
+
+if autostart:
+    make_choice(game, state, state["choices"]["start"]["address"])
+
 while True:
     command = input("\n> ")
-    command = command.split(" ")
+    command = command.split()
     print("") # Add a new line
 
     if command[0] == "exit":
         break
+    elif command[0] == "goto":
+        if len(command) < 2:
+            print("Must give an address.")
+        else:
+            address_to_goto = None
+            try:
+                address_to_goto = addressing.parse_addr(game, ("story",), command[1])
+            except Exception as e:
+                print("Incorrect address") # TODO: Catch only relevant exceptions
+            if not (address_to_goto is None):
+                make_choice(game, state, address_to_goto[1:]) # TODO: Get rid of the 1:, it's here for backwards compatibility reasons
     elif command[0] == "help":
-        print("Valid commands are 'exit', 'help', 'inspect', and 'settings'.")
+        print("Valid commands are 'exit', 'go', 'help', 'inspect', 'load', 'save', and 'settings'.")
     elif command[0] == "inspect":
         if len(command) < 2:
             print("Must give a variable to print the value of.")
@@ -77,6 +88,32 @@ while True:
                 print(state["vars"][command[1]])
             else:
                 print("That's not a valid variable")
+    elif command[0] == "load":
+        if len(command) == 1:
+            print("Must supply file to load.")
+        else:
+            try:
+                with open("/Users/kylehess/Documents/programs/tunnelgame/saves/" + command[1], "rb") as file:
+                    state = pickle.load(file)
+                    gameparser.add_module_vars(state)
+                    os.system("clear")
+                    print_choices(state)
+            except FileNotFoundError:
+                print("Load file not found.")
+    elif command[0] == "save":
+        if len(command) == 1:
+            if state["file_data"]["filename"] == "":
+                print("Must supply default save name.")
+            else:
+                with open("/Users/kylehess/Documents/programs/tunnelgame/saves/" + state["file_data"]["filename"], "wb") as file:
+                    gameparser.remove_module_vars(state)
+                    pickle.dump(state, file)
+                    gameparser.add_module_vars(state)
+        else:
+            with open("/Users/kylehess/Documents/programs/tunnelgame/saves/" + command[1], "wb") as file:
+                gameparser.remove_module_vars(state)
+                pickle.dump(state, file)
+                gameparser.add_module_vars(state)
     elif command[0] == "settings":
         if len(command) < 2:
             print("Must give a setting to give a new value to or test the current value of. Here is a list of settings:\n")
@@ -103,21 +140,8 @@ while True:
         else:
             # Pay required costs
             for modification in choice["modifications"]:
-                state["vars"][modification["var"]] += modification["amount"]
-            
-            state["bookmark"] = ()
-            interpreter.make_bookmark(game, state, choice["address"])
-            state["choices"] = {}
-            # Populate the state vars with args
-            state["vars"]["_args"] = []
-            for arg in command[1:]:
-                state["vars"]["_args"].append(arg)
+                state["vars"][modification["var"]] += modification["amount"] # TODO: Print modifications
 
-            os.system("clear")
-            
-            while interpreter.step(game, state):
-                pass
-
-            print_choices(state)
+            make_choice(game, state, choice["address"], command)
     else:
         print("Unrecognized command/choice. Type 'help' for commands or 'choices' for a list of choices.")

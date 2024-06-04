@@ -153,24 +153,29 @@ def parse_addr(game, curr_addr, addr_id, state):
             curr_addr = get_parent_block(game, curr_addr, state)[:-1]
         else:
             curr_addr = curr_addr + (index,)
-    
+
     if isinstance(get_instr(game["story"], curr_addr), list):
         return curr_addr + (0,)
     
     return curr_addr + ("_content", 0)
 
-def do_print(text, state):
-    string_to_print = string.Formatter().vformat(text, (), state["vars"]) # TODO: Exceptions in case of syntax errors
-    print(textwrap.fill(string_to_print, 100))
+def collect_vars(state):
+    var_dict = state["vars"]
+    var_dict["_visits"] = state["visits"][get_curr_addr(state)]
+    return var_dict
+
+def do_print(text, state, ansi_code = "\033[0m"):
+    string_to_print = string.Formatter().vformat(text, (), collect_vars(state)) # TODO: Exceptions in case of syntax errors
+    print(ansi_code + textwrap.fill(string_to_print, 100) + "\033[0m")
     print()
 
-def do_shown_var_modification(modification, state, symbol):
+def do_shown_var_modification(modification, state, symbol, game):
     amount_to_modify = 0
     modification_var = ""
     if modification.find('(') != -1 and modification.rfind(')') != -1:
         modification_amount_spec = modification[modification.find('(') + 1:modification.rfind(')')]
 
-        amount_to_modify = eval(modification_amount_spec, {}, state["vars"])
+        amount_to_modify = eval(modification_amount_spec, {}, collect_vars(state))
         modification_var = modification[modification.rfind(')') + 2:]
     else:
         modification_specification = modification.split()
@@ -186,7 +191,19 @@ def do_shown_var_modification(modification, state, symbol):
         amount_to_modify *= -1
         symbol = "" # The negative sign already shows up by virtue of it being a negative number
     state["vars"][modification_var] += amount_to_modify
-    print("[" + symbol + str(amount_to_modify) + " " + modification_var + "]") # TODO: Add localization
+    print("[" + symbol + str(amount_to_modify) + " " + localize(modification_var, game) + "]") # TODO: Add localization
+
+# TODO: Move to library module
+def localize(var_name, game):
+    corresponding_var = None
+    for var in game["vars"]:
+        if var_name in var:
+            corresponding_var = var
+
+    if "_locale" in corresponding_var:
+        return corresponding_var["_locale"]
+    else:
+        return var_name
 
 def step(game, state):
     if get_curr_addr(state) == False:
@@ -208,7 +225,7 @@ def step(game, state):
     # Since this is an instruction, it must be a map
     # TODO: Verify this part of stories
     if "add" in curr_node:
-        do_shown_var_modification(curr_node["add"], state, "+")
+        do_shown_var_modification(curr_node["add"], state, "+", game)
     elif "choice" in curr_node:
         missing_list = []
         modify_list = []
@@ -225,7 +242,7 @@ def step(game, state):
             for requirement in require_list:
                 parsed_requirement = requirement.split()
 
-                text += parsed_requirement[0] + " " + parsed_requirement[1] + ", "
+                text += parsed_requirement[0] + " " + localize(parsed_requirement[1], game) + ", "
 
                 if state["vars"][parsed_requirement[1]] < int(parsed_requirement[0]):
                     missing_list.append(parsed_requirement[1])
@@ -241,7 +258,7 @@ def step(game, state):
             for cost in cost_list:
                 parsed_cost = cost.split()
 
-                text += parsed_cost[0] + " " + parsed_cost[1] + ", " # TODO: Use localised name of variables
+                text += parsed_cost[0] + " " + localize(parsed_cost[1], game) + ", " # TODO: Use localised name of variables
 
                 if state["vars"][parsed_cost[1]] < int(parsed_cost[0]):
                     missing_list.append(parsed_cost[1])
@@ -250,10 +267,33 @@ def step(game, state):
             # Remove the last comma and space
             text = text[:-2]
             text += "]"
+        if "shown" in curr_node:
+            if text != "":
+                text += " "
+            text += "\033[0m[\033[34mEffects:\033[0m "
 
-        effect_address = get_curr_addr(state) + ("effects", 0)
-        if isinstance(curr_node["effects"], str):
-            effect_address = parse_addr(game, get_curr_addr(state), curr_node["effects"], state)
+            shown_list = curr_node["shown"].split(",")
+            for shown in shown_list:
+                parsed_shown = shown.split()
+
+                # Need to add "+" manually for positive numbers
+                if int(parsed_shown[0]) >= 0:
+                    text += "+"
+
+                text += parsed_shown[0] + " " + localize(parsed_shown[1], game) + ", " # TODO: Use localised name of variables
+
+                modify_list.append({"var": parsed_cost[1], "amount": int(parsed_shown[0])})
+            # Remove the last comma and space
+            text = text[:-2]
+            text += "]"
+
+        effect_address = ""
+        if not "effects" in curr_node:
+            effect_address = parse_addr(game, get_curr_addr(state), curr_node["choice"], state)
+        else:
+            effect_address = get_curr_addr(state) + ("effects", 0)
+            if isinstance(curr_node["effects"], str):
+                effect_address = parse_addr(game, get_curr_addr(state), curr_node["effects"], state)
 
         state["choices"][curr_node["choice"]] = {"text": text, "address": effect_address, "missing": missing_list, "modifications": modify_list, "choice_address": get_curr_addr(state)}
     elif "error" in curr_node:
@@ -266,6 +306,15 @@ def step(game, state):
                 set_curr_addr(state, get_curr_addr(state) + ("flavor", 0))
 
                 return True
+    elif "gosub" in curr_node:
+        sub_address = parse_addr(game, get_curr_addr(state), curr_node["gosub"], state)
+
+        new_first_stack = state["bookmark"][0] + (sub_address,)
+        new_bookmark = (new_first_stack,) + state["bookmark"][1:]
+
+        state["bookmark"] = new_bookmark
+
+        return True
     elif "goto" in curr_node:
         set_curr_addr(state, parse_addr(game, get_curr_addr(state), curr_node["goto"], state))
 
@@ -273,7 +322,7 @@ def step(game, state):
     elif "if" in curr_node:
         exception_occurred = False
         try:
-            condition = eval(curr_node["if"], {}, state["vars"])
+            condition = eval(curr_node["if"], {}, collect_vars(state))
         except Exception as e:
             exception_occurred = True
             print(f"Warning, exception \"{e}\" occurred while evaluating if condition. Skipping if statement.")
@@ -288,7 +337,7 @@ def step(game, state):
 
                 return True
     elif "lose" in curr_node:
-        do_shown_var_modification(curr_node["lose"], state, "-")
+        do_shown_var_modification(curr_node["lose"], state, "-", game)
     elif "once" in curr_node:
         if state["visits"][get_curr_addr(state)] <= 1:
             if isinstance(curr_node["once"], str):
@@ -300,7 +349,23 @@ def step(game, state):
     elif "pass" in curr_node:
         pass
     elif "print" in curr_node:
-        do_print(curr_node["print"], state)
+        ansi_code = "\033[0m"
+        if "style" in curr_node:
+            if curr_node["style"] == "bold":
+                ansi_code = "\033[1m"
+
+        do_print(curr_node["print"], state, ansi_code)
+    elif "print_table" in curr_node:
+        tbl_to_display = state["vars"][curr_node["print_table"]]
+
+        print("+" + "-" * (len(tbl_to_display[0]) + 2) + "+")
+        for row in tbl_to_display:
+            row_str = "| "
+            for col in row:
+                row_str += col
+            row_str += " |"
+            print(row_str)
+        print("+" + "-" * (len(tbl_to_display[0]) + 2) + "+")
     elif "random" in curr_node:
         possibilities_list = []
 
@@ -334,10 +399,69 @@ def step(game, state):
                 
                 return True
     elif "set" in curr_node:
-        if isinstance(curr_node["to"], (int, float)):
-            state["vars"][curr_node["set"]] = curr_node["to"]
+        text_to_show = ""
+
+        if not ("to" in curr_node):
+            var_expr_pair = curr_node["set"].split("=")
+
+            var_name = var_expr_pair[0].strip()
+            modifier = None
+            if var_name[-1] == "+" or var_name[-1] == "-":
+                modifier = var_name[-1]
+                var_name = var_name[:-1].strip()
+
+            var_name_indices = var_name.split("[")
+            last_var_to_modify = None # list
+            var_to_modify = state["vars"][var_name_indices[0]]
+            last_index = None # int
+            for index in var_name_indices[1:]:
+                last_index = int(index[:-1])
+                last_var_to_modify = var_to_modify
+                var_to_modify = var_to_modify[int(index[:-1])]
+
+            if modifier == "+":
+                if not (last_index is None):
+                    last_var_to_modify[last_index] += eval(var_expr_pair[1], {}, collect_vars(state))
+                    # TODO: Show some text (in this case it doesn't quite make sense how to refer to the variable
+                else:
+                    var_to_modify += eval(var_expr_pair[1], {}, collect_vars(state))
+                    text_to_show = "[+" + str(eval(var_expr_pair[1], {}, collect_vars(state))) + " " + localize(var_name_indices[0], game) + "]"
+            elif modifier == "-":
+                if not (last_index is None):
+                    last_var_to_modify[last_index] -= eval(var_expr_pair[1], {}, collect_vars(state))
+                else:
+                    var_to_modify -= eval(var_expr_pair[1], {}, collect_vars(state))
+                    text_to_show = "[-" + str(eval(var_expr_pair[1], {}, collect_vars(state))) + " " + localize(var_name_indices[0], game) + "]"
+            else:
+                if not (last_index is None):
+                    last_var_to_modify[last_index] = eval(var_expr_pair[1], {}, collect_vars(state))
+                else:
+                    var_to_modify = eval(var_expr_pair[1], {}, collect_vars(state))
+                    text_to_show = "[Set " + localize(var_name_indices[0], game) + " to " + str(eval(var_expr_pair[1], {}, collect_vars(state))) + "]"
         else:
-            state["vars"][curr_node["set"]] = eval(curr_node["to"], {}, state["vars"]) # TODO: Catch exceptions in case of syntax errors
+            if isinstance(curr_node["to"], (int, float)):
+                state["vars"][curr_node["set"]] = curr_node["to"]
+            else:
+                state["vars"][curr_node["set"]] = eval(curr_node["to"], {}, collect_vars(state)) # TODO: Catch exceptions in case of syntax errors
+
+        if "show" in curr_node:
+            print(text_to_show)
+    elif "switch" in curr_node:
+        switch_value = eval(curr_node["switch"], {}, collect_vars(state))
+        if str(switch_value) in curr_node:
+            if isinstance(curr_node[str(switch_value)], str):
+                set_curr_addr(state, parse_addr(game, get_curr_addr(state), curr_node[str(switch_value)], state))
+            else:
+                set_curr_addr(state, get_curr_addr(state) + (str(switch_value), 0))
+            
+            return True
+        elif "default" in curr_node:
+            if isinstance(curr_node["default"], str):
+                set_curr_addr(state, parse_addr(game, get_curr_addr(state), curr_node[str(switch_value)], state))
+            else:
+                set_curr_addr(state, get_curr_addr(state) + ("default", 0))
+
+            return True
     else:
         raise UnrecognizedInstruction("Unrecognized instruction: " + str(curr_node))
 

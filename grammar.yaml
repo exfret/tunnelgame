@@ -10,17 +10,16 @@ VARS:
   elements: VAR
 VAR: # Has special built-in checking
   type: dict
-  other: _value
+  other: _complex_value
 STORY:
   type: dict
   mandatory:
     _content: CONTENT
   other: BLOCK
 BLOCK:
-  type: union
-  members:
-    - DICT_BLOCK
-    - LIST_BLOCK
+  type: union_with_types
+  dict: DICT_BLOCK
+  list: LIST_BLOCK
 DICT_BLOCK: # Has special built-in checking
   type: dict
   optional:
@@ -33,21 +32,42 @@ CONTENT:
   type: list
   elements: INSTR
 INSTR:
-  type: union
-  members:
-    - _text
-    - CHOICE
-    - GOTO
-    - IF
-    - PRINT
-    - RANDOM
+  type: union_with_types
+  str: _text
+  dict: DICT_INSTR
+DICT_INSTR:
+  type: union_with_keys
+  contexts:
+    choice: CHOICE
+    flavor: FLAVOR
+    gosub: GOSUB
+    goto: GOTO
+    if: IF
+    once: ONCE
+    pass: PASS
+    print: PRINT
+    print_table: PRINT_TABLE
+    random: RANDOM
+    set: SET
+    switch: SWITCH
 CHOICE:
   type: dict
   mandatory:
     choice: _text
-    effects: CONTENT
   optional:
+    text: _text
     require: _requirement_specification
+    cost: _requirement_specification
+    shown: _requirement_specification
+    effects: EFFECTS_SPEC
+EFFECTS_SPEC:
+  type: union_with_types
+  str: _addr
+  list: CONTENT
+FLAVOR:
+  type: dict
+  mandatory:
+    flavor: _text
 IF:
   type: dict
   mandatory:
@@ -55,28 +75,63 @@ IF:
     then: CONTENT
   optional:
     else: CONTENT
+GOSUB:
+  type: dict
+  mandatory:
+    gosub: _addr
 GOTO:
   type: dict
   mandatory:
     goto: _addr
+ONCE:
+  type: dict
+  mandatory:
+    once: ONCE_SPEC
+ONCE_SPEC:
+  type: union_with_types
+  str: _text
+  list: CONTENT
+PASS:
+  type: dict
+  mandatory:
+    pass: _null
 PRINT:
   type: dict
   mandatory:
     print: _text
+  optional:
+    style: _text
+PRINT_TABLE:
+  type: dict
+  mandatory:
+    print_table: _table_id
 RANDOM:
   type: dict
   mandatory:
     random: RANDOM_EVENTS_SPEC
 RANDOM_EVENTS_SPEC:
-  type: union
-  members:
-    - _addr_list
-    - RANDOM_EVENT_DICT
+  type: union_with_types
+  str: _addr_list
+  dict: RANDOM_EVENT_DICT
 RANDOM_EVENT_DICT:
   type: dict
   other: RANDOM_EVENT
 RANDOM_EVENT:
-  type: union
-  members:
-    - _null
-    - CONTENT
+  type: union_with_types
+  null: _null
+  list: CONTENT
+SET:
+  type: dict
+  mandatory:
+    set: _set_expr
+  optional:
+    show: _null
+SWITCH:
+  type: dict
+  mandatory:
+    switch: _expr
+  other: CASE_SPEC
+CASE_SPEC:
+  type: union_with_types
+  str: _addr
+  list: CONTENT

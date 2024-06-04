@@ -1,0 +1,39 @@
+---
+vars:
+  - logger: 0
+  - machines:
+      - - "."
+        - "."
+        - "."
+      - - "."
+        - "."
+        - "."
+      - - "."
+        - "."
+        - "."
+  - time: 0
+  - wood: 0
+story:
+  _content:
+    - choice: craft
+    - choice: gather
+    - print_table: machines
+  logic:
+    time_passed:
+      _content:
+        - set: time += 1
+        - print: It worked!
+  craft:
+    _content:
+      - choice: back
+        effects: /
+      - choice: logger
+        text: Automatically gathers wood as time passes.
+        cost: 2 wood
+        shown: 1 logger
+  gather:
+    _content:
+      - gosub: /logic/time_passed
+      - You get some wood.
+      - set: wood += 1
+        show:

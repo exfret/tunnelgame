@@ -1,17 +1,92 @@
 ---
 vars:
+  - coin: 0
+  - diary: ""
+  - months_passed: 0
+  - temp: 0
   - torch: 0
+  - whistle: 0
+    _locale: Totally Normal Whistle
 story:
   _content:
-    - goto: explore
+    - goto: town
+  logic:
+    - once: "Tip: Type 'diary' to access history of what happened last month, or 'diary 4' for what happened the 4th month."
+    - set: temp = months_passed + 1 # Print out the actual month rather than the months passed, so it's off from the var value by one
+    - print: "[Month {temp}]"
+      style: bold
+    - set: months_passed += 1
+  town:
+    _content:
+      - You're in town. What do you want to do?
+      - choice: explore
+        text: Go exploring outside the town.
+        effects: ../explore
+      - choice: shop
+        text: Visit the shop.
+    shop:
+      - flavor: The shopkeeper is an old man with a stiff, scruffy beard and dark black hair. He grunts when he sees you enter.
+      - What would you like to buy?
+      - choice: torch
+        text: For exploring caves and dark places
+        cost: 10 coin
+        shown: 1 torch
+        effects: .
   explore:
     _content:
-      - random: cave, springs
+      - random: cave, springs, cabin
     cave:
-      - You come across a rock formation jutting up from the ground. Between the rocks is an entrance to a cave. You can barely see inside.
-      - choice: go_inside
-        require: 1 torch
-        effects:
-          - You go inside.
+      _content:
+        - print: Cave Encounter
+          style: bold
+        - flavor: You come across a rock formation jutting up from the ground. Between the rocks is an entrance to a cave. You can barely see inside.
+        - choice: inside
+          text: Go inside the cave
+          require: 1 torch
+        - choice: climb
+          text: Climb on the rocks
+        - choice: around
+          text: Go around the rocks
+      inside:
+        _content:
+          - It's very dark inside, and one torch is barely enough to see even a few feet in front of you. It's almost as if the darkness is swallowing up the light. Your footsteps patter on some puddles, then you hear a whistle.
+          - choice: continue
+            text: Keep going
+          - choice: back
+            text: Go back home
+            effects: /town
+        continue:
+          - The whistling gets louder and louder. The cave makes a narrow bend and you're sure it's just around the corner. But when you turn, nothing's there... except a whistle laying on a golden pedestal. You decide to pick it up.
+          - set: whistle += 1
+            show:
+          - Afterward, you return home.
+          - goto: /town
+      climb:
+        - You try as hard as you can to climb to the top but it seems you need better fitness for that!
+        - goto: /town
+      around:
+        _content:
+          - switch: _visits
+            "1":
+              - You find 3 coins beneath a rock. Cool!
+              - set: coin += 3
+              - goto: /town
+            "2":
+              - You find a note that says "give me my coins back". It seems like someone was unhappy about you taking the coins last time.
+              - choice: return
+                text: Return the coins you took
+                cost: 3 coin
+                effects:
+                  - You leave the coins there for the person to pick up again.
+              - choice: keep
+                text: Keep the coins you took
+                effects:
+                  - You keep the coins you took. # TODO: Flag here for part 3
     springs:
-      - You spot a stream of water coming up from a bubbling source in the ground. Upon further inspection, the water is cold and crisp.
+      _content:
+        - You spot a stream of water coming up from a bubbling source in the ground. Upon further inspection, the water is cold and crisp.
+    cabin:
+      _content:
+        - print: Cabin Encounter
+          style: bold
+        - flavor: You find a cabin in the woods. You try the door, but it seems to be locked. Upon closer inspection, it seems to have a keyhole in the shape of a whistle.
