@@ -11,6 +11,8 @@ vars:
       - - "."
         - "."
         - "."
+  - inventory:
+    _type: bag
   - time: 0
   - wood: 0
 story:
@@ -18,6 +20,17 @@ story:
     - choice: craft
     - choice: gather
     - print_table: machines
+    - insert: test_item
+      into: inventory
+    - if:
+        - "True"
+        - or:
+            - "False"
+            - has: test_item
+              in: inventory
+              amount: 3
+      then:
+        - print: Condition true
   logic:
     time_passed:
       _content:
@@ -31,6 +44,9 @@ story:
         text: Automatically gathers wood as time passes.
         cost: 2 wood
         shown: 1 logger
+    logger:
+      - choice: back
+        effects: /
   gather:
     _content:
       - gosub: /logic/time_passed

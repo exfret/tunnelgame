@@ -205,6 +205,32 @@ def localize(var_name, game):
     else:
         return var_name
 
+def eval_conditional(game, state, node):
+    if isinstance(node, str):
+        return eval(node, {}, collect_vars(state))
+    elif isinstance(node, list): # Lists are automatically ANDS, unless they're part of an OR tag covered later
+        condition = True
+        for subnode in node:
+            if not eval_conditional(game, state, subnode):
+                return False
+        return True
+    elif isinstance(node, dict):
+        if "has" in node:
+            bag = state["vars"][node["in"]]
+            amount = 1
+            if "amount" in node:
+                amount = node["amount"]
+
+            if node["has"] in bag and bag[node["has"]] >= amount:
+                return True
+            else:
+                return False
+        elif "or" in node:
+            for subnode in node["or"]:
+                if eval_conditional(game, state, subnode):
+                    return True
+            return False
+
 def step(game, state):
     if get_curr_addr(state) == False:
         return False
@@ -321,14 +347,15 @@ def step(game, state):
         return True
     elif "if" in curr_node:
         exception_occurred = False
+        condition_value = None # Bool representing the end condition value
         try:
-            condition = eval(curr_node["if"], {}, collect_vars(state))
+            condition_value = eval_conditional(game, state, curr_node["if"])
         except Exception as e:
             exception_occurred = True
             print(f"Warning, exception \"{e}\" occurred while evaluating if condition. Skipping if statement.")
 
         if not exception_occurred:
-            if condition:
+            if condition_value:
                 set_curr_addr(state, get_curr_addr(state) + ("then", 0))
 
                 return True
@@ -336,6 +363,10 @@ def step(game, state):
                 set_curr_addr(state, get_curr_addr(state) + ("else", 0))
 
                 return True
+    elif "insert" in curr_node:
+        if not (curr_node["insert"] in state["vars"][curr_node["into"]]):
+            state["vars"][curr_node["into"]][curr_node["insert"]] = 0
+        state["vars"][curr_node["into"]][curr_node["insert"]] += 1
     elif "lose" in curr_node:
         do_shown_var_modification(curr_node["lose"], state, "-", game)
     elif "once" in curr_node:

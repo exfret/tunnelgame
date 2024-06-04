@@ -208,11 +208,17 @@ def add_vars(game, state):
             elif key == "_locale":
                 if not isinstance(val, str):
                     raise IncorrectTypeError()
+            elif key == "_type":
+                if val != "bag": # Bag is the only allowed special type for now
+                    raise IncorrectTypeError()
             else:
                 raise InvalidTagError()
         if num_var_keys != 1:
             raise InvalidTagError("Extra tags in VAR specification.")
         state["vars"][var_name] = var_val
+        # Initialize bags as dicts
+        if ("_type" in var) and var["_type"] == "bag" and var_val == None:
+            state["vars"][var_name] = {}
     
     # Extra vars
     state["vars"]["_visits"] = 0
@@ -258,6 +264,20 @@ def parse_node(game, node, state, grammar, context, address):
             eval(node, {}, state["vars"])
         else:
             raise IncorrectTypeError("Node with context " + context + " is of incorrect type.")
+    elif context == "_id":
+        if not isinstance(node, str):
+            raise IncorrectTypeError()
+        
+        # Id's can't start with an underscore or have whitespace
+        if node[0] == "_" or len(node.split()) != 1:
+            raise WrongFormattingError()
+    elif context == "_num_expr":
+        if isinstance(node, int | float):
+            pass
+        elif isinstance(node, str):
+            parse_node(game, node, state, grammar, "_expr", address)
+        else:
+            raise IncorrectTypeError()
     elif context == "_null":
         if not (node is None):
             raise IncorrectTypeError("Node with context " + context + " is of incorrect type.")
@@ -361,6 +381,10 @@ def parse_node(game, node, state, grammar, context, address):
             raise IncorrectTypeError()
         if not node in state["vars"]:
             raise MissingReferenceError()
+    elif context == "_var_type":
+        if node != "bag": # Bag is the only current var type
+            # TODO: Unify this code with the checking in var creation
+            raise IncorrectTypeError()
     elif context[0] == "_":
         raise GrammarParsingError("Node with incorrect terminal context " + context)
     
@@ -439,6 +463,11 @@ def parse_node(game, node, state, grammar, context, address):
             raise InvalidDisjunctError()
     else:
         GrammarParsingError("Invalid type key for grammar rule.")
+    
+    # Special checking
+    if context == "CHOICE":
+        if not ("effects" in node): # If effects doesn't exist, this should be an address
+            parse_node(game, node["choice"], state, grammar, "_addr", address)
 
 def parse(game, state):
     with open(

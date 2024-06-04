@@ -10,6 +10,9 @@ VARS:
   elements: VAR
 VAR: # Has special built-in checking
   type: dict
+  optional:
+    _locale: _text
+    _type: _var_type
   other: _complex_value
 STORY:
   type: dict
@@ -43,6 +46,7 @@ DICT_INSTR:
     gosub: GOSUB
     goto: GOTO
     if: IF
+    insert: INSERT
     once: ONCE
     pass: PASS
     print: PRINT
@@ -53,7 +57,7 @@ DICT_INSTR:
 CHOICE:
   type: dict
   mandatory:
-    choice: _text
+    choice: _text # Custom checking
   optional:
     text: _text
     require: _requirement_specification
@@ -71,10 +75,42 @@ FLAVOR:
 IF:
   type: dict
   mandatory:
-    if: _expr
+    if: CONDITION
     then: CONTENT
   optional:
     else: CONTENT
+CONDITION:
+  type: union_with_types
+  str: _expr
+  dict: DICT_CONDITION
+  list: CONDITION_AND
+CONDITION_AND:
+  type: list
+  elements: CONDITION
+CONDITION_OR:
+  type: list
+  elements: CONDITION
+DICT_CONDITION:
+  type: union_with_keys
+  contexts:
+    has: CONDITION_HAS
+    or: DICT_CONDITION_OR
+DICT_CONDITION_OR:
+  type: dict
+  mandatory:
+    or: CONDITION_OR
+CONDITION_HAS:
+  type: dict
+  mandatory:
+    has: _id
+    in: _var_id
+  optional:
+    amount: _num_expr
+INSERT:
+  type: dict
+  mandatory:
+    insert: _id
+    into: _var_id
 GOSUB:
   type: dict
   mandatory:

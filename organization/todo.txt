@@ -1,7 +1,9 @@
 Currently:
  * Finishing writing examples/User Guide
- * Writing gosub
+ * Implementing bags
+ * Complex conditionals for bag handling
 
+53. Automatic checking for interpreter functions
 52. Check that grammar disjuncts aren't ambiguous
 51. Figure out how to deal with array-valued types
 50. Finish view class implementation for command line
@@ -36,17 +38,16 @@ Currently:
 19. Repeat command to do something many times
 18. Autocomplete
 15. Show off subroutine capabilities with time advancing subroutine
-14. Implement gosub
 13. Allow specification file for author-defined commands
 12. If a variable doesn't exist, still instantiate it, but give a warning.
 10. Allow loading of other specification files with things like variables and layouts
 9. More specific error parsing messages
 8. Add variable sensing elsewhere, like costs
-7. I think I used 'int' where I should have used 'double' or something such. Fix this.
+7. I think I used 'int' where I should have used 'float' or something such in the vars. Fix this.
 4. Catch exceptions from eval, for things like if statements assume falseness, for set statements don't modify
-2. Unify actions and choices with actions as just "default choices"
 
 DONE
+14. Implement gosub
 29. Basic saving/loading functionality
 25. randint import as randint
 17. Require tag for choices
@@ -56,3 +57,6 @@ DONE
 5. Make automatic syntax checking from YAML file
 3. No keyword needed to do choices, just type them
 1. Checking that story is formatted correctly
+
+NOT DOING
+2. Unify actions and choices with actions as just "default choices"
