@@ -23,12 +23,9 @@ story:
     - insert: test_item
       into: inventory
     - if:
-        - "True"
-        - or:
-            - "False"
-            - has: test_item
-              in: inventory
-              amount: 3
+        - has: test_item
+          in: inventory
+          amount: 3
       then:
         - print: Condition true
   logic:

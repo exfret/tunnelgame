@@ -2,6 +2,8 @@ import random
 import string
 import textwrap
 
+from utility import *
+
 class ErrorNode(Exception):
     pass
 
@@ -9,7 +11,7 @@ class UnrecognizedInstruction(Exception):
     pass
 
 def add_stack(game, state, address, partial_address):
-    curr_node = get_instr(game["story"], partial_address)
+    curr_node = get_instr(game, partial_address)
 
     if isinstance(curr_node, dict) and "_header" in curr_node:
         state["bookmark"] = state["bookmark"] + ((partial_address + ("_header", 0),),)
@@ -61,7 +63,7 @@ def get_next_addr(game, addr):
 
     new_addr = addr[:-1] + ((addr[-1] + 1),) # TODO: Error check that last element is indeed an int
 
-    if get_instr(game["story"], new_addr) == False:
+    if get_instr(game, new_addr) == False:
         return get_next_addr(game, addr[:-1])
     else:
         return new_addr
@@ -79,7 +81,7 @@ def trim_footer(addr):
         return trim_footer(addr[:-1])
 
 def search_for_footers(game, call_stack):
-    curr_node = get_instr(game["story"], call_stack[0])
+    curr_node = get_instr(game, call_stack[0])
 
     if isinstance(curr_node, dict) and "_footer" in curr_node:
         return (call_stack[0] + ("_footer", 0),)
@@ -118,22 +120,22 @@ def get_next_bookmark(game, bookmark):
         return bookmark[1:] + (get_next_call_stack(game, bookmark[0]),)
 
 def get_parent_block(game, addr, state):
-    node = get_instr(game["story"], addr)
+    node = get_instr(game, addr)
 
     is_content = False
     if addr != ():
-        parent = get_instr(game["story"], addr[:-1])
+        parent = get_instr(game, addr[:-1])
         if isinstance(parent, dict):
             for key, val in parent.items():
                 if val == node and key == "_content":
                     is_content = True
 
-    node_types = state["metadata"]["node_types"][("story",) + addr] # TODO: Remove backwards compatibility quirk (need to add "story" to address)
-    if "STORY" in node_types or "BLOCK" in node_types:
+    node_types = state["metadata"]["node_types"][addr] # TODO: Remove backwards compatibility quirk (need to add "story" to address)
+    if "START" in node_types or "BLOCK" in node_types:
         return addr
     # Check for list blocks
     # TODO: Make this more elegant, maybe metadate for what's a list and not
-    elif (not is_content) and addr != () and isinstance(get_instr(game["story"], addr[:-1]), dict) and ("_type" in get_instr(game["story"], addr[:-1])) and isinstance(node, list):
+    elif (not is_content) and addr != () and isinstance(get_instr(game, addr[:-1]), dict) and ("_type" in get_instr(game, addr[:-1])) and isinstance(node, list):
         return addr
     else:
         return get_parent_block(game, addr[:-1], state)
@@ -154,15 +156,10 @@ def parse_addr(game, curr_addr, addr_id, state):
         else:
             curr_addr = curr_addr + (index,)
 
-    if isinstance(get_instr(game["story"], curr_addr), list):
+    if isinstance(get_instr(game, curr_addr), list):
         return curr_addr + (0,)
     
     return curr_addr + ("_content", 0)
-
-def collect_vars(state):
-    var_dict = state["vars"]
-    var_dict["_visits"] = state["visits"][get_curr_addr(state)]
-    return var_dict
 
 def do_print(text, state, ansi_code = "\033[0m"):
     string_to_print = string.Formatter().vformat(text, (), collect_vars(state)) # TODO: Exceptions in case of syntax errors
@@ -190,22 +187,23 @@ def do_shown_var_modification(modification, state, symbol, game):
     if symbol == "-":
         amount_to_modify *= -1
         symbol = "" # The negative sign already shows up by virtue of it being a negative number
-    state["vars"][modification_var] += amount_to_modify
-    print("[" + symbol + str(amount_to_modify) + " " + localize(modification_var, game) + "]") # TODO: Add localization
+
+    vars_by_name = collect_vars_with_dicts(state)
+    vars_by_name[modification_var]["value"] += amount_to_modify
+    print("[" + symbol + str(amount_to_modify) + " " + localize(modification_var, state) + "]") # TODO: Add localization
 
 # TODO: Move to library module
-def localize(var_name, game):
-    corresponding_var = None
-    for var in game["vars"]:
-        if var_name in var:
-            corresponding_var = var
+def localize(var_name, state):
+    vars_by_name = collect_vars_with_dicts(state)
 
-    if "_locale" in corresponding_var:
-        return corresponding_var["_locale"]
+    if "locale" in vars_by_name[var_name]:
+        return vars_by_name[var_name]["locale"]
     else:
         return var_name
 
 def eval_conditional(game, state, node):
+    vars_by_name = collect_vars_with_dicts(state)
+
     if isinstance(node, str):
         return eval(node, {}, collect_vars(state))
     elif isinstance(node, list): # Lists are automatically ANDS, unless they're part of an OR tag covered later
@@ -216,7 +214,7 @@ def eval_conditional(game, state, node):
         return True
     elif isinstance(node, dict):
         if "has" in node:
-            bag = state["vars"][node["in"]]
+            bag = vars_by_name[node["in"]]["value"]
             amount = 1
             if "amount" in node:
                 amount = node["amount"]
@@ -235,7 +233,7 @@ def step(game, state):
     if get_curr_addr(state) == False:
         return False
 
-    curr_node = get_instr(game["story"], get_curr_addr(state))
+    curr_node = get_instr(game, get_curr_addr(state))
     # Mark that we've visited this node (again)
     if not (get_curr_addr(state) in state["visits"]):
         state["visits"][get_curr_addr(state)] = 0
@@ -253,6 +251,8 @@ def step(game, state):
     if "add" in curr_node:
         do_shown_var_modification(curr_node["add"], state, "+", game)
     elif "choice" in curr_node:
+        vars_by_name = collect_vars_with_dicts(state)
+
         missing_list = []
         modify_list = []
         text = ""
@@ -268,9 +268,9 @@ def step(game, state):
             for requirement in require_list:
                 parsed_requirement = requirement.split()
 
-                text += parsed_requirement[0] + " " + localize(parsed_requirement[1], game) + ", "
+                text += parsed_requirement[0] + " " + localize(parsed_requirement[1], state) + ", "
 
-                if state["vars"][parsed_requirement[1]] < int(parsed_requirement[0]):
+                if vars_by_name[parsed_requirement[1]]["value"] < int(parsed_requirement[0]):
                     missing_list.append(parsed_requirement[1])
 
             text = text[:-2]
@@ -284,9 +284,9 @@ def step(game, state):
             for cost in cost_list:
                 parsed_cost = cost.split()
 
-                text += parsed_cost[0] + " " + localize(parsed_cost[1], game) + ", " # TODO: Use localised name of variables
+                text += parsed_cost[0] + " " + localize(parsed_cost[1], state) + ", " # TODO: Use localised name of variables
 
-                if state["vars"][parsed_cost[1]] < int(parsed_cost[0]):
+                if vars_by_name[parsed_cost[1]]["value"] < int(parsed_cost[0]):
                     missing_list.append(parsed_cost[1])
                 
                 modify_list.append({"var": parsed_cost[1], "amount": -1 * int(parsed_cost[0])})
@@ -306,7 +306,7 @@ def step(game, state):
                 if int(parsed_shown[0]) >= 0:
                     text += "+"
 
-                text += parsed_shown[0] + " " + localize(parsed_shown[1], game) + ", " # TODO: Use localised name of variables
+                text += parsed_shown[0] + " " + localize(parsed_shown[1], state) + ", " # TODO: Use localised name of variables
 
                 modify_list.append({"var": parsed_cost[1], "amount": int(parsed_shown[0])})
             # Remove the last comma and space
@@ -364,9 +364,11 @@ def step(game, state):
 
                 return True
     elif "insert" in curr_node:
-        if not (curr_node["insert"] in state["vars"][curr_node["into"]]):
-            state["vars"][curr_node["into"]][curr_node["insert"]] = 0
-        state["vars"][curr_node["into"]][curr_node["insert"]] += 1
+        vars_by_name = collect_vars_with_dicts(state)
+
+        if not (curr_node["insert"] in vars_by_name[curr_node["into"]]["value"]):
+            vars_by_name[curr_node["into"]]["value"][curr_node["insert"]] = 0
+        vars_by_name[curr_node["into"]]["value"][curr_node["insert"]] += 1
     elif "lose" in curr_node:
         do_shown_var_modification(curr_node["lose"], state, "-", game)
     elif "once" in curr_node:
@@ -387,7 +389,9 @@ def step(game, state):
 
         do_print(curr_node["print"], state, ansi_code)
     elif "print_table" in curr_node:
-        tbl_to_display = state["vars"][curr_node["print_table"]]
+        vars_by_name = collect_vars_with_dicts(state)
+
+        tbl_to_display = vars_by_name[curr_node["print_table"]]["value"]
 
         print("+" + "-" * (len(tbl_to_display[0]) + 2) + "+")
         for row in tbl_to_display:
@@ -431,6 +435,7 @@ def step(game, state):
                 return True
     elif "set" in curr_node:
         text_to_show = ""
+        vars_by_name = collect_vars_with_dicts(state)
 
         if not ("to" in curr_node):
             var_expr_pair = curr_node["set"].split("=")
@@ -443,7 +448,7 @@ def step(game, state):
 
             var_name_indices = var_name.split("[")
             last_var_to_modify = None # list
-            var_to_modify = state["vars"][var_name_indices[0]]
+            var_to_modify = vars_by_name[var_name_indices[0]]["value"]
             last_index = None # int
             for index in var_name_indices[1:]:
                 last_index = int(index[:-1])
@@ -456,24 +461,24 @@ def step(game, state):
                     # TODO: Show some text (in this case it doesn't quite make sense how to refer to the variable
                 else:
                     var_to_modify += eval(var_expr_pair[1], {}, collect_vars(state))
-                    text_to_show = "[+" + str(eval(var_expr_pair[1], {}, collect_vars(state))) + " " + localize(var_name_indices[0], game) + "]"
+                    text_to_show = "[+" + str(eval(var_expr_pair[1], {}, collect_vars(state))) + " " + localize(var_name_indices[0], state) + "]"
             elif modifier == "-":
                 if not (last_index is None):
                     last_var_to_modify[last_index] -= eval(var_expr_pair[1], {}, collect_vars(state))
                 else:
                     var_to_modify -= eval(var_expr_pair[1], {}, collect_vars(state))
-                    text_to_show = "[-" + str(eval(var_expr_pair[1], {}, collect_vars(state))) + " " + localize(var_name_indices[0], game) + "]"
+                    text_to_show = "[-" + str(eval(var_expr_pair[1], {}, collect_vars(state))) + " " + localize(var_name_indices[0], state) + "]"
             else:
                 if not (last_index is None):
                     last_var_to_modify[last_index] = eval(var_expr_pair[1], {}, collect_vars(state))
                 else:
                     var_to_modify = eval(var_expr_pair[1], {}, collect_vars(state))
-                    text_to_show = "[Set " + localize(var_name_indices[0], game) + " to " + str(eval(var_expr_pair[1], {}, collect_vars(state))) + "]"
+                    text_to_show = "[Set " + localize(var_name_indices[0], state) + " to " + str(eval(var_expr_pair[1], {}, collect_vars(state))) + "]"
         else:
             if isinstance(curr_node["to"], (int, float)):
-                state["vars"][curr_node["set"]] = curr_node["to"]
+                vars_by_name[curr_node["set"]]["value"] = curr_node["to"]
             else:
-                state["vars"][curr_node["set"]] = eval(curr_node["to"], {}, collect_vars(state)) # TODO: Catch exceptions in case of syntax errors
+                vars_by_name[curr_node["set"]]["value"] = eval(curr_node["to"], {}, collect_vars(state)) # TODO: Catch exceptions in case of syntax errors
 
         if "show" in curr_node:
             print(text_to_show)

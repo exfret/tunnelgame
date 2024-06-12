@@ -1,13 +1,17 @@
 Currently:
  * Finishing writing examples/User Guide
  * Implementing bags
- * Complex conditionals for bag handling
+ * Local vars
+    * Make choice addressing correct when modifying var cost in gameloop
 
+56. Disallow randomness in choice specs?
+55. Remove underscores and use protected keywords instead
+54. Keep track of last instruction address for debug purposes in the gameloop
 53. Automatic checking for interpreter functions
 52. Check that grammar disjuncts aren't ambiguous
 51. Figure out how to deal with array-valued types
 50. Finish view class implementation for command line
-49. Introduce type annotations
+49. Introduce type annotations (learn them)
 48. Recursive searching for block names if there's a unique block with that name or closest one
 47. no_flavor alternative text
 46. Variables that are temporary/only relevant within a block, then they're not set anymore/block variables

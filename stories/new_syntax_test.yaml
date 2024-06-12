@@ -1,0 +1,11 @@
+---
+_vars:
+  - test: 0
+_content:
+  - "This is the value: {test}"
+  - goto: /test_block
+test_block:
+  _vars:
+    - test: 1
+  _content:
+    - "This is the value: {test}"

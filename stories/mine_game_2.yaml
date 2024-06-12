@@ -1,158 +1,175 @@
 ---
-vars:
+_vars:
   - temp: 0
-story:
-  _start:
-    - choice: beg
-    - choice: chop
-    - choice: gather
-    - if: respect_for_shopkeeper >= 0
-      then:
-        - choice: shop
-    - if: wooden_pickaxe >= 1
-      then:
-        - choice: mine
-    - if: coke_oven >= 1
-      then:
-        - choice: cook
-          cost: 10 wood
-    - if: cooking_skill >= 3 and coke_oven >= 1
-      then:
-        - choice: cook_more
-          cost: 100 wood
-    - if: compressor >= 1
-      text: "Usage: compress X where X is the amount you need to compress; requires at least 9 charcoal"
-      then:
-        - choice: compress
-    - if: compressing_skill > 0
-      then:
-        - choice: compress_again
-          cost: 9 charcoal_block
-    - if: compressed_charcoal >= 1
-      then:
-        - choice: even_more_compressing
-          cost: 9 compressed_charcoal
-    - if: doubly_compressed_charcoal >= 1
-      then:
-        - choice: the_most_compressing
-          cost: 9 doubly_compressed_charcoal
-  beg:
-    - if: coin <= 2
-      then:
-        - Since you were so poor, someone gave you 3 coins!
-        - add: 3 coin
-        - goto: ..
-    - random:
-        mugged:
-          - You were mugged and lose half your coins.
-          - lose: (math.floor(coin / 2)) coin
-        2 gained_coin:
-          - Someone was generous enough to hand you a coin.
-          - add: 1 coin
-    - goto: ..
-  chop:
-    - flavor: The wintry air is crisp as your boots crunch against the grass. You find a few good trees and force them to the ground with your sharp lumberaxe.
-    - if: lumberaxe > 0
-      then:
-        - Because you have a lumberaxe, you get a lot of wood.
-        - add: 100-200 wood
-      else:
-        - add: 2-5 wood
-    - goto: ..
-  cook:
-    - add: 1 cooking_skill
-    - add: 10 charcoal
-    - add: 35928 creosote
-    - if: creosote >= 250000
-      then:
-        - You filled up on creosote, so you need to destroy the coke oven to get rid of it. Afterwards, you eat all the stone it's made from.
-        - lose: 1 coke_oven
-    - once: You have the feeling the shop has more items now that you have charcoal
-    - goto: ..
-  cook_more:
-    - add: 10 cooking_skill
-    - add: 100 charcoal
-    - once: For some reason, cooking more doesn't seem to produce any creosote. You suspect it has to do with either integer overflow, or the laziness of the author.
-    - goto: ..
-  compress:
-    - set: temp
-      to: 1
-    - if: len(_args) > 0
-      then:
-        - set: temp
-          to: int(_args[0])
-    - if: temp > compressor
-      then:
-        - You don't have enough compressors. You need one compressor for each compression you're doing at once.
-        - goto: ..
-    - if: temp * 9 > charcoal
-      then:
-        - set: temp
-          to: temp * 9 - charcoal
-        - You don't have enough charcoal. You need {temp} more.
-        - goto: ..
-    - lose: (temp * 9) charcoal
-    - add: (temp) compressing_skill
-    - add: (temp) charcoal_block
-    - once: You might have to get wood more quickly if you want a lot more of these charcoal blocks. Maybe you should visit the shop again.
-    - goto: ..
-  compress_again:
-    - add: 9 compressing_skill
-    - add: 1 compressed_charcoal
-    - goto: ..
-  even_more_compressing:
-    - add: 81 compressing_skill
-    - add: 1 doubly_compressed_charcoal
-    - goto: ..
-  the_most_compressing:
-    - add: 273 compressing_skill
-    - add: 1 triply_compressed_charcoal
-    - goto: ..
-  gather:
-    - flavor: You scavenge through many a berry bush before finding ones plump enough to harvest. It takes many hours but you eventually get a basket worth.
-    - add: 40-100 berries
-    - goto: ..
-  mine:
-    - flavor: Sweat drowns you as you work in the hot, slimy caves of the underworld. You manage to mine several pieces of stone.
-    - add: 2-3 stone
-    - goto: ..
-  shop:
-    - flavor: The shopkeeper is an old man with a stiff, scruffy beard and dark black hair. He grunts when he sees you enter.
-    - choice: back
-      effects: ..
-    - choice: wooden_pickaxe
-      cost: 10 wood, 5 coin
-      effects:
-        - once: You grip the glossy hardwood pickaxe in your hand. Time to mine some stone. Hurrah!
-        - add: 1 wooden_pickaxe
-        - goto: .
-    - choice: coke_oven
-      cost: 27 stone
-      effects:
-        - once: You build a coke oven, which will allow you to make charcoal. You miscounted and made 27 cobble instead of the usual 26, so you just eat the last one.
-        - add: 1 coke_oven
-        - goto: .
-    - if: cooking_skill > 0
-      then:
-        - once: "Note: You can buy more compressors to compress more at once with 'compress X' where X is the number you want to compress."
-        - choice: compressor
-          cost: 5 stone
-          effects:
-            - once: A compressor will allow you to compress stuff, like charcoal.
-            - add: 1 compressor
-            - goto: .
-    - if: compressing_skill > 0
-      then:
-        - choice: lumberaxe
-          cost: 10 coin
-          effects:
-            - A lumberaxe will allow you to fell massive trees when you chop.
-            - add: 1 lumberaxe
-            - goto: .
-    - choice: hat
-      text: The shopkeeper's beloved hat.
-      cost: 1 triply_compressed_charcoal
-      effects:
-        - He takes it and runs. Sadge
-        - lose: 1 respect_for_shopkeeper
-        - goto: ..
+  - respect_for_shopkeeper: 0
+  - wooden_pickaxe: 0
+  - coke_oven: 0
+  - wood: 0
+  - cooking_skill: 0
+  - compressor: 0
+  - compressing_skill: 0
+  - charcoal_block: 0
+  - compressed_charcoal: 0
+  - doubly_compressed_charcoal: 0
+  - coin: 0
+  - lumberaxe: 0
+  - charcoal: 0
+  - creosote: 0
+  - triply_compressed_charcoal: 0
+  - temp: 0
+  - berries: 0
+  - stone: 0
+_content:
+  - choice: beg
+  - choice: chop
+  - choice: gather
+  - if: respect_for_shopkeeper >= 0
+    then:
+      - choice: shop
+  - if: wooden_pickaxe >= 1
+    then:
+      - choice: mine
+  - if: coke_oven >= 1
+    then:
+      - choice: cook
+        cost: 10 wood
+  - if: cooking_skill >= 3 and coke_oven >= 1
+    then:
+      - choice: cook_more
+        cost: 100 wood
+  - if: compressor >= 1
+    then:
+      - choice: compress
+        text: "Usage: compress X where X is the amount you need to compress; requires at least 9 charcoal"
+  - if: compressing_skill > 0
+    then:
+      - choice: compress_again
+        cost: 9 charcoal_block
+  - if: compressed_charcoal >= 1
+    then:
+      - choice: even_more_compressing
+        cost: 9 compressed_charcoal
+  - if: doubly_compressed_charcoal >= 1
+    then:
+      - choice: the_most_compressing
+        cost: 9 doubly_compressed_charcoal
+beg:
+  - if: coin <= 2
+    then:
+      - Since you were so poor, someone gave you 3 coins!
+      - add: 3 coin
+      - goto: ..
+  - random:
+      mugged:
+        - You were mugged and lose half your coins.
+        - lose: (math.floor(coin / 2)) coin
+      2 gained_coin:
+        - Someone was generous enough to hand you a coin.
+        - add: 1 coin
+  - goto: ..
+chop:
+  - flavor: The wintry air is crisp as your boots crunch against the grass. You find a few good trees and force them to the ground with your sharp lumberaxe.
+  - if: lumberaxe > 0
+    then:
+      - Because you have a lumberaxe, you get a lot of wood.
+      - add: 100-200 wood
+    else:
+      - add: 2-5 wood
+  - goto: ..
+cook:
+  - add: 1 cooking_skill
+  - add: 10 charcoal
+  - add: 35928 creosote
+  - if: creosote >= 250000
+    then:
+      - You filled up on creosote, so you need to destroy the coke oven to get rid of it. Afterwards, you eat all the stone it's made from.
+      - lose: 1 coke_oven
+  - once: You have the feeling the shop has more items now that you have charcoal
+  - goto: ..
+cook_more:
+  - add: 10 cooking_skill
+  - add: 100 charcoal
+  - once: For some reason, cooking more doesn't seem to produce any creosote. You suspect it has to do with either integer overflow, or the laziness of the author.
+  - goto: ..
+compress:
+  - set: temp
+    to: 1
+  - if: len(_args) > 0
+    then:
+      - set: temp
+        to: int(_args[0])
+  - if: temp > compressor
+    then:
+      - You don't have enough compressors. You need one compressor for each compression you're doing at once.
+      - goto: ..
+  - if: temp * 9 > charcoal
+    then:
+      - set: temp
+        to: temp * 9 - charcoal
+      - You don't have enough charcoal. You need {temp} more.
+      - goto: ..
+  - lose: (temp * 9) charcoal
+  - add: (temp) compressing_skill
+  - add: (temp) charcoal_block
+  - once: You might have to get wood more quickly if you want a lot more of these charcoal blocks. Maybe you should visit the shop again.
+  - goto: ..
+compress_again:
+  - add: 9 compressing_skill
+  - add: 1 compressed_charcoal
+  - goto: ..
+even_more_compressing:
+  - add: 81 compressing_skill
+  - add: 1 doubly_compressed_charcoal
+  - goto: ..
+the_most_compressing:
+  - add: 273 compressing_skill
+  - add: 1 triply_compressed_charcoal
+  - goto: ..
+gather:
+  - flavor: You scavenge through many a berry bush before finding ones plump enough to harvest. It takes many hours but you eventually get a basket worth.
+  - add: 40-100 berries
+  - goto: ..
+mine:
+  - flavor: Sweat drowns you as you work in the hot, slimy caves of the underworld. You manage to mine several pieces of stone.
+  - add: 2-3 stone
+  - goto: ..
+shop:
+  - flavor: The shopkeeper is an old man with a stiff, scruffy beard and dark black hair. He grunts when he sees you enter.
+  - choice: back
+    effects: ..
+  - choice: wooden_pickaxe
+    cost: 10 wood, 5 coin
+    effects:
+      - once: You grip the glossy hardwood pickaxe in your hand. Time to mine some stone. Hurrah!
+      - add: 1 wooden_pickaxe
+      - goto: .
+  - choice: coke_oven
+    cost: 27 stone
+    effects:
+      - once: You build a coke oven, which will allow you to make charcoal. You miscounted and made 27 cobble instead of the usual 26, so you just eat the last one.
+      - add: 1 coke_oven
+      - goto: .
+  - if: cooking_skill > 0
+    then:
+      - once: "Note: You can buy more compressors to compress more at once with 'compress X' where X is the number you want to compress."
+      - choice: compressor
+        cost: 5 stone
+        effects:
+          - once: A compressor will allow you to compress stuff, like charcoal.
+          - add: 1 compressor
+          - goto: .
+  - if: compressing_skill > 0
+    then:
+      - choice: lumberaxe
+        cost: 10 coin
+        effects:
+          - A lumberaxe will allow you to fell massive trees when you chop.
+          - add: 1 lumberaxe
+          - goto: .
+  - choice: hat
+    text: The shopkeeper's beloved hat.
+    cost: 1 triply_compressed_charcoal
+    effects:
+      - He takes it and runs. Sadge
+      - lose: 1 respect_for_shopkeeper
+      - goto: ..

@@ -1,21 +1,20 @@
 ---
-story:
+_content:
+  - print: This is the start of the program.
+  - choice: good
+    effects:
+      - print: You're headed to the good block.
+      - goto: /good
+  - choice: bad
+    effects:
+      - print: You're headed to the bad block.
+      - goto: /bad
+  - print: Now you make a choice (this should only appear once).
+good:
   _content:
-    - print: This is the start of the program.
-    - choice: good
-      effects:
-        - print: You're headed to the good block.
-        - goto: /good
-    - choice: bad
-      effects:
-        - print: You're headed to the bad block.
-        - goto: /bad
-    - print: Now you make a choice (this should only appear once).
-  good:
-    _content:
-      - print: You're in the good block.
-      - print: The program should end now. Goodbye!
-  bad:
-    _content:
-      - print: You're in the bad block.
-      - print: The program should end now. Goodbye!
+    - print: You're in the good block.
+    - print: The program should end now. Goodbye!
+bad:
+  _content:
+    - print: You're in the bad block.
+    - print: The program should end now. Goodbye!

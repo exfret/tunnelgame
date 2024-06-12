@@ -22,9 +22,6 @@ def make_bookmark(address):
     return (address,)
 
 def get_block_part(curr_addr, index):
-    if curr_addr == () or curr_addr[0] != "story":
-        raise InvalidAddressError("Attempt to get block part of non-story address.")
-    
     if index >= len(curr_addr):
         return curr_addr
     
@@ -34,19 +31,19 @@ def get_block_part(curr_addr, index):
         return get_block_part(curr_addr, index + 1)
 
 def parse_addr(game, curr_addr, addr_id):
-    # Blocks are simply children of story (including story) with numerical addresses and no leading underscores
+    # Blocks are simply children of the root node with purely string addresses having leading underscores
     curr_addr = get_block_part(curr_addr, 0)
 
     path = tuple(addr_id.split("/"))
 
     for index in path:
         if index == "": # Corresponds to instance of a root /
-            curr_addr = ("story",)
+            curr_addr = ()
         elif index == ".":
             pass
         elif index == "..":
-            if len(curr_addr) == 1:
-                raise InvalidAddressError("Attempt to index out of story in an address ID.")
+            if len(curr_addr) == 0:
+                raise InvalidAddressError("Attempt to index out of root node in an address ID.")
 
             curr_addr = curr_addr[:-1]
         elif index[0] == "_":

@@ -7,17 +7,14 @@ import yaml
 import addressing
 import interpreter
 import gameparser
+import utility
 
 # Config imports
 from config import game, state
 
-gameparser.add_vars(game, state)
+gameparser.add_vars_with_address(game, state, game, ())
 gameparser.add_module_vars(state)
 gameparser.parse(game, state)
-
-# verify also creates vars on the fly, so it needs the state
-# gameparser.verify(game, state)
-# gameparser.init_vars(game, state)
 
 def print_choices(state):
     print("\n        Choices are as follows...")
@@ -84,9 +81,11 @@ while True:
         if len(command) < 2:
             print("Must give a variable to print the value of.")
         else:
-            if command[1] in state["vars"]:
-                print(state["vars"][command[1]])
-            else:
+            try:
+                var_referenced = utility.get_var(state["vars"], command[1], ()) # TODO: Take into account some placeholder address
+
+                print(var_referenced["value"])
+            except Exception as e:
                 print("That's not a valid variable")
     elif command[0] == "load":
         if len(command) == 1:
@@ -140,7 +139,10 @@ while True:
         else:
             # Pay required costs
             for modification in choice["modifications"]:
-                state["vars"][modification["var"]] += modification["amount"] # TODO: Print modifications
+                # TODO: Make the address the place where the choice command was, not the address to go to with the choice command (these are subtly different)
+                var_ref = utility.get_var(state["vars"], modification["var"], choice["address"])
+                
+                var_ref["value"] += modification["amount"] # TODO: Print modifications
 
             make_choice(game, state, choice["address"], command)
     else:

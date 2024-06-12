@@ -2,9 +2,10 @@
 START:
   type: dict
   mandatory:
-    story: STORY
+    _content: CONTENT
   optional:
-    vars: VARS
+    _vars: VARS
+  other: BLOCK
 VARS:
   type: list
   elements: VAR
@@ -14,11 +15,6 @@ VAR: # Has special built-in checking
     _locale: _text
     _type: _var_type
   other: _complex_value
-STORY:
-  type: dict
-  mandatory:
-    _content: CONTENT
-  other: BLOCK
 BLOCK:
   type: union_with_types
   dict: DICT_BLOCK
@@ -27,6 +23,7 @@ DICT_BLOCK: # Has special built-in checking
   type: dict
   optional:
     _content: CONTENT
+    _vars: VARS
   other: BLOCK
 LIST_BLOCK:
   type: list
@@ -41,12 +38,15 @@ INSTR:
 DICT_INSTR:
   type: union_with_keys
   contexts:
+    add: ADD
     choice: CHOICE
+    error: ERROR
     flavor: FLAVOR
     gosub: GOSUB
     goto: GOTO
     if: IF
     insert: INSERT
+    lose: LOSE
     once: ONCE
     pass: PASS
     print: PRINT
@@ -54,6 +54,10 @@ DICT_INSTR:
     random: RANDOM
     set: SET
     switch: SWITCH
+ADD:
+  type: dict
+  mandatory:
+    add: _requirement_specification
 CHOICE:
   type: dict
   mandatory:
@@ -68,6 +72,10 @@ EFFECTS_SPEC:
   type: union_with_types
   str: _addr
   list: CONTENT
+ERROR:
+  type: dict
+  mandatory:
+    error: _null
 FLAVOR:
   type: dict
   mandatory:
@@ -111,6 +119,10 @@ INSERT:
   mandatory:
     insert: _id
     into: _var_id
+LOSE:
+  type: dict
+  mandatory:
+    lose: _requirement_specification
 GOSUB:
   type: dict
   mandatory:
@@ -162,6 +174,7 @@ SET:
     set: _set_expr
   optional:
     show: _null
+    to: _expr
 SWITCH:
   type: dict
   mandatory:

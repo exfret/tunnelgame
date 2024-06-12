@@ -1,13 +1,12 @@
 ---
-story:
+_content:
+  - print: This is the start of the program
+  - goto: /OtherBlock
+  - print: This shouldn't be printed.
+OtherBlock:
   _content:
-    - print: This is the start of the program
-    - goto: /OtherBlock
-    - print: This shouldn't be printed.
-  OtherBlock:
+    - print: Arrived at other block.
+    - goto: /OtherBlock/ChildBlock
+  ChildBlock:
     _content:
-      - print: Arrived at other block.
-      - goto: /OtherBlock/ChildBlock
-    ChildBlock:
-      _content:
-        - print: Arrived at child block. End of program.
+      - print: Arrived at child block. End of program.

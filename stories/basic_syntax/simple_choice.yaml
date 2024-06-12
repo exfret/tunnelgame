@@ -1,8 +1,7 @@
 ---
-story:
-  _content:
-    - print: This is the start of the program.
-    - choice: continue
-      effects:
-        - print: You made a choice.
-    - print: This is the text after the choice.
+_content:
+  - print: This is the start of the program.
+  - choice: continue
+    effects:
+      - print: You made a choice.
+  - print: This is the text after the choice.
