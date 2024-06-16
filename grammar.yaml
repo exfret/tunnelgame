@@ -39,6 +39,7 @@ DICT_INSTR:
   type: union_with_keys
   contexts:
     add: ADD
+    back: BACK
     choice: CHOICE
     error: ERROR
     flavor: FLAVOR
@@ -58,6 +59,10 @@ ADD:
   type: dict
   mandatory:
     add: _requirement_specification
+BACK:
+  type: dict
+  mandatory:
+    back: _null
 CHOICE:
   type: dict
   mandatory:

@@ -55,15 +55,17 @@ def add_vars_with_address(game, state, node, address): # TODO: Finish up so that
                     var_name = key
                     var_value = val
                     num_var_keys += 1
-                elif "_locale" in var:
+                elif key == "_locale":
                     if not isinstance(var["_locale"], str):
                         raise IncorrectTypeError()
                     locale = var["_locale"]
-                elif "_type" in var:
+                elif key == "_type":
                     if not isinstance(var["_type"], str):
                         raise IncorrectTypeError()
-                    if val != "bag": # Bag is the only allowed special type for now
+                    if val != "bag" and val != "map" and val != "grid": # These are the only allowed special types for now
                         raise IncorrectTypeError()
+                elif key == "_fill" or "_dims": # Extra keys
+                    pass
                 else:
                     raise InvalidTagError()
 
@@ -76,6 +78,31 @@ def add_vars_with_address(game, state, node, address): # TODO: Finish up so that
             # Initialize bags as dicts
             if ("_type" in var) and var["_type"] == "bag" and var_value == None:
                 var_value = {}
+            elif ("_type" in var) and var["_type"] == "map":
+                pass # TODO: Any special parsing to be done?
+            elif ("_type" in var) and var["_type"] == "grid":
+                if not "_dims" in var:
+                    raise MissingRequiredTagError()
+                elif not "_fill" in var:
+                    raise MissingRequiredTagError() # TODO: Have a default fill?
+                
+                dims = var["_dims"].split()
+                for ind, dim in enumerate(dims):
+                    dims[ind] = int(dim)
+
+                def get_arrs(curr_ind, dims):
+                    if len(curr_ind) == len(dims):
+                        return var["_fill"]
+                    
+                    curr_arr = []
+                    for i in range(dims[len(curr_ind)]):
+                        curr_arr.append(get_arrs(curr_ind + (i,), dims))
+                    
+                    return curr_arr
+                
+                curr_ind = () * len(dims)
+                arr = get_arrs(curr_ind, dims)
+
             state["vars"][address][var_name] = {"address": address, "locale": locale, "value": var_value}
     
     # Recurse into all sub-blocks
@@ -83,43 +110,6 @@ def add_vars_with_address(game, state, node, address): # TODO: Finish up so that
         # Anything that's not a keyword must be a block right now
         if tag[0] != "_":
             add_vars_with_address(game, state, subnode, address + (tag,))
-
-def add_vars(game, state):
-    if not ("_vars" in game):
-        game["_vars"] = []
-        return
-    
-    if not isinstance(game["_vars"], list):
-        raise IncorrectTypeError("VARS is not a list.")
-
-    for var in game["_vars"]:
-        if not isinstance(var, dict):
-            raise IncorrectTypeError("VAR not a dict")
-
-        var_name = ""
-        num_var_keys = 0
-        for key, val in var.items(): # TODO: Check that vars have valid names (no leading underscores/name conflicts)
-            if key[0] != "_":
-                var_name = key
-                var_val = val
-                num_var_keys += 1
-            elif key == "_locale":
-                if not isinstance(val, str):
-                    raise IncorrectTypeError()
-            elif key == "_type":
-                if val != "bag": # Bag is the only allowed special type for now
-                    raise IncorrectTypeError()
-            else:
-                raise InvalidTagError()
-        if num_var_keys != 1:
-            raise InvalidTagError("Extra tags in VAR specification.")
-        state["vars"][var_name] = var_val
-        # Initialize bags as dicts
-        if ("_type" in var) and var["_type"] == "bag" and var_val == None:
-            state["vars"][var_name] = {}
-    
-    # Extra vars
-    state["vars"]["_visits"] = 0
 
 def add_module_vars(state):
     # Add special variables
@@ -148,7 +138,7 @@ def parse_node(game, node, state, grammar, context, address):
 
     if context == "_addr":
         # Try to access this address to ensure it's valid
-        addressing.parse_addr(game, address, node)
+        addressing.parse_addr(address, node)
     elif context == "_addr_list":
         if not isinstance(node, str):
             raise IncorrectTypeError("Node with context " + context + " is of incorrect type.")
@@ -207,8 +197,13 @@ def parse_node(game, node, state, grammar, context, address):
             if len(spec) > 0:
                 if spec[-1] != ")":
                     for substring in spec.split(","):
-                        for subsubstring in substring.split():
-                            real_specs.append(subsubstring)
+                        if len(substring.split("from")) == 2:
+                            # Case of a 'from' statement, keep the part with the "from", i.e. - the last 3 "words"
+                            real_specs.append(substring.split(" ", 1)[0])
+                            real_specs.append(substring.split(" ", 1)[1])
+                        else:
+                            for subsubstring in substring.split():
+                                real_specs.append(subsubstring)
                 else:
                     real_specs.append(spec)
         
@@ -233,7 +228,10 @@ def parse_node(game, node, state, grammar, context, address):
                     else:
                         raise WrongFormattingError("Wrong number of -'s in requirement amount.")
             elif index % 2 == 1:
-                if not (real_spec in collect_vars(state, address)):
+                if len(real_spec.split("from")) > 1:
+                    if not real_spec.split(" from ")[-1] in collect_vars(state, address):
+                        raise MissingReferenceError() # Here, just check for bag's existence
+                elif not (real_spec in collect_vars(state, address)):
                     raise MissingReferenceError("Referenced variable not declared.")
     elif context == "_set_expr":
         if not isinstance(node, str):
@@ -287,7 +285,7 @@ def parse_node(game, node, state, grammar, context, address):
         if not node in collect_vars(state, address):
             raise MissingReferenceError()
     elif context == "_var_type":
-        if node != "bag": # Bag is the only current var type
+        if node != "bag" and node != "map" and node != "grid": # Bag is the only current var type
             # TODO: Unify this code with the checking in var creation
             raise IncorrectTypeError()
     elif context[0] == "_":
@@ -372,7 +370,14 @@ def parse_node(game, node, state, grammar, context, address):
     # Special checking
     if context == "CHOICE":
         if not ("effects" in node): # If effects doesn't exist, this should be an address
-            parse_node(game, node["choice"], state, grammar, "_addr", address)
+            if node["choice"] == "_back":
+                # Special indicator for "back" choice, fill in the syntactic sugar
+                # TODO: Maybe figure out a way to do this without modifying game?
+                node["choice"] = "back"
+                node["effects"] = [{"back": None}]
+                parse_node(game, node["effects"], state, grammar, "CONTENT", address + ("effects",))
+            else:
+                parse_node(game, node["choice"], state, grammar, "_addr", address)
     # TODO: Special checking for SET to check that if the set is just a single var name we need a TO
 
 def parse(game, state):

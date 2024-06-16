@@ -23,14 +23,16 @@ def make_choice(game, state, new_addr, command = "start"):
     state["choices"] = {}
 
     # Populate the state vars with args
-    state["vars"]["_args"] = []
-    for arg in command[1:]:
-        state["vars"]["_args"].append(arg)
+    state["vars"]["_args"] = [0] * 10000
+    for i, arg in enumerate(command[1:]):
+        state["vars"]["_args"][i] = arg
 
     os.system("clear")
 
     while interpreter.step(game, state):
         pass
+
+    state["last_address_list"].append(state["last_address"])
 
     view.print_choices()
 
@@ -52,7 +54,7 @@ while True:
         else:
             address_to_goto = None
             try:
-                address_to_goto = addressing.parse_addr(game, (), command[1])
+                address_to_goto = addressing.parse_addr((), command[1])
             except Exception as e: # TODO: Catch only relevant exceptions
                 view.print_feedback_message("goto_invalid_address_given")
             if not (address_to_goto is None):
@@ -121,10 +123,12 @@ while True:
         else:
             # Pay required costs
             for modification in choice["modifications"]:
-                # TODO: Make the address the place where the choice command was, not the address to go to with the choice command (these are subtly different)
-                var_ref = utility.get_var(state["vars"], modification["var"], choice["address"])
-                
-                var_ref["value"] += modification["amount"] # TODO: Print modifications
+                if ("type_to_modify" in modification) and modification["type_to_modify"] == "bag":
+                    modification["bag_ref"]["value"][modification["item"]] += modification["amount"]
+                else:
+                    var_ref = utility.get_var(state["vars"], modification["var"], choice["choice_address"])
+                    
+                    var_ref["value"] += modification["amount"] # TODO: Print modifications
 
             make_choice(game, state, choice["address"], command)
     else:

@@ -1,5 +1,6 @@
 import random
 
+import addressing
 from utility import *
 from view import view
 
@@ -141,28 +142,7 @@ def get_parent_block(game, addr, state):
     else:
         return get_parent_block(game, addr[:-1], state)
 
-def parse_addr(game, curr_addr, addr_id, state):
-    curr_path = tuple(addr_id.split("/"))
-
-    curr_addr = get_parent_block(game, curr_addr, state)
-
-    for index in curr_path:
-        # This usually happens when there is an initial / so go to root
-        if index == "":
-            curr_addr = ()
-        elif index == ".":
-            pass
-        elif index == "..":
-            curr_addr = get_parent_block(game, curr_addr, state)[:-1]
-        else:
-            curr_addr = curr_addr + (index,)
-
-    if isinstance(get_instr(game, curr_addr), list):
-        return curr_addr + (0,)
-    
-    return curr_addr + ("_content", 0)
-
-def do_print(text, state, style): # TODO: Move ansi code handling to view as well
+def do_print(text, state, style = {}): # TODO: Move ansi code handling to view as well
     view.print_text(text, style)
 
 def do_shown_var_modification(modification, state, symbol, game): # TODO: Remove... Only used for "add" and "lose", which are defunct
@@ -251,6 +231,36 @@ def step(game, state):
     # TODO: Verify this part of stories
     if "add" in curr_node:
         do_shown_var_modification(curr_node["add"], state, "+", game)
+    elif "back" in curr_node:
+        # If we try to go back and there is nothing to go back to, immediately halt execution
+        if len(state["last_address_list"]) == 0:
+            return False
+
+        new_addr = get_parent_block(game, state["last_address_list"].pop(), state)
+        # Default behavior: Go back again if we're in an effects section, this is so that choices don't just go back to the block that presented the choice
+        # TODO: Add a tag to disable this behavior
+        def is_in_effects_section(addr):
+            if addr == ():
+                return False
+            
+            # We're in an effects node if at some point there is an effects tag in our address that is part of a choice tag and we're content within that effects
+            if "CONTENT" in state["metadata"]["node_types"][addr] and "CHOICE" in state["metadata"]["node_types"][addr[:-1]] and addr[-1] == "effects":
+                return True
+            else:
+                return is_in_effects_section(addr[:-1])
+        if is_in_effects_section(get_curr_addr(state)):
+            new_addr = get_parent_block(game, state["last_address_list"].pop(), state)
+
+        parent_node = get_instr(game, new_addr)
+
+        if isinstance(parent_node, list):
+            new_addr = new_addr + (0,)
+        else:
+            new_addr = new_addr + ("_content", 0)
+
+        set_curr_addr(state, new_addr)
+
+        return True
     elif "choice" in curr_node:
         vars_by_name = collect_vars_with_dicts(state)
 
@@ -283,14 +293,26 @@ def step(game, state):
 
             cost_list = curr_node["cost"].split(",")
             for cost in cost_list:
-                parsed_cost = cost.split()
+                bag_cost = cost.split("from")
+                bag_name = None
+                if len(bag_cost) == 2:
+                    bag_name = bag_cost[1].strip()
+                parsed_cost = bag_cost[0].split()
 
-                text += parsed_cost[0] + " " + localize(parsed_cost[1], state) + ", " # TODO: Use localised name of variables
+                if not (bag_name is None):
+                    text += parsed_cost[0] + " " + parsed_cost[1] + " from " + bag_name + ", " # TODO: Localization of bag items
 
-                if vars_by_name[parsed_cost[1]]["value"] < int(parsed_cost[0]):
-                    missing_list.append(parsed_cost[1])
-                
-                modify_list.append({"var": parsed_cost[1], "amount": -1 * int(parsed_cost[0])})
+                    if not (parsed_cost[1] in vars_by_name[bag_name]["value"]) or vars_by_name[bag_name]["value"][parsed_cost[1]] < int(parsed_cost[0]):
+                        missing_list.append({"type_missing": "bag", "bag_name": bag_name, "item": parsed_cost[1]})
+
+                    modify_list.append({"type_to_modify": "bag", "bag_ref": vars_by_name[bag_name], "item": parsed_cost[1], "amount": -1 * int(parsed_cost[0])}) # TODO
+                else:
+                    text += parsed_cost[0] + " " + localize(parsed_cost[1], state) + ", "
+
+                    if vars_by_name[parsed_cost[1]]["value"] < int(parsed_cost[0]):
+                        missing_list.append(parsed_cost[1])
+                    
+                    modify_list.append({"var": parsed_cost[1], "amount": -1 * int(parsed_cost[0])})
             # Remove the last comma and space
             text = text[:-2]
             text += "]"
@@ -316,11 +338,11 @@ def step(game, state):
 
         effect_address = ""
         if not "effects" in curr_node:
-            effect_address = parse_addr(game, get_curr_addr(state), curr_node["choice"], state)
+            effect_address = addressing.parse_addr(get_curr_addr(state), curr_node["choice"])
         else:
             effect_address = get_curr_addr(state) + ("effects", 0)
             if isinstance(curr_node["effects"], str):
-                effect_address = parse_addr(game, get_curr_addr(state), curr_node["effects"], state)
+                effect_address = addressing.parse_addr(get_curr_addr(state), curr_node["effects"])
 
         state["choices"][curr_node["choice"]] = {"text": text, "address": effect_address, "missing": missing_list, "modifications": modify_list, "choice_address": get_curr_addr(state)}
     elif "error" in curr_node:
@@ -334,7 +356,7 @@ def step(game, state):
 
                 return True
     elif "gosub" in curr_node:
-        sub_address = parse_addr(game, get_curr_addr(state), curr_node["gosub"], state)
+        sub_address = addressing.parse_addr(get_curr_addr(state), curr_node["gosub"])
 
         new_first_stack = state["bookmark"][0] + (sub_address,)
         new_bookmark = (new_first_stack,) + state["bookmark"][1:]
@@ -343,7 +365,7 @@ def step(game, state):
 
         return True
     elif "goto" in curr_node:
-        set_curr_addr(state, parse_addr(game, get_curr_addr(state), curr_node["goto"], state))
+        set_curr_addr(state, addressing.parse_addr(get_curr_addr(state), curr_node["goto"]))
 
         return True
     elif "if" in curr_node:
@@ -400,8 +422,8 @@ def step(game, state):
         if isinstance(curr_node["random"], str):
             for id in curr_node["random"].split(","):
                 possibilities_list.append(id.strip())
-            
-            set_curr_addr(state, parse_addr(game, get_curr_addr(state), possibilities_list[random.randint(0, len(possibilities_list) - 1)], state))
+
+            set_curr_addr(state, addressing.parse_addr(get_curr_addr(state), possibilities_list[random.randint(0, len(possibilities_list) - 1)]))
 
             return True
 
@@ -421,7 +443,7 @@ def step(game, state):
             curr_weight += possibility[0]
             if curr_weight >= target_weight:
                 if curr_node["random"][possibility[1]] is None:
-                    set_curr_addr(state, parse_addr(game, get_curr_addr(state), possibility[1].split()[-1], state))
+                    set_curr_addr(state, addressing.parse_addr(get_curr_addr(state), possibility[1].split()[-1]))
                 else:
                     set_curr_addr(state, get_curr_addr(state) + ("random", possibility[1], 0))
                 
@@ -479,14 +501,14 @@ def step(game, state):
         switch_value = eval(curr_node["switch"], {}, collect_vars(state))
         if str(switch_value) in curr_node:
             if isinstance(curr_node[str(switch_value)], str):
-                set_curr_addr(state, parse_addr(game, get_curr_addr(state), curr_node[str(switch_value)], state))
+                set_curr_addr(state, addressing.parse_addr(get_curr_addr(state), curr_node[str(switch_value)]))
             else:
                 set_curr_addr(state, get_curr_addr(state) + (str(switch_value), 0))
             
             return True
         elif "default" in curr_node:
             if isinstance(curr_node["default"], str):
-                set_curr_addr(state, parse_addr(game, get_curr_addr(state), curr_node[str(switch_value)], state))
+                set_curr_addr(state, addressing.parse_addr(get_curr_addr(state), curr_node[str(switch_value)]))
             else:
                 set_curr_addr(state, get_curr_addr(state) + ("default", 0))
 

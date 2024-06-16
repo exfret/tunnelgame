@@ -1,6 +1,18 @@
 ---
 _vars:
   - logger: 0
+  - overworld: # Overworld is a list containing the locations, each location contains its list of connections
+      spawn:
+        - hill
+      hill:
+        - spawn
+        - river
+      river:
+        - hill
+        - cliff
+      cliff:
+        - spawn
+    _type: map
   - machines:
       - - "."
         - "."
@@ -31,11 +43,15 @@ _content:
         amount: 3
     then:
       - print: Condition true
+  - choice: build
+    cost: 3 test_item from inventory
 logic:
   time_passed:
     _content:
       - set: time += 1
       - print: It worked!
+build:
+  - goto: /
 craft:
   _content:
     - choice: back
@@ -53,3 +69,4 @@ gather:
     - You get some wood.
     - set: wood += 1
       show:
+    - goto: /

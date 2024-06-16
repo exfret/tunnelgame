@@ -1,0 +1,10 @@
+_vars:
+  - plot:
+    _fill: "."
+    _dims: 5 5
+    _type: grid
+_content:
+  - choice: craft
+craft:
+  - What would you like to craft?
+  - choice: _back

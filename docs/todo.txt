@@ -2,10 +2,14 @@ Currently:
  * Finishing writing examples/User Guide
  * Implementing bags
 
+63. Check that insert commands and such are only used with bags
+62. Master _requirement_specification parsing function
+61. Return command for gosub
+60. What to do about vars that change after costs are evaluated?
 59. Save current text printed to terminal when file saved
 58. SPILL command for when we do want to "spill" from an effects section to the parent area
 57. Automatic stopping outside of effects blocks!
-56. Disallow randomness in choice specs?
+56. Disallow random intervals in choice specs?
 55. Remove underscores and use protected keywords instead
 54. Keep track of last instruction address for debug purposes in the gameloop
 53. Automatic checking for interpreter functions

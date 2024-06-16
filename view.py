@@ -38,7 +38,13 @@ class View:
             if len(choice["missing"]) > 0:
                 missing_text = "              Missing: "
                 for missing in choice["missing"]:
-                    missing_text += missing + ", "
+                    if isinstance(missing, dict):
+                        if missing["type_missing"] == "bag":
+                            missing_text += missing["item"] + " in " + missing["bag_name"] + ", "
+                        else: # The only special missing type right now is a bag
+                            raise Exception()
+                    else:
+                        missing_text += missing + ", "
                 missing_text = missing_text[:-2]
                 print(missing_text)
     

@@ -1,3 +1,10 @@
+2024/6/16
+- Moved some addressing functionality from interpreter into the addressing module
+- Fixed bug with the way I thought local addressing worked causing some example stories to not compile
+- Added "back" command, which returns to the innermost block that the program executed an INSTRUCTION node within during the *previous* stepping
+- Fixed error with new variable checking that didn't allow locales
+- Allowed bag functionality in "costs" (still need to implement for other requirement_spec)
+
 2024/6/15
 - Fixed bug where "set" command would cause crash on parsing with expressions that just set values rather than adding or subtracting them
 - Started moving print commands from interpreter to view

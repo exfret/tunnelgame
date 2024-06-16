@@ -30,9 +30,13 @@ def get_block_part(curr_addr, index):
     else:
         return get_block_part(curr_addr, index + 1)
 
-def parse_addr(game, curr_addr, addr_id):
+def parse_addr(curr_addr, addr_id):
     # Blocks are simply children of the root node with purely string addresses having leading underscores
     curr_addr = get_block_part(curr_addr, 0)
+    # If this block is a list block and not the root content, it can't contain other blocks anyways, so just allow it to goto sibling blocks
+    # TODO: More "block searching" functionality to find blocks with similar names
+    if isinstance(get_node(curr_addr), list):
+        curr_addr = curr_addr[:-1]
 
     path = tuple(addr_id.split("/"))
 

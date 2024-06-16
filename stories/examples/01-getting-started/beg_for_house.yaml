@@ -1,0 +1,18 @@
+---
+_vars:
+  - times_begged: 0
+_content:
+  - choice: beg
+    text: Beg for money
+  - if: times_begged >= 3
+    then:
+      - choice: buy
+        text: Buy a house
+  - print: What would you like to do?
+beg:
+  - set: times_begged += 1
+    show:
+  - print: You got a coin begging for money.
+  - goto: /
+buy:
+  - print: You bought a house and had a happy ending!

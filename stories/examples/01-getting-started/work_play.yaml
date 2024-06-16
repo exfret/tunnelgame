@@ -1,0 +1,18 @@
+---
+_content:
+  - print: You have homework, but a new video game came out today.
+  - choice: play
+    text: Play and do your homework later
+  - choice: work
+    text: Do your homework now
+play:
+  - print: You play outside and lose track of time.
+  - goto: fail
+work:
+  - print: You do a stellar job on your food groups homework.
+  - print: Unfortunately, the unit was about the protein group...
+  - print: And your dog sees the meat images on the page...
+  - print: He eats it.
+  - goto: fail
+fail:
+  - print: You go to school without your homework and fail.
