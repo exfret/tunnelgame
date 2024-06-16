@@ -1,0 +1,6 @@
+---
+_content:
+  - print: This is the root block.
+  - goto: OtherBlock
+OtherBlock:
+  - print: This is another block.

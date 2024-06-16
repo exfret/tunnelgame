@@ -73,6 +73,9 @@ def add_vars_with_address(game, state, node, address): # TODO: Finish up so that
             if locale is None:
                 locale = var_name
             
+            # Initialize bags as dicts
+            if ("_type" in var) and var["_type"] == "bag" and var_value == None:
+                var_value = {}
             state["vars"][address][var_name] = {"address": address, "locale": locale, "value": var_value}
     
     # Recurse into all sub-blocks
@@ -250,7 +253,7 @@ def parse_node(game, node, state, grammar, context, address):
         elif var_name_indices[-1] == "-":
             var_name_indices = var_name_indices[:-1].strip().split("[")
         else:
-            var_name_indices = var_name_indices.split("[")
+            var_name_indices = var_name_indices.strip().split("[")
         
         if not (var_name_indices[0] in collect_vars(state, address)):
             raise MissingReferenceError()
@@ -262,7 +265,7 @@ def parse_node(game, node, state, grammar, context, address):
         # First check it's a valid variable reference
         parse_node(game, node, state, grammar, "_var_id", address)
 
-        var_referenced = collect_vars(state, address)[node]["value"]
+        var_referenced = collect_vars_with_dicts(state, address)[node]["value"]
         if not isinstance(var_referenced, list):
             raise IncorrectTypeError()
         for row in var_referenced:

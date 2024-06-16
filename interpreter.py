@@ -1,8 +1,7 @@
 import random
-import string
-import textwrap
 
 from utility import *
+from view import view
 
 class ErrorNode(Exception):
     pass
@@ -59,6 +58,8 @@ def get_next_addr(game, addr):
     
     # If it's a string key, it's not an incrementable address piece
     if isinstance(addr[-1], str):
+        if addr[-1] == "effects": # If it's a choice effects section, don't spill over into the remaining block
+            return False
         return get_next_addr(game, addr[:-1])
 
     new_addr = addr[:-1] + ((addr[-1] + 1),) # TODO: Error check that last element is indeed an int
@@ -161,12 +162,10 @@ def parse_addr(game, curr_addr, addr_id, state):
     
     return curr_addr + ("_content", 0)
 
-def do_print(text, state, ansi_code = "\033[0m"):
-    string_to_print = string.Formatter().vformat(text, (), collect_vars(state)) # TODO: Exceptions in case of syntax errors
-    print(ansi_code + textwrap.fill(string_to_print, 100) + "\033[0m")
-    print()
+def do_print(text, state, style): # TODO: Move ansi code handling to view as well
+    view.print_text(text, style)
 
-def do_shown_var_modification(modification, state, symbol, game):
+def do_shown_var_modification(modification, state, symbol, game): # TODO: Remove... Only used for "add" and "lose", which are defunct
     amount_to_modify = 0
     modification_var = ""
     if modification.find('(') != -1 and modification.rfind(')') != -1:
@@ -190,7 +189,7 @@ def do_shown_var_modification(modification, state, symbol, game):
 
     vars_by_name = collect_vars_with_dicts(state)
     vars_by_name[modification_var]["value"] += amount_to_modify
-    print("[" + symbol + str(amount_to_modify) + " " + localize(modification_var, state) + "]") # TODO: Add localization
+    print("[" + symbol + str(amount_to_modify) + " " + localize(modification_var, state) + "]")
 
 # TODO: Move to library module
 def localize(var_name, state):
@@ -232,6 +231,8 @@ def eval_conditional(game, state, node):
 def step(game, state):
     if get_curr_addr(state) == False:
         return False
+    
+    state["last_address"] = get_curr_addr(state)
 
     curr_node = get_instr(game, get_curr_addr(state))
     # Mark that we've visited this node (again)
@@ -326,8 +327,8 @@ def step(game, state):
         raise ErrorNode("Error raised.")
     elif "flavor" in curr_node:
         if state["settings"]["show_flavor_text"] != "never" and (state["visits"][get_curr_addr(state)] <= 1 or state["settings"]["show_flavor_text"] == "always"):
-            if isinstance(curr_node["flavor"], str):
-                do_print(curr_node["flavor"], state)
+            if isinstance(curr_node["flavor"], str): # TODO: Allow style spec tag with flavor text
+                view.print_flavor_text(curr_node["flavor"])
             else:
                 set_curr_addr(state, get_curr_addr(state) + ("flavor", 0))
 
@@ -382,25 +383,17 @@ def step(game, state):
     elif "pass" in curr_node:
         pass
     elif "print" in curr_node:
-        ansi_code = "\033[0m"
+        style = None
         if "style" in curr_node:
-            if curr_node["style"] == "bold":
-                ansi_code = "\033[1m"
+            style = curr_node["style"]
 
-        do_print(curr_node["print"], state, ansi_code)
+        do_print(curr_node["print"], state, style)
     elif "print_table" in curr_node:
         vars_by_name = collect_vars_with_dicts(state)
 
         tbl_to_display = vars_by_name[curr_node["print_table"]]["value"]
 
-        print("+" + "-" * (len(tbl_to_display[0]) + 2) + "+")
-        for row in tbl_to_display:
-            row_str = "| "
-            for col in row:
-                row_str += col
-            row_str += " |"
-            print(row_str)
-        print("+" + "-" * (len(tbl_to_display[0]) + 2) + "+")
+        view.print_table(tbl_to_display)
     elif "random" in curr_node:
         possibilities_list = []
 
@@ -434,7 +427,7 @@ def step(game, state):
                 
                 return True
     elif "set" in curr_node:
-        text_to_show = ""
+        text_to_show_spec = {}
         vars_by_name = collect_vars_with_dicts(state)
 
         if not ("to" in curr_node):
@@ -461,19 +454,19 @@ def step(game, state):
                     # TODO: Show some text (in this case it doesn't quite make sense how to refer to the variable
                 else:
                     var_to_modify += eval(var_expr_pair[1], {}, collect_vars(state))
-                    text_to_show = "[+" + str(eval(var_expr_pair[1], {}, collect_vars(state))) + " " + localize(var_name_indices[0], state) + "]"
+                    text_to_show_spec = {"op": "add", "amount": eval(var_expr_pair[1], {}, collect_vars(state)), "var": vars_by_name[var_name_indices[0]]}
             elif modifier == "-":
                 if not (last_index is None):
                     last_var_to_modify[last_index] -= eval(var_expr_pair[1], {}, collect_vars(state))
                 else:
                     var_to_modify -= eval(var_expr_pair[1], {}, collect_vars(state))
-                    text_to_show = "[-" + str(eval(var_expr_pair[1], {}, collect_vars(state))) + " " + localize(var_name_indices[0], state) + "]"
+                    text_to_show_spec = {"op": "subtract", "amount": eval(var_expr_pair[1], {}, collect_vars(state)), "var": vars_by_name[var_name_indices[0]]}
             else:
                 if not (last_index is None):
                     last_var_to_modify[last_index] = eval(var_expr_pair[1], {}, collect_vars(state))
                 else:
                     var_to_modify = eval(var_expr_pair[1], {}, collect_vars(state))
-                    text_to_show = "[Set " + localize(var_name_indices[0], state) + " to " + str(eval(var_expr_pair[1], {}, collect_vars(state))) + "]"
+                    text_to_show_spec = {"op": "set", "amount": eval(var_expr_pair[1], {}, collect_vars(state)), "var": vars_by_name[var_name_indices[0]]}
         else:
             if isinstance(curr_node["to"], (int, float)):
                 vars_by_name[curr_node["set"]]["value"] = curr_node["to"]
@@ -481,7 +474,7 @@ def step(game, state):
                 vars_by_name[curr_node["set"]]["value"] = eval(curr_node["to"], {}, collect_vars(state)) # TODO: Catch exceptions in case of syntax errors
 
         if "show" in curr_node:
-            print(text_to_show)
+            view.print_var_modification(text_to_show_spec)
     elif "switch" in curr_node:
         switch_value = eval(curr_node["switch"], {}, collect_vars(state))
         if str(switch_value) in curr_node:

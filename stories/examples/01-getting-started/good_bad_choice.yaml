@@ -1,0 +1,9 @@
+---
+_content:
+  - choice: bad
+    effects:
+      - print: You made a bad choice.
+  - choice: good
+    effects:
+      - print: You made a good choice.
+  - print: Make a choice!

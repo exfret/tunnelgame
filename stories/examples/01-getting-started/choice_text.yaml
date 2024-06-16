@@ -1,0 +1,10 @@
+---
+_content:
+  - choice: continue
+    text: Continue on the path
+    effects:
+      - print: You continue along the path.
+  - choice: back
+    text: Go back home
+    effects:
+      - print: You decide to go back home.

@@ -3,7 +3,10 @@ _vars:
   - test: 0
 _content:
   - "This is the value: {test}"
-  - goto: /test_block
+  - choice: hi
+    effects:
+      - Hi1
+  - Hi2
 test_block:
   _vars:
     - test: 1

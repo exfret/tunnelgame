@@ -1,0 +1,41 @@
+---
+_content:
+  - print: You wake up to your blaring alarm.
+  - choice: sleep
+    text: Go back to sleep
+    effects:
+      - print: You fall back asleep.
+      - print: Then, you wake up again, you're now late to work.
+      - choice: work
+        text: Go in to work even though you'll be late
+        effects:
+          - print: Your boss tells you that you're fired.
+      - choice: sick
+        text: Call in sick even though you're not sick
+        effects:
+          - print: Your boss is sympathetic and gives you a raise.
+  - choice: work
+    text: Go to work
+    effects:
+      - print: You drive to work but there's a lot of traffic.
+      - choice: mech_robot
+        text: Activate your mech robot
+        effects:
+          - print: You bust out your giant mech robot and stomp cars.
+          - print: You're later arrested for massive property damage.
+      - choice: wait
+        text: Patiently wait in line on the road
+        effects:
+          - print: You get there pretty late.
+          - print: Your boss is also late, even more so than you.
+          - choice: honest
+            text: Tell your boss you were late
+            effects:
+              - print: You apologize for being late.
+              - print: He fires you.
+          - choice: lie
+            text: Tell your boss you were on time
+            effects:
+              - print: You lie that you were on time.
+              - print: He is impressed with your timeliness.
+              - print: He gives you a raise

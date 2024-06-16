@@ -1,7 +1,7 @@
 import yaml
 
 with open(
-    "/Users/kylehess/Documents/programs/tunnelgame/stories/mine_game_2.yaml", "r"
+    "/Users/kylehess/Documents/programs/tunnelgame/stories/machine_plot.yaml", "r"
 ) as file:
     game = yaml.safe_load(file)
 

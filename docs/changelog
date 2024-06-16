@@ -1,2 +1,10 @@
+2024/6/15
+- Fixed bug where "set" command would cause crash on parsing with expressions that just set values rather than adding or subtracting them
+- Started moving print commands from interpreter to view
+
+2024/6/14
+- Fixed bug involving loading the state object in gameloop disconnecting the reference from the state object in other files
+- Moved all print statements from gameloop to a view object
+
 2024/6/12
 - Implemented changelog

@@ -1,9 +1,10 @@
 Currently:
  * Finishing writing examples/User Guide
  * Implementing bags
- * Local vars
-    * Make choice addressing correct when modifying var cost in gameloop
 
+59. Save current text printed to terminal when file saved
+58. SPILL command for when we do want to "spill" from an effects section to the parent area
+57. Automatic stopping outside of effects blocks!
 56. Disallow randomness in choice specs?
 55. Remove underscores and use protected keywords instead
 54. Keep track of last instruction address for debug purposes in the gameloop
