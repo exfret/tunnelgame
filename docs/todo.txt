@@ -1,21 +1,20 @@
 Currently:
- * Finishing writing examples/User Guide
- * Implementing bags
 
+67. Actually write the tests
+65. Special addressing for the "root" block of a *file* rather than of the whole story
+64. Check "extra newline" with consecutive print statements.
 63. Check that insert commands and such are only used with bags
 62. Master _requirement_specification parsing function
 61. Return command for gosub
 60. What to do about vars that change after costs are evaluated?
 59. Save current text printed to terminal when file saved
 58. SPILL command for when we do want to "spill" from an effects section to the parent area
-57. Automatic stopping outside of effects blocks!
 56. Disallow random intervals in choice specs?
 55. Remove underscores and use protected keywords instead
 54. Keep track of last instruction address for debug purposes in the gameloop
 53. Automatic checking for interpreter functions
 52. Check that grammar disjuncts aren't ambiguous
 51. Figure out how to deal with array-valued types
-50. Finish view class implementation for command line
 49. Introduce type annotations (learn them)
 48. Recursive searching for block names if there's a unique block with that name or closest one
 47. no_flavor alternative text
@@ -25,15 +24,9 @@ Currently:
 43. Automatic log of variable changes
 42. Interrupts if commands take too long (maybe test if the number of visits goes up too high).
 41. Pausing on repeat commands when, for example, you no longer have the materials for something, so it doesn't just spam console (maybe also a "max" option)
-40. Search command to search for a place
-39. Make _content a root type
-38. Local _vars on top of blocks
-37. Add special lib var that is a library accessible to expressions but doesn't get saved with the state
 36. Autosaves and overwrite confirmation
 35. Write a semantics spec (once I get syntax more nailed down)
-34. User guide
 33. Use config file to name game and state globals
-32. For implementing UI, do purely text based commands with passed in print/display functions
 31. Write exploration story
 30. More complicated parsing system; add metadata into game itself and use this to make saving/loading more robust
 28. Attach function handlers during parsing
@@ -50,12 +43,16 @@ Currently:
 13. Allow specification file for author-defined commands
 12. If a variable doesn't exist, still instantiate it, but give a warning.
 10. Allow loading of other specification files with things like variables and layouts
-9. More specific error parsing messages
-8. Add variable sensing elsewhere, like costs
-7. I think I used 'int' where I should have used 'float' or something such in the vars. Fix this.
+7. Allow float vars
 4. Catch exceptions from eval, for things like if statements assume falseness, for set statements don't modify
 
 DONE
+66. Remove list block/dict block distinction
+50. Finish view class implementation for command line
+39. Make _content a root type
+38. Local _vars on top of blocks
+34. Start user guide
+9. More specific error parsing messages
 14. Implement gosub
 29. Basic saving/loading functionality
 25. randint import as randint
@@ -69,3 +66,12 @@ DONE
 
 NOT DOING
 2. Unify actions and choices with actions as just "default choices"
+
+I FORGET WHAT THIS MEANS
+40. Search command to search for a place
+32. For implementing UI, do purely text based commands with passed in print/display functions
+57. Automatic stopping outside of effects blocks!
+
+DEFUNCT
+37. Add special lib var that is a library accessible to expressions but doesn't get saved with the state
+8. Add back in variable sensing?

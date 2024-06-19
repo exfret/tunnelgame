@@ -1,10 +1,11 @@
+import copy
 import math
 import random
 import yaml
 
-from utility import *
-
 import addressing
+from config import game, state, local_dir
+from utility import *
 
 # TODO: Check addresses in program are valid
 
@@ -28,6 +29,21 @@ class MissingRequiredTagError(Exception):
 
 class WrongFormattingError(Exception):
     pass
+
+def construct_game(node):
+    if "_include" in node:
+        for block_name, file_name in node["_include"].items():
+            with open(
+                local_dir + "/stories/" + file_name, "r"
+            ) as file:
+                subgame = yaml.safe_load(file)
+            
+            node[block_name] = copy.deepcopy(subgame)
+    
+    for key, subnode in node.items():
+        if isinstance(subnode, dict): # Only recurse into sub-blocks
+            construct_game(subnode) # Note: This can result in exponentially long games with the right setups...
+            # TODO: Smarter stitching that does not just duplicate everything
 
 def add_vars_with_address(game, state, node, address): # TODO: Finish up so that it has the other extra features of vars too
     if isinstance(node, list): # In this case, the inner part of the node is just content
@@ -57,19 +73,24 @@ def add_vars_with_address(game, state, node, address): # TODO: Finish up so that
                     num_var_keys += 1
                 elif key == "_locale":
                     if not isinstance(var["_locale"], str):
+                        print("\033[31mError:\033[0m _locale is not of type string at " + str(address) + " node " + str(node))
                         raise IncorrectTypeError()
                     locale = var["_locale"]
                 elif key == "_type":
                     if not isinstance(var["_type"], str):
+                        print("\033[31mError:\033[0m _type is not of type string at " + str(address) + " node " + str(node))
                         raise IncorrectTypeError()
                     if val != "bag" and val != "map" and val != "grid": # These are the only allowed special types for now
+                        print("\033[31mError:\033[0m _type has invalid value at " + str(address) + " node " + str(node))
                         raise IncorrectTypeError()
                 elif key == "_fill" or "_dims": # Extra keys
                     pass
                 else:
+                    print("\033[31mError:\033[0m Invalid special var tag address " + str(address) + " node " + str(node))
                     raise InvalidTagError()
 
             if num_var_keys != 1:
+                print("\033[31mError:\033[0m More than one var specified at " + str(address) + " node " + str(node))
                 raise InvalidTagError()
 
             if locale is None:
@@ -82,8 +103,10 @@ def add_vars_with_address(game, state, node, address): # TODO: Finish up so that
                 pass # TODO: Any special parsing to be done?
             elif ("_type" in var) and var["_type"] == "grid":
                 if not "_dims" in var:
+                    print("\033[31mError:\033[0m Missing required tag " + "_dims" + " at " + str(address) + " node " + str(node))
                     raise MissingRequiredTagError()
                 elif not "_fill" in var:
+                    print("\033[31mError:\033[0m Missing required tag " + "_fill" + " at " + str(address) + " node " + str(node))
                     raise MissingRequiredTagError() # TODO: Have a default fill?
                 
                 dims = var["_dims"].split()
@@ -141,7 +164,8 @@ def parse_node(game, node, state, grammar, context, address):
         addressing.parse_addr(address, node)
     elif context == "_addr_list":
         if not isinstance(node, str):
-            raise IncorrectTypeError("Node with context " + context + " is of incorrect type.")
+            print("\033[31mError:\033[0m _addr_list is not of type string at " + str(address) + " node " + str(node))
+            raise IncorrectTypeError()
         else:
             for id in node.split(","):
                 parse_node(game, id.strip(), state, grammar, "_addr", address)
@@ -156,24 +180,29 @@ def parse_node(game, node, state, grammar, context, address):
         elif isinstance(node, (int, float)):
             return # Plain numerical set
         else:
-            raise IncorrectTypeError("Node with context " + context + " is of incorrect type.")
+            print("\033[31mError:\033[0m _expr is neither a numerical or string type at " + str(address) + " node " + str(node))
+            raise IncorrectTypeError()
     elif context == "_id":
         if not isinstance(node, str):
+            print("\033[31mError:\033[0m _id is not of type string at " + str(address) + " node " + str(node))
             raise IncorrectTypeError()
         
         # Id's can't start with an underscore or have whitespace
         if node[0] == "_" or len(node.split()) != 1:
+            print("\033[31mError:\033[0m Id's can't start with an underscore or have whitespace at " + str(address) + " node " + str(node))
             raise WrongFormattingError()
-    elif context == "_num_expr":
+    elif context == "_num_expr": # TODO: Is there a difference between this and _expr?
         if isinstance(node, (int, float)):
             pass
         elif isinstance(node, str):
             parse_node(game, node, state, grammar, "_expr", address)
         else:
+            print("\033[31mError:\033[0m _num_expr is neither of type numerical or string at " + str(address) + " node " + str(node))
             raise IncorrectTypeError()
     elif context == "_null":
         if not (node is None):
-            raise IncorrectTypeError("Node with context " + context + " is of incorrect type.")
+            print("\033[31mError:\033[0m Null type expected at " + str(address) + " node " + str(node))
+            raise IncorrectTypeError()
     elif context == "_requirement_specification": # TODO: Rename to '_amount_specification' or something similar
         specs = []
         paren_state = 0
@@ -218,23 +247,29 @@ def parse_node(game, node, state, grammar, context, address):
                         try:
                             float(real_spec_split[0])
                         except ValueError:
-                            raise IncorrectTypeError("Non-numerical string for requirement amount.")
+                            print("\033[31mError:\033[0m Non numerical string for requirement amount at " + str(address) + " node " + str(node))
+                            raise IncorrectTypeError()
                     elif len(real_spec_split) == 2: # TODO: Error on requirements/costs
                         try:
                             float(real_spec_split[0])
                             float(real_spec_split[1])
                         except ValueError:
-                            raise IncorrectTypeError("Non-numerical string for requirement amount.")
+                            print("\033[31mError:\033[0m Non numerical string for requirement amount at " + str(address) + " node " + str(node))
+                            raise IncorrectTypeError()
                     else:
-                        raise WrongFormattingError("Wrong number of -'s in requirement amount.")
+                        print("\033[31mError:\033[0m Wrong number of -'s in requirement amount at " + str(address) + " node " + str(node))
+                        raise WrongFormattingError()
             elif index % 2 == 1:
                 if len(real_spec.split("from")) > 1:
                     if not real_spec.split(" from ")[-1] in collect_vars(state, address):
+                        print("\033[31mError:\033[0m Undefined variable " + real_spec.split(" from ")[-1] + " at " + str(address) + " node " + str(node))
                         raise MissingReferenceError() # Here, just check for bag's existence
                 elif not (real_spec in collect_vars(state, address)):
-                    raise MissingReferenceError("Referenced variable not declared.")
+                    print("\033[31mError:\033[0m Undefined variable " + real_spec + " at " + str(address) + " node " + str(node))
+                    raise MissingReferenceError()
     elif context == "_set_expr":
         if not isinstance(node, str):
+            print("\033[31mError:\033[0m Expected string for _set_expression at " + str(address) + " node " + str(node))
             raise IncorrectTypeError() # TODO: Convert IncorrectTypeError exceptions to more useful format
         
         var_expr_pair = node.split("=")
@@ -242,7 +277,7 @@ def parse_node(game, node, state, grammar, context, address):
         if len(var_expr_pair) == 1 and (var_expr_pair[0] in collect_vars(state, address)):
             return
         elif len(var_expr_pair) != 2:
-            print(address)
+            print("\033[31mError:\033[0m Incorrect formatting of _set_expr at " + str(address) + " node " + str(node))
             raise WrongFormattingError()
 
         var_name_indices = var_expr_pair[0]
@@ -254,6 +289,7 @@ def parse_node(game, node, state, grammar, context, address):
             var_name_indices = var_name_indices.strip().split("[")
         
         if not (var_name_indices[0] in collect_vars(state, address)):
+            print("\033[31mError:\033[0m Undefined variable " + var_name_indices[0] + " at " + str(address) + " node " + str(node))
             raise MissingReferenceError()
         
         # NOTE: No checking for array length yet!
@@ -265,50 +301,60 @@ def parse_node(game, node, state, grammar, context, address):
 
         var_referenced = collect_vars_with_dicts(state, address)[node]["value"]
         if not isinstance(var_referenced, list):
+            print("\033[31mError:\033[0m Non-list table specified at " + str(address) + " node " + str(node))
             raise IncorrectTypeError()
         for row in var_referenced:
             if not isinstance(row, list):
-                raise IncorrectTypeError
+                print("\033[31mError:\033[0m Non-list table row specified at " + str(address) + " node " + str(node))
+                raise IncorrectTypeError()
             for col in row:
                 # Check that this is a valid (non-list) value
                 parse_node(game, col, state, grammar, "_value", address)
     elif context == "_text":
         if not isinstance(node, str):
-            print(address)
+            print("\033[31mError:\033[0m String expected for _text value at " + str(address) + " node " + str(node))
             raise IncorrectTypeError()
     elif context == "_value":
         if not isinstance(node, (str, int, bool, float)):
+            print("\033[31mError:\033[0m Expected string/numerical/bool value at " + str(address) + " node " + str(node))
             raise IncorrectTypeError("Node with context " + context + " is of incorrect type.")
     elif context == "_var_id":
         if not isinstance(node, str):
+            print("\033[31mError:\033[0m Expected string value at " + str(address) + " node " + str(node))
             raise IncorrectTypeError()
         if not node in collect_vars(state, address):
+            print("\033[31mError:\033[0m Undefined variable " + node + " at " + str(address) + " node " + str(node))
             raise MissingReferenceError()
     elif context == "_var_type":
         if node != "bag" and node != "map" and node != "grid": # Bag is the only current var type
             # TODO: Unify this code with the checking in var creation
+            print("\033[31mError:\033[0m Disallowed value of _var_type at " + str(address) + " node " + str(node))
             raise IncorrectTypeError()
     elif context[0] == "_":
-        raise GrammarParsingError("Node with incorrect terminal context " + context)
+        print("\033[31mError:\033[0m Specification of incorrect terminal context " + context + " at " + str(address) + " node " + str(node))
+        raise GrammarParsingError()
     
     # Return if this is just a terminal node
     if context[0] == "_":
         return
 
     if not (context in grammar):
-        GrammarParsingError("Undefined context " + context)
+        print("\033[31mError:\033[0m Undefined context " + context + " at " + str(address) + " node " + str(node))
+        GrammarParsingError()
 
     curr_rule = grammar[context]
 
     # First, check the type of the node
     if curr_rule["type"] == "dict":
         if not isinstance(node, dict):
-            raise IncorrectTypeError("Node with context " + context + " is of incorrect type.")
+            print("\033[31mError:\033[0m Expected dict node at " + str(address) + " node " + str(node))
+            raise IncorrectTypeError()
         
         if "mandatory" in curr_rule:
             for mandatory_key in curr_rule["mandatory"].keys():
                 if not mandatory_key in node:
-                    raise MissingRequiredTagError("Node with context " + context + " is missing required tag: " + mandatory_key)
+                    print("\033[31mError:\033[0m Missing required tag " + mandatory_key + " at " + str(address) + " node " + str(node))
+                    raise MissingRequiredTagError()
         for key, val in node.items():
             if "mandatory" in curr_rule and key in curr_rule["mandatory"]:
                 parse_node(game, node[key], state, grammar, curr_rule["mandatory"][key], address + (key,))
@@ -317,11 +363,12 @@ def parse_node(game, node, state, grammar, context, address):
             elif "other" in curr_rule:
                 parse_node(game, node[key], state, grammar, curr_rule["other"], address + (key,))
             else:
-                print(address)
-                raise InvalidTagError("Node with context " + context + " has invalid tag: " + key)
+                print("\033[31mError:\033[0m Invalid tag " + key + " at address " + str(address) + " node " + str(node))
+                raise InvalidTagError()
     elif curr_rule["type"] == "list":
         if not isinstance(node, list):
-            raise IncorrectTypeError("Node with context " + context + " is of incorrect type.")
+            print("\033[31mError:\033[0m Expected list node at " + str(address) + " node " + str(node))
+            raise IncorrectTypeError()
         
         for index, element in enumerate(node):
             parse_node(game, element, state, grammar, curr_rule["elements"], address + (index,))
@@ -335,6 +382,7 @@ def parse_node(game, node, state, grammar, context, address):
             except Exception as e:
                 continue
         if not could_be_parsed:
+            print("\033[31mError:\033[0m Invalid Disjunct at address " + str(address) + " node " + str(node))
             raise InvalidDisjunctError("Could not instantiate union node of type " + context + " as any of its member types.")
     elif curr_rule["type"] == "union_with_keys":
         could_be_parsed = False
@@ -342,6 +390,7 @@ def parse_node(game, node, state, grammar, context, address):
             if key in node:
                 # In this case, we've parsed it as multiple different things
                 if could_be_parsed:
+                    print("\033[31mError:\033[0m Ambiguous Disjunct at address " + str(address) + " node " + str(node))
                     raise InvalidDisjunctError()
                 
                 parse_node(game, node, state, grammar, context, address)
@@ -349,7 +398,7 @@ def parse_node(game, node, state, grammar, context, address):
 
         # In this case, it couldn't be parsed as anything
         if not could_be_parsed:
-            print(address)
+            print("\033[31mError:\033[0m Invalid Disjunct at address " + str(address) + " node " + str(node))
             raise InvalidDisjunctError()
     elif curr_rule["type"] == "union_with_types":
         if "list" in curr_rule and isinstance(node, list):
@@ -365,7 +414,8 @@ def parse_node(game, node, state, grammar, context, address):
         else:
             raise InvalidDisjunctError()
     else:
-        GrammarParsingError("Invalid type key for grammar rule.")
+        print("\033[31mError:\033[0m Invalid 'type' key for grammar rule " + context + " while parsing at " + str(address) + " node " + str(node))
+        GrammarParsingError()
     
     # Special checking
     if context == "CHOICE":
@@ -382,7 +432,7 @@ def parse_node(game, node, state, grammar, context, address):
 
 def parse(game, state):
     with open(
-        "/Users/kylehess/Documents/programs/tunnelgame/grammar.yaml", "r"
+        local_dir + "src/grammar.yaml", "r"
     ) as file:
         grammar = yaml.safe_load(file)
     

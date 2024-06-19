@@ -13,8 +13,6 @@ _content:
 good:
   _content:
     - print: You're in the good block.
-    - print: The program should end now. Goodbye!
 bad:
   _content:
     - print: You're in the bad block.
-    - print: The program should end now. Goodbye!

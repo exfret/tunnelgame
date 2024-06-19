@@ -33,27 +33,38 @@ def get_block_part(curr_addr, index):
 def parse_addr(curr_addr, addr_id):
     # Blocks are simply children of the root node with purely string addresses having leading underscores
     curr_addr = get_block_part(curr_addr, 0)
-    # If this block is a list block and not the root content, it can't contain other blocks anyways, so just allow it to goto sibling blocks
-    # TODO: More "block searching" functionality to find blocks with similar names
-    if isinstance(get_node(curr_addr), list):
-        curr_addr = curr_addr[:-1]
-
     path = tuple(addr_id.split("/"))
 
-    for index in path:
+    def parse_addr_from_block(block_addr, path):
+        if len(path) == 0:
+            return block_addr
+        
+        index = path[0]
+        path = path[1:]
+
         if index == "": # Corresponds to instance of a root /
-            curr_addr = ()
+            return parse_addr_from_block((), path)
         elif index == ".":
-            pass
+            return parse_addr_from_block(block_addr, path)
         elif index == "..":
-            if len(curr_addr) == 0:
+            if len(block_addr) == 0:
                 raise InvalidAddressError("Attempt to index out of root node in an address ID.")
 
-            curr_addr = curr_addr[:-1]
+            return parse_addr_from_block(block_addr[:-1], path)
         elif index[0] == "_":
             raise InvalidAddressError("Attempt to index into non-block address.")
         else:
-            curr_addr = curr_addr + (index,)
+            return parse_addr_from_block(curr_addr + (index,), path)
+
+    new_addr = None
+    try:
+        new_addr = parse_addr_from_block(curr_addr, path)
+    except InvalidAddressError():
+        if len(curr_addr) > 0 and isinstance(get_node(curr_addr), list):
+            # If this block is a list block and not the root content, it can't contain other blocks anyways, so just allow it to goto sibling blocks
+            # TODO: More "block searching" functionality to find blocks with similar names
+            new_addr = parse_addr_from_block(curr_addr[:-1], path)
+    curr_addr = new_addr
 
     node = get_node(curr_addr)
 

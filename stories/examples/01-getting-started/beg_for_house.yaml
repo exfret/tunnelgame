@@ -13,6 +13,7 @@ beg:
   - set: times_begged += 1
     show:
   - print: You got a coin begging for money.
+  - print: You now have {times_begged} coins.
   - goto: /
 buy:
   - print: You bought a house and had a happy ending!

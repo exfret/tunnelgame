@@ -230,7 +230,11 @@ def step(game, state):
     # Since this is an instruction, it must be a map
     # TODO: Verify this part of stories
     if "add" in curr_node:
-        do_shown_var_modification(curr_node["add"], state, "+", game)
+        try:
+            do_shown_var_modification(curr_node["add"], state, "+", game)
+        except Exception:
+            # Just move on and do nothing if we get an exception, and print warning
+            print("WARNING: Exception occurred evaluating 'ADD' node at address " + get_curr_addr(state))
     elif "back" in curr_node:
         # If we try to go back and there is nothing to go back to, immediately halt execution
         if len(state["last_address_list"]) == 0:
@@ -389,11 +393,20 @@ def step(game, state):
     elif "insert" in curr_node:
         vars_by_name = collect_vars_with_dicts(state)
 
+        amount = 1
+        if "amount" in curr_node and isinstance(curr_node["amount"], (int, float)):
+            amount = curr_node["amount"]
+        elif "amount" in curr_node and isinstance(curr_node["amount"], str):
+            amount = eval(curr_node["amount"], {}, collect_vars(state))
+
         if not (curr_node["insert"] in vars_by_name[curr_node["into"]]["value"]):
             vars_by_name[curr_node["into"]]["value"][curr_node["insert"]] = 0
-        vars_by_name[curr_node["into"]]["value"][curr_node["insert"]] += 1
+        vars_by_name[curr_node["into"]]["value"][curr_node["insert"]] += amount
     elif "lose" in curr_node:
-        do_shown_var_modification(curr_node["lose"], state, "-", game)
+        try:
+            do_shown_var_modification(curr_node["lose"], state, "-", game)
+        except Exception:
+            print("WARNING: Exception occurred evaluating 'LOSE' node at address " + get_curr_addr(state))
     elif "once" in curr_node:
         if state["visits"][get_curr_addr(state)] <= 1:
             if isinstance(curr_node["once"], str):
@@ -463,7 +476,7 @@ def step(game, state):
 
             var_name_indices = var_name.split("[")
             last_var_to_modify = None # list
-            var_to_modify = vars_by_name[var_name_indices[0]]["value"]
+            var_to_modify = vars_by_name[var_name_indices[0]]
             last_index = None # int
             for index in var_name_indices[1:]:
                 last_index = int(index[:-1])
@@ -475,19 +488,19 @@ def step(game, state):
                     last_var_to_modify[last_index] += eval(var_expr_pair[1], {}, collect_vars(state))
                     # TODO: Show some text (in this case it doesn't quite make sense how to refer to the variable
                 else:
-                    var_to_modify += eval(var_expr_pair[1], {}, collect_vars(state))
+                    vars_by_name[var_name_indices[0]]["value"] += eval(var_expr_pair[1], {}, collect_vars(state))
                     text_to_show_spec = {"op": "add", "amount": eval(var_expr_pair[1], {}, collect_vars(state)), "var": vars_by_name[var_name_indices[0]]}
             elif modifier == "-":
                 if not (last_index is None):
                     last_var_to_modify[last_index] -= eval(var_expr_pair[1], {}, collect_vars(state))
                 else:
-                    var_to_modify -= eval(var_expr_pair[1], {}, collect_vars(state))
+                    vars_by_name[var_name_indices[0]]["value"] -= eval(var_expr_pair[1], {}, collect_vars(state))
                     text_to_show_spec = {"op": "subtract", "amount": eval(var_expr_pair[1], {}, collect_vars(state)), "var": vars_by_name[var_name_indices[0]]}
             else:
                 if not (last_index is None):
                     last_var_to_modify[last_index] = eval(var_expr_pair[1], {}, collect_vars(state))
                 else:
-                    var_to_modify = eval(var_expr_pair[1], {}, collect_vars(state))
+                    vars_by_name[var_name_indices[0]]["value"] = eval(var_expr_pair[1], {}, collect_vars(state))
                     text_to_show_spec = {"op": "set", "amount": eval(var_expr_pair[1], {}, collect_vars(state)), "var": vars_by_name[var_name_indices[0]]}
         else:
             if isinstance(curr_node["to"], (int, float)):

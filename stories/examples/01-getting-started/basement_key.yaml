@@ -1,0 +1,21 @@
+---
+_vars:
+  - doubloons: 0
+_content:
+  - print: Someone offers you a key to your master's basement.
+  - print: He says there are riches beyond your wildest dreams there.
+  - print: However, it will cost you 50 doubloons.
+  - choice: work
+  - choice: key
+    text: Buy a key to the basement
+    cost: 50 doubloons
+work:
+  - print: You do a week's worth of work.
+  - set: doubloons += 50
+    show:
+  - print: You now have ${doubloons}.
+key:
+  - print: It's time to see what riches your master holds!
+  - print: Note to player...
+  - print: The next part of this story costs $15
+  - print: But I promise it's worth it!

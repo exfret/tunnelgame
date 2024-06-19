@@ -1,10 +1,25 @@
+---
 _vars:
+  - inventory:
+    _type: bag
   - plot:
     _fill: "."
     _dims: 5 5
     _type: grid
 _content:
-  - choice: craft
+  - choice: gather
+gather:
+  _content:
+    - What would you like to gather?
+    - choice: _back
+    - choice: wood
+    #- choice: stone
+    #  require: 1 wooden_pickaxe
+  wood:
+    - You gather some wood.
+    - insert: wood
+      into: inventory
+      amount: 3
 craft:
   - What would you like to craft?
   - choice: _back

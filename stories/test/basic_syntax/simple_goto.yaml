@@ -1,6 +1,6 @@
 ---
 _content:
-  - print: This is the start of the program
+  - print: This is the start of the program.
   - goto: /OtherBlock
   - print: This shouldn't be printed.
 OtherBlock:

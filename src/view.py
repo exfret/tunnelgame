@@ -1,4 +1,5 @@
 from config import game, state
+import os
 import string
 import textwrap
 import utility
@@ -21,7 +22,10 @@ feedback_msg = {
 
 class View:
     def __init__(self):
-            pass
+        pass
+
+    def clear(self):
+        os.system("clear")
     
     def print_choices(self):
         print("\n        Choices are as follows...")
@@ -106,4 +110,74 @@ class View:
         command = command_string.split()
         return command
 
-view = View()
+class TestView:
+    def __init__(self, choice_list):
+        self.num_choices_made = 0
+        self.choice_list = choice_list
+        self.commands_called = []
+    
+    def update_choice_list(self, choice_list):
+        self.num_choices_made = 0
+        self.choice_list = choice_list
+        self.commands_called = []
+    
+    def get_sub_commands_called(self, id):
+        sub_commands_called = []
+        for command in self.commands_called:
+            if command["id"] == id:
+                sub_commands_called.append(command)
+        return sub_commands_called
+    
+    def get_text_commands_called(self):
+        text_commands_called = []
+        for command in self.commands_called:
+            if command["id"] == "print_text":
+                text_commands_called.append(command["text"])
+        return text_commands_called
+
+    def clear(self):
+        self.commands_called.append({"id": "clear"})
+    
+    def print_choices(self):
+        self.commands_called.append({"id": "print_choices"})
+    
+    def print_feedback_message(self, msg_type):
+        self.commands_called.append({"id": "print_feedback_message", "msg": msg_type})
+
+    def print_flavor_text(self, text):
+        self.commands_called.append({"id": "print_flavor_text", "text": text})
+    
+    def print_settings(self):
+        self.commands_called.append({"id": "print_settings"})
+
+    def print_settings_flavor_text_get(self):
+        self.commands_called.append({"id": "print_settings_flavor_text_get"})
+
+    def print_settings_flavor_text_set(self, new_value):
+        self.commands_called.append({"id": "print_settings_flavor_text_set", "new_value": new_value})
+
+    def print_stat_change(self, text):
+        self.commands_called.append({"id": "print_stat_change", "text": text})
+
+    def print_table(self, tbl_to_display):
+        self.commands_called.append({"id": "print_table", "tbl": tbl_to_display})
+    
+    def print_text(self, text, style):
+        self.commands_called.append({"id": "print_text", "text": string.Formatter().vformat(text, (), utility.collect_vars(state)), "style": style})
+    
+    def print_var_modification(self, text_to_show_spec):
+        self.commands_called.append({"id": "print_var_modifications", "text": text_to_show_spec})
+    
+    def print_var_value(self, var_value):
+        self.commands_called.append({"id": "print_var_value", "var_value": var_value})
+    
+    def get_input(self) -> str:
+        if self.num_choices_made >= len(self.choice_list):
+            return "exit".split()
+
+        self.num_choices_made += 1
+        return self.choice_list[self.num_choices_made - 1].split()
+
+#view = View()
+
+view = TestView([])

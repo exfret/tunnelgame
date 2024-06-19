@@ -1,7 +1,0 @@
----
-vars:
-  - name: test
-    value: Hi
-story:
-  _content:
-    - print: "{test}"

@@ -1,3 +1,18 @@
+2024/6/19
+- Implemented testing for basic syntax
+- More specific parsing error messages
+
+2024/6/18
+- Big work on testing functionalities!
+- Moved terminal clearing to view
+- Moved source code to src file
+- Fixed bug with address . not going to parent block in list blocks
+- Fixed bug after variable refactoring that caused "set" command to not work at all
+
+2024/6/17
+- Added file stitching
+- Finished first section of user guide, "Getting Started", and started second section on "Organizational Concepts"
+
 2024/6/16
 - Moved some addressing functionality from interpreter into the addressing module
 - Fixed bug with the way I thought local addressing worked causing some example stories to not compile

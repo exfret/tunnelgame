@@ -1,0 +1,5 @@
+---
+_vars:
+  - test: Hello, World!
+_content:
+  - print: "{test}"

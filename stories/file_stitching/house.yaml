@@ -1,0 +1,6 @@
+---
+_include:
+  yard: file_stitching/yard.yaml
+_content:
+  - You're in house.
+  - goto: yard
