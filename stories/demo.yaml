@@ -1,0 +1,26 @@
+---
+_include:
+  other_demo: demo/demo_1.yaml
+_content:
+  - Hello, World!
+  - choice: good
+    effects:
+      - goto: good
+  - choice: bad
+    effects:
+      - You made a bad choice, you should feel bad!
+      - choice: good
+bad:
+  - hello
+good:
+  _vars:
+    - coin: 100
+  _include:
+    other_demo: demo/demo_1.yaml
+  _content:
+    - You made a good choice!
+    - "{coin}"
+    - goto: bad
+  bad:
+    _content:
+      - Hello

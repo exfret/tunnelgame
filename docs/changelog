@@ -1,3 +1,17 @@
+2024/6/22
+- Added ability to run a story within a story
+- Added call statements that allow for a stack of variables, returns for call statements, and global variables that are persistent through calls
+
+2024/6/21
+- Added flag command
+- Added _num_choices special var
+- Added stop instruction
+- The "goto" command is now relative to where the user is in the story
+- Wrote three new sections of user manual
+- Modified behavior of back to be more intuitive
+- Dict blocks now also search for sibling blocks with the same name in local addressing (not just list blocks)
+- Work on new variable dict types
+
 2024/6/19
 - Implemented testing for basic syntax
 - More specific parsing error messages

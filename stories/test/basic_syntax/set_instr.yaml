@@ -1,0 +1,10 @@
+---
+_vars:
+  - test: 0
+_content:
+  - set: test += 2
+  - "{test}" # Should be 2
+  - set: test -= 3
+  - "{test}" # Should be -1
+  - set: test = 1
+  - "{test}" # Should be 1

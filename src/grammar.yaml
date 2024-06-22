@@ -5,17 +5,23 @@ START:
     _content: CONTENT
   optional:
     _include: INCLUDE_DICT
+    _meta: META_DICT
     _vars: VARS
   other: BLOCK
 INCLUDE_DICT:
   type: dict
   other: _text # Actually is a filename, but we don't have to pay attention to that for now
+META_DICT:
+  type: dict
+  optional:
+    no_parse_eval: _null
 VARS:
   type: list
   elements: VAR
 VAR: # Has special built-in checking
   type: dict
   optional:
+    _global: _null
     _locale: _text
     _type: _var_type
   other: _complex_value
@@ -45,8 +51,10 @@ DICT_INSTR:
   contexts:
     add: ADD
     back: BACK
+    call: CALL
     choice: CHOICE
     error: ERROR
+    flag: FLAG
     flavor: FLAVOR
     gosub: GOSUB
     goto: GOTO
@@ -58,7 +66,10 @@ DICT_INSTR:
     print: PRINT
     print_table: PRINT_TABLE
     random: RANDOM
+    return: RETURN
+    run: RUN
     set: SET
+    stop: STOP
     switch: SWITCH
 ADD:
   type: dict
@@ -68,6 +79,10 @@ BACK:
   type: dict
   mandatory:
     back: _null
+CALL:
+  type: dict
+  mandatory:
+    call: _addr
 CHOICE:
   type: dict
   mandatory:
@@ -86,10 +101,22 @@ ERROR:
   type: dict
   mandatory:
     error: _null
+FLAG:
+  type: dict
+  mandatory:
+    flag: _id
 FLAVOR:
   type: dict
   mandatory:
     flavor: _text
+GOSUB:
+  type: dict
+  mandatory:
+    gosub: _addr
+GOTO:
+  type: dict
+  mandatory:
+    goto: _addr
 IF:
   type: dict
   mandatory:
@@ -134,14 +161,6 @@ LOSE:
   type: dict
   mandatory:
     lose: _requirement_specification
-GOSUB:
-  type: dict
-  mandatory:
-    gosub: _addr
-GOTO:
-  type: dict
-  mandatory:
-    goto: _addr
 ONCE:
   type: dict
   mandatory:
@@ -179,6 +198,14 @@ RANDOM_EVENT:
   type: union_with_types
   null: _null
   list: CONTENT
+RETURN:
+  type: dict
+  mandatory:
+    return: _null
+RUN:
+  type: dict
+  mandatory:
+    run: _var_id
 SET:
   type: dict
   mandatory:
@@ -186,6 +213,10 @@ SET:
   optional:
     show: _null
     to: _expr
+STOP:
+  type: dict
+  mandatory:
+    stop: _null
 SWITCH:
   type: dict
   mandatory:

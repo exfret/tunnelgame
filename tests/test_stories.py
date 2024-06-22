@@ -1,3 +1,7 @@
+# Tests for:
+#   - Local variables
+#   - 
+
 # In test_gameloop.py
 import sys
 import os
@@ -9,6 +13,10 @@ from config import game, state
 from gameloop import run
 from interpreter import ErrorNode
 from view import view
+
+######################################################################
+# basic_syntax
+######################################################################
 
 def test_error():
     view.update_choice_list([])
@@ -24,10 +32,20 @@ def test_hello_world():
     run("test/basic_syntax/hello_world.yaml")
     assert view.get_text_commands_called() == ["Hello, World!"]
 
+def test_list_block():
+    view.update_choice_list(["stay", "leave"])
+    run("test/basic_syntax/list_block.yaml")
+    assert view.get_text_commands_called() == ["a", "b", "b", "c"]
+
 def test_print_with_vars():
     view.update_choice_list([])
     run("test/basic_syntax/print_with_vars.yaml")
     assert view.get_text_commands_called() == ["Hello, World!"]
+
+def test_set_instr():
+    view.update_choice_list([])
+    run("test/basic_syntax/set_instr.yaml")
+    assert view.get_text_commands_called() == ["2", "-1", "1"]
 
 def test_simple_choice_goto():
     view.update_choice_list(["good"])
@@ -47,3 +65,12 @@ def test_simple_goto():
     view.update_choice_list([])
     run("test/basic_syntax/simple_goto.yaml")
     assert view.get_text_commands_called() == ["This is the start of the program.", "Arrived at other block.", "Arrived at child block. End of program."]
+
+######################################################################
+# game_objects
+######################################################################
+
+def test_game_objects():
+    view.update_choice_list([])
+    run("test/game_objects/simple_bags.yaml")
+    assert view.get_text_commands_called() == ["0", "2", "2"]

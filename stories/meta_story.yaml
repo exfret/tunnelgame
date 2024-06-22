@@ -1,0 +1,78 @@
+---
+_meta:
+  no_parse_eval:
+_vars:
+  - curr:
+    _global:
+  - store:
+_content:
+  - set: curr = {}
+  - goto: START
+START:
+  _content:
+    - You're modifying a START section.
+    - choice: run
+      text: Run the story you created
+      effects:
+        - run: curr
+        - goto: .
+    - choice: content
+      effects:
+        - set: store = curr
+        - set: curr = []
+        - call: CONTENT
+        - set: 'curr = {**store, "_content": curr}'
+        - goto: .
+    - choice: block
+      text: Takes 1 arg (str)
+      effects:
+        - if: _args[0] != 0
+          then:
+            - set: store = curr
+            - set: curr = {}
+            - call: BLOCK
+            - set: "curr = {**store, _args[0]: curr}"
+        - goto: .
+BLOCK:
+  _content:
+    - You're modifying a BLOCK section.
+    - choice: done
+      effects:
+        - return:
+    - choice: content
+      effects:
+        - set: store = curr
+        - set: curr = []
+        - call: CONTENT
+        - set: 'curr = {**store, "_content": curr}'
+        - goto: .
+    - choice: block
+      text: Takes 1 arg (str)
+      effects:
+        - if: _args[0] != 0
+          then:
+            - set: store = curr
+            - set: curr = {}
+            - call: BLOCK
+            - set: "curr = {**store, _args[0]: curr}"
+        - goto: .
+CONTENT:
+  _content:
+    - You're modifying a CONTENT section.
+    - choice: done
+      effects:
+        - return:
+    - choice: choice
+      effects:
+        - pass: # TODO
+    - choice: goto
+      text: Takes 1 arg (str)
+      effects:
+        - pass: # TODO
+    - choice: print
+      text: Takes 1 arg (str)
+      effects:
+        - if: _args[0] != 0
+          then:
+            - set: 'curr = curr + [{"print": _args[0]}]'
+        - goto: .

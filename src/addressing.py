@@ -15,8 +15,10 @@ def get_node(addr, curr_node = game):
         raise InvalidAddressError("Address has string index for non-dict node.")
     if isinstance(curr_node, list) and (addr[0] >= len(curr_node) or addr[0] < -len(curr_node)):
         raise InvalidAddressError("Address has numerical index that is out of range.")
+    if isinstance(curr_node, dict) and not addr[0] in curr_node:
+        raise InvalidAddressError("Attempt to index into nonexistent key of address")
 
-    return get_node(addr[1:], curr_node[addr[0]]) # TODO: Check map/address compatibility
+    return get_node(addr[1:], curr_node[addr[0]])
 
 def make_bookmark(address):
     return (address,)
@@ -54,19 +56,24 @@ def parse_addr(curr_addr, addr_id):
         elif index[0] == "_":
             raise InvalidAddressError("Attempt to index into non-block address.")
         else:
-            return parse_addr_from_block(curr_addr + (index,), path)
+            return parse_addr_from_block(block_addr + (index,), path)
 
     new_addr = None
     try:
         new_addr = parse_addr_from_block(curr_addr, path)
-    except InvalidAddressError():
-        if len(curr_addr) > 0 and isinstance(get_node(curr_addr), list):
+
+        node = get_node(new_addr)
+    except InvalidAddressError:
+        if len(curr_addr) > 0:
             # If this block is a list block and not the root content, it can't contain other blocks anyways, so just allow it to goto sibling blocks
             # TODO: More "block searching" functionality to find blocks with similar names
             new_addr = parse_addr_from_block(curr_addr[:-1], path)
-    curr_addr = new_addr
 
-    node = get_node(curr_addr)
+            node = get_node(new_addr)
+        else:
+            raise InvalidAddressError("Non-existent block address")
+
+    curr_addr = new_addr
 
     if isinstance(node, list):
         return curr_addr + (0,)

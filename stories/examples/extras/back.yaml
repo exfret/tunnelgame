@@ -1,0 +1,12 @@
+---
+_content:
+  - choice: town
+town:
+  - choice: _back
+  - choice: market
+market:
+  - choice: _back
+  - choice: shop
+    effects:
+      - You shop for goods.
+      - goto: .

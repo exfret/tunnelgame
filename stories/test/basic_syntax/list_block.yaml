@@ -1,0 +1,12 @@
+---
+_content:
+  - a
+  - goto: Block1
+Block1:
+  - b
+  - choice: stay
+    effects: .
+  - choice: leave
+    effects: Block2
+Block2:
+  - c

@@ -1,4 +1,5 @@
 # Standard imports
+import copy
 import pickle
 
 # Local imports
@@ -15,6 +16,7 @@ def run(game_name):
     open_game(game_name)
 
     gameparser.construct_game(game)
+    gameparser.add_flags(game)
     gameparser.add_vars_with_address(game, state, game, ())
     gameparser.add_module_vars(state)
     gameparser.parse(game, state)
@@ -31,8 +33,30 @@ def run(game_name):
 
         view.clear()
 
-        while interpreter.step(game, state):
-            pass
+        while True:
+            while interpreter.step(game, state):
+                pass
+
+            if "signal_run_statement" in state["msg"] and state["msg"]["signal_run_statement"]:
+                state["msg"]["signal_run_statement"] = False
+                # Store state, game, and view
+                gameparser.remove_module_vars(state)
+
+                temp_game = copy.deepcopy(game)
+                temp_state = copy.deepcopy(state) # TODO: Store view!
+
+                run("temp.yaml")
+
+                game.clear()
+                game.update(temp_game)
+                state.clear()
+                state.update(temp_state)
+
+                gameparser.add_module_vars(state)
+
+                view.clear()
+            else:
+                break
 
         state["last_address_list"].append(state["last_address"])
 
@@ -56,11 +80,11 @@ def run(game_name):
             else:
                 address_to_goto = None
                 try:
-                    address_to_goto = addressing.parse_addr((), command[1])
+                    address_to_goto = addressing.parse_addr(state["last_address_list"][-1], command[1]) # last_address_list should always be nonempty here since we just made a choice
                 except Exception as e: # TODO: Catch only relevant exceptions
                     view.print_feedback_message("goto_invalid_address_given")
                 if not (address_to_goto is None):
-                    make_choice(game, state, address_to_goto)
+                    make_choice(game, state, address_to_goto) # TODO: Don't add to last_address_list for "back" command with gotos?
         elif command[0] == "help":
             view.print_feedback_message("help")
         elif command[0] == "inspect":
@@ -68,9 +92,7 @@ def run(game_name):
                 view.print_feedback_message("inspect_no_variable_given")
             else:
                 try:
-                    var_referenced = utility.get_var(state["vars"], command[1], ()) # TODO: Take into account some placeholder address
-
-                    view.print_var_value(var_referenced["value"])
+                    view.print_var_value(utility.collect_vars(state, state["last_address_list"][-1])[command[1]])
                 except Exception as e:
                     view.print_feedback_message("inspect_invalid_variable_given")
         elif command[0] == "load":

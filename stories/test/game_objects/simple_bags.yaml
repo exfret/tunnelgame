@@ -1,0 +1,12 @@
+_vars:
+  - inventory:
+    _type: bag
+  - test: 0
+_content:
+  - "{inventory/item}"
+  - insert: item
+    into: inventory
+    amount: 2
+  - "{inventory/item}"
+  - set: test = inventory__item
+  - "{test}"

@@ -29,12 +29,14 @@ def open_game(game_name):
         game.update(yaml.safe_load(file))
 
     starting_state = {
-        "choices": {"start": {"text": "Start the game", "address": ("_content", 0)}}, # Dict of choice ID's to new locations and descriptions
         "bookmark": (), # bookmark is a queue (tuple) of call stacks (tuples) containing addresses (tuples)
+        "call_stack": [], # List of dicts with bookmarks and vars (TODO: Maybe do last_address_list and choices here too?)
+        "choices": {"start": {"text": "Start the game", "address": ("_content", 0)}}, # Dict of choice ID's to new locations and descriptions
         "file_data": {"filename": ""}, # TODO: Include some sort of hash or name of game
         "last_address_list": [],
-        "map": {},
+        "map": {}, # TODO: What was map again? I think it was the game object, probably need to implement this
         "metadata": {"node_types": {}}, # TODO: Rename to 'story_data' or something such, maybe remove after parsing overhaul
+        "msg": {}, # Hacky way for things to communicate to gameloop
         "settings": {"show_flavor_text": "once"},
         "vars": {},
         "visits": {}

@@ -28,7 +28,7 @@ class View:
         os.system("clear")
     
     def print_choices(self):
-        print("\n        Choices are as follows...")
+        print("\n        Choices...")
         for choice_id, choice in state["choices"].items():
             choice_color = "\033[32m"
             text_color = "\033[0m"
@@ -83,12 +83,12 @@ class View:
             print(row_str)
         print("+" + "-" * (len(tbl_to_display[0]) + 2) + "+")
     
-    def print_text(self, text, style):
+    def print_text(self, text, style = ""):
         ansi_code = "\033[0m"
         if style == "bold":
             ansi_code = "\033[1m"
 
-        string_to_print = string.Formatter().vformat(text, (), utility.collect_vars(state)) # TODO: Exceptions in case of syntax errors
+        string_to_print = utility.format.vformat(text, (), utility.collect_vars(state)) # TODO: Exceptions in case of syntax errors
         print(ansi_code + textwrap.fill(string_to_print, 100) + "\033[0m")
         print()
     
@@ -163,7 +163,7 @@ class TestView:
         self.commands_called.append({"id": "print_table", "tbl": tbl_to_display})
     
     def print_text(self, text, style):
-        self.commands_called.append({"id": "print_text", "text": string.Formatter().vformat(text, (), utility.collect_vars(state)), "style": style})
+        self.commands_called.append({"id": "print_text", "text": utility.format.vformat(text, (), utility.collect_vars(state)), "style": style})
     
     def print_var_modification(self, text_to_show_spec):
         self.commands_called.append({"id": "print_var_modifications", "text": text_to_show_spec})
@@ -178,6 +178,6 @@ class TestView:
         self.num_choices_made += 1
         return self.choice_list[self.num_choices_made - 1].split()
 
-#view = View()
+view = View()
 
-view = TestView([])
+#view = TestView([])

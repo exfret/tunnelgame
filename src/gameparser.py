@@ -40,29 +40,46 @@ def construct_game(node):
             
             node[block_name] = copy.deepcopy(subgame)
     
+    if not "_meta" in node:
+        node["_meta"] = {}
+    
     for key, subnode in node.items():
-        if isinstance(subnode, dict): # Only recurse into sub-blocks
+        if isinstance(subnode, dict) and not key[0] == "_": # Only recurse into sub-blocks
             construct_game(subnode) # Note: This can result in exponentially long games with the right setups...
             # TODO: Smarter stitching that does not just duplicate everything
+
+def add_flags(node):
+    if not "flags" in state["vars"]:
+        state["vars"]["flags"] = {}
+
+    if isinstance(node, list):
+        for subnode in node:
+            add_flags(subnode)
+    elif isinstance(node, dict):
+        for key, subnode in node.items():
+            if key == "flag":
+                state["vars"]["flags"][subnode] = False
+
+            add_flags(subnode)
 
 def add_vars_with_address(game, state, node, address): # TODO: Finish up so that it has the other extra features of vars too
     if isinstance(node, list): # In this case, the inner part of the node is just content
         return
 
-    if not ("vars" in state):
-        state["vars"] = {}
     # Run this once
     if address == ():
         # Initialize special vars
         # TODO: _args overhaul, and make it NoneType by default
         state["vars"]["_args"] = [0] * 10000 # TODO: Remove this hardcap on number arguments, and it's also a little silly
-    state["vars"][address] = {}
+    if not address in state["vars"]:
+        state["vars"][address] = {}
 
     if "_vars" in node:
         for var in node["_vars"]:
             # Find the var_name/value declaration
             var_name = None
             var_value = None
+            global_value = False
             locale = None
 
             num_var_keys = 0
@@ -71,6 +88,11 @@ def add_vars_with_address(game, state, node, address): # TODO: Finish up so that
                     var_name = key
                     var_value = val
                     num_var_keys += 1
+                elif key == "_global":
+                    if not var["_global"] is None:
+                        print("\033[31mError:\033[0m _global is not of type null at " + str(address) + " node " + str(node))
+                        raise IncorrectTypeError()
+                    global_value = True
                 elif key == "_locale":
                     if not isinstance(var["_locale"], str):
                         print("\033[31mError:\033[0m _locale is not of type string at " + str(address) + " node " + str(node))
@@ -126,8 +148,8 @@ def add_vars_with_address(game, state, node, address): # TODO: Finish up so that
                 curr_ind = () * len(dims)
                 arr = get_arrs(curr_ind, dims)
 
-            state["vars"][address][var_name] = {"address": address, "locale": locale, "value": var_value}
-    
+            state["vars"][address][var_name] = {"address": address, "locale": locale, "value": var_value, "global": global_value}
+
     # Recurse into all sub-blocks
     for tag, subnode in node.items():
         # Anything that's not a keyword must be a block right now
@@ -176,7 +198,8 @@ def parse_node(game, node, state, grammar, context, address):
         if isinstance(node, str):
             # Try to eval the node to make sure it works
             # TODO: Add variable sensing
-            eval(node, {}, collect_vars(state, address))
+            if not "no_parse_eval" in game["_meta"]: # TODO: Local _meta tags repected
+                eval(node, {}, collect_vars(state, address))
         elif isinstance(node, (int, float)):
             return # Plain numerical set
         else:
@@ -326,7 +349,7 @@ def parse_node(game, node, state, grammar, context, address):
             print("\033[31mError:\033[0m Undefined variable " + node + " at " + str(address) + " node " + str(node))
             raise MissingReferenceError()
     elif context == "_var_type":
-        if node != "bag" and node != "map" and node != "grid": # Bag is the only current var type
+        if node != "bag" and node != "map" and node != "grid": # Bag, map, and grid are the only current var types
             # TODO: Unify this code with the checking in var creation
             print("\033[31mError:\033[0m Disallowed value of _var_type at " + str(address) + " node " + str(node))
             raise IncorrectTypeError()

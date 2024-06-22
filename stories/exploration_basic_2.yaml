@@ -1,0 +1,84 @@
+_vars:
+  - coin: 0
+  - torch: 0
+_content:
+  - goto: town
+town:
+  _content:
+    - print: Town
+      style: bold
+    - flavor: You're downtown in the bustling atmosphere of a cool fall day. The market is busy now that it's harvest season.
+    - choice: shop
+      text: Visit the shop
+    - choice: explore
+      text: Go exploring
+  shop:
+    _content:
+      - print: Shop
+        style: bold
+      - flavor: The shopkeeper is an old man with a stiff, scruffy beard and dark black hair. He grunts when he sees you enter.
+      - choice: _back
+      - flag: hi
+explore:
+  _content:
+    - random: cave, springs, cabin
+  cave:
+    _content:
+      - print: Cave Encounter
+        style: bold
+      - flavor: You come across a rock formation jutting up from the ground. Between the rocks is an entrance to a cave. You can barely see inside.
+      - choice: back
+        text: Go back to town
+        effects: /town
+      - choice: inside
+        text: Go inside the cave
+        require: 1 torch
+      - choice: around
+    inside:
+      - pass:
+    around:
+      _content:
+        - switch: _visits
+          "1":
+            - You find 3 coins!
+            - set: coin += 3
+              show:
+          "2":
+            - The 3 coins are no longer there, but in its place you find a note that says, "Please return my coins, thanks!"
+            - choice: return
+              text: Return the coins
+              cost: 3 coin
+              effects:
+                - You return the coins to the spot.
+                - flag: returned_coins_to_cave
+            - choice: keep
+              text: Don't return the coins
+              effects:
+                - You don't return the coins.
+                - flag: kept_coins_from_cave
+          "3":
+            - if: kept_coins_from_cave
+              then:
+                - You see a big burly man with a red face grimacing and muttering about "thieves stealing his coins".
+                - choice: brag
+                  text: Brag about the 3 coins you found here.
+                  effects:
+                    - He booms, "So you're the one who took my coins! Prepare for a clobbering!"
+                    - You die. The end.
+                    - stop:
+  springs:
+    _content:
+      - goto: /town
+  cabin:
+    _content:
+      - switch: _visits
+        "1":
+          - You find 3 coins!
+        "2":
+          - You don't find anything.
+  _footer:
+    - if: _num_choices == 0
+      then:
+        - choice: home
+          text: Return to town
+          effects: /town
