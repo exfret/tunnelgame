@@ -1,3 +1,7 @@
+2024/6/23
+- Fixed that require tags in choice instructions would crash the interpreter
+- Wrote some of the exploration basic 2 story for testing out the language
+
 2024/6/22
 - Added ability to run a story within a story
 - Added call statements that allow for a stack of variables, returns for call statements, and global variables that are persistent through calls

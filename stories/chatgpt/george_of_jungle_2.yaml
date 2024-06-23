@@ -1,0 +1,214 @@
+_vars:
+  - time: 0
+  - strength: 0
+    _locale: Strength
+  - vine: 0
+    _locale: Vine Swinging Skill
+  - berries: 0
+    _locale: Berries
+  - gem: 0
+    _locale: Jungle Gem
+  - water: 0
+    _locale: Water Flask
+  - torch: 0
+    _locale: Torch
+_content:
+  - goto: Camp
+
+Camp:
+  _content:
+    - print: Jungle Camp
+      style: bold
+    - flavor: You are at George's jungle camp, surrounded by dense trees and the sounds of wildlife.
+    - choice: Explore
+      text: Explore
+    - choice: Train
+      text: Train
+    - choice: Gather
+      text: Gather
+    - choice: Shop
+      text: Shop
+
+Explore:
+  _content:
+    - print: Exploring the Jungle
+      style: bold
+    - flavor: The jungle is vast and full of surprises. What would you like to do?
+    - choice: Climb
+      text: Climb a tree
+    - choice: River
+      text: Find a river
+    - choice: Cave
+      text: Investigate a cave
+    - choice: Path
+      text: Follow a secret path
+
+Climb:
+  _content:
+    - if: vine >= 1
+      then:
+        - You swing up the tree with ease and spot a shiny object in a nest.
+        - set: gem += 1
+          show:
+        - flavor: You found a Jungle Gem!
+      else:
+        - You attempt to climb the tree but lose your grip and fall.
+        - You hurt yourself but find some berries on the ground.
+        - set: berries += 1
+          show:
+    - choice: Camp
+      text: Return to camp
+
+River:
+  _content:
+    - print: River Encounter
+      style: bold
+    - flavor: You find a clear river flowing through the jungle.
+    - choice: Drink
+      text: Drink water
+      effects:
+        - set: water += 1
+          show:
+    - choice: Swim
+      text: Swim
+    - choice: Fish
+      text: Catch a fish
+    - choice: Camp
+      text: Return to camp
+
+Swim:
+  _content:
+    - You dive into the refreshing water and swim around.
+    - flavor: The cool water rejuvenates you.
+    - choice: River
+      text: Return to riverbank
+
+Fish:
+  _content:
+    - You try to catch a fish with your bare hands.
+    - if: strength >= 1
+      then:
+        - flavor: You catch a fish! It will make a nice meal.
+        - set: berries += 1
+          show:
+      else:
+        - flavor: The fish are too fast for you. Better luck next time.
+    - choice: River
+      text: Return to riverbank
+
+Cave:
+  _content:
+    - print: Cave Encounter
+      style: bold
+    - flavor: You come across a dark cave. It looks ominous.
+    - choice: Enter
+      text: Enter
+      require: 1 torch
+    - choice: Around
+      text: Go around
+    - choice: Top
+      text: Climb on top
+      require: 1 vine
+
+Enter:
+  _content:
+    - You light your torch and step inside. It's eerily quiet.
+    - if: strength >= 1
+      then:
+        - You find an old chest and use your strength to open it. Inside, you find a rare Jungle Gem!
+        - set: gem += 1
+          show:
+      else:
+        - You find an old chest but can't open it. Maybe you need more strength.
+    - choice: Cave
+      text: Leave the cave
+
+Around:
+  _content:
+    - You find some berries growing on a bush.
+    - set: berries += 2
+      show:
+    - choice: Camp
+      text: Return to camp
+
+Top:
+  _content:
+    - if: not been_on_top_of_cave
+      then:
+        - From the top of the cave, you have a great view of the jungle. You spot a hidden path!
+        - flag: been_on_top_of_cave
+      else:
+        - The view from the top is still breathtaking.
+    - choice: Cave
+      text: Climb down
+
+Path:
+  _content:
+    - print: Secret Path
+      style: bold
+    - flavor: You follow the secret path and it leads you to a hidden waterfall.
+    - choice: Collect
+      text: Collect water
+      effects:
+        - set: water += 1
+          show:
+    - choice: SwimWaterfall
+      text: Swim
+    - choice: Camp
+      text: Return to camp
+
+SwimWaterfall:
+  _content:
+    - You dive into the waterfall pool and enjoy the cool water.
+    - flavor: The water is refreshing and invigorates you.
+    - choice: Path
+      text: Return to path
+
+Train:
+  _content:
+    - print: Training Area
+      style: bold
+    - flavor: You arrive at a makeshift training area with logs and rocks for lifting.
+    - choice: Lift
+      text: Lift rocks
+      effects:
+        - set: strength += 1
+          show:
+    - choice: Swing
+      text: Practice swinging
+      effects:
+        - set: vine += 1
+          show:
+    - choice: Camp
+      text: Return to camp
+
+Gather:
+  _content:
+    - print: Gathering Berries
+      style: bold
+    - flavor: You search the jungle for edible berries.
+    - set: berries += 3
+      show:
+    - choice: Camp
+      text: Return to camp
+
+Shop:
+  _content:
+    - print: Jungle Shop
+      style: bold
+    - flavor: You visit a small hut where an old trader sells useful items.
+    - choice: BuyTorch
+      text: Buy a torch (3 berries)
+      require: 3 berries
+      effects:
+        - set: berries -= 3
+        - set: torch += 1
+          show:
+    - choice: Camp
+      text: Return to camp
+
+_footer:
+  - if: _num_choices == 0
+    then:
+      - choice: Camp
+        text: Return to camp

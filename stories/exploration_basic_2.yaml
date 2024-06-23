@@ -1,6 +1,25 @@
 _vars:
+  - time: 0
+  # Progression vars
+  - blue_pass: 0
+    _locale: Blue Pass
+  # Research vars
+  - botany: 0
+    _locale: Botany Knowledge
+  # Skills
+  - skill_rosalia: 2
+    _locale: Rosalia Gather Skill
+  # Inventory vars
+  - climbing_shoes: 0
+    _locale: Climbing Shoes
   - coin: 0
+    _locale: Coin
+  - petunal: 0
+    _locale: Petunal Blossoms
+  - rosalia: 0
+    _locale: Rosalia
   - torch: 0
+    _locale: Torch
 _content:
   - goto: town
 town:
@@ -8,34 +27,87 @@ town:
     - print: Town
       style: bold
     - flavor: You're downtown in the bustling atmosphere of a cool fall day. The market is busy now that it's harvest season.
+    - choice: library
+      text: Visit the library
     - choice: shop
       text: Visit the shop
+    - choice: training
+      text: Visit the training center
     - choice: explore
       text: Go exploring
+  hospital:
+    - print: Hospital
+      style: bold
+    - flavor: You wake up on the ground outside of the local town hospital. Its white concrete exterior shimmers in the blinding light. You get to your feet and stare back at the giant sleek lettering above the double-door entrance spelling out the hospital's name... "Plot Magic Hospital".
+    - choice: town
+      text: Go back into the main town area.
+      effects: ..
+  library:
+    _content:
+      - print: Library
+        style: bold
+      - flavor: The library has a muffled quietness, only interrupted by the flipping of a page.
+      - choice: _back
+      - choice: botany
+        text: Research botany
+        cost: 5 rosalia
+        shown: 1 botany
+        effects:
+          - goto: .
   shop:
     _content:
       - print: Shop
         style: bold
       - flavor: The shopkeeper is an old man with a stiff, scruffy beard and dark black hair. He grunts when he sees you enter.
       - choice: _back
-      - flag: hi
+      - choice: climbing_shoes
+        cost: 5 coin
+        shown: 1 climbing_shoes
+        effects: .
+  training:
+    _content:
+      - print: Training Center
+        style: bold
+      - flavor: Arrows whiz by in the shooting range, and you can hear the loud clang of wooden training swords in the dueling area.
+      - choice: _back
+      - if: blue_pass == 0
+        then:
+          - choice: blue_pass
+            text: Unlocks more encounters
+            cost: 2 petunal
+            shown: 1 blue_pass
+            effects: .
 explore:
   _content:
-    - random: cave, springs, cabin
+    - What would you like to do for your exploring?
+    - if: went_on_top_of_the_cave
+      then:
+        - choice: cave
+          text: Head directly to that cave
+    - choice: wander
+      text: Wander aimlessly hoping to find something cool
+      effects:
+        - random: cave, springs, cabin, rosalia
+    - choice: gather
+      text: Gather rosalia
+      shown: skill_rosalia rosalia
+      effects:
+        - You gathered rosalia.
   cave:
     _content:
       - print: Cave Encounter
         style: bold
       - flavor: You come across a rock formation jutting up from the ground. Between the rocks is an entrance to a cave. You can barely see inside.
-      - choice: back
-        text: Go back to town
-        effects: /town
       - choice: inside
         text: Go inside the cave
         require: 1 torch
       - choice: around
+        text: Go around the cave
+      - choice: top
+        text: Go on top of the cave
+        require: 1 climbing_shoes
     inside:
-      - pass:
+      - The inside hasn't been written yet. I mean, it's just too dark. Yeah, let's go with that.
     around:
       _content:
         - switch: _visits
@@ -50,7 +122,6 @@ explore:
               cost: 3 coin
               effects:
                 - You return the coins to the spot.
-                - flag: returned_coins_to_cave
             - choice: keep
               text: Don't return the coins
               effects:
@@ -64,18 +135,91 @@ explore:
                   text: Brag about the 3 coins you found here.
                   effects:
                     - He booms, "So you're the one who took my coins! Prepare for a clobbering!"
-                    - You die. The end.
-                    - stop:
+                    - choice: oops
+                      effects: /town/hospital
+              else:
+                - You see a big burly man flipping three coins around his knuckles and smiling. He walks by and waves to you, creating mini-earthquakes with his stomps.
+          "default":
+            - You find 2 rosalia!
+            - set: rosalia += 2
+              show:
+    top:
+      - if: not went_on_top_of_the_cave
+        then:
+          - From the top of the cave, the horizon opens up. In the distance you see the dots of the town's houses. The rest is rolling hills and flat plains, with some mountains in the opposite direction.
+          - You get enough of a perspective from the view that you've unlocked the ability to head directly to the cave if you want!
+          - flag: went_on_top_of_the_cave
+        else:
+          - You stare again out at the beautiful field, hills, and mountains, and ponder life.
   springs:
     _content:
-      - goto: /town
+      - You come across a cool mountain spring spouting out water that then gently winds down the mountain's soft dirt surface.
+      - if: not mountain_spring_is_plugged
+        then:
+          - choice: drink
+            text: Drink from the mountain spring
+            effects:
+              - if: not already_turned_into_human
+                then:
+                  - flag: already_turned_into_human
+                  - You turn into a human. Wait, what were you before? Who knows.
+                else:
+                  - You're still a human.
+      - if: not mountain_spring_is_plugged
+        then:
+          - choice: plug
+            text: Plug the mountain spring with a rock
+            effects:
+              - flag: mountain_spring_is_plugged
+              - You plug the spring. Now any dehydrated travellers on the verge of death will be denied the water that could save their life. That was a pretty morbid choice actually.
+      - choice: up
+        text: Go up the mountain further
+        effects:
+          - You travel up the mountain quite a bit further, but it's a tall mountain. Do you continue?
+          - choice: continue
+            effects:
+              - Are you sure? It's a tall mountain and it's getting dark.
+              - choice: continue
+                effects:
+                  - goto: /town/hospital
+              - choice: stop
+                effects: /town
+          - choice: stop
+            effects: /town
+      - choice: down
+        effects:
+          - You continue down the mountain, back whence you came and come across the town again.
   cabin:
     _content:
+      - if: _visits >= 3
+        then:
+          - goto: missing
+      - print: cabin
+        style: bold
+      - flavor: You arrive at a creepy old cabin in some deeply forested woods. You get the feeling that going through the door will be dangerous, so you just go around.
       - switch: _visits
         "1":
-          - You find 3 coins!
+          - Behind the cabin, you find 2 rosalia!
+          - set: rosalia += 2
+            show:
         "2":
-          - You don't find anything.
+          - You don't find anything around the cabin. Maybe you should try to go inside just in case?
+          - choice: home
+            text: Return to town
+            effects: /town
+          - choice: bad_decision
+            text: Go inside the cabin
+            effects: /town/hospital
+    missing:
+      _content:
+        - print: Missing Cabin
+          style: bold
+        - flavor: You arrive at the spot where the cabin was previously, but it's oddly disappeared. You can see the imprint on the ground of where it was before; the grass hasn't even regrown yet. But the cabin itself is oddly missing.
+  rosalia:
+    _content:
+      - You come across a new rosalia field and decide to pick up some rosalia. # TODO: Have this increase rosalia gather skills instead
+      - set: skill_rosalia += 4
+        show:
   _footer:
     - if: _num_choices == 0
       then:

@@ -3,7 +3,10 @@ Currently:
   - Set statements and requirement specifications with vars (pull out requirement spec parsing into utility)
   - "Locals"
 
-79. Use Black formatter
+83. Use _default in switch statements
+82. Fix goto . command
+81. Error on choices that are more than one word
+80. Iteration loops (iterate through a list and do something for each thing in the list)
 78. Treat footers more like macros that get executed within the blocks
 77. _args overhaul to use list of variable dicts, not just numbers
 76. Change _vars to dict
@@ -80,6 +83,7 @@ DONE
 1. Checking that story is formatted correctly
 
 NOT DOING
+79. Use Black formatter?
 2. Unify actions and choices with actions as just "default choices"
 
 I FORGET WHAT THIS MEANS

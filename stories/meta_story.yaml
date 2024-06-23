@@ -12,7 +12,6 @@ START:
   _content:
     - You're modifying a START section.
     - choice: run
-      text: Run the story you created
       effects:
         - run: curr
         - goto: .

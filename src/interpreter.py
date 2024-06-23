@@ -348,7 +348,7 @@ def step(game, state):
 
                 text += parsed_shown[0] + " " + localize(parsed_shown[1], state) + ", " # TODO: Use localised name of variables
 
-                modify_list.append({"var": parsed_cost[1], "amount": int(parsed_shown[0])})
+                modify_list.append({"var": parsed_shown[1], "amount": int(parsed_shown[0])})
             # Remove the last comma and space
             text = text[:-2]
             text += "]"
@@ -498,7 +498,7 @@ def step(game, state):
         state["msg"]["signal_run_statement"] = True
 
         state["bookmark"] = get_next_bookmark(game, state["bookmark"])
-        
+
         return False
     elif "set" in curr_node:
         text_to_show_spec = {}

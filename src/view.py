@@ -20,13 +20,68 @@ feedback_msg = {
     "default": "Error: Invalid feedback message key."
 }
 
+# Story board (Left up) - Supports different views, currently just story view which displays story and flavor-related text
+# Stats board (Right up) - Will support buttons to change views of story board, currently just var changes
+# Console (bottom) - Prints feedback and takes input
+
 class View:
     def __init__(self):
         pass
 
+    ######################################################################
+    # Miscellaneous
+    ######################################################################
+
+    # Clears console and story view
     def clear(self):
         os.system("clear")
     
+    ######################################################################
+    # Story board
+    ######################################################################
+    
+    def print_flavor_text(self, text):
+        self.print_text(text)
+    
+    def print_table(self, tbl_to_display):
+        print("+" + "-" * (len(tbl_to_display[0]) + 2) + "+")
+        for row in tbl_to_display:
+            row_str = "| "
+            for col in row:
+                row_str += col
+            row_str += " |"
+            print(row_str)
+        print("+" + "-" * (len(tbl_to_display[0]) + 2) + "+")
+    
+    def print_text(self, text, style = ""):
+        ansi_code = "\033[0m"
+        if style == "bold":
+            ansi_code = "\033[1m"
+
+        string_to_print = utility.format.vformat(text, (), utility.collect_vars(state)) # TODO: Exceptions in case of syntax errors
+        print(ansi_code + textwrap.fill(string_to_print, 100) + "\033[0m")
+        print()
+    
+    ######################################################################
+    # Stats board
+    ######################################################################
+
+    def print_stat_change(self, text):
+        print(text)
+
+    def print_var_modification(self, text_to_show_spec):
+        operation_text = None
+        if text_to_show_spec["op"] == "add":
+            print("[+" + str(text_to_show_spec["amount"]) + " " + text_to_show_spec["var"]["locale"] + "]")
+        elif text_to_show_spec["op"] == "subtract":
+            print("[-" + str(text_to_show_spec["amount"]) + " " + text_to_show_spec["var"]["locale"] + "]")
+        elif text_to_show_spec["op"] == "set":
+            print("[Set " + text_to_show_spec["var"]["locale"] + " to " + str(text_to_show_spec["amount"]) + "]")
+    
+    ######################################################################
+    # Console
+    ######################################################################
+
     def print_choices(self):
         print("\n        Choices...")
         for choice_id, choice in state["choices"].items():
@@ -57,9 +112,6 @@ class View:
             print(feedback_msg["default"])
         print(feedback_msg[msg_type])
 
-    def print_flavor_text(self, text):
-        self.print_text(text)
-    
     def print_settings(self):
         for key in state["settings"].keys():
             print(" * " + key)
@@ -70,37 +122,6 @@ class View:
     def print_settings_flavor_text_set(self, new_value):
         print("Set show_flavor_text to '" + new_value + "'")
 
-    def print_stat_change(self, text):
-        print(text)
-
-    def print_table(self, tbl_to_display):
-        print("+" + "-" * (len(tbl_to_display[0]) + 2) + "+")
-        for row in tbl_to_display:
-            row_str = "| "
-            for col in row:
-                row_str += col
-            row_str += " |"
-            print(row_str)
-        print("+" + "-" * (len(tbl_to_display[0]) + 2) + "+")
-    
-    def print_text(self, text, style = ""):
-        ansi_code = "\033[0m"
-        if style == "bold":
-            ansi_code = "\033[1m"
-
-        string_to_print = utility.format.vformat(text, (), utility.collect_vars(state)) # TODO: Exceptions in case of syntax errors
-        print(ansi_code + textwrap.fill(string_to_print, 100) + "\033[0m")
-        print()
-    
-    def print_var_modification(self, text_to_show_spec):
-        operation_text = None
-        if text_to_show_spec["op"] == "add":
-            print("[+" + str(text_to_show_spec["amount"]) + " " + text_to_show_spec["var"]["locale"] + "]")
-        elif text_to_show_spec["op"] == "subtract":
-            print("[-" + str(text_to_show_spec["amount"]) + " " + text_to_show_spec["var"]["locale"] + "]")
-        elif text_to_show_spec["op"] == "set":
-            print("[Set " + text_to_show_spec["var"]["locale"] + " to " + str(text_to_show_spec["amount"]) + "]")
-    
     def print_var_value(self, var_value):
         print(var_value)
     

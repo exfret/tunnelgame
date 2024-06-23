@@ -44,10 +44,12 @@ class VarDict(dict):
 
 class VarDictValues(VarDict):
     def __getitem__(self, key):
-        if isinstance(super().__getitem__(key), dict) and "value" in super().__getitem__(key):
-            return super().__getitem__(key)["value"]
+        var = super().__getitem__(key)
+
+        if isinstance(var, dict) and "value" in var:
+            return var["value"]
         else:
-            return super().__getitem__(key)
+            return var
 
 def get_var(var_dict, var_name, curr_address):
     if (curr_address in var_dict) and (var_name in var_dict[curr_address]):
