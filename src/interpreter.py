@@ -281,77 +281,19 @@ def step(game, state):
     elif "choice" in curr_node:
         vars_by_name = collect_vars_with_dicts(state)
 
+        state["choices"][curr_node["choice"]] = {}
+
         missing_list = []
         modify_list = []
         text = ""
         if "text" in curr_node:
             text = curr_node["text"]
         if "require" in curr_node:
-            if text != "":
-                text += " "
-            text += "\033[0m[\033[38;2;255;165;0mRequired:\033[0m "
-
-            # TODO: Make this conform to standards allowing expressions
-            require_list = curr_node["require"].split(",")
-            for requirement in require_list:
-                parsed_requirement = requirement.split()
-
-                text += parsed_requirement[0] + " " + localize(parsed_requirement[1], state) + ", "
-
-                if vars_by_name[parsed_requirement[1]]["value"] < int(parsed_requirement[0]):
-                    missing_list.append(parsed_requirement[1])
-
-            text = text[:-2]
-            text += "]"
+            state["choices"][curr_node["choice"]]["req_spec"] = parse_requirement_spec(curr_node["require"])
         if "cost" in curr_node:
-            if text != "":
-                text += " "
-            text += "\033[0m[\033[31mCost:\033[0m "
-
-            cost_list = curr_node["cost"].split(",")
-            for cost in cost_list:
-                bag_cost = cost.split("from")
-                bag_name = None
-                if len(bag_cost) == 2:
-                    bag_name = bag_cost[1].strip()
-                parsed_cost = bag_cost[0].split()
-
-                if not (bag_name is None):
-                    text += parsed_cost[0] + " " + parsed_cost[1] + " from " + bag_name + ", " # TODO: Localization of bag items
-
-                    if not (parsed_cost[1] in vars_by_name[bag_name]["value"]) or vars_by_name[bag_name]["value"][parsed_cost[1]] < int(parsed_cost[0]):
-                        missing_list.append({"type_missing": "bag", "bag_name": bag_name, "item": parsed_cost[1]})
-
-                    modify_list.append({"type_to_modify": "bag", "bag_ref": vars_by_name[bag_name], "item": parsed_cost[1], "amount": -1 * int(parsed_cost[0])}) # TODO
-                else:
-                    text += parsed_cost[0] + " " + localize(parsed_cost[1], state) + ", "
-
-                    if vars_by_name[parsed_cost[1]]["value"] < int(parsed_cost[0]):
-                        missing_list.append(parsed_cost[1])
-                    
-                    modify_list.append({"var": parsed_cost[1], "amount": -1 * int(parsed_cost[0])})
-            # Remove the last comma and space
-            text = text[:-2]
-            text += "]"
+            state["choices"][curr_node["choice"]]["cost_spec"] = parse_requirement_spec(curr_node["cost"])
         if "shown" in curr_node:
-            if text != "":
-                text += " "
-            text += "\033[0m[\033[34mEffects:\033[0m "
-
-            shown_list = curr_node["shown"].split(",")
-            for shown in shown_list:
-                parsed_shown = shown.split()
-
-                # Need to add "+" manually for positive numbers
-                if int(parsed_shown[0]) >= 0:
-                    text += "+"
-
-                text += parsed_shown[0] + " " + localize(parsed_shown[1], state) + ", " # TODO: Use localised name of variables
-
-                modify_list.append({"var": parsed_shown[1], "amount": int(parsed_shown[0])})
-            # Remove the last comma and space
-            text = text[:-2]
-            text += "]"
+            state["choices"][curr_node["choice"]]["shown_spec"] = parse_requirement_spec(curr_node["shown"])
 
         effect_address = ""
         if not "effects" in curr_node:
@@ -361,7 +303,11 @@ def step(game, state):
             if isinstance(curr_node["effects"], str):
                 effect_address = addressing.parse_addr(get_curr_addr(state), curr_node["effects"])
 
-        state["choices"][curr_node["choice"]] = {"text": text, "address": effect_address, "missing": missing_list, "modifications": modify_list, "choice_address": get_curr_addr(state)}
+        state["choices"][curr_node["choice"]]["text"] = text
+        state["choices"][curr_node["choice"]]["address"] = effect_address
+        state["choices"][curr_node["choice"]]["missing"] = missing_list
+        state["choices"][curr_node["choice"]]["modifications"] = modify_list
+        state["choices"][curr_node["choice"]]["choice_address"] = get_curr_addr(state)
     elif "error" in curr_node:
         raise ErrorNode("Error raised.")
     elif "flag" in curr_node:

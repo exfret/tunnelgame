@@ -1,3 +1,9 @@
+2024/6/25
+
+
+2024/6/24
+- Moved requirement spec display logic to view
+
 2024/6/23
 - Fixed that require tags in choice instructions would crash the interpreter
 - Wrote some of the exploration basic 2 story for testing out the language

@@ -1,3 +1,3 @@
 from gameloop import run
 
-run("meta_story.yaml")
+run("exploration_basic_2.yaml")

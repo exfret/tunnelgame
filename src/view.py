@@ -83,8 +83,55 @@ class View:
     ######################################################################
 
     def print_choices(self):
+        # Choices now have cost_spec, req_spec, and shown_spec
+        # TODO: Evaluate missing at choice printing (here)
+
         print("\n        Choices...")
         for choice_id, choice in state["choices"].items():
+            # Evaluate costs/requirements/shown
+            if not "missing" in choice:
+                choice["missing"] = []
+            if not "modifications" in choice:
+                choice["modifications"] = []
+            var_dict_vals = utility.collect_vars(state, choice["choice_address"])
+            effects_text = ""
+            if "cost_spec" in choice and len(choice["cost_spec"]) > 0:
+                effects_text += "\033[0m [\033[31mCost:\033[0m "
+                for cost in choice["cost_spec"]:
+                    localized_var = utility.localize(cost["var"], choice["choice_address"])
+                    expr_val = eval(cost["amount"], {}, var_dict_vals)
+                    var_val = var_dict_vals[cost["var"]]
+
+                    effects_text += str(expr_val) + " " + localized_var + ", "
+                    if var_val < expr_val:
+                        choice["missing"].append(localized_var)
+                    choice["modifications"].append({"var": cost["var"], "amount": -expr_val})
+                effects_text = effects_text[:-2]
+                effects_text += "]"
+            if "req_spec" in choice and len(choice["req_spec"]) > 0:
+                effects_text += "\033[0m [\033[38;2;255;165;0mRequired:\033[0m "
+                for req in choice["req_spec"]:
+                    localized_var = utility.localize(req["var"], choice["choice_address"])
+                    expr_val = eval(req["amount"], {}, var_dict_vals)
+                    var_val = var_dict_vals[req["var"]]
+
+                    effects_text += str(expr_val) + " " + localized_var + ", "
+                    if var_val < expr_val:
+                        choice["missing"].append(localized_var)
+                effects_text = effects_text[:-2]
+                effects_text += "]"
+            if "shown_spec" in choice and len(choice["shown_spec"]) > 0:
+                effects_text += "\033[0m [\033[34mEffects:\033[0m "
+                for shown in choice["shown_spec"]:
+                    localized_var = utility.localize(shown["var"], choice["choice_address"])
+                    expr_val = eval(shown["amount"], {}, var_dict_vals)
+                    var_val = var_dict_vals[shown["var"]]
+
+                    effects_text += str(expr_val) + " " + localized_var + ", "
+                    choice["modifications"].append({"var": shown["var"], "amount": expr_val})
+                effects_text = effects_text[:-2]
+                effects_text += "]"
+
             choice_color = "\033[32m"
             text_color = "\033[0m"
             if len(choice["missing"]) > 0:
@@ -93,7 +140,11 @@ class View:
             new_text = ""
             if state["visits"][choice["choice_address"]] <= 1:
                 new_text = "\033[33m(New) "
-            print("        " + text_color + " * " + new_text + choice_color + choice_id + text_color + " " + choice["text"])
+            
+            text_for_choice = ""
+            if choice["text"]:
+                text_for_choice = " " + choice["text"]
+            print("        " + text_color + " * " + new_text + choice_color + choice_id + text_color + text_for_choice + effects_text)
             if len(choice["missing"]) > 0:
                 missing_text = "              Missing: "
                 for missing in choice["missing"]:

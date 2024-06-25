@@ -109,8 +109,19 @@ def get_curr_addr(state):
 
     return state["bookmark"][0][-1]
 
+def localize(var_name, address = None):
+    if address is None:
+        address = get_curr_addr(state)
+    var_dict = collect_vars_with_dicts(state, address)
+    var = var_dict[var_name]
+
+    if "locale" in var:
+        return var["locale"]
+    else:
+        return var_name
+
 def parse_requirement_spec(text_spec):
-    vars_by_name = collect_vars_with_dicts(state)
+    vars_by_name = collect_vars_with_dicts(state) # I don't think this is used because we don't actually do the eval here
 
     paren_splits = []
     paren_state = 0
@@ -138,13 +149,19 @@ def parse_requirement_spec(text_spec):
                     substring = substring[:-1]
                 non_grouped_specs.append(substring)
         else:
-            non_grouped_specs.append(substring)
+            non_grouped_specs.append(paren_split)
+    
+    # Remove possible initial paren issue
+    if non_grouped_specs[0] == "":
+        non_grouped_specs = non_grouped_specs[1:]
 
     grouped_specs = []
     for index, non_grouped_spec in enumerate(non_grouped_specs):
         if index % 2 == 0: # Case of an eval part
             grouped_specs.append({})
-            grouped_specs[index / 2]["req"] = non_grouped_spec
+            grouped_specs[int(index / 2)]["amount"] = non_grouped_spec
         else: # Case of a var part
             # TODO: Use collect_vars?
-            grouped_specs[index / 2]["var"] = non_grouped_spec
+            grouped_specs[int(index / 2)]["var"] = non_grouped_spec
+    
+    return grouped_specs

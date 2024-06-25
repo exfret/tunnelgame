@@ -1,7 +1,7 @@
 Currently:
   - Bags have vars inside of them, not values (I think this is actually done but gotta check)
   - Set statements and requirement specifications with vars (pull out requirement spec parsing into utility)
-  - "Locals"
+  - Fix gameparser for requirement specifications
 
 83. Use _default in switch statements
 82. Fix goto . command

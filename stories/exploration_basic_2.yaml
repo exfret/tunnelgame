@@ -48,12 +48,23 @@ town:
         style: bold
       - flavor: The library has a muffled quietness, only interrupted by the flipping of a page.
       - choice: _back
-      - choice: botany
-        text: Research botany
-        cost: 5 rosalia
-        shown: 1 botany
-        effects:
-          - goto: .
+      - if: botany == 0
+        then:
+          - choice: botany
+            text: Research Botany
+            cost: 5 rosalia
+            shown: 1 botany
+            effects:
+              - You learn about petunal blossoms, delicate flowers with yellow-specked, deep purple petals. Paradoxically, they like to grow between the cracks of rocks where their delicate stems are partially protected from the elements rather than out in a field.
+              - goto: .
+      - if: botany == 1
+        then:
+          - choice: botany_2
+            text: Research Botany II
+            cost: 5 petunal
+            shown: 1 botany
+            effects:
+              - goto: .
   shop:
     _content:
       - print: Shop
@@ -90,7 +101,7 @@ explore:
         - random: cave, springs, cabin, rosalia
     - choice: gather
       text: Gather rosalia
-      shown: skill_rosalia rosalia
+      shown: (skill_rosalia) rosalia
       effects:
         - You gathered rosalia.
   cave:
@@ -217,8 +228,8 @@ explore:
         - flavor: You arrive at the spot where the cabin was previously, but it's oddly disappeared. You can see the imprint on the ground of where it was before; the grass hasn't even regrown yet. But the cabin itself is oddly missing.
   rosalia:
     _content:
-      - You come across a new rosalia field and decide to pick up some rosalia. # TODO: Have this increase rosalia gather skills instead
-      - set: skill_rosalia += 4
+      - You come across a new rosalia field. You don't have time to pick any, but now you will gather more each time you go gathering rosalia.
+      - set: skill_rosalia += 1
         show:
   _footer:
     - if: _num_choices == 0
