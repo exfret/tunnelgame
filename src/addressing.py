@@ -23,7 +23,7 @@ def get_node(addr, curr_node = game):
 def make_bookmark(address):
     return (address,)
 
-def get_block_part(curr_addr, index):
+def get_block_part(curr_addr, index = 0):
     if index >= len(curr_addr):
         return curr_addr
     

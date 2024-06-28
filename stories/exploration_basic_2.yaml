@@ -56,7 +56,8 @@ town:
             shown: 1 botany
             effects:
               - You learn about petunal blossoms, delicate flowers with yellow-specked, deep purple petals. Paradoxically, they like to grow between the cracks of rocks where their delicate stems are partially protected from the elements rather than out in a field.
-              - goto: .
+              - choice: done
+                effects: .
       - if: botany == 1
         then:
           - choice: botany_2
@@ -64,7 +65,9 @@ town:
             cost: 5 petunal
             shown: 1 botany
             effects:
-              - goto: .
+              - You learn about starblossoms, a flower whose petals are large and shaped like a five-pointed star. It is perpetually in bloom, but very rare.
+              - choice: done
+                effects: .
   shop:
     _content:
       - print: Shop
@@ -85,7 +88,7 @@ town:
         then:
           - choice: blue_pass
             text: Unlocks more encounters
-            cost: 2 petunal
+            cost: 2 petunal, 10 rosalia
             shown: 1 blue_pass
             effects: .
 explore:
@@ -121,6 +124,12 @@ explore:
       - The inside hasn't been written yet. I mean, it's just too dark. Yeah, let's go with that.
     around:
       _content:
+        - if: botany >= 1 and not found_cave_around_petunal_blossoms
+          then:
+            - flag: found_cave_around_petunal_blossoms
+            - You find a couple petunal blossoms!
+            - set: petunal += 2
+              show:
         - switch: _visits
           "1":
             - You find 3 coins!
@@ -200,6 +209,16 @@ explore:
       - choice: down
         effects:
           - You continue down the mountain, back whence you came and come across the town again.
+          - if: not found_petunal_field_from_mountain
+            then:
+              - You spot something in the distance to your right. A little purple patch of plants.
+              - if: botany >= 1
+                then:
+                  - flag: found_petunal_field_from_mountain
+                  - It's a field of petunal blossoms! These ones look in good condition for making into herbal remedies.
+                  - In the future, you can return here to gather petunal blossoms.
+                else:
+                  - You feel like if you had more botany knowledge you would be able to figure out what it was. You just decide to continue on.
   cabin:
     _content:
       - if: _visits >= 3
@@ -230,6 +249,11 @@ explore:
     _content:
       - You come across a new rosalia field. You don't have time to pick any, but now you will gather more each time you go gathering rosalia.
       - set: skill_rosalia += 1
+        show:
+  petunal:
+    _content:
+      - You gather some petunal blossoms down at the field by the mountain.
+      - set: petunal += 1
         show:
   _footer:
     - if: _num_choices == 0

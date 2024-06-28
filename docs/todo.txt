@@ -1,19 +1,24 @@
 Currently:
   - Bags have vars inside of them, not values (I think this is actually done but gotta check)
   - Set statements and requirement specifications with vars (pull out requirement spec parsing into utility)
-  - Fix gameparser for requirement specifications
 
+94. 
+92. Info tag for instructions when you're in a block/reminders (maybe combine with actions)
+91. Add footers to effects sections too (maybe move back to ending footers)
+90. Titles for locations
+89. Fix gameparser for requirement specifications
+88. Make sure "help" string is up to date
+87. Change "stop" to "wait" statement? Maybe "pause".
+86. Implement unflagging
+85. Use python ast module to check for undefined variables
 83. Use _default in switch statements
-82. Fix goto . command
 81. Error on choices that are more than one word
 80. Iteration loops (iterate through a list and do something for each thing in the list)
 78. Treat footers more like macros that get executed within the blocks
 77. _args overhaul to use list of variable dicts, not just numbers
-76. Change _vars to dict
 75. Should "stops" deconstruct the call stack like they do now? In general, how could we do choices within a gosub?
 74. Write a story that allows the reader to write their own story, just for the meta-ness nerd cred
 73. Test for substrings of commands and if it applies do those
-72. Flag command that raises a new boolean var
 71. Re-implement "actions", which are always available choices not presented, but can be analyzed by typing "actions" (they also apply to all sub-blocks, like a footer)
 70. Plural/gender/etc. localizations
 69. Override variable subscripting, turning variables into special dicts before being passed to eval
@@ -22,49 +27,44 @@ Currently:
 65. Special addressing for the "root" block of a *file* rather than of the whole story
 64. Check "extra newline" with consecutive print statements.
 63. Check that insert commands and such are only used with bags
-62. Master _requirement_specification parsing function
 61. Return command for gosub
-60. What to do about vars that change after costs are evaluated?
 59. Save current text printed to terminal when file saved
 58. SPILL command for when we do want to "spill" from an effects section to the parent area
 56. Disallow random intervals in choice specs?
-55. Remove underscores and use protected keywords instead
-54. Keep track of last instruction address for debug purposes in the gameloop
-53. Automatic checking for interpreter functions
-52. Check that grammar disjuncts aren't ambiguous
-51. Figure out how to deal with array-valued types
-49. Introduce type annotations (learn them)
-48. Recursive searching for block names if there's a unique block with that name or closest one
 47. no_flavor alternative text
 46. Variables that are temporary/only relevant within a block, then they're not set anymore/block variables
 45. Better gameparser interaction with _args
-44. Location tracking/where playing "is" between choices (idea: "Location" storypoint commands)
 43. Automatic log of variable changes
-42. Interrupts if commands take too long (maybe test if the number of visits goes up too high).
+42. Interrupts when commands take too long (maybe test if the number of visits goes up too high).
 41. Pausing on repeat commands when, for example, you no longer have the materials for something, so it doesn't just spam console (maybe also a "max" option)
 36. Autosaves and overwrite confirmation
-35. Write a semantics spec (once I get syntax more nailed down)
-33. Use config file to name game and state globals
-31. Write exploration story
-30. More complicated parsing system; add metadata into game itself and use this to make saving/loading more robust
-28. Attach function handlers during parsing
-27. Debug commands for messing with the state in all sorts of ways
 26. Cost checking with passed args
-24. Allow accessing _args out of bound in a more user-friendly manner
-23. Basic GUI layout
-22. Update 'help' string for new commands (#1 - 5/22/2024)
-21. Setting for showing non-taken choices
-20. Player-defined macros
+21. Setting for showing non-taken choices or not
+20. Player-defined macros via command line
 19. Repeat command to do something many times
-18. Autocomplete
+18. Autocomplete for commands
 15. Show off subroutine capabilities with time advancing subroutine
 13. Allow specification file for author-defined commands
 12. If a variable doesn't exist, still instantiate it, but give a warning.
-10. Allow loading of other specification files with things like variables and layouts
 7. Allow float vars
-4. Catch exceptions from eval, for things like if statements assume falseness, for set statements don't modify
 
 DONE
+72. Flag command that raises a new boolean var
+62. Master _requirement_specification parsing function
+60. What to do about vars that change after costs are evaluated? (Figured this out, costs are now evaluated on choice presentation)
+54. Keep track of last instruction address for debug purposes in the gameloop
+52. Check that grammar disjuncts aren't ambiguous
+51. Figure out how to deal with array-valued types
+44. Location tracking/where playing "is" between choices
+33. Use config file to name game and state globals
+31. Write exploration story
+27. Debug commands for setting variable values
+24. Allow accessing _args out of bound in a more user-friendly manner
+23. Basic GUI layout
+22. Update 'help' string for new commands (#1 - 5/22/2024)
+84. Fix eval not actually evaluating whether all variables in an expression exist
+4. Catch exceptions from eval, for things like if statements assume falseness, for set statements don't modify
+82. Fix goto . command
 66. Remove list block/dict block distinction
 50. Finish view class implementation for command line
 39. Make _content a root type
@@ -83,10 +83,19 @@ DONE
 1. Checking that story is formatted correctly
 
 NOT DOING
+76. Change _vars to dict
+55. Remove underscores and use protected keywords instead
+49. Introduce type annotations (learn them)
+48. Recursive searching for block names if there's a unique block with that name or closest one
+35. Write a semantics spec (once I get syntax more nailed down) (replaced by user guide)
+28. Attach function handlers during parsing
+10. Allow loading of other specification files with things like variables and layouts
 79. Use Black formatter?
 2. Unify actions and choices with actions as just "default choices"
 
 I FORGET WHAT THIS MEANS
+53. Automatic checking for interpreter functions
+30. More complicated parsing system; add metadata into game itself and use this to make saving/loading more robust
 40. Search command to search for a place
 32. For implementing UI, do purely text based commands with passed in print/display functions
 57. Automatic stopping outside of effects blocks!

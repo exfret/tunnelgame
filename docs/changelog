@@ -1,5 +1,16 @@
-2024/6/25
+2024/6/28
+- Pytest test case for example stories (just make sure they parse)
+- Got simple_bags test working again
 
+2024/6/27
+- Worked on exploration story (v3)
+
+2024/6/26
+- Made footers macros instead of separate content sections
+- Used python ast module for finding missing var references
+
+2024/6/25
+- Added set command for changing var values at runtime for testing
 
 2024/6/24
 - Moved requirement spec display logic to view
@@ -20,7 +31,7 @@
 - Wrote three new sections of user manual
 - Modified behavior of back to be more intuitive
 - Dict blocks now also search for sibling blocks with the same name in local addressing (not just list blocks)
-- Work on new variable dict types
+- Worked on new variable dict types
 
 2024/6/19
 - Implemented testing for basic syntax

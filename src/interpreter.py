@@ -4,7 +4,7 @@ import random
 import addressing
 from config import local_dir
 import gameparser
-from utility import *
+import utility
 from view import view
 
 class ErrorNode(Exception):
@@ -38,17 +38,6 @@ def get_instr(curr_node, addr):
         return False # TODO: Instead throw/catch error
 
     return get_instr(curr_node[addr[0]], addr[1:]) # TODO: Check map/address compatibility
-
-def get_curr_addr(state):
-    # If queue is empty, we're done
-    if len(state["bookmark"]) == 0:
-        return False
-    
-    if len(state["bookmark"][0]) == 0:
-        state["bookmark"] = state["bookmark"][1:]
-        return get_curr_addr(state)
-
-    return state["bookmark"][0][-1]
 
 def set_curr_addr(state, new_addr):
     new_first_stack = state["bookmark"][0][:-1] + (new_addr,)
@@ -124,6 +113,7 @@ def get_next_bookmark(game, bookmark):
     else:
         return bookmark[1:] + (get_next_call_stack(game, bookmark[0]),)
 
+# Note: Duplicate code, also in addressing
 def get_parent_block(game, addr, state):
     node = get_instr(game, addr)
 
@@ -154,7 +144,7 @@ def do_shown_var_modification(modification, state, symbol, game): # TODO: Remove
     if modification.find('(') != -1 and modification.rfind(')') != -1:
         modification_amount_spec = modification[modification.find('(') + 1:modification.rfind(')')]
 
-        amount_to_modify = eval(modification_amount_spec, {}, collect_vars(state))
+        amount_to_modify = eval(modification_amount_spec, {}, utility.collect_vars(state))
         modification_var = modification[modification.rfind(')') + 2:]
     else:
         modification_specification = modification.split()
@@ -170,24 +160,15 @@ def do_shown_var_modification(modification, state, symbol, game): # TODO: Remove
         amount_to_modify *= -1
         symbol = "" # The negative sign already shows up by virtue of it being a negative number
 
-    vars_by_name = collect_vars_with_dicts(state)
+    vars_by_name = utility.collect_vars_with_dicts(state)
     vars_by_name[modification_var]["value"] += amount_to_modify
-    print("[" + symbol + str(amount_to_modify) + " " + localize(modification_var, state) + "]")
-
-# TODO: Move to library module
-def localize(var_name, state):
-    vars_by_name = collect_vars_with_dicts(state)
-
-    if "locale" in vars_by_name[var_name]:
-        return vars_by_name[var_name]["locale"]
-    else:
-        return var_name
+    print("[" + symbol + str(amount_to_modify) + " " + utility.localize(modification_var) + "]")
 
 def eval_conditional(game, state, node):
-    vars_by_name = collect_vars_with_dicts(state)
+    vars_by_name = utility.collect_vars_with_dicts(state)
 
     if isinstance(node, str):
-        return eval(node, {}, collect_vars(state))
+        return eval(node, {}, utility.collect_vars(state))
     elif isinstance(node, list): # Lists are automatically ANDS, unless they're part of an OR tag covered later
         condition = True
         for subnode in node:
@@ -212,16 +193,19 @@ def eval_conditional(game, state, node):
             return False
 
 def step(game, state):
-    if get_curr_addr(state) == False:
+    if utility.get_curr_addr(state) == False:
         return False
     
-    state["last_address"] = get_curr_addr(state)
+    parent_block = get_parent_block(game, utility.get_curr_addr(state), state)
+    # Don't save footer addresses
+    if len(parent_block) == 0 or parent_block[-1] != "_footer":
+        state["last_address"] = utility.get_curr_addr(state)
 
-    curr_node = get_instr(game, get_curr_addr(state))
+    curr_node = get_instr(game, utility.get_curr_addr(state))
     # Mark that we've visited this node (again)
-    if not (get_curr_addr(state) in state["visits"]):
-        state["visits"][get_curr_addr(state)] = 0
-    state["visits"][get_curr_addr(state)] += 1
+    if not (utility.get_curr_addr(state) in state["visits"]):
+        state["visits"][utility.get_curr_addr(state)] = 0
+    state["visits"][utility.get_curr_addr(state)] += 1
 
     if isinstance(curr_node, str):
         do_print(curr_node, state)
@@ -237,7 +221,7 @@ def step(game, state):
             do_shown_var_modification(curr_node["add"], state, "+", game)
         except Exception:
             # Just move on and do nothing if we get an exception, and print warning
-            print("WARNING: Exception occurred evaluating 'ADD' node at address " + get_curr_addr(state))
+            print("WARNING: Exception occurred evaluating 'ADD' node at address " + utility.get_curr_addr(state))
     elif "back" in curr_node:
         while True:
             if len(state["last_address_list"]) == 0:
@@ -245,7 +229,8 @@ def step(game, state):
             
             new_addr = get_parent_block(game, state["last_address_list"].pop(), state)
 
-            if get_parent_block(game, get_curr_addr(state), state) != new_addr:
+            # Don't count footers
+            if get_parent_block(game, state["last_address"], state) != new_addr:
                 parent_node = get_instr(game, new_addr)
 
                 if isinstance(parent_node, list):
@@ -261,7 +246,7 @@ def step(game, state):
         # Right now no variables persist after calls
         state["call_stack"].append({"bookmark": state["bookmark"], "vars": state["vars"]})
 
-        curr_addr = get_curr_addr(state)
+        curr_addr = utility.get_curr_addr(state)
         state["bookmark"] = ()
         make_bookmark(game, state, addressing.parse_addr(curr_addr, curr_node["call"]))
 
@@ -279,7 +264,7 @@ def step(game, state):
 
         return True
     elif "choice" in curr_node:
-        vars_by_name = collect_vars_with_dicts(state)
+        vars_by_name = utility.collect_vars_with_dicts(state)
 
         state["choices"][curr_node["choice"]] = {}
 
@@ -289,39 +274,39 @@ def step(game, state):
         if "text" in curr_node:
             text = curr_node["text"]
         if "require" in curr_node:
-            state["choices"][curr_node["choice"]]["req_spec"] = parse_requirement_spec(curr_node["require"])
+            state["choices"][curr_node["choice"]]["req_spec"] = utility.parse_requirement_spec(curr_node["require"])
         if "cost" in curr_node:
-            state["choices"][curr_node["choice"]]["cost_spec"] = parse_requirement_spec(curr_node["cost"])
+            state["choices"][curr_node["choice"]]["cost_spec"] = utility.parse_requirement_spec(curr_node["cost"])
         if "shown" in curr_node:
-            state["choices"][curr_node["choice"]]["shown_spec"] = parse_requirement_spec(curr_node["shown"])
+            state["choices"][curr_node["choice"]]["shown_spec"] = utility.parse_requirement_spec(curr_node["shown"])
 
         effect_address = ""
         if not "effects" in curr_node:
-            effect_address = addressing.parse_addr(get_curr_addr(state), curr_node["choice"])
+            effect_address = addressing.parse_addr(utility.get_curr_addr(state), curr_node["choice"])
         else:
-            effect_address = get_curr_addr(state) + ("effects", 0)
+            effect_address = utility.get_curr_addr(state) + ("effects", 0)
             if isinstance(curr_node["effects"], str):
-                effect_address = addressing.parse_addr(get_curr_addr(state), curr_node["effects"])
+                effect_address = addressing.parse_addr(utility.get_curr_addr(state), curr_node["effects"])
 
         state["choices"][curr_node["choice"]]["text"] = text
         state["choices"][curr_node["choice"]]["address"] = effect_address
         state["choices"][curr_node["choice"]]["missing"] = missing_list
         state["choices"][curr_node["choice"]]["modifications"] = modify_list
-        state["choices"][curr_node["choice"]]["choice_address"] = get_curr_addr(state)
+        state["choices"][curr_node["choice"]]["choice_address"] = utility.get_curr_addr(state)
     elif "error" in curr_node:
         raise ErrorNode("Error raised.")
     elif "flag" in curr_node:
         state["vars"]["flags"][curr_node["flag"]] = True
     elif "flavor" in curr_node:
-        if state["settings"]["show_flavor_text"] != "never" and (state["visits"][get_curr_addr(state)] <= 1 or state["settings"]["show_flavor_text"] == "always"):
+        if state["settings"]["show_flavor_text"] != "never" and (state["visits"][utility.get_curr_addr(state)] <= 1 or state["settings"]["show_flavor_text"] == "always"):
             if isinstance(curr_node["flavor"], str): # TODO: Allow style spec tag with flavor text
                 view.print_flavor_text(curr_node["flavor"])
             else:
-                set_curr_addr(state, get_curr_addr(state) + ("flavor", 0))
+                set_curr_addr(state, utility.get_curr_addr(state) + ("flavor", 0))
 
                 return True
     elif "gosub" in curr_node:
-        sub_address = addressing.parse_addr(get_curr_addr(state), curr_node["gosub"])
+        sub_address = addressing.parse_addr(utility.get_curr_addr(state), curr_node["gosub"])
 
         new_first_stack = state["bookmark"][0] + (sub_address,)
         new_bookmark = (new_first_stack,) + state["bookmark"][1:]
@@ -330,7 +315,7 @@ def step(game, state):
 
         return True
     elif "goto" in curr_node:
-        set_curr_addr(state, addressing.parse_addr(get_curr_addr(state), curr_node["goto"]))
+        set_curr_addr(state, addressing.parse_addr(utility.get_curr_addr(state), curr_node["goto"]))
 
         return True
     elif "if" in curr_node:
@@ -344,21 +329,21 @@ def step(game, state):
 
         if not exception_occurred:
             if condition_value:
-                set_curr_addr(state, get_curr_addr(state) + ("then", 0))
+                set_curr_addr(state, utility.get_curr_addr(state) + ("then", 0))
 
                 return True
             elif "else" in curr_node:
-                set_curr_addr(state, get_curr_addr(state) + ("else", 0))
+                set_curr_addr(state, utility.get_curr_addr(state) + ("else", 0))
 
                 return True
     elif "insert" in curr_node:
-        vars_by_name = collect_vars_with_dicts(state)
+        vars_by_name = utility.collect_vars_with_dicts(state)
 
         amount = 1
         if "amount" in curr_node and isinstance(curr_node["amount"], (int, float)):
             amount = curr_node["amount"]
         elif "amount" in curr_node and isinstance(curr_node["amount"], str):
-            amount = eval(curr_node["amount"], {}, collect_vars(state))
+            amount = eval(curr_node["amount"], {}, utility.collect_vars(state))
 
         if not (curr_node["insert"] in vars_by_name[curr_node["into"]]["value"]):
             vars_by_name[curr_node["into"]]["value"][curr_node["insert"]] = {
@@ -371,13 +356,13 @@ def step(game, state):
         try:
             do_shown_var_modification(curr_node["lose"], state, "-", game)
         except Exception:
-            print("WARNING: Exception occurred evaluating 'LOSE' node at address " + get_curr_addr(state))
+            print("WARNING: Exception occurred evaluating 'LOSE' node at address " + utility.get_curr_addr(state))
     elif "once" in curr_node:
-        if state["visits"][get_curr_addr(state)] <= 1:
+        if state["visits"][utility.get_curr_addr(state)] <= 1:
             if isinstance(curr_node["once"], str):
                 do_print(curr_node["once"], state)
             else:
-                set_curr_addr(state, get_curr_addr(state) + ("once", 0))
+                set_curr_addr(state, utility.get_curr_addr(state) + ("once", 0))
 
                 return True
     elif "pass" in curr_node:
@@ -389,7 +374,7 @@ def step(game, state):
 
         do_print(curr_node["print"], state, style)
     elif "print_table" in curr_node:
-        vars_by_name = collect_vars_with_dicts(state)
+        vars_by_name = utility.collect_vars_with_dicts(state)
 
         tbl_to_display = vars_by_name[curr_node["print_table"]]["value"]
 
@@ -401,7 +386,7 @@ def step(game, state):
             for id in curr_node["random"].split(","):
                 possibilities_list.append(id.strip())
 
-            set_curr_addr(state, addressing.parse_addr(get_curr_addr(state), possibilities_list[random.randint(0, len(possibilities_list) - 1)]))
+            set_curr_addr(state, addressing.parse_addr(utility.get_curr_addr(state), possibilities_list[random.randint(0, len(possibilities_list) - 1)]))
 
             return True
 
@@ -421,9 +406,9 @@ def step(game, state):
             curr_weight += possibility[0]
             if curr_weight >= target_weight:
                 if curr_node["random"][possibility[1]] is None:
-                    set_curr_addr(state, addressing.parse_addr(get_curr_addr(state), possibility[1].split()[-1]))
+                    set_curr_addr(state, addressing.parse_addr(utility.get_curr_addr(state), possibility[1].split()[-1]))
                 else:
-                    set_curr_addr(state, get_curr_addr(state) + ("random", possibility[1], 0))
+                    set_curr_addr(state, utility.get_curr_addr(state) + ("random", possibility[1], 0))
                 
                 return True
     elif "return" in curr_node:
@@ -439,7 +424,7 @@ def step(game, state):
         with open(
             local_dir + "stories/" + "temp.yaml", "w"
         ) as file:
-            yaml.dump(get_var(state["vars"], curr_node["run"], get_curr_addr(state))["value"], file)
+            yaml.dump(utility.get_var(state["vars"], curr_node["run"], utility.get_curr_addr(state))["value"], file)
 
         state["msg"]["signal_run_statement"] = True
 
@@ -448,7 +433,7 @@ def step(game, state):
         return False
     elif "set" in curr_node:
         text_to_show_spec = {}
-        vars_by_name = collect_vars_with_dicts(state)
+        vars_by_name = utility.collect_vars_with_dicts(state)
 
         if not ("to" in curr_node):
             var_expr_pair = curr_node["set"].split("=")
@@ -470,47 +455,47 @@ def step(game, state):
 
             if modifier == "+":
                 if not (last_index is None):
-                    last_var_to_modify[last_index] += eval(var_expr_pair[1], {}, collect_vars(state))
+                    last_var_to_modify[last_index] += eval(var_expr_pair[1], {}, utility.collect_vars(state))
                     # TODO: Show some text (in this case it doesn't quite make sense how to refer to the variable
                 else:
-                    vars_by_name[var_name_indices[0]]["value"] += eval(var_expr_pair[1], {}, collect_vars(state))
-                    text_to_show_spec = {"op": "add", "amount": eval(var_expr_pair[1], {}, collect_vars(state)), "var": vars_by_name[var_name_indices[0]]}
+                    vars_by_name[var_name_indices[0]]["value"] += eval(var_expr_pair[1], {}, utility.collect_vars(state))
+                    text_to_show_spec = {"op": "add", "amount": eval(var_expr_pair[1], {}, utility.collect_vars(state)), "var": vars_by_name[var_name_indices[0]]}
             elif modifier == "-":
                 if not (last_index is None):
-                    last_var_to_modify[last_index] -= eval(var_expr_pair[1], {}, collect_vars(state))
+                    last_var_to_modify[last_index] -= eval(var_expr_pair[1], {}, utility.collect_vars(state))
                 else:
-                    vars_by_name[var_name_indices[0]]["value"] -= eval(var_expr_pair[1], {}, collect_vars(state))
-                    text_to_show_spec = {"op": "subtract", "amount": eval(var_expr_pair[1], {}, collect_vars(state)), "var": vars_by_name[var_name_indices[0]]}
+                    vars_by_name[var_name_indices[0]]["value"] -= eval(var_expr_pair[1], {}, utility.collect_vars(state))
+                    text_to_show_spec = {"op": "subtract", "amount": eval(var_expr_pair[1], {}, utility.collect_vars(state)), "var": vars_by_name[var_name_indices[0]]}
             else:
                 if not (last_index is None):
-                    last_var_to_modify[last_index] = eval(var_expr_pair[1], {}, collect_vars(state))
+                    last_var_to_modify[last_index] = eval(var_expr_pair[1], {}, utility.collect_vars(state))
                 else:
-                    vars_by_name[var_name_indices[0]]["value"] = eval(var_expr_pair[1], {}, collect_vars(state))
-                    text_to_show_spec = {"op": "set", "amount": eval(var_expr_pair[1], {}, collect_vars(state)), "var": vars_by_name[var_name_indices[0]]}
+                    vars_by_name[var_name_indices[0]]["value"] = eval(var_expr_pair[1], {}, utility.collect_vars(state))
+                    text_to_show_spec = {"op": "set", "amount": eval(var_expr_pair[1], {}, utility.collect_vars(state)), "var": vars_by_name[var_name_indices[0]]}
         else:
             if isinstance(curr_node["to"], (int, float)):
                 vars_by_name[curr_node["set"]]["value"] = curr_node["to"] # TODO: Allow setting to string literal values
             else:
-                vars_by_name[curr_node["set"]]["value"] = eval(curr_node["to"], {}, collect_vars(state)) # TODO: Catch exceptions in case of syntax errors
+                vars_by_name[curr_node["set"]]["value"] = eval(curr_node["to"], {}, utility.collect_vars(state)) # TODO: Catch exceptions in case of syntax errors
 
         if "show" in curr_node:
             view.print_var_modification(text_to_show_spec)
     elif "stop" in curr_node:
         return False
     elif "switch" in curr_node:
-        switch_value = eval(curr_node["switch"], {}, collect_vars(state))
+        switch_value = eval(curr_node["switch"], {}, utility.collect_vars(state))
         if str(switch_value) in curr_node:
             if isinstance(curr_node[str(switch_value)], str):
-                set_curr_addr(state, addressing.parse_addr(get_curr_addr(state), curr_node[str(switch_value)]))
+                set_curr_addr(state, addressing.parse_addr(utility.get_curr_addr(state), curr_node[str(switch_value)]))
             else:
-                set_curr_addr(state, get_curr_addr(state) + (str(switch_value), 0))
+                set_curr_addr(state, utility.get_curr_addr(state) + (str(switch_value), 0))
             
             return True
-        elif "default" in curr_node:
-            if isinstance(curr_node["default"], str):
-                set_curr_addr(state, addressing.parse_addr(get_curr_addr(state), curr_node[str(switch_value)]))
+        elif "_default" in curr_node:
+            if isinstance(curr_node["_default"], str):
+                set_curr_addr(state, addressing.parse_addr(utility.get_curr_addr(state), curr_node[str(switch_value)]))
             else:
-                set_curr_addr(state, get_curr_addr(state) + ("default", 0))
+                set_curr_addr(state, utility.get_curr_addr(state) + ("_default", 0))
 
             return True
     else:

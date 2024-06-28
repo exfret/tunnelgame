@@ -1,3 +1,3 @@
 from gameloop import run
 
-run("exploration_basic_2.yaml")
+run("exploration_basic_3.yaml")

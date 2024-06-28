@@ -13,6 +13,10 @@ feedback_msg = {
     "load_invalid_file_given": "File to be loaded not found.",
     "load_no_file_given": "Must supply file to load.",
     "save_no_default_name_given": "Must supply default save name.",
+    "set_no_variable_given": "Must supply a variable to set the value of.",
+    "set_no_value_given": "Must supply a new value for the variable.",
+    "set_invalid_variable_given": "Invalid variable given to set value of.",
+    "set_command_successful": "Successfully set variable to new value.",
     "settings_no_setting_given": "Must give a setting to give a new value to or test the current value of. Here is a list of settings:",
     "settings_flavor_invalid_val": "That's not an allowed value of show_flavor_text. Allowed values are 'always', 'once', and 'never'",
     "choice_missing_requirements": "Missing requirements.",
@@ -77,6 +81,7 @@ class View:
             print("[-" + str(text_to_show_spec["amount"]) + " " + text_to_show_spec["var"]["locale"] + "]")
         elif text_to_show_spec["op"] == "set":
             print("[Set " + text_to_show_spec["var"]["locale"] + " to " + str(text_to_show_spec["amount"]) + "]")
+        print() # Print newline
     
     ######################################################################
     # Console
@@ -127,7 +132,10 @@ class View:
                     expr_val = eval(shown["amount"], {}, var_dict_vals)
                     var_val = var_dict_vals[shown["var"]]
 
-                    effects_text += str(expr_val) + " " + localized_var + ", "
+                    sign = ""
+                    if expr_val > 0:
+                        sign = "+"
+                    effects_text += sign + str(expr_val) + " " + localized_var + ", "
                     choice["modifications"].append({"var": shown["var"], "amount": expr_val})
                 effects_text = effects_text[:-2]
                 effects_text += "]"
@@ -250,6 +258,6 @@ class TestView:
         self.num_choices_made += 1
         return self.choice_list[self.num_choices_made - 1].split()
 
-view = View()
+#view = View()
 
-#view = TestView([])
+view = TestView([])

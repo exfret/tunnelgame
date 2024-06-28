@@ -3,16 +3,36 @@
 #   - 
 
 # In test_gameloop.py
-import sys
 import os
+from pathlib import Path
+import sys
 
 # Add the path to the src directory
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../src')))
 
-from config import game, state
+from config import game, state, local_dir
 from gameloop import run
 from interpreter import ErrorNode
 from view import view
+
+######################################################################
+# examples
+######################################################################
+
+# Just make sure the examples compile
+def test_examples():
+    directory_path = Path(local_dir + "stories/examples")
+
+    for folder_path in directory_path.iterdir():
+        if folder_path.is_dir():
+            for file_path in folder_path.iterdir():
+                if file_path.is_file() and file_path.suffix in {".yaml", ".yml"}:
+                    # Now remove the absolute part of the string
+                    absolute_part = len(local_dir + "stories/")
+                    path_name = str(file_path)
+                    path_name = path_name[absolute_part:]
+
+                    run(str(path_name))
 
 ######################################################################
 # basic_syntax

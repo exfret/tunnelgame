@@ -16,10 +16,11 @@ def run(game_name):
     open_game(game_name)
 
     gameparser.construct_game(game)
+    gameparser.expand_macros(game)
     gameparser.add_flags(game)
     gameparser.add_vars_with_address(game, state, game, ())
     gameparser.add_module_vars(state)
-    gameparser.parse(game, state)
+    gameparser.parse_game(game, state)
 
     def make_choice(game, state, new_addr, command = "start"):
         state["bookmark"] = ()
@@ -122,6 +123,20 @@ def run(game_name):
                     gameparser.remove_module_vars(state)
                     pickle.dump(state, file)
                     gameparser.add_module_vars(state)
+        elif command[0] == "set":
+            if len(command) < 2:
+                view.print_feedback_message("set_no_variable_given")
+            else:
+                if len(command) < 3:
+                    view.print_feedback_message("set_no_value_given")
+                else:
+                    var_dict = utility.collect_vars_with_dicts(state, state["last_address_list"][-1])
+                    var_dict_vals = utility.collect_vars(state, state["last_address_list"][-1])
+                    try:
+                        var_dict[command[1]]["value"] = eval(command[2], {}, var_dict_vals)
+                        view.print_feedback_message("set_command_successful")
+                    except:
+                        view.print_feedback_message("set_invalid_variable_given")
         elif command[0] == "settings":
             if len(command) < 2:
                 view.print_feedback_message("settings_no_setting_given")

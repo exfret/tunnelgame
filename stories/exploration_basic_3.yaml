@@ -1,0 +1,392 @@
+---
+_vars:
+  # Progression
+  - blue_pass: 0
+    _locale: Blue Pass
+  # Skills
+  - athletic: 0
+    _locale: Athleticism
+  - botany: 0
+    _locale: Botany Knowledge
+  # Inventory
+  - coin: 0
+    _locale: Coin
+  - petunal: 0
+    _locale: Petunal Blossom
+  - rosalia: 0
+    _locale: Rosalia
+  - statue: 0
+    _locale: Statue
+  - torch: 0
+    _locale: Torch
+  - whistle: 0
+    _locale: Totally Normal Whistle
+_content:
+  - You are an adventurer of the Dome, hoping to make it rich by exploring the Tunnel, the Dome's only exit. No one has ever reached the other side, and efforts to escape the Dome via other means have proven fruitless.
+  - choice: start
+    effects: /town
+hospital: # Part of town, but we don't want the "back" option from the footer
+  _content:
+    - print: Hospital
+      style: bold
+    - flavor: You wake up on the ground outside of the local town hospital. Its white concrete exterior shimmers in the blinding light. You get to your feet and stare back at the giant sleek lettering above the double-door entrance spelling out the hospital's name... "Plot Magic Hospital".
+    - choice: town
+      text: Go back into the main town area
+      effects: ..
+town:
+  _content:
+    - print: Town
+      style: bold
+    - flavor: You stand at the center of town. A bustling crowd moves around you as a crisp, cool autumn wind passes through.
+    - once: Exploring is the name of the game, so let's get to it!
+    - if: unlocked_city_center
+      then:
+        - choice: center
+          text: Visit the city center
+    - if: unlocked_market
+      then:
+        - choice: market
+          text: Visit the market
+    - if: unlocked_outskirts
+      then:
+        - choice: outskirts
+          text: Visit the city outskirts
+    - choice: explore
+      text: Go exploring
+  center:
+    _content:
+      - print: City Center
+        style: bold
+      - choice: library
+        text: Visit the library
+    library:
+      _content:
+        - print: Library
+          style: bold
+        - flavor: The library has a muffled quietness, only interrupted by the flipping of a page.
+        - once: The librarian offers to teach you courses for rosalia, a type of tea leaf that produces a sweet red tea.
+        - if: botany == 0
+          then:
+            - choice: botany
+              text: Botany I
+              cost: 2 rosalia
+              effects:
+                - flavor: You learn about petunal blossoms, delicate flowers with yellow-specked, deep purple petals. Paradoxically, they like to grow between the cracks of rocks where their delicate stems are partially protected from the elements rather than out in a field.
+                - set: botany += 1
+                  show:
+                - choice: done
+                  effects: .
+  market:
+    _content:
+      - print: Market
+        style: bold
+      - flavor: The market is even busier than the city center. It proves hard to push past each human body to get to your destination, especially when everyone is traveling in such separate directions in the plaza. Where is your destination, by the way?
+      - choice: general
+        text: Visit the general store
+    general:
+      _content:
+        - print: General Store
+          style: bold
+        - flavor: The shopkeeper is an old man with a stiff, scruffy beard and dark black hair. He grunts when he sees you enter.
+        - choice: torch
+          text: For exploring caves and dark places
+          cost: 10 coin
+          shown: 1 torch
+          effects: .
+        - if: whistle > 0 and not offered_shopkeeper_whistle
+          then:
+            - choice: whistle
+              text: Sell the whistle
+              cost: 1 whistle
+              shown: 25 coin
+              effects:
+                - flag: offered_shopkeeper_whistle
+                - The shopkeeper looks over the whistle and his face morphs into one of terror. He hands it back to you, saying you can keep the coins as long as he doesn't have to keep the whistle.
+                - You got your whistle back!
+                - set: whistle += 1
+                  show:
+                - choice: nice
+                  effects: .
+        #- choice: clackadoo_feather
+        #  text: Buy the Clackadoo Feather
+  outskirts:
+    _content:
+      - print: Outskirts
+        style: bold
+      - choice: training
+        text: Visit the training center
+    training:
+      _content:
+        - print: Training Center
+          style: bold
+        - flavor: Arrows whiz by in the shooting range, and you can hear the loud clang of wooden training swords in the dueling area.
+        - if: blue_pass == 0
+          then:
+            - choice: blue_pass
+              text: Unlocks farther exploring
+              cost: 2 petunal, 10 rosalia
+              shown: 1 blue_pass
+              effects: .
+  _footer:
+    - if: len(_address) > 1
+      then:
+        - choice: _back
+    - if: len(_address) > 2
+      then:
+        - choice: home
+          effects: /town
+explore:
+  _content:
+    - print: Exploring
+      style: bold
+    - switch: _visits
+      "1":
+        - flag: unlocked_market
+        - Each time you explore, you may unlock something new. Right now, you've unlocked the market, which holds the general store.
+      "2":
+        - flag: unlocked_city_center
+        - You stare back at the town as you leave and can make out the taller buildings at its center. You should stop by the city center sometime.
+      "3":
+        - flag: unlocked_outskirts
+        - As you walk out the town to explore, you pass by the city outskirts. You should check that area out sometime!
+    - flavor: How far would you like to explore?
+    - choice: near
+    - choice: far
+      require: 1 blue_pass
+  near:
+    _content:
+      - print: Exploring (Near)
+        style: bold
+      - once: While exploring nearby, you get a coin for each new place you find.
+      - flavor: What would you like to do?
+      - choice: wander
+        text: Aimlessly wander to see what I find
+        effects:
+          - random: backpack, cave, coin_stash, henry, human_path, shrine, springs
+    backpack:
+      _content:
+        - print: Rolling Hill
+          style: bold
+        - if: not explore_backpack_already_shown
+          then:
+            - flag: explore_backpack_already_shown
+            - flavor: You walk up a rolling hill and get an excellent view of the countryside-esque view of the landscape near town. The view is interrupted by the sharp contrast of jagged mountains in the distance. From this high perch, you see a backpack lying on the ground in a field. Past the backpack, over yonder (for some definition of "yonder") is a lightly wooded area.
+            - choice: backpack
+              text: Go to the backpack
+          else:
+            - flavor: You walk up the rolling hill and stare out again at the countryside. There are woods in the distance.
+        - choice: woods
+          text: Go to the woods
+      backpack:
+        _content:
+          - print: Backpack
+            style: bold
+          - You get to the backpack. Do you take it?
+          - choice: steal
+            text: Steal the backpack
+          - choice: leave
+            text: Leave the backpack there
+        steal:
+          _content:
+            - You take the backpack and walk a little ways before a hunky dude behind you calls out, "Hey, that's mine!"
+            - choice: run
+              text: Run away!
+            - choice: return
+              text: Return the backpack
+          run:
+            _content:
+              - You run away, but you're not athletic enough to get away from the burly guy. He catches up to you and beats you up. # TODO: Check for athleticism
+              - choice: oops
+                effects: /hospital
+          return:
+            _content:
+              - You walk back to him and give him the backpack. He says, "Thanks for handing it back, but you still stole it. Prepare for a clobbering!"
+              - choice: oops
+                effects: /hospital
+        leave:
+          _content:
+            - You wander around the field but don't find much else on your journey.
+      woods:
+        _content:
+          - pass:
+    cave:
+      _content:
+        - print: Cave
+          style: bold
+        - flavor: You come across a rock formation jutting up from the ground. Between the rocks is an entrance to a cave. You can barely see inside.
+        - if: not took_cave_statue
+          then:
+            - You find a mini-statue leaning on some pebbles near the cave's entrance.
+            - if: found_shrine_statue
+              then:
+                - Aha! This must be one of the statue children. You stash it for later.
+                - flag: took_cave_statue
+                - set: statue += 1
+                  show:
+        - choice: inside
+          text: Go inside the cave
+          require: 1 torch
+        - choice: around
+          text: Go around the cave
+        - choice: top
+          text: Go on top of the cave
+          require: 3 athletic
+      inside:
+        _content:
+          - print: Cave (Inside)
+            style: bold
+          - It's very dark inside, and one torch is barely enough to see even a few feet in front of you. It's almost as if the darkness is swallowing up the light. Your footsteps patter on some puddles, then you hear a whistle.
+          - choice: continue
+            text: Keep going
+          - choice: home
+            text: Return to town
+            effects: /town
+        continue:
+          _content:
+            - print: Cave (Inside)
+              style: bold
+            - The whistling gets louder and louder. The cave makes a narrow bend and you're sure whoever is whistling is just around the corner. But when you turn, no one's there... except a whistle laying on a golden pedestal. You decide it's a good idea to take it. (Oh, and the whistling has stopped).
+            - set: whistle += 1
+              show:
+      around:
+        _content:
+          - if: not found_cave_around_rosalia
+            then:
+              - flag: found_cave_around_rosalia
+              - You find two rosalia behind the cave.
+              - set: rosalia += 2
+                show:
+            else:
+              - There's nothing more.
+      top:
+        _content:
+          - pass:
+    coin_stash:
+      _vars:
+        - coins_left: 20
+      _content:
+        - print: Coin Stash
+          style: bold
+        - if: coins_left >= 13
+          then:
+            - flavor: Wow, you find a coin stash!
+        - if: coins_left >= 5 and coins_left < 13
+          then:
+            - flavor: The coins here seem to be decreasing. It's like there is only a finite supply of coins!
+        - if: coins_left >= 1 and coins_left < 5
+          then:
+            - flavor: Now you're barely finding any coins. Someone better refresh this stash! # TODO: Option to replenish the stash
+        - if: coins_left == 0
+          then:
+            - The stash is empty.
+          else:
+            - set: coin += ceil(coins_left / 4)
+              show:
+            - set: coins_left = coins_left - ceil(coins_left / 4)
+    henry:
+      _content:
+        - if: not met_henry
+          then:
+            - pass:
+    human_path:
+      _content:
+        - print: Path
+          style: bold
+        - flavor: You come across a rugged dirt path that you can barely make out through the dense foliage of the forest floor.
+        - if: not spring_turned_to_human
+          then:
+            - Unfortunately, you're not the right species to travel on this path.
+          else:
+            - flavor: Since you're now human, you can travel on the path.
+            - if: not human_path_found_rosalia
+              then:
+                - flag: human_path_found_rosalia
+                - You find some rosalia along the path. Awesome!
+                - set: rosalia += 2
+              else:
+                - There's nothing more along the path.
+    shrine:
+      _content:
+        - print: Shrine
+          style: bold
+        - switch: _visits
+          "1":
+            - flag: found_shrine_statue
+            - You come across a shrine with a statue of a fat man decorated by deep red flowers. A voice enters your head, "I spread the gift of flowers. All you must do is find my children."
+        - choice: give
+          text: Give all your statues in return for rosalia
+          require: 1 statue
+        - choice: home # We have to manually include the choice to return home since the "give" choice prevents the footer from giving this choice
+          text: Return to town
+          effects: /town
+      give:
+        _content:
+          - set: rosalia += 3 * statue
+            show:
+          - set: statue = 0
+            show:
+    springs:
+      _content:
+        - print: Springs
+          style: bold
+        - flavor: You come across a cool mountain spring spouting out cold water that then gently winds down the mountain's soft dirt surface.
+        - choice: drink
+          text: Drink from the spring
+        - choice: around
+          text: Go around the mountain
+        - choice: up
+          text: Go up the mountain further
+      drink:
+        - if: not spring_turned_to_human
+          then:
+            - flag: spring_turned_to_human
+            - You turn into a human. Wait, what were you before?
+          else:
+            - You're still human.
+      around:
+        _content:
+          - if: not found_springs_around_rosalia
+            then:
+              - flag: found_springs_around_rosalia
+              - You find some rosalia.
+              - set: rosalia += 2
+                show:
+            else:
+              - You don't find anything.
+      up:
+        _content:
+          - print: Mountain (Up)
+            style: bold
+          - if: not springs_mountain_up_found_petunal
+            then:
+              - if: botany == 0
+                then:
+                  - You find some purple flowers with yellow specks between the rocks jutting out from the ground. However, you don't know what they are, so you just trudge on.
+                else:
+                  - You find a petunal blossom!
+                  - flag: springs_mountain_up_found_petunal
+                  - set: petunal += 1
+                    show:
+          - flavor: You get near the top, but the last push is very vertical and there is slippery moss that makes for a hazardous traversal. You need some athleticism to keep going.
+          - choice: continue
+            require: 5 athletic
+          - choice: home
+            text: Return to town
+            effects: /town
+        continue:
+          _content:
+            - pass:
+    _footer:
+      - if: _visits == 1
+        then:
+          - "[New Place: +1 Coin]"
+          - set: coin += 1
+  far:
+    _content:
+      - pass:
+  _footer:
+    - if: _num_choices == 0
+      then:
+        - choice: home
+          text: Return to town
+          effects: /town

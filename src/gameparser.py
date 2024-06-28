@@ -1,3 +1,4 @@
+import ast
 import copy
 import math
 import random
@@ -5,7 +6,7 @@ import yaml
 
 import addressing
 from config import game, state, local_dir
-from utility import *
+from utility import * # TODO: Make it not import *, use proper namespace
 
 # TODO: Check addresses in program are valid
 
@@ -30,6 +31,18 @@ class MissingRequiredTagError(Exception):
 class WrongFormattingError(Exception):
     pass
 
+class UndefinedVariableChecker(ast.NodeVisitor):
+    def visit_Name(self, node):
+        if node.id not in self.var_dict and node.id not in __builtins__:
+            raise MissingReferenceError()
+        self.generic_visit(node)
+
+    def check(self, expression, var_dict):
+        tree = ast.parse(expression, mode="eval")
+        self.var_dict = var_dict
+        self.visit(tree)
+expr_checker = UndefinedVariableChecker()
+
 def construct_game(node):
     if "_include" in node:
         for block_name, file_name in node["_include"].items():
@@ -47,6 +60,27 @@ def construct_game(node):
         if isinstance(subnode, dict) and not key[0] == "_": # Only recurse into sub-blocks
             construct_game(subnode) # Note: This can result in exponentially long games with the right setups...
             # TODO: Smarter stitching that does not just duplicate everything
+
+def expand_macros(node):
+    def add_footers(node, footer):
+        for key, subnode in node.items():
+            # If this is a terminal block or _content node
+            if (key == "_content" or key[0] != "_") and isinstance(subnode, list):
+                subnode.extend(footer)
+            if isinstance(subnode, dict):
+                add_footers(subnode, footer)
+
+    if isinstance(node, list):
+        for subnode in node:
+            expand_macros(subnode)
+    elif isinstance(node, dict):
+        for key, subnode in node.items():
+            if key == "_footer":
+                add_footers(node, subnode)
+            else:
+                expand_macros(subnode)
+        if "_footer" in node:
+            del node["_footer"]
 
 def add_flags(node):
     if not "flags" in state["vars"]:
@@ -199,9 +233,9 @@ def parse_node(game, node, state, grammar, context, address):
             # Try to eval the node to make sure it works
             # TODO: Add variable sensing
             if not "no_parse_eval" in game["_meta"]: # TODO: Local _meta tags repected
-                eval(node, {}, collect_vars(state, address))
+                expr_checker.check(node,collect_vars(state, address))
         elif isinstance(node, (int, float)):
-            return # Plain numerical set
+            return # Plain numerical expression
         else:
             print("\033[31mError:\033[0m _expr is neither a numerical or string type at " + str(address) + " node " + str(node))
             raise IncorrectTypeError()
@@ -317,7 +351,7 @@ def parse_node(game, node, state, grammar, context, address):
         
         # NOTE: No checking for array length yet!
         
-        parse_node(game, var_expr_pair[1], state, grammar, "_expr", address)
+        parse_node(game, var_expr_pair[1].strip(), state, grammar, "_expr", address)
     elif context == "_table_id":
         # First check it's a valid variable reference
         parse_node(game, node, state, grammar, "_var_id", address)
@@ -453,7 +487,7 @@ def parse_node(game, node, state, grammar, context, address):
                 parse_node(game, node["choice"], state, grammar, "_addr", address)
     # TODO: Special checking for SET to check that if the set is just a single var name we need a TO
 
-def parse(game, state):
+def parse_game(game, state):
     with open(
         local_dir + "src/grammar.yaml", "r"
     ) as file:

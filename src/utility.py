@@ -1,5 +1,6 @@
 from string import Formatter
 
+import addressing
 from config import state, game
 
 class CustomFormatter(Formatter):
@@ -18,6 +19,16 @@ class CustomFormatter(Formatter):
 format = CustomFormatter()
 
 class VarDict(dict):
+    def __contains__(self, key: object) -> bool:
+        if isinstance(key, str) and len(key.split("__")) == 2:
+            bag_name = key.split("__")[0]
+            if super().__contains__(bag_name):
+                return True # Never raise missing reference for items as long as the bag exists
+            else:
+                return False
+        else:
+            return super().__contains__(key)
+
     def __getitem__(self, key):
         if isinstance(key, str) and len(key.split("__")) == 2:
             bag_var = super().__getitem__(key.split("__")[0])
@@ -86,10 +97,11 @@ def collect_vars_with_dicts(state, address = None):
     
     var_dict["_visits"] = state["visits"][address]
     var_dict["_num_choices"] = len(state["choices"])
+    var_dict["_address"] = addressing.get_block_part(state["last_address"])
     if len(state["last_address_list"]) >= 1:
-        var_dict["_address"] = state["last_address_list"][-1]
+        var_dict["_previous_address"] = addressing.get_block_part(state["last_address_list"][-1])
     else:
-        var_dict["_address"] = ()
+        var_dict["_previous_address"] = ()
     return var_dict
 
 def collect_vars(state, address = None):
@@ -97,7 +109,7 @@ def collect_vars(state, address = None):
 
     return var_dict
 
-# TODO: Make this not duplicate code and move all into addressing (it's also in interpreter.py right now)
+# TODO: Move to addressing
 def get_curr_addr(state):
     # If queue is empty, we're done
     if len(state["bookmark"]) == 0:
