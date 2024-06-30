@@ -16,17 +16,21 @@ def run(game_name):
     gameparser.add_module_vars(state)
     gameparser.parse_game()
 
-    def make_choice(game, state, new_addr, command = "start"):
+    def make_choice(game, state, new_addr, command = "start", is_action = False):
         state["bookmark"] = ()
         interpreter.make_bookmark(game, state, new_addr)
-        state["choices"] = {}
+
+        # Only get rid of old choices if this was a proper choice, not an action
+        if not is_action:
+            state["choices"] = {}
 
         # Populate the state vars with args
         state["vars"]["_args"] = [0] * 10000
         for i, arg in enumerate(command[1:]):
             state["vars"]["_args"][i] = arg
 
-        view.clear()
+        if not is_action:
+            view.clear()
 
         while True:
             while interpreter.step(game, state):
@@ -53,9 +57,11 @@ def run(game_name):
             else:
                 break
 
-        state["last_address_list"].append(state["last_address"])
+        # Only change where we were in the story for "proper" choices
+        if not is_action:
+            state["last_address_list"].append(state["last_address"])
 
-        view.print_choices()
+            view.print_choices()
 
     autostart = True
 
@@ -65,7 +71,9 @@ def run(game_name):
     while True:
         command = view.get_input()
 
-        if command[0] == "choices":
+        if command[0] == "actions":
+            view.print_choices(True) # Print actions
+        elif command[0] == "choices":
             view.print_choices()
         elif command[0] == "exit":
             break
@@ -163,6 +171,6 @@ def run(game_name):
 
                         var_ref["value"] += modification["amount"] # TODO: Print modifications
 
-                make_choice(game, state, choice["address"], command)
+                make_choice(game, state, choice["address"], command, choice["action"])
         else:
             view.print_feedback_message("unrecognized_command")

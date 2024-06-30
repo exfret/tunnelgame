@@ -285,11 +285,16 @@ def step(game, state):
             if isinstance(curr_node["effects"], str):
                 effect_address = addressing.parse_addr(utility.get_curr_addr(state), curr_node["effects"])
 
+        is_action = False
+        if "action" in curr_node:
+            is_action = True
+
         state["choices"][curr_node["choice"]]["text"] = text
         state["choices"][curr_node["choice"]]["address"] = effect_address
         state["choices"][curr_node["choice"]]["missing"] = missing_list
         state["choices"][curr_node["choice"]]["modifications"] = modify_list
         state["choices"][curr_node["choice"]]["choice_address"] = utility.get_curr_addr(state)
+        state["choices"][curr_node["choice"]]["action"] = is_action
     elif "error" in curr_node:
         raise ErrorNode("Error raised.")
     elif "flag" in curr_node:
@@ -428,6 +433,8 @@ def step(game, state):
         state["bookmark"] = get_next_bookmark(game, state["bookmark"])
 
         return False
+    elif "separator" in curr_node:
+        view.print_separator()
     elif "set" in curr_node:
         text_to_show_spec = {}
         vars_by_name = utility.collect_vars_with_dicts(state)

@@ -6,7 +6,7 @@ from tunnelvision import utility
 feedback_msg = {
     "goto_invalid_address_given": "Incorrect address given.",
     "goto_no_address_given": "Must give an address.",
-    "help": "Valid commands are 'exit', 'goto', 'help', 'inspect', 'load', 'save', and 'settings'.",
+    "help": "Valid commands are 'actions', 'choices', 'exit', 'goto', 'help', 'inspect', 'load', 'save', 'set', and 'settings'.",
     "inspect_invalid_variable_given": "That's not a valid variable.",
     "inspect_no_variable_given": "Must give a variable to print the value of.",
     "load_invalid_file_given": "File to be loaded not found.",
@@ -45,6 +45,10 @@ class View:
     
     def print_flavor_text(self, text):
         self.print_text(text)
+    
+    def print_separator(self):
+        print("——————————————————————————————————————————————————————————————————————————————————————————")
+        print()
     
     def print_table(self, tbl_to_display):
         print("+" + "-" * (len(tbl_to_display[0]) + 2) + "+")
@@ -86,12 +90,21 @@ class View:
     # Console
     ######################################################################
 
-    def print_choices(self):
+    def print_choices(self, display_actions = False):
         # Choices now have cost_spec, req_spec, and shown_spec
         # TODO: Evaluate missing at choice printing (here)
 
-        print("\n        Choices...")
+        if not display_actions:
+            print("\n        Choices...")
+        else:
+            print("\n        Actions...")
         for choice_id, choice in state["choices"].items():
+            # Display only actions/choices, whichever is selected
+            if not display_actions and choice["action"]:
+                continue
+            if display_actions and not choice["action"]:
+                continue
+
             # Evaluate costs/requirements/shown
             if not "missing" in choice:
                 choice["missing"] = []
@@ -189,7 +202,7 @@ class View:
         command = command_string.split()
         return command
 
-class TestView:
+class ViewForTesting:
 
     def __init__(self, choice_list=[]):
         self.num_choices_made = 0

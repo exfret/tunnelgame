@@ -8,7 +8,7 @@ from tunnelvision import config
 from tunnelvision.config import stories
 from tunnelvision.gameloop import run
 from tunnelvision.interpreter import ErrorNode
-from tunnelvision.view import TestView
+from tunnelvision.view import ViewForTesting
 
 ######################################################################
 # fixtures
@@ -18,7 +18,7 @@ from tunnelvision.view import TestView
 @pytest.fixture(autouse=True)
 def view():
     original_view = config.view
-    config.load(view=TestView())
+    config.load(view=ViewForTesting())
     yield config.view
     config.load(view=original_view)
 

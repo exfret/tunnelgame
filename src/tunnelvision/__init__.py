@@ -2,4 +2,4 @@ from tunnelvision.gameloop import run
 
 
 def main():
-    run("exploration_basic_3.yaml")
+    run("tunnel/01-railroaded/intro.yaml")

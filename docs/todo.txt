@@ -3,7 +3,12 @@ Currently:
   - Set statements and requirement specifications with vars (pull out requirement spec parsing into utility)
 
 100. Going back with story re-running
-94. 
+99. Make headers/footers proper blocks too
+98. Execute command for executing instructions from command console (more flexibility with changing state, etc.)
+97. Separator instruction
+96. Local flags
+95. "Disable-able" choices
+94. Make _footer's back into distinguished blocks not macros (or maybe a special type of block)
 92. Info tag for instructions when you're in a block/reminders (maybe combine with actions)
 91. Add footers to effects sections too (maybe move back to ending footers)
 90. Titles for locations

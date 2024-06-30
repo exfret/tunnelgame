@@ -38,7 +38,11 @@ class UndefinedVariableChecker(ast.NodeVisitor):
         self.generic_visit(node)
 
     def check(self, expression, var_dict):
-        tree = ast.parse(expression, mode="eval")
+        try:
+            tree = ast.parse(expression, mode="eval")
+        except Exception:
+            print("\033[31mError:\033[0m Parsing error at for expression " + str(expression))
+            raise WrongFormattingError()
         self.var_dict = var_dict
         self.visit(tree)
 expr_checker = UndefinedVariableChecker()
@@ -133,6 +137,9 @@ def add_vars_with_address(game, state, node, address): # TODO: Finish up so that
     if not address in state["vars"]:
         state["vars"][address] = {}
 
+    if not isinstance(node, dict):
+        print("\033[31mError:\033[0m Block is not of type dict at " + str(address) + " node " + str(node))
+        raise IncorrectTypeError()
     if "_vars" in node:
         for var in node["_vars"]:
             # Find the var_name/value declaration

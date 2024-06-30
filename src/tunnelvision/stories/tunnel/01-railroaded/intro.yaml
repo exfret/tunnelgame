@@ -1,0 +1,310 @@
+---
+_vars:
+  - time: 0 # Measured in days
+  # Logic vars
+  - temp: 0
+  # Progress vars
+  - tunnel_pass: training
+  # Research vars
+  - research_botany_1_chapter: 0
+  # Inventory vars
+  - rosalia: 0
+    _locale: Rosalia
+  # Misc. vars
+  - time_last_explored: 0
+  - time_next_training: 0
+_content:
+  - goto: tunnel/training/first_journey/george_waiting
+_header:
+  - choice: encyclopedia
+    action:
+    effects:
+      - "Rosalia: Rosalia is a rose-like plant with big, broad, deep red leaves and smaller leaves along its stem. These smaller leaves are often crushed up to create teas."
+  - choice: inventory
+    action:
+    effects:
+      - switch: _args[0]
+        "0":
+          - At a glance...
+          - "\tTraining Pass"
+          - To see more detailed options, try something like "inventory plants". Valid options are "plants" to see plants and "prized" to see prized possessions.
+        plants:
+          - Flowers...
+          - "\tRosalia: {rosalia}"
+        _default:
+          - That's not a valid option for inventory. Valid options are "plants" to see plants and "prized" to see prized possessions.
+organization:
+  flags:
+    # Just a block with flags I haven't used yet
+    - pass:
+logic:
+  time:
+    _content:
+      - set: time += 1
+      - if: 'tunnel_pass == "training" and time == time_next_training'
+        then:
+          - It's time for you to train in the Tunnel again! Meet George in his room.
+orphanage:
+  _content:
+    # Evaluate events for returning to orphanage here
+    - if: time % 7 == 3 # Tuesday is work day (at least initially)
+      then:
+        - goto: days/work
+    - if: time % 7 == 4 # Wednesday is free day
+      then:
+        - Today is free day at the orphanage. The only day you have to yourself. You can go wander around the halls.
+    - if: time % 7 == 5 # Thursday is work day again
+      then:
+        - goto: days/work
+    - goto: rooms/personal
+  admin:
+    _content:
+      - pass:
+  common:
+    _content:
+      - You're in the common hallway.
+      - choice: rooms
+        text: Go to the bedrooms
+      - choice: study
+        text: Visit the orphanage's study.
+      #- choice: courtyard
+      #  text: Visit the orphanage's courtyard.
+    study:
+      _content:
+        - if: not met_mabel
+          then:
+            - flag: met_mabel
+            - A young, thin woman looks up from a desk at the front of the orphanage's study. "I'm Mabel. I heard you have started exploring. It would only make sense to give you access to our dismal collection of knowledge and folklore surrounding the Tunnel. You'll have to get access to the main town library for more in-depth knowledge. Just choose a subject to study and you can make progress on that book."
+          else:
+            - Mabel stares at you briefly, as if suspicious of what you might do next, before returning to her dusty book.
+        - choice: botany
+          text: Read the textbook on Botany I
+          effects:
+            - You spend the day reading.
+            - switch: research_botany_1_chapter
+              "0":
+                - The first section is just a preface about the beauty of plants in the Tunnel. It goes over the author's love for the different flowers, which is why this first volume of his series on plants is devoted to them. They are also the most common useful type of plant to gather from the first layer of the Tunnel, which is why it's important to learn about them.
+              "1":
+                - The next section is the first real chapter. It goes over lemens. They're a bulbous, yellow, luminous plant that dims over time. Due to their luminosity, fresh lemens are used for lighting. They have never been successfully grown in the Dome, leading many to believe there is a special aura in the Tunnel that keep them alive.
+                - flag: unlocked_knowledge_lemens
+            - set: research_botany_1_chapter += 1
+            - gosub: /logic/time
+            - separator:
+            - goto: /orphanage/rooms/personal
+    courtyard:
+      _content:
+        - pass:
+  lobby:
+    _content:
+      - You're in the lobby.
+      - choice: admin
+        text: Go to the administrative area
+        effects:
+          - You're not allowed there.
+          - separator:
+          - goto: .
+      - choice: common
+        text: Go to the commons hallway
+      - choice: rooms
+        text: Go to the bedrooms
+      - choice: town
+        text: Go into town
+        effects:
+          - You're not allowed into town yet.
+          - separator:
+          - goto: .
+  rooms:
+    _content:
+      - You stand in the hallway where the orphanage bedrooms are. There are 7 bedrooms, and as usual, they're all full. You're at the very beginning, close to the administrative offices on the other end across the lobby. The lobby also opens up to another hallway on the right across from the exit. At the end of all the rooms is a door to the basement.
+      #- choice: admin
+      #  text: Go to the administrative area
+      #  effects:
+      #    - You're not allowed there.
+      #    - separator:
+      #    - goto: .
+      #- choice: lobby
+      #  text: Go to the lobby
+      - choice: common
+        text: Go to the commons hallway on the right
+      - choice: personal
+        text: Visit my own room
+      - choice: george
+        text: Visit George's room
+        effects: george/knock
+      # TODO: Ways to unlock these rooms
+      #- choice: caroline
+      #  text: Visit Caroline's room
+      #- choice: benedict
+      #  text: Visit Benedict's room
+      #- choice: rose
+      #  text: Visit Rose's room
+      #- choice: ben
+      #  text: Visit Ben's room
+    personal:
+      _vars:
+        - last_time_made_bed: 0
+      _content:
+        - You're in your room.
+        - if: (time - last_time_made_bed) < 7
+          then:
+            - Your bed is pristine and neatly tucked.
+        - if: (time - last_time_made_bed) >= 7 and (time - last_time_made_bed) < 30
+          then:
+            - Your bed is mostly neat. There is a bit of the sheet poking out where it should be tucked in and there are some crinkles in the cover. But overall it's pretty good.
+        - if: (time - last_time_made_bed) >= 30
+          then:
+            - Your bed is pretty much completely untucked, the covers are thrown off, and the mattress sheet is no longer on one of the corners of the mattress.
+        - choice: leave
+          text: Leave your room
+          effects: ..
+        - choice: make_bed
+          text: Make your bed
+          effects:
+            - You make your bed.
+            - set: last_time_made_bed = time
+            - separator:
+            - goto: .
+    george:
+      _content:
+        - What do you want to talk to George about?
+        - if: time_next_training <= time
+          then:
+            - choice: explore
+              text: Go on your next venture into the Tunnel
+              effects:
+                - pass:
+        #- choice: explore
+        #  text:
+        - choice: training
+          text: Ask when the next training in the Tunnel is
+          effects:
+            - set: temp = time_next_training - time
+            - if: temp <= 0
+              then:
+                - He says it's time, and he's ready to go when you are.
+              else:
+                - He says it's in {temp} days.
+            - separator:
+            - goto: .
+        - choice: chat
+          text: Chat with him
+      knock:
+        _content:
+          - You knock on George's door. He opens it and answers.
+          - goto: ..
+      chat:
+        _content:
+          - What would you like to chat with him about?
+          - choice: _back
+    caroline:
+      _content:
+        - Caroline is a cheerful woman with long black hair. Her hair has strands that fall out a lot all over her room (though somehow without leaving bald spots). She was cursed with a forever-child curse and must now be a child her whole life despite being physically an adult. But she really likes playing with all the new stuff you get from the Tunnel, and watching that helps you learn, so, like, give her stuff and get experience.
+    benedict:
+      _content:
+        - pass:
+    rose:
+      _content:
+        - pass:
+    ben:
+      _content:
+        - pass:
+  days:
+    work:
+      _content:
+        - Today is a work day at the orphanage.
+        - switch: _visits
+          "1":
+            - As usual, you, George, and the other 3 children old enough at the orphanage to work line up in front of the double oak doors while Ms. Bee and Mabel stare down at everyone. Then, they open the doors and lead everyone to the farm a 10 minute walk away.
+            - Older residents of Sleepy Hollow Orphanage have to work at Karo's farm. He doesn't pay well for the untrained labor, but the orphanage needs all the money it can get. Of course, you don't get a single coin from it. That's just the cost of having a safe place to live and eat.
+            - It's hard work, and takes the rest of the day.
+            - choice: work
+              effects:
+                - gosub: /logic/time
+                - goto: /orphanage
+        # Don't do work day if the player explored recently
+        #- if: time <= time_last_explored + 1
+        #  then:
+        #    - However, since you are resting from your recent venture into the Tunnel, you're allowed to rest today.
+        #    - goto: /orphanage/rooms/personal
+tunnel:
+  _header:
+    - set: time_last_explored = time
+  training:
+    first_journey:
+      george_waiting:
+        _vars:
+          - first_choice_made: False
+          - second_choice_made: False
+          - third_choice_made: False
+        _content:
+          - George is standing at the dusty entrance to the orphanage, his ruffled brown hair blending with the oak double round-top door that leads outside. He's flipping a doubloon to pass the time as he waits for you to finish packing for your trip to the Tunnel with him.
+          - if: not first_choice_made
+            then:
+              - choice: review
+                text: Review your encyclopedia notes on rosalia, which you will be gathering with George
+                effects:
+                  - set: first_choice_made = True
+                  - You're able to navigate to your encyclopedia by typing in "encyclopedia" to the command line. You note that you can also see other actions available by typing "actions", or a complete list of commands by typing "help".
+                  - You keep in mind to always check your encyclopedia when you get a new entry, since the entries explain important game mechanics, and often include some lore as well!
+                  - separator:
+                  - goto: .
+          - if: not second_choice_made
+            then:
+              - choice: check
+                text: Check that you have your training pass, which is required for entering the Tunnel
+                effects:
+                  - set: second_choice_made = True
+                  - You can see easily by typing in "inventory" to the command line that you have your training pass with you.
+                  - separator:
+                  - goto: .
+          - if: not third_choice_made
+            then:
+              - choice: touch
+                text: Touch the necklace my parents gave me for comfort
+                effects:
+                  - set: third_choice_made = True
+                  - The necklace is all you have left of your parents. You remember little of them.
+                  - On the other hand, the hairs knotted to the necklace are tied to a vivid memory. An orphan girl wailing just outside the doorway for a room in winter. Usually, the temperature in the Dome wasn't too bad, but that year was brutal. Director Dicky, the owner of the orphanage, refused to let her in since the place was already so full, and she later became unresponsive and motionless. To his credit, Dicky did let her in at last... to a small graveyard in the orphanage.
+                  - You vow to become a great Tunnel explorer, someone who brings back riches and glory. That way, you can provide the funds for anyone to be taken in. You snuck a lock of hair you cut from the poor girl's head as a symbol of your promise.
+                  - goto: .
+          - choice: ready
+            text: Tell George that I'm ready
+            effects:
+              - goto: leave_orphanage
+      leave_orphanage:
+        _content:
+          - George opens the doors, allowing the light that permeates the outside of the Dome to flood in.
+          - You hunker along with your heavy packs, heading for the gaping miles-wide gap in the Dome's rocky walls. It's the Tunnel, which is the only way out, and today will be your first day exploring it.
+          - It's only a day's walk from your small town to the Tunnel.
+          - choice: walk
+            text: Walk with George to the Tunnel
+            effects:
+              - gosub: /logic/time
+              - goto: tunnel_entrance
+      tunnel_entrance:
+        _content:
+          - You reach the entrance to the Tunnel, the only exit from the 100-mile or so Dome to which humanity is confined. From here, you finally get a sense of its true magnitude. It's about half a day's walk from one side to the other, but its width is still nothing compared to its depth. No one has gotten to the end, or at least, no one has gotten to the end and returned. Some even think it never ends. Maybe you'll be the first to prove them wrong.
+          - "A guard to the entrance booth checks George's Blue Pass and your Training Pass. There are multiple reasons for the 10-foot stone wall that bars those without passes from getting through: safety, bureaucracy, tradition, preservation. All you care for, though, is to finally see the lush rolling landscape of the first layer."
+          - George is unusually adept at Tunnel exploration. Despite only being only a Yellow Pass holder (already a feat for a 19-year-old like him), he was allowed via special agreement to train you. Also due to his natural ability, it doesn't take long for you both to find a rosalia patch.
+          - choice: gather
+            text: Gather rosalia with George
+            effects: gather_rosalia
+      gather_rosalia:
+        _content:
+          # TODO: Use scraps explanation
+          - gosub: /logic/time
+          - George teaches you how to pluck the small leaves from the red flower for use in teas. You already know some about it due to Mabel's love for it. The orphanage's study doesn't hold many books, but she often goes out of her way to find more for those who are able to fetch her some rosalia.
+          - set: rosalia += 3
+            show:
+          - After a day's work of gathering rosalia, George tells you its time to head home. You're disappointed that your first journey was so short, but he explains he just wanted somethings simple the first time. Then he pats you on the back and says, "You did great".
+          - choice: return
+            text: Return to the orphanage
+            effects: return
+      return:
+        _content:
+          - gosub: /logic/time
+          - set: time_next_training = time + 3
+          - Despite the short trip, you feel exhaustion kick in as soon as you get back to the orphanage. Both you and George go straight to bed.
+          - choice: sleep
+            text: Go to sleep
+            effects: /orphanage

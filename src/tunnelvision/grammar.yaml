@@ -68,6 +68,7 @@ DICT_INSTR:
     random: RANDOM
     return: RETURN
     run: RUN
+    separator: SEPARATOR
     set: SET
     stop: STOP
     switch: SWITCH
@@ -88,6 +89,7 @@ CHOICE:
   mandatory:
     choice: _text # Custom checking
   optional:
+    action: _null
     text: _text
     require: _requirement_specification
     cost: _requirement_specification
@@ -206,6 +208,10 @@ RUN:
   type: dict
   mandatory:
     run: _var_id
+SEPARATOR:
+  type: dict
+  mandatory:
+    separator: _null
 SET:
   type: dict
   mandatory:

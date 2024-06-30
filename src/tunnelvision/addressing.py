@@ -75,9 +75,13 @@ def parse_addr(curr_addr, addr_id):
         if len(curr_addr) > 0:
             # If this block is a list block and not the root content, it can't contain other blocks anyways, so just allow it to goto sibling blocks
             # TODO: More "block searching" functionality to find blocks with similar names
-            new_addr = parse_addr_from_block(curr_addr[:-1], path)
-
-            node = get_node(new_addr)
+            try:
+                new_addr = parse_addr_from_block(curr_addr[:-1], path)
+                
+                node = get_node(new_addr)
+            except InvalidAddressError:
+                print("Invalid address " + str(path) + " at address " + str(curr_addr))
+                raise InvalidAddressError()
         else:
             raise InvalidAddressError("Non-existent block address")
 

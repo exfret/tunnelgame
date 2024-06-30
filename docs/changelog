@@ -1,4 +1,12 @@
+2024/6/29
+- Added "logical capabilities" section to user guide with a subsection on subroutines
+- Custom error handling for null blocks
+- Wrote a lot of tunnel story in new language (mostly intro stuff)
+
 2024/6/28
+- Added separator instruction
+- Added actions (choices that don't remove the other choices)
+- Work toward merge with Max changes to packaging and such
 - Pytest test case for example stories (just make sure they parse)
 - Got simple_bags test working again
 
