@@ -1,45 +1,57 @@
-import copy
-import sys
+from pathlib import Path
 import yaml
 
-local_dir = "/Users/kylehess/Documents/programs/tunnelgame/"
+from tunnelvision import (
+    gameloop,
+    interpreter,
+    utility,
+    addressing,
+    gameparser,
+    view as V,
+)
 
-class Sensor:
-    _instance = None
 
-    def __new__(cls):
-        if cls._instance is None:
-            cls._instance = super().__new__(cls)
-            cls._instance.data = {
-                "game": {},
-                "state": {}
-            }
-        return cls._instance
-sensor = Sensor()
-game = sensor.data["game"]
-state = sensor.data["state"]
+###########################################################
+# Data sources
+###########################################################
 
-def open_game(game_name):
-    game.clear()
-    state.clear()
+local_dir = Path(__file__).parent
+stories = local_dir / "stories"
+saves = local_dir / "saves"
+grammar = yaml.safe_load((local_dir / "grammar.yaml").read_text())
 
-    with open(
-        local_dir + "stories/" + game_name, "r"
-    ) as file:
-        game.update(yaml.safe_load(file))
 
-    starting_state = {
-        "bookmark": (), # bookmark is a queue (tuple) of call stacks (tuples) containing addresses (tuples)
-        "call_stack": [], # List of dicts with bookmarks and vars (TODO: Maybe do last_address_list and choices here too?)
-        "choices": {"start": {"text": "Start the game", "address": ("_content", 0)}}, # Dict of choice ID's to new locations and descriptions
-        "file_data": {"filename": ""}, # TODO: Include some sort of hash or name of game
-        "last_address": (),
-        "last_address_list": [],
-        "map": {}, # TODO: What was map again? I think it was the game object, probably need to implement this
-        "metadata": {"node_types": {}}, # TODO: Rename to 'story_data' or something such, maybe remove after parsing overhaul
-        "msg": {}, # Hacky way for things to communicate to gameloop
-        "settings": {"show_flavor_text": "once"},
-        "vars": {},
-        "visits": {}
-    }
-    state.update(copy.deepcopy(starting_state))
+###########################################################
+# Injections
+###########################################################
+
+injections = ["game", "state", "view"]
+# Default values
+game = {}
+state = {}
+view = V.View()
+targets = [
+    addressing,  # game
+    gameloop,  # game, state, view
+    gameparser,  # game, state
+    interpreter,  # game, state, view
+    utility,  # state
+    V,  # state
+]
+
+
+def load(**config_dict):
+    # Update config
+    for variable, value in config_dict.items():
+        if variable not in injections:
+            raise ValueError(f"Invalid config item: {variable}")
+        globals()[variable] = value
+
+    # Publish config
+    for module in targets:
+        for service in injections:
+            setattr(module, service, globals()[service])
+
+
+# Publish default config
+load()

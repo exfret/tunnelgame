@@ -284,6 +284,8 @@ explore:
               show:
             - set: coins_left = coins_left - ceil(coins_left / 4)
     henry:
+      _vars:
+        - met_henry: false
       _content:
         - if: not met_henry
           then:

@@ -1,11 +1,8 @@
 import yaml
 import random
 
-import addressing
-from config import local_dir
-import gameparser
-import utility
-from view import view
+from tunnelvision import addressing, gameparser, utility
+from tunnelvision.config import stories
 
 class ErrorNode(Exception):
     pass
@@ -195,7 +192,7 @@ def eval_conditional(game, state, node):
 def step(game, state):
     if utility.get_curr_addr(state) == False:
         return False
-    
+
     parent_block = get_parent_block(game, utility.get_curr_addr(state), state)
     # Don't save footer addresses
     if len(parent_block) == 0 or parent_block[-1] != "_footer":
@@ -226,7 +223,7 @@ def step(game, state):
         while True:
             if len(state["last_address_list"]) == 0:
                 break
-            
+
             new_addr = get_parent_block(game, state["last_address_list"].pop(), state)
 
             # Don't count footers
@@ -409,7 +406,7 @@ def step(game, state):
                     set_curr_addr(state, addressing.parse_addr(utility.get_curr_addr(state), possibility[1].split()[-1]))
                 else:
                     set_curr_addr(state, utility.get_curr_addr(state) + ("random", possibility[1], 0))
-                
+
                 return True
     elif "return" in curr_node:
         # TODO: Give warning if call stack is empty
@@ -421,10 +418,10 @@ def step(game, state):
 
             # Don't return true since we need to increment past the call instruction
     elif "run" in curr_node:
-        with open(
-            local_dir + "stories/" + "temp.yaml", "w"
-        ) as file:
-            yaml.dump(utility.get_var(state["vars"], curr_node["run"], utility.get_curr_addr(state))["value"], file)
+        addr = utility.get_curr_addr(state)
+        contents = utility.get_var(state["vars"], curr_node["run"], addr)["value"]
+        temp_yaml = stories / "temp.yaml"
+        temp_yaml.write_bytes(yaml.dump(contents))
 
         state["msg"]["signal_run_statement"] = True
 
@@ -489,7 +486,7 @@ def step(game, state):
                 set_curr_addr(state, addressing.parse_addr(utility.get_curr_addr(state), curr_node[str(switch_value)]))
             else:
                 set_curr_addr(state, utility.get_curr_addr(state) + (str(switch_value), 0))
-            
+
             return True
         elif "_default" in curr_node:
             if isinstance(curr_node["_default"], str):
