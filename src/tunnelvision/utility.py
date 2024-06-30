@@ -1,7 +1,6 @@
 from string import Formatter
 
-import addressing
-from config import state, game
+from tunnelvision import addressing
 
 class CustomFormatter(Formatter):
     def get_value(self, key, args, kwargs):

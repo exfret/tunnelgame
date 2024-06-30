@@ -1,0 +1,18 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "tunnelvision"
+description = "A language for Interactive Fiction!"
+authors = [{ name = "Kyle Hess", email = "donotreply@github.com" }]
+version = "0.0.1"
+readme = "README.md"
+urls = { Homepage = "https://github.com/exfret/tunnelgame" }
+keywords = ["IF", "Interactive Fiction"]
+classifiers = ["Topic :: Games/Entertainment :: Role-Playing"]
+requires-python = ">=3.10"
+dependencies = ["build", "black", "pytest", "pyyaml", "rich", "twine"]
+
+[project.scripts]
+tunnelvision = "tunnelvision:main"

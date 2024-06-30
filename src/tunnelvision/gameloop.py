@@ -1,26 +1,20 @@
 # Standard imports
 import copy
+from pathlib import Path
 import pickle
 
-# Local imports
-import addressing
-import interpreter
-import gameparser
-import utility
+from tunnelvision import addressing, interpreter, gameparser, utility
+from tunnelvision.config import saves
 
-# Config imports
-from config import game, state, local_dir, open_game
-from view import view
 
 def run(game_name):
-    open_game(game_name)
-
+    gameparser.open_game(game_name)
     gameparser.construct_game(game)
     gameparser.expand_macros(game)
     gameparser.add_flags(game)
     gameparser.add_vars_with_address(game, state, game, ())
     gameparser.add_module_vars(state)
-    gameparser.parse_game(game, state)
+    gameparser.parse_game()
 
     def make_choice(game, state, new_addr, command = "start"):
         state["bookmark"] = ()
@@ -99,30 +93,30 @@ def run(game_name):
         elif command[0] == "load":
             if len(command) == 1:
                 view.print_feedback_message("load_no_file_given")
-            else:
-                try:
-                    with open(local_dir + "saves/" + command[1], "rb") as file:
-                        state.clear()
-                        state.update(pickle.load(file))
-                        gameparser.add_module_vars(state)
-                        view.clear()
-                        view.print_choices()
-                except FileNotFoundError:
-                    view.print_feedback_message("load_invalid_file_given")
+                continue
+            try:
+                contents = pickle.loads(
+                    (saves / command[1]).with_suffix(".pkl").read_bytes()
+                )
+            except FileNotFoundError:
+                view.print_feedback_message("load_invalid_file_given")
+                continue
+            state.clear()
+            state.update(contents)
+            gameparser.add_module_vars(state)
+            view.clear()
+            view.print_choices()
         elif command[0] == "save":
-            if len(command) == 1:
-                if state["file_data"]["filename"] == "":
-                    view.print_feedback_message("save_no_default_name_given")
-                else:
-                    with open(local_dir + "saves/" + state["file_data"]["filename"], "wb") as file:
-                        gameparser.remove_module_vars(state)
-                        pickle.dump(state, file)
-                        gameparser.add_module_vars(state)
-            else:
-                with open(local_dir + "saves/" + command[1], "wb") as file:
-                    gameparser.remove_module_vars(state)
-                    pickle.dump(state, file)
-                    gameparser.add_module_vars(state)
+            try:
+                save_slot = command[1]
+            except IndexError:
+                save_slot = state["file_data"]["filename"]
+            if not save_slot:
+                view.print_feedback_message("save_no_default_name_given")
+                continue
+            gameparser.remove_module_vars(state)
+            (saves / save_slot).with_suffix(".pkl").write_bytes(pickle.dumps(state))
+            gameparser.add_module_vars(state)
         elif command[0] == "set":
             if len(command) < 2:
                 view.print_feedback_message("set_no_variable_given")
@@ -166,7 +160,7 @@ def run(game_name):
                         modification["bag_ref"]["value"][modification["item"]] += modification["amount"]
                     else:
                         var_ref = utility.get_var(state["vars"], modification["var"], choice["choice_address"])
-                        
+
                         var_ref["value"] += modification["amount"] # TODO: Print modifications
 
                 make_choice(game, state, choice["address"], command)

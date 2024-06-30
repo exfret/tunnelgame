@@ -2,6 +2,7 @@ Currently:
   - Bags have vars inside of them, not values (I think this is actually done but gotta check)
   - Set statements and requirement specifications with vars (pull out requirement spec parsing into utility)
 
+100. Going back with story re-running
 94. 
 92. Info tag for instructions when you're in a block/reminders (maybe combine with actions)
 91. Add footers to effects sections too (maybe move back to ending footers)
