@@ -186,7 +186,7 @@ def add_vars_with_address(game, state, node, address):  # TODO: Finish up so tha
                     if val != "bag" and val != "map" and val != "grid":  # These are the only allowed special types for now
                         print(f"\033[31mError:\033[0m _type has invalid value at {address} node {node}")
                         raise IncorrectTypeError()
-                elif key == "_fill" or "_dims":  # Extra keys
+                elif key in ["_fill", "_dims"]:  # Extra keys
                     pass
                 else:
                     print(f"\033[31mError:\033[0m Invalid special var tag address {address} node {node}")
@@ -447,7 +447,7 @@ def parse_node(node, context, address):
 
     if not (context in grammar):
         print(f"\033[31mError:\033[0m Undefined context {context} at {address} node {node}")
-        GrammarParsingError()
+        raise GrammarParsingError()
 
     curr_rule = grammar[context]
 
@@ -530,7 +530,7 @@ def parse_node(node, context, address):
             raise InvalidDisjunctError()
     else:
         print(f"\033[31mError:\033[0m Invalid 'type' key for grammar rule {context} while parsing at {address} node {node}")
-        GrammarParsingError()
+        raise GrammarParsingError()
 
     # Special checking
     if context == "CHOICE":
