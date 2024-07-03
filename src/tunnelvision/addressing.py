@@ -43,29 +43,6 @@ def parse_addr(curr_addr, addr_id):
     curr_addr = get_block_part(curr_addr, 0)
     path = tuple(addr_id.split("/"))
 
-    def parse_addr_from_block(block_addr, path):
-        if len(path) == 0:
-            return block_addr
-
-        index = path[0]
-        path = path[1:]
-
-        if index == "":  # Corresponds to instance of a root /
-            return parse_addr_from_block((), path)
-        elif index == ".":
-            return parse_addr_from_block(block_addr, path)
-        elif index == "..":
-            if len(block_addr) == 0:
-                raise InvalidAddressError(
-                    "Attempt to index out of root node in an address ID."
-                )
-
-            return parse_addr_from_block(block_addr[:-1], path)
-        elif index[0] == "_":
-            raise InvalidAddressError("Attempt to index into non-block address.")
-        else:
-            return parse_addr_from_block(block_addr + (index,), path)
-
     new_addr = None
     try:
         new_addr = parse_addr_from_block(curr_addr, path)
@@ -93,3 +70,27 @@ def parse_addr(curr_addr, addr_id):
         return curr_addr + ("_content", 0)
     else:
         raise InvalidAddressError("Attempt to goto block without content.")
+
+
+def parse_addr_from_block(block_addr, path):
+    if len(path) == 0:
+        return block_addr
+
+    index = path[0]
+    path = path[1:]
+
+    if index == "":  # Corresponds to instance of a root /
+        return parse_addr_from_block((), path)
+    elif index == ".":
+        return parse_addr_from_block(block_addr, path)
+    elif index == "..":
+        if len(block_addr) == 0:
+            raise InvalidAddressError(
+                "Attempt to index out of root node in an address ID."
+            )
+
+        return parse_addr_from_block(block_addr[:-1], path)
+    elif index[0] == "_":
+        raise InvalidAddressError("Attempt to index into non-block address.")
+    else:
+        return parse_addr_from_block(block_addr + (index,), path)
