@@ -10,26 +10,34 @@ from tunnelvision.utility import *  # TODO: Make it not import *, use proper nam
 
 # TODO: Check addresses in program are valid
 
+
 class InvalidDisjunctError(Exception):
     pass
+
 
 class InvalidTagError(Exception):
     pass
 
+
 class IncorrectTypeError(Exception):
     pass
+
 
 class GrammarParsingError(Exception):
     pass
 
+
 class MissingReferenceError(Exception):
     pass
+
 
 class MissingRequiredTagError(Exception):
     pass
 
+
 class WrongFormattingError(Exception):
     pass
+
 
 class UndefinedVariableChecker(ast.NodeVisitor):
     def visit_Name(self, node):
@@ -45,6 +53,8 @@ class UndefinedVariableChecker(ast.NodeVisitor):
             raise WrongFormattingError()
         self.var_dict = var_dict
         self.visit(tree)
+
+
 expr_checker = UndefinedVariableChecker()
 
 
@@ -58,19 +68,21 @@ def open_game(game_name):
         "bookmark": (),  # bookmark is a queue (tuple) of call stacks (tuples) containing addresses (tuples)
         "call_stack": [],  # List of dicts with bookmarks and vars (TODO: Maybe do last_address_list and choices here too?)
         "choices": {
-            "start": {"text": "Start the game", "address": ("_content", 0)}
+            "start": {"text": "Start the game", "address": ("_content", 0)},
         },  # Dict of choice ID's to new locations and descriptions
         "file_data": {
-            "filename": ""
+            "filename": "",
         },  # TODO: Include some sort of hash or name of game
         "last_address": (),
         "last_address_list": [],
         "map": {},  # TODO: What was map again? I think it was the game object, probably need to implement this
         "metadata": {
-            "node_types": {}
+            "node_types": {},
         },  # TODO: Rename to 'story_data' or something such, maybe remove after parsing overhaul
         "msg": {},  # Hacky way for things to communicate to gameloop
-        "settings": {"show_flavor_text": "once"},
+        "settings": {
+            "show_flavor_text": "once",
+        },
         "vars": {},
         "visits": {},
     }
@@ -86,9 +98,10 @@ def construct_game(node):
         node["_meta"] = {}
 
     for key, subnode in node.items():
-        if isinstance(subnode, dict) and not key[0] == "_": # Only recurse into sub-blocks
-            construct_game(subnode) # Note: This can result in exponentially long games with the right setups...
+        if isinstance(subnode, dict) and not key[0] == "_":  # Only recurse into sub-blocks
+            construct_game(subnode)  # Note: This can result in exponentially long games with the right setups...
             # TODO: Smarter stitching that does not just duplicate everything
+
 
 def expand_macros(node):
     def add_footers(node, footer):
@@ -111,6 +124,7 @@ def expand_macros(node):
         if "_footer" in node:
             del node["_footer"]
 
+
 def add_flags(node):
     if not "flags" in state["vars"]:
         state["vars"]["flags"] = {}
@@ -125,15 +139,16 @@ def add_flags(node):
 
             add_flags(subnode)
 
-def add_vars_with_address(game, state, node, address): # TODO: Finish up so that it has the other extra features of vars too
-    if isinstance(node, list): # In this case, the inner part of the node is just content
+
+def add_vars_with_address(game, state, node, address):  # TODO: Finish up so that it has the other extra features of vars too
+    if isinstance(node, list):  # In this case, the inner part of the node is just content
         return
 
     # Run this once
     if address == ():
         # Initialize special vars
         # TODO: _args overhaul, and make it NoneType by default
-        state["vars"]["_args"] = [0] * 10000 # TODO: Remove this hardcap on number arguments, and it's also a little silly
+        state["vars"]["_args"] = [0] * 10000  # TODO: Remove this hardcap on number arguments, and it's also a little silly
     if not address in state["vars"]:
         state["vars"][address] = {}
 
@@ -168,10 +183,10 @@ def add_vars_with_address(game, state, node, address): # TODO: Finish up so that
                     if not isinstance(var["_type"], str):
                         print("\033[31mError:\033[0m _type is not of type string at " + str(address) + " node " + str(node))
                         raise IncorrectTypeError()
-                    if val != "bag" and val != "map" and val != "grid": # These are the only allowed special types for now
+                    if val != "bag" and val != "map" and val != "grid":  # These are the only allowed special types for now
                         print("\033[31mError:\033[0m _type has invalid value at " + str(address) + " node " + str(node))
                         raise IncorrectTypeError()
-                elif key == "_fill" or "_dims": # Extra keys
+                elif key == "_fill" or "_dims":  # Extra keys
                     pass
                 else:
                     print("\033[31mError:\033[0m Invalid special var tag address " + str(address) + " node " + str(node))
@@ -183,20 +198,20 @@ def add_vars_with_address(game, state, node, address): # TODO: Finish up so that
 
             if locale is None:
                 locale = var_name
-            
+
             # Initialize bags as dicts
             if ("_type" in var) and var["_type"] == "bag" and var_value == None:
                 var_value = {}
             elif ("_type" in var) and var["_type"] == "map":
-                pass # TODO: Any special parsing to be done?
+                pass  # TODO: Any special parsing to be done?
             elif ("_type" in var) and var["_type"] == "grid":
                 if not "_dims" in var:
                     print("\033[31mError:\033[0m Missing required tag " + "_dims" + " at " + str(address) + " node " + str(node))
                     raise MissingRequiredTagError()
                 elif not "_fill" in var:
                     print("\033[31mError:\033[0m Missing required tag " + "_fill" + " at " + str(address) + " node " + str(node))
-                    raise MissingRequiredTagError() # TODO: Have a default fill?
-                
+                    raise MissingRequiredTagError()  # TODO: Have a default fill?
+
                 dims = var["_dims"].split()
                 for ind, dim in enumerate(dims):
                     dims[ind] = int(dim)
@@ -204,13 +219,13 @@ def add_vars_with_address(game, state, node, address): # TODO: Finish up so that
                 def get_arrs(curr_ind, dims):
                     if len(curr_ind) == len(dims):
                         return var["_fill"]
-                    
+
                     curr_arr = []
                     for i in range(dims[len(curr_ind)]):
                         curr_arr.append(get_arrs(curr_ind + (i,), dims))
-                    
+
                     return curr_arr
-                
+
                 curr_ind = () * len(dims)
                 arr = get_arrs(curr_ind, dims)
 
@@ -222,6 +237,7 @@ def add_vars_with_address(game, state, node, address): # TODO: Finish up so that
         if tag[0] != "_":
             add_vars_with_address(game, state, subnode, address + (tag,))
 
+
 def add_module_vars(state):
     # Add special variables
     state["vars"]["random"] = random
@@ -230,6 +246,7 @@ def add_module_vars(state):
     state["vars"]["floor"] = math.floor
     state["vars"]["ceil"] = math.ceil
     state["vars"]["pow"] = math.pow
+
 
 def remove_module_vars(state):
     del state["vars"]["random"]
@@ -265,10 +282,10 @@ def parse_node(node, context, address):
         if isinstance(node, str):
             # Try to eval the node to make sure it works
             # TODO: Add variable sensing
-            if not "no_parse_eval" in game["_meta"]: # TODO: Local _meta tags repected
-                expr_checker.check(node,collect_vars(state, address))
+            if not "no_parse_eval" in game["_meta"]:  # TODO: Local _meta tags repected
+                expr_checker.check(node, collect_vars(state, address))
         elif isinstance(node, (int, float)):
-            return # Plain numerical expression
+            return  # Plain numerical expression
         else:
             print("\033[31mError:\033[0m _expr is neither a numerical or string type at " + str(address) + " node " + str(node))
             raise IncorrectTypeError()
@@ -281,7 +298,7 @@ def parse_node(node, context, address):
         if node[0] == "_" or len(node.split()) != 1:
             print("\033[31mError:\033[0m Id's can't start with an underscore or have whitespace at " + str(address) + " node " + str(node))
             raise WrongFormattingError()
-    elif context == "_num_expr": # TODO: Is there a difference between this and _expr?
+    elif context == "_num_expr":  # TODO: Is there a difference between this and _expr?
         if isinstance(node, (int, float)):
             pass
         elif isinstance(node, str):
@@ -293,7 +310,7 @@ def parse_node(node, context, address):
         if not (node is None):
             print("\033[31mError:\033[0m Null type expected at " + str(address) + " node " + str(node))
             raise IncorrectTypeError()
-    elif context == "_requirement_specification": # TODO: Rename to '_amount_specification' or something similar
+    elif context == "_requirement_specification":  # TODO: Rename to '_amount_specification' or something similar
         specs = []
         paren_state = 0
         last_index = 0
@@ -307,7 +324,7 @@ def parse_node(node, context, address):
             elif char == ")":
                 paren_state -= 1
                 if paren_state == 0:
-                    specs.append(node[last_index:index + 1])
+                    specs.append(node[last_index : index + 1])
                     last_index = index + 1
         specs.append(node[last_index:])
 
@@ -339,7 +356,7 @@ def parse_node(node, context, address):
                         except ValueError:
                             print("\033[31mError:\033[0m Non numerical string for requirement amount at " + str(address) + " node " + str(node))
                             raise IncorrectTypeError()
-                    elif len(real_spec_split) == 2: # TODO: Error on requirements/costs
+                    elif len(real_spec_split) == 2:  # TODO: Error on requirements/costs
                         try:
                             float(real_spec_split[0])
                             float(real_spec_split[1])
@@ -353,14 +370,14 @@ def parse_node(node, context, address):
                 if len(real_spec.split("from")) > 1:
                     if not real_spec.split(" from ")[-1] in collect_vars(state, address):
                         print("\033[31mError:\033[0m Undefined variable " + real_spec.split(" from ")[-1] + " at " + str(address) + " node " + str(node))
-                        raise MissingReferenceError() # Here, just check for bag's existence
+                        raise MissingReferenceError()  # Here, just check for bag's existence
                 elif not (real_spec in collect_vars(state, address)):
                     print("\033[31mError:\033[0m Undefined variable " + real_spec + " at " + str(address) + " node " + str(node))
                     raise MissingReferenceError()
     elif context == "_set_expr":
         if not isinstance(node, str):
             print("\033[31mError:\033[0m Expected string for _set_expression at " + str(address) + " node " + str(node))
-            raise IncorrectTypeError() # TODO: Convert IncorrectTypeError exceptions to more useful format
+            raise IncorrectTypeError()  # TODO: Convert IncorrectTypeError exceptions to more useful format
 
         var_expr_pair = node.split("=")
 
@@ -416,7 +433,7 @@ def parse_node(node, context, address):
             print("\033[31mError:\033[0m Undefined variable " + node + " at " + str(address) + " node " + str(node))
             raise MissingReferenceError()
     elif context == "_var_type":
-        if node != "bag" and node != "map" and node != "grid": # Bag, map, and grid are the only current var types
+        if node != "bag" and node != "map" and node != "grid":  # Bag, map, and grid are the only current var types
             # TODO: Unify this code with the checking in var creation
             print("\033[31mError:\033[0m Disallowed value of _var_type at " + str(address) + " node " + str(node))
             raise IncorrectTypeError()
@@ -517,7 +534,7 @@ def parse_node(node, context, address):
 
     # Special checking
     if context == "CHOICE":
-        if not ("effects" in node): # If effects doesn't exist, this should be an address
+        if not ("effects" in node):  # If effects doesn't exist, this should be an address
             if node["choice"] == "_back":
                 # Special indicator for "back" choice, fill in the syntactic sugar
                 # TODO: Maybe figure out a way to do this without modifying game?

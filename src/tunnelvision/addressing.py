@@ -14,9 +14,7 @@ def get_node(addr, curr_node=None):
         raise InvalidAddressError("Address has numerical index for non-list node.")
     if isinstance(addr[0], str) and not isinstance(curr_node, dict):
         raise InvalidAddressError("Address has string index for non-dict node.")
-    if isinstance(curr_node, list) and (
-        addr[0] >= len(curr_node) or addr[0] < -len(curr_node)
-    ):
+    if isinstance(curr_node, list) and (addr[0] >= len(curr_node) or addr[0] < -len(curr_node)):
         raise InvalidAddressError("Address has numerical index that is out of range.")
     if isinstance(curr_node, dict) and not addr[0] in curr_node:
         raise InvalidAddressError("Attempt to index into nonexistent key of address")
@@ -54,7 +52,7 @@ def parse_addr(curr_addr, addr_id):
             # TODO: More "block searching" functionality to find blocks with similar names
             try:
                 new_addr = parse_addr_from_block(curr_addr[:-1], path)
-                
+
                 node = get_node(new_addr)
             except InvalidAddressError:
                 print("Invalid address " + str(path) + " at address " + str(curr_addr))
@@ -85,9 +83,7 @@ def parse_addr_from_block(block_addr, path):
         return parse_addr_from_block(block_addr, path)
     elif index == "..":
         if len(block_addr) == 0:
-            raise InvalidAddressError(
-                "Attempt to index out of root node in an address ID."
-            )
+            raise InvalidAddressError("Attempt to index out of root node in an address ID.")
 
         return parse_addr_from_block(block_addr[:-1], path)
     elif index[0] == "_":

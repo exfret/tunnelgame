@@ -16,3 +16,6 @@ dependencies = ["build", "black", "pytest", "pyyaml", "rich", "twine"]
 
 [project.scripts]
 tunnelvision = "tunnelvision:main"
+
+[tool.black]
+line-length = 180

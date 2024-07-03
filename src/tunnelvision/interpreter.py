@@ -4,17 +4,21 @@ import random
 from tunnelvision import addressing, gameparser, utility
 from tunnelvision.config import stories
 
+
 class ErrorNode(Exception):
     pass
 
+
 class UnrecognizedInstruction(Exception):
     pass
+
 
 def add_stack(game, state, address, partial_address):
     curr_node = get_instr(game, partial_address)
 
     if isinstance(curr_node, dict) and "_header" in curr_node:
         state["bookmark"] = state["bookmark"] + ((partial_address + ("_header", 0),),)
+
 
 def make_bookmark(game, state, address):
     partial_address = ()
@@ -26,15 +30,17 @@ def make_bookmark(game, state, address):
     # Add the _content node
     state["bookmark"] = state["bookmark"] + ((address,),)
 
+
 # TODO: Change to "get_node"
 def get_instr(curr_node, addr):
     if addr == ():
         return curr_node
-    
-    if isinstance(curr_node, list) and addr[0] >= len(curr_node):
-        return False # TODO: Instead throw/catch error
 
-    return get_instr(curr_node[addr[0]], addr[1:]) # TODO: Check map/address compatibility
+    if isinstance(curr_node, list) and addr[0] >= len(curr_node):
+        return False  # TODO: Instead throw/catch error
+
+    return get_instr(curr_node[addr[0]], addr[1:])  # TODO: Check map/address compatibility
+
 
 def set_curr_addr(state, new_addr):
     new_first_stack = state["bookmark"][0][:-1] + (new_addr,)
@@ -42,27 +48,29 @@ def set_curr_addr(state, new_addr):
 
     state["bookmark"] = new_bookmark
 
+
 def get_next_addr(game, addr):
     if addr == ():
         return False
-    
+
     # If it's a string key, it's not an incrementable address piece
     if isinstance(addr[-1], str):
-        if addr[-1] == "effects": # If it's a choice effects section, don't spill over into the remaining block
+        if addr[-1] == "effects":  # If it's a choice effects section, don't spill over into the remaining block
             return False
         return get_next_addr(game, addr[:-1])
 
-    new_addr = addr[:-1] + ((addr[-1] + 1),) # TODO: Error check that last element is indeed an int
+    new_addr = addr[:-1] + ((addr[-1] + 1),)  # TODO: Error check that last element is indeed an int
 
     if get_instr(game, new_addr) == False:
         return get_next_addr(game, addr[:-1])
     else:
         return new_addr
 
+
 def trim_footer(addr):
     if addr == ():
         return True
-    
+
     if addr[-1] == "_footer":
         if len(addr) == 1:
             return False
@@ -70,6 +78,7 @@ def trim_footer(addr):
         return addr[:-2]
     else:
         return trim_footer(addr[:-1])
+
 
 def search_for_footers(game, call_stack):
     curr_node = get_instr(game, call_stack[0])
@@ -79,8 +88,9 @@ def search_for_footers(game, call_stack):
     else:
         if call_stack[0] == ():
             return ()
-    
+
         return search_for_footers(game, (call_stack[0][:-1],))
+
 
 def get_next_call_stack(game, call_stack):
     if call_stack == ():
@@ -101,14 +111,16 @@ def get_next_call_stack(game, call_stack):
     else:
         return call_stack[:-1] + (get_next_addr(game, call_stack[-1]),)
 
+
 def get_next_bookmark(game, bookmark):
     if bookmark == ():
         return False
-    
+
     if get_next_call_stack(game, bookmark[0]) == False:
-        return bookmark[1:] # We don't need to increment because in the queue this hasn't been touched at all
+        return bookmark[1:]  # We don't need to increment because in the queue this hasn't been touched at all
     else:
         return bookmark[1:] + (get_next_call_stack(game, bookmark[0]),)
+
 
 # Note: Duplicate code, also in addressing
 def get_parent_block(game, addr, state):
@@ -122,7 +134,7 @@ def get_parent_block(game, addr, state):
                 if val == node and key == "_content":
                     is_content = True
 
-    node_types = state["metadata"]["node_types"][addr] # TODO: Remove backwards compatibility quirk (need to add "story" to address)
+    node_types = state["metadata"]["node_types"][addr]  # TODO: Remove backwards compatibility quirk (need to add "story" to address)
     if "START" in node_types or "BLOCK" in node_types:
         return addr
     # Check for list blocks
@@ -132,17 +144,19 @@ def get_parent_block(game, addr, state):
     else:
         return get_parent_block(game, addr[:-1], state)
 
-def do_print(text, state, style = {}): # TODO: Move ansi code handling to view as well
+
+def do_print(text, state, style={}):  # TODO: Move ansi code handling to view as well
     view.print_text(text, style)
 
-def do_shown_var_modification(modification, state, symbol, game): # TODO: Remove... Only used for "add" and "lose", which are defunct
+
+def do_shown_var_modification(modification, state, symbol, game):  # TODO: Remove... Only used for "add" and "lose", which are defunct
     amount_to_modify = 0
     modification_var = ""
-    if modification.find('(') != -1 and modification.rfind(')') != -1:
-        modification_amount_spec = modification[modification.find('(') + 1:modification.rfind(')')]
+    if modification.find("(") != -1 and modification.rfind(")") != -1:
+        modification_amount_spec = modification[modification.find("(") + 1 : modification.rfind(")")]
 
         amount_to_modify = eval(modification_amount_spec, {}, utility.collect_vars(state))
-        modification_var = modification[modification.rfind(')') + 2:]
+        modification_var = modification[modification.rfind(")") + 2 :]
     else:
         modification_specification = modification.split()
         modification_amount_spec = modification_specification[0].split("-")
@@ -155,18 +169,19 @@ def do_shown_var_modification(modification, state, symbol, game): # TODO: Remove
     # Check if we're actually losing this amount
     if symbol == "-":
         amount_to_modify *= -1
-        symbol = "" # The negative sign already shows up by virtue of it being a negative number
+        symbol = ""  # The negative sign already shows up by virtue of it being a negative number
 
     vars_by_name = utility.collect_vars_with_dicts(state)
     vars_by_name[modification_var]["value"] += amount_to_modify
     print("[" + symbol + str(amount_to_modify) + " " + utility.localize(modification_var) + "]")
+
 
 def eval_conditional(game, state, node):
     vars_by_name = utility.collect_vars_with_dicts(state)
 
     if isinstance(node, str):
         return eval(node, {}, utility.collect_vars(state))
-    elif isinstance(node, list): # Lists are automatically ANDS, unless they're part of an OR tag covered later
+    elif isinstance(node, list):  # Lists are automatically ANDS, unless they're part of an OR tag covered later
         condition = True
         for subnode in node:
             if not eval_conditional(game, state, subnode):
@@ -188,6 +203,7 @@ def eval_conditional(game, state, node):
                 if eval_conditional(game, state, subnode):
                     return True
             return False
+
 
 def step(game, state):
     if utility.get_curr_addr(state) == False:
@@ -301,7 +317,7 @@ def step(game, state):
         state["vars"]["flags"][curr_node["flag"]] = True
     elif "flavor" in curr_node:
         if state["settings"]["show_flavor_text"] != "never" and (state["visits"][utility.get_curr_addr(state)] <= 1 or state["settings"]["show_flavor_text"] == "always"):
-            if isinstance(curr_node["flavor"], str): # TODO: Allow style spec tag with flavor text
+            if isinstance(curr_node["flavor"], str):  # TODO: Allow style spec tag with flavor text
                 view.print_flavor_text(curr_node["flavor"])
             else:
                 set_curr_addr(state, utility.get_curr_addr(state) + ("flavor", 0))
@@ -322,12 +338,12 @@ def step(game, state):
         return True
     elif "if" in curr_node:
         exception_occurred = False
-        condition_value = None # Bool representing the end condition value
+        condition_value = None  # Bool representing the end condition value
         try:
             condition_value = eval_conditional(game, state, curr_node["if"])
         except Exception as e:
             exception_occurred = True
-            print(f"Warning, exception \"{e}\" occurred while evaluating if condition. Skipping if statement.")
+            print(f'Warning, exception "{e}" occurred while evaluating if condition. Skipping if statement.')
 
         if not exception_occurred:
             if condition_value:
@@ -351,7 +367,7 @@ def step(game, state):
             vars_by_name[curr_node["into"]]["value"][curr_node["insert"]] = {
                 "address": vars_by_name[curr_node["into"]]["address"],
                 # TODO: Locale!
-                "value": 0
+                "value": 0,
             }
         vars_by_name[curr_node["into"]]["value"][curr_node["insert"]]["value"] += amount
     elif "lose" in curr_node:
@@ -449,9 +465,9 @@ def step(game, state):
                 var_name = var_name[:-1].strip()
 
             var_name_indices = var_name.split("[")
-            last_var_to_modify = None # list
+            last_var_to_modify = None  # list
             var_to_modify = vars_by_name[var_name_indices[0]]
-            last_index = None # int
+            last_index = None  # int
             for index in var_name_indices[1:]:
                 last_index = int(index[:-1])
                 last_var_to_modify = var_to_modify
@@ -478,9 +494,9 @@ def step(game, state):
                     text_to_show_spec = {"op": "set", "amount": eval(var_expr_pair[1], {}, utility.collect_vars(state)), "var": vars_by_name[var_name_indices[0]]}
         else:
             if isinstance(curr_node["to"], (int, float)):
-                vars_by_name[curr_node["set"]]["value"] = curr_node["to"] # TODO: Allow setting to string literal values
+                vars_by_name[curr_node["set"]]["value"] = curr_node["to"]  # TODO: Allow setting to string literal values
             else:
-                vars_by_name[curr_node["set"]]["value"] = eval(curr_node["to"], {}, utility.collect_vars(state)) # TODO: Catch exceptions in case of syntax errors
+                vars_by_name[curr_node["set"]]["value"] = eval(curr_node["to"], {}, utility.collect_vars(state))  # TODO: Catch exceptions in case of syntax errors
 
         if "show" in curr_node:
             view.print_var_modification(text_to_show_spec)

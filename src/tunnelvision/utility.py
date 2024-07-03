@@ -2,6 +2,7 @@ from string import Formatter
 
 from tunnelvision import addressing
 
+
 class CustomFormatter(Formatter):
     def get_value(self, key, args, kwargs):
         # TODO: Support nested bags
@@ -15,14 +16,17 @@ class CustomFormatter(Formatter):
             return var_val
         else:
             return Formatter.get_value(self, key, args, kwargs)
+
+
 format = CustomFormatter()
+
 
 class VarDict(dict):
     def __contains__(self, key: object) -> bool:
         if isinstance(key, str) and len(key.split("__")) == 2:
             bag_name = key.split("__")[0]
             if super().__contains__(bag_name):
-                return True # Never raise missing reference for items as long as the bag exists
+                return True  # Never raise missing reference for items as long as the bag exists
             else:
                 return False
         else:
@@ -34,12 +38,12 @@ class VarDict(dict):
 
             if not key.split("__")[1] in bag_var["value"]:
                 # TODO: Remove this duplicate "default var creation" code
-                bag_var["value"][key.split("__")[1]] = {"address": bag_var["address"], "value": 0, "locale": key.split("__")[1]} # TODO: locale support
-            
+                bag_var["value"][key.split("__")[1]] = {"address": bag_var["address"], "value": 0, "locale": key.split("__")[1]}  # TODO: locale support
+
             return bag_var["value"][key.split("__")[1]]
         else:
             return super().__getitem__(key)
-    
+
     def __setitem__(self, key, value):
         if isinstance(key, str) and len(key.split("__")) == 2:
             bag_var = super().__getitem__(key.split("__")[0])
@@ -47,10 +51,11 @@ class VarDict(dict):
             if not key.split("__")[1] in bag_var["value"]:
                 # TODO: Remove this duplicate "default var creation" code
                 bag_var["value"][key.split("__")[1]] = {"address": bag_var["address"], "value": 0, "locale": key.split("__")[1]}
-            
+
             bag_var["value"][key.split("__")[1]]["value"] = value
         else:
             super().__setitem__(key, value)
+
 
 class VarDictValues(VarDict):
     def __getitem__(self, key):
@@ -61,16 +66,18 @@ class VarDictValues(VarDict):
         else:
             return var
 
+
 def get_var(var_dict, var_name, curr_address):
     if (curr_address in var_dict) and (var_name in var_dict[curr_address]):
         return var_dict[curr_address][var_name]
     else:
         if curr_address == ():
-            raise Exception() # TODO: Make exception more specific (missing reference)
+            raise Exception()  # TODO: Make exception more specific (missing reference)
 
         return get_var(var_dict, var_name, curr_address[:-1])
 
-def collect_vars_with_dicts(state, address = None):
+
+def collect_vars_with_dicts(state, address=None):
     var_dict = VarDict()
 
     if address is None:
@@ -83,7 +90,7 @@ def collect_vars_with_dicts(state, address = None):
 
             for var_name, var_spec in new_vars_dict.items():
                 var_dict[var_name] = var_spec
-    
+
     # Add module vars/other special vars
     for ind, val in state["vars"].items():
         if not isinstance(ind, tuple):
@@ -93,7 +100,7 @@ def collect_vars_with_dicts(state, address = None):
             var_dict[flag] = True
         else:
             var_dict[flag] = False
-    
+
     var_dict["_visits"] = state["visits"][address]
     var_dict["_num_choices"] = len(state["choices"])
     var_dict["_address"] = addressing.get_block_part(state["last_address"])
@@ -103,24 +110,27 @@ def collect_vars_with_dicts(state, address = None):
         var_dict["_previous_address"] = ()
     return var_dict
 
-def collect_vars(state, address = None):
+
+def collect_vars(state, address=None):
     var_dict = VarDictValues(collect_vars_with_dicts(state, address))
 
     return var_dict
+
 
 # TODO: Move to addressing
 def get_curr_addr(state):
     # If queue is empty, we're done
     if len(state["bookmark"]) == 0:
         return False
-    
+
     if len(state["bookmark"][0]) == 0:
         state["bookmark"] = state["bookmark"][1:]
         return get_curr_addr(state)
 
     return state["bookmark"][0][-1]
 
-def localize(var_name, address = None):
+
+def localize(var_name, address=None):
     if address is None:
         address = get_curr_addr(state)
     var_dict = collect_vars_with_dicts(state, address)
@@ -131,8 +141,9 @@ def localize(var_name, address = None):
     else:
         return var_name
 
+
 def parse_requirement_spec(text_spec):
-    vars_by_name = collect_vars_with_dicts(state) # I don't think this is used because we don't actually do the eval here
+    vars_by_name = collect_vars_with_dicts(state)  # I don't think this is used because we don't actually do the eval here
 
     paren_splits = []
     paren_state = 0
@@ -146,7 +157,7 @@ def parse_requirement_spec(text_spec):
         elif char == ")":
             paren_state -= 1
             if paren_state == 0:
-                paren_splits.append(text_spec[last_index:index + 1])
+                paren_splits.append(text_spec[last_index : index + 1])
                 last_index = index + 1
     paren_splits.append(text_spec[last_index:])
 
@@ -161,18 +172,18 @@ def parse_requirement_spec(text_spec):
                 non_grouped_specs.append(substring)
         else:
             non_grouped_specs.append(paren_split)
-    
+
     # Remove possible initial paren issue
     if non_grouped_specs[0] == "":
         non_grouped_specs = non_grouped_specs[1:]
 
     grouped_specs = []
     for index, non_grouped_spec in enumerate(non_grouped_specs):
-        if index % 2 == 0: # Case of an eval part
+        if index % 2 == 0:  # Case of an eval part
             grouped_specs.append({})
             grouped_specs[int(index / 2)]["amount"] = non_grouped_spec
-        else: # Case of a var part
+        else:  # Case of a var part
             # TODO: Use collect_vars?
             grouped_specs[int(index / 2)]["var"] = non_grouped_spec
-    
+
     return grouped_specs

@@ -16,7 +16,7 @@ def run(game_name):
     gameparser.add_module_vars(state)
     gameparser.parse_game()
 
-    def make_choice(game, state, new_addr, command = "start", is_action = False):
+    def make_choice(game, state, new_addr, command="start", is_action=False):
         state["bookmark"] = ()
         interpreter.make_bookmark(game, state, new_addr)
 
@@ -42,7 +42,7 @@ def run(game_name):
                 gameparser.remove_module_vars(state)
 
                 temp_game = copy.deepcopy(game)
-                temp_state = copy.deepcopy(state) # TODO: Store view!
+                temp_state = copy.deepcopy(state)  # TODO: Store view!
 
                 run("temp.yaml")
 
@@ -72,7 +72,7 @@ def run(game_name):
         command = view.get_input()
 
         if command[0] == "actions":
-            view.print_choices(True) # Print actions
+            view.print_choices(True)  # Print actions
         elif command[0] == "choices":
             view.print_choices()
         elif command[0] == "exit":
@@ -83,11 +83,13 @@ def run(game_name):
             else:
                 address_to_goto = None
                 try:
-                    address_to_goto = addressing.parse_addr(state["last_address_list"][-1], command[1]) # last_address_list should always be nonempty here since we just made a choice
-                except Exception as e: # TODO: Catch only relevant exceptions
+                    address_to_goto = addressing.parse_addr(
+                        state["last_address_list"][-1], command[1]
+                    )  # last_address_list should always be nonempty here since we just made a choice
+                except Exception as e:  # TODO: Catch only relevant exceptions
                     view.print_feedback_message("goto_invalid_address_given")
                 if not (address_to_goto is None):
-                    make_choice(game, state, address_to_goto) # TODO: Don't add to last_address_list for "back" command with gotos?
+                    make_choice(game, state, address_to_goto)  # TODO: Don't add to last_address_list for "back" command with gotos?
         elif command[0] == "help":
             view.print_feedback_message("help")
         elif command[0] == "inspect":
@@ -103,9 +105,7 @@ def run(game_name):
                 view.print_feedback_message("load_no_file_given")
                 continue
             try:
-                contents = pickle.loads(
-                    (saves / command[1]).with_suffix(".pkl").read_bytes()
-                )
+                contents = pickle.loads((saves / command[1]).with_suffix(".pkl").read_bytes())
             except FileNotFoundError:
                 view.print_feedback_message("load_invalid_file_given")
                 continue
@@ -169,7 +169,7 @@ def run(game_name):
                     else:
                         var_ref = utility.get_var(state["vars"], modification["var"], choice["choice_address"])
 
-                        var_ref["value"] += modification["amount"] # TODO: Print modifications
+                        var_ref["value"] += modification["amount"]  # TODO: Print modifications
 
                 make_choice(game, state, choice["address"], command, choice["action"])
         else:
