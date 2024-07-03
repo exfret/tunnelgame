@@ -55,7 +55,7 @@ def parse_addr(curr_addr, addr_id):
 
                 node = get_node(new_addr)
             except InvalidAddressError:
-                print("Invalid address " + str(path) + " at address " + str(curr_addr))
+                print(f"Invalid address {path} at address {curr_addr}")
                 raise InvalidAddressError()
         else:
             raise InvalidAddressError("Non-existent block address")

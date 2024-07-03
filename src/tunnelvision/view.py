@@ -52,14 +52,12 @@ class View:
         print()
 
     def print_table(self, tbl_to_display):
-        print("+" + "-" * (len(tbl_to_display[0]) + 2) + "+")
+        border = f"+-{'-' * len(tbl_to_display[0])}-+"
+        print(border)
         for row in tbl_to_display:
-            row_str = "| "
-            for col in row:
-                row_str += col
-            row_str += " |"
-            print(row_str)
-        print("+" + "-" * (len(tbl_to_display[0]) + 2) + "+")
+            row = map(str, row)
+            print(f"| {''.join(row)} |")
+        print(border)
 
     def print_text(self, text, style=""):
         ansi_code = "\033[0m"
@@ -80,11 +78,11 @@ class View:
     def print_var_modification(self, text_to_show_spec):
         operation_text = None
         if text_to_show_spec["op"] == "add":
-            print("[+" + str(text_to_show_spec["amount"]) + " " + text_to_show_spec["var"]["locale"] + "]")
+            print(f"[+{text_to_show_spec['amount']} {text_to_show_spec['var']['locale']}]")
         elif text_to_show_spec["op"] == "subtract":
-            print("[-" + str(text_to_show_spec["amount"]) + " " + text_to_show_spec["var"]["locale"] + "]")
+            print(f"[-{text_to_show_spec['amount']} {text_to_show_spec['var']['locale']}]")
         elif text_to_show_spec["op"] == "set":
-            print("[Set " + text_to_show_spec["var"]["locale"] + " to " + str(text_to_show_spec["amount"]) + "]")
+            print(f"[Set {text_to_show_spec['var']['locale']} to {text_to_show_spec['amount']}]")
         print()  # Print newline
 
     ######################################################################
@@ -120,7 +118,7 @@ class View:
                     expr_val = eval(cost["amount"], {}, var_dict_vals)
                     var_val = var_dict_vals[cost["var"]]
 
-                    effects_text += str(expr_val) + " " + localized_var + ", "
+                    effects_text += f"{expr_val} {localized_var}, "
                     if var_val < expr_val:
                         choice["missing"].append(localized_var)
                     choice["modifications"].append({"var": cost["var"], "amount": -expr_val})
@@ -133,7 +131,7 @@ class View:
                     expr_val = eval(req["amount"], {}, var_dict_vals)
                     var_val = var_dict_vals[req["var"]]
 
-                    effects_text += str(expr_val) + " " + localized_var + ", "
+                    effects_text += f"{expr_val} {localized_var}, "
                     if var_val < expr_val:
                         choice["missing"].append(localized_var)
                 effects_text = effects_text[:-2]
@@ -148,7 +146,7 @@ class View:
                     sign = ""
                     if expr_val > 0:
                         sign = "+"
-                    effects_text += sign + str(expr_val) + " " + localized_var + ", "
+                    effects_text += f"{sign}{expr_val} {localized_var}, "
                     choice["modifications"].append({"var": shown["var"], "amount": expr_val})
                 effects_text = effects_text[:-2]
                 effects_text += "]"
@@ -164,14 +162,14 @@ class View:
 
             text_for_choice = ""
             if choice["text"]:
-                text_for_choice = " " + choice["text"]
-            print("        " + text_color + " * " + new_text + choice_color + choice_id + text_color + text_for_choice + effects_text)
+                text_for_choice = f" {choice['text']}"
+            print(f"        {text_color} * {new_text}{choice_color}{choice_id}{text_color}{text_for_choice}{effects_text}")
             if len(choice["missing"]) > 0:
                 missing_text = "              Missing: "
                 for missing in choice["missing"]:
                     if isinstance(missing, dict):
                         if missing["type_missing"] == "bag":
-                            missing_text += missing["item"] + " in " + missing["bag_name"] + ", "
+                            missing_text += f"{missing['item']} in {missing['bag_name']}, "
                         else:  # The only special missing type right now is a bag
                             raise Exception()
                     else:
@@ -186,13 +184,13 @@ class View:
 
     def print_settings(self):
         for key in state["settings"].keys():
-            print(" * " + key)
+            print(f" * {key}")
 
     def print_settings_flavor_text_get(self):
-        print("Allowed values are 'always', 'once', and 'never'. The current value of this setting is '" + state["settings"]["show_flavor_text"] + "'")
+        print(f"Allowed values are 'always', 'once', and 'never'. The current value of this setting is '{state['settings']['show_flavor_text']}'")
 
     def print_settings_flavor_text_set(self, new_value):
-        print("Set show_flavor_text to '" + new_value + "'")
+        print(f"Set show_flavor_text to '{new_value}'")
 
     def print_var_value(self, var_value):
         print(var_value)

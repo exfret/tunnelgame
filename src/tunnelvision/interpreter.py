@@ -173,7 +173,7 @@ def do_shown_var_modification(modification, state, symbol, game):  # TODO: Remov
 
     vars_by_name = utility.collect_vars_with_dicts(state)
     vars_by_name[modification_var]["value"] += amount_to_modify
-    print("[" + symbol + str(amount_to_modify) + " " + utility.localize(modification_var) + "]")
+    print(f"[{symbol}{amount_to_modify} {utility.localize(modification_var)}]")
 
 
 def eval_conditional(game, state, node):
@@ -234,7 +234,7 @@ def step(game, state):
             do_shown_var_modification(curr_node["add"], state, "+", game)
         except Exception:
             # Just move on and do nothing if we get an exception, and print warning
-            print("WARNING: Exception occurred evaluating 'ADD' node at address " + utility.get_curr_addr(state))
+            print(f"WARNING: Exception occurred evaluating 'ADD' node at address {utility.get_curr_addr(state)}")
     elif "back" in curr_node:
         while True:
             if len(state["last_address_list"]) == 0:
@@ -374,7 +374,7 @@ def step(game, state):
         try:
             do_shown_var_modification(curr_node["lose"], state, "-", game)
         except Exception:
-            print("WARNING: Exception occurred evaluating 'LOSE' node at address " + utility.get_curr_addr(state))
+            print(f"WARNING: Exception occurred evaluating 'LOSE' node at address {utility.get_curr_addr(state)}")
     elif "once" in curr_node:
         if state["visits"][utility.get_curr_addr(state)] <= 1:
             if isinstance(curr_node["once"], str):
@@ -519,7 +519,7 @@ def step(game, state):
 
             return True
     else:
-        raise UnrecognizedInstruction("Unrecognized instruction: " + str(curr_node))
+        raise UnrecognizedInstruction(f"Unrecognized instruction: {curr_node}")
 
     state["bookmark"] = get_next_bookmark(game, state["bookmark"])
 
