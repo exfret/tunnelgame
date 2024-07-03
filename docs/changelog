@@ -1,4 +1,17 @@
-2024/6/29
+2024/7/3
+- Saving retains text in console/default view
+- Added autosaves (just once each choice for now)
+- Added repeat command
+
+2024/7/2
+- Added pytest test case for float vars
+- Added ability for vars to be floats (I think?)
+- Added choice parsing logic to gameloop as well since it was needed there, also moved some of it out of view
+
+2024/6/30
+- Interpreter instructions can now run gameloop commands; attempted the reverse direction, but that seems to be a bit more difficult
+- Added input command for inputting several commands at a time
+- Fixed missing conversion of yaml dump to utf-8 before write-bytes
 - Added "logical capabilities" section to user guide with a subsection on subroutines
 - Custom error handling for null blocks
 - Wrote a lot of tunnel story in new language (mostly intro stuff)

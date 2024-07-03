@@ -67,14 +67,17 @@ def open_game(game_name):
     starting_state = {
         "bookmark": (),  # bookmark is a queue (tuple) of call stacks (tuples) containing addresses (tuples)
         "call_stack": [],  # List of dicts with bookmarks and vars (TODO: Maybe do last_address_list and choices here too?)
+        "command_buffer": [],
         "choices": {
             "start": {"text": "Start the game", "address": ("_content", 0)},
         },  # Dict of choice ID's to new locations and descriptions
+        "displayed_text": "",
         "file_data": {
             "filename": "",
         },  # TODO: Include some sort of hash or name of game
         "last_address": (),
         "last_address_list": [],
+        "macros": {},
         "map": {},  # TODO: What was map again? I think it was the game object, probably need to implement this
         "metadata": {
             "node_types": {},

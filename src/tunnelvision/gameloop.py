@@ -6,15 +6,22 @@ import pickle
 from tunnelvision import addressing, interpreter, gameparser, utility
 from tunnelvision.config import saves
 
-
 def run(game_name):
     gameparser.open_game(game_name)
-    gameparser.construct_game(game)
-    gameparser.expand_macros(game)
-    gameparser.add_flags(game)
-    gameparser.add_vars_with_address(game, state, game, ())
-    gameparser.add_module_vars(state)
-    gameparser.parse_game()
+
+    def setup_game():
+        gameparser.construct_game(game)
+        gameparser.expand_macros(game)
+        gameparser.add_flags(game)
+        gameparser.add_vars_with_address(game, state, game, ())
+        gameparser.add_module_vars(state)
+        gameparser.parse_game()
+    setup_game()
+
+    def save_game(save_slot):
+        gameparser.remove_module_vars(state)
+        (saves / save_slot).with_suffix(".pkl").write_bytes(pickle.dumps(state))
+        gameparser.add_module_vars(state)
 
     def make_choice(game, state, new_addr, command="start", is_action=False):
         state["bookmark"] = ()
@@ -56,6 +63,42 @@ def run(game_name):
                 view.clear()
             else:
                 break
+        
+        # Update the choices now with proper costs and such
+        def update_choice_reqs():
+            # Choices now have cost_spec, req_spec, and shown_spec
+            # TODO: Evaluate missing at choice printing (here)
+
+            for choice_id, choice in state["choices"].items():
+                # Evaluate costs/requirements/shown
+                if not "missing" in choice:
+                    choice["missing"] = []
+                if not "modifications" in choice:
+                    choice["modifications"] = []
+
+                def parse_modification_spec(choice, spec_type):
+                    for modification in choice[spec_type]:
+                        var_dict_vals = utility.collect_vars(state, choice["choice_address"])
+                        var_val = var_dict_vals[modification["var"]]
+                        expr_val = eval(modification["amount"], {}, var_dict_vals)
+
+                        if spec_type == "require_spec" or spec_type == "cost_spec":
+                            if var_val < expr_val:
+                                choice["missing"].append(utility.localize(modification["var"], choice["choice_address"]))
+                        sign = 1
+                        if spec_type == "cost_spec":
+                            sign = -1
+                        if spec_type == "cost_spec" or spec_type == "shown_spec":
+                            choice["modifications"].append({"var": modification["var"], "amount": sign * expr_val})
+
+                        #choice[spec_type]["final_var"] = var_dict[modification["var"]]
+                        #choice[spec_type]["final_val"] = eval(modification["amount"], {}, var_dict_vals)
+
+                for spec_type in ["cost_spec", "req_spec", "shown_spec", "per_cost_spec", "per_req_spec", "per_shown_spec"]:
+                    if spec_type in choice and len(choice[spec_type]) > 0:
+                        parse_modification_spec(choice, spec_type)
+        
+        update_choice_reqs()
 
         # Only change where we were in the story for "proper" choices
         if not is_action:
@@ -69,12 +112,43 @@ def run(game_name):
         make_choice(game, state, state["choices"]["start"]["address"])
 
     while True:
-        command = view.get_input()
+        if len(state["command_buffer"]) == 0:
+            command = view.get_input()
+        else:
+            command = state["command_buffer"].pop(0)
 
         if command[0] == "actions":
             view.print_choices(True)  # Print actions
         elif command[0] == "choices":
             view.print_choices()
+        elif command[0] == "exec":
+            continue # Not yet implemented
+            if len(command) < 2:
+                view.print_feedback_message("exec_no_story_given")
+                continue
+            # Save game and state, then make the new game a "subgame" of the old one
+            old_game = copy.deepcopy(game)
+            gameparser.remove_module_vars(state)
+            old_state = copy.deepcopy(state)
+            new_game = None
+            try:
+                gameparser.open_game(command[1])
+                setup_game()
+                new_game = copy.deepcopy(game)
+            except Exception as e:
+                print(e)
+                view.print_feedback_message("exec_invalid_file_given")
+            finally:
+                game.clear()
+                game.update(old_game)
+                state.clear()
+                state.update(old_state)
+                gameparser.add_module_vars(state)
+            
+            # Check if we were able to load the new game
+            if new_game is not None:
+                game["_exec"] = new_game
+                make_choice(game, state, ("_exec",), command, True) # Do this as an action
         elif command[0] == "exit":
             break
         elif command[0] == "goto":
@@ -92,6 +166,12 @@ def run(game_name):
                     make_choice(game, state, address_to_goto)  # TODO: Don't add to last_address_list for "back" command with gotos?
         elif command[0] == "help":
             view.print_feedback_message("help")
+        elif command[0] == "input":
+            reconstructed_input = ""
+            for subcommand in command[1:]:
+                reconstructed_input += subcommand + " "
+            for subcommand in reconstructed_input.split(",")[::-1]:
+                state["command_buffer"].insert(0, subcommand.split())
         elif command[0] == "inspect":
             if len(command) < 2:
                 view.print_feedback_message("inspect_no_variable_given")
@@ -112,8 +192,25 @@ def run(game_name):
             state.clear()
             state.update(contents)
             gameparser.add_module_vars(state)
-            view.clear()
-            view.print_choices()
+            view.clear(True) # True doesn't reset saved text
+            view.print_displayed_text()
+        elif command[0] == "repeat":
+            if len(command) < 2:
+                view.print_feedback_message("repeat_no_num_times_given")
+                continue
+            elif len(command) < 3:
+                view.print_feedback_message("repeat_no_command_given")
+                continue
+            else:
+                num_repeats = 0
+
+                try:
+                    num_repeats = int(command[1])
+                except Exception:
+                    view.print_feedback_message("repeat_incorrect_num_times_format")
+                else:
+                    for i in range(num_repeats):
+                        state["command_buffer"].insert(0, command[2:])
         elif command[0] == "save":
             try:
                 save_slot = command[1]
@@ -122,9 +219,7 @@ def run(game_name):
             if not save_slot:
                 view.print_feedback_message("save_no_default_name_given")
                 continue
-            gameparser.remove_module_vars(state)
-            (saves / save_slot).with_suffix(".pkl").write_bytes(pickle.dumps(state))
-            gameparser.add_module_vars(state)
+            save_game(save_slot)
         elif command[0] == "set":
             if len(command) < 2:
                 view.print_feedback_message("set_no_variable_given")
@@ -153,11 +248,25 @@ def run(game_name):
                     else:
                         view.print_feedback_message("settings_flavor_invalid_val")
         elif command[0] in state["choices"]:
+            # First, save the state in an autosave after each choice
+            save_game("autosave")
+
             choice = state["choices"][command[0]]
             if not ("missing" in choice):
                 choice["missing"] = []
             if not ("modifications" in choice):
                 choice["modifications"] = []
+            
+            # Unfinished code, I should have committed before writing this since it started requiring large-scale changes that I wasn't ready to make
+            #def find_modifications_and_missing(choice, spec_type):
+            #    for spec in choice[spec_type]:
+            #        # First calculate things missing from cost or require
+            #        if not spec["final_var"] in choice["total_var_mods"]:
+            #            choice["total_var_mods"]["final_var"] = {"var": }
+            #        else:
+            #           pass
+            #choice["total_var_mods"] = {} # Dict with key as var_names, and including vars and modification values for cost, and requirements for require (evaluated first)
+            #for spec_type in ["cost_spec", "req_spec", "shown_spec", "per_cost_spec", "per_req_spec", "per_shown_spec"]:
 
             if len(choice["missing"]) > 0:
                 view.print_feedback_message("choice_missing_requirements")

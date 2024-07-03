@@ -1,0 +1,9 @@
+---
+_vars:
+  - test: 3.5
+_content:
+  - "{test}"
+  - choice: shop
+    cost: 0.8 test
+    effects:
+      - "{test}"

@@ -4,6 +4,8 @@ import textwrap
 from tunnelvision import utility
 
 feedback_msg = {
+    "exec_no_story_given": "Must give path to story to execute.",
+    "exec_invalid_file_given": "Invalid story given for exec.",
     "goto_invalid_address_given": "Incorrect address given.",
     "goto_no_address_given": "Must give an address.",
     "help": "Valid commands are 'actions', 'choices', 'exit', 'goto', 'help', 'inspect', 'load', 'save', 'set', and 'settings'.",
@@ -11,6 +13,9 @@ feedback_msg = {
     "inspect_no_variable_given": "Must give a variable to print the value of.",
     "load_invalid_file_given": "File to be loaded not found.",
     "load_no_file_given": "Must supply file to load.",
+    "repeat_no_num_times_given": "Must supply number of times to repeat command.",
+    "repeat_no_command_given": "Must supply a command to repeat.",
+    "repeat_incorrect_num_times_format": "Number times to repeat not an integer.",
     "save_no_default_name_given": "Must supply default save name.",
     "set_no_variable_given": "Must supply a variable to set the value of.",
     "set_no_value_given": "Must supply a new value for the variable.",
@@ -22,6 +27,14 @@ feedback_msg = {
     "unrecognized_command": "Unrecognized command/choice. Type 'help' for commands or 'choices' for a list of choices.",
     "default": "Error: Invalid feedback message key.",
 }
+
+
+old_print = print
+
+def print(text = ""):
+    state["displayed_text"] += text
+    old_print(text)
+
 
 # Story board (Left up) - Supports different views, currently just story view which displays story and flavor-related text
 # Stats board (Right up) - Will support buttons to change views of story board, currently just var changes
@@ -37,9 +50,15 @@ class View:
     ######################################################################
 
     # Clears console and story view
-    def clear(self):
+    def clear(self, dont_reset_displayed_text = False):
+        if not dont_reset_displayed_text:
+            state["displayed_text"] = ""
         os.system("clear")
 
+    # Reprints displayed text for save/loads
+    def print_displayed_text(self):
+        print(state["displayed_text"])
+    
     ######################################################################
     # Story board
     ######################################################################
@@ -48,7 +67,7 @@ class View:
         self.print_text(text)
 
     def print_separator(self):
-        print("——————————————————————————————————————————————————————————————————————————————————————————")
+        print("-" * 90)
         print()
 
     def print_table(self, tbl_to_display):
@@ -73,10 +92,13 @@ class View:
     ######################################################################
 
     def print_stat_change(self, text):
-        print(text)
+        displayed_text = text + "\n"
+        state["displayed_text"] += displayed_text + "\n"
+        print(displayed_text)
 
     def print_var_modification(self, text_to_show_spec):
         operation_text = None
+        new_text = ""
         if text_to_show_spec["op"] == "add":
             print(f"[+{text_to_show_spec['amount']} {text_to_show_spec['var']['locale']}]")
         elif text_to_show_spec["op"] == "subtract":
@@ -93,10 +115,11 @@ class View:
         # Choices now have cost_spec, req_spec, and shown_spec
         # TODO: Evaluate missing at choice printing (here)
 
+        text_to_display = ""
         if not display_actions:
-            print("\n        Choices...")
+            text_to_display += "\n        Choices...\n"
         else:
-            print("\n        Actions...")
+            text_to_display += "\n        Actions...\n"
         for choice_id, choice in state["choices"].items():
             # Display only actions/choices, whichever is selected
             if not display_actions and choice["action"]:
@@ -104,52 +127,37 @@ class View:
             if display_actions and not choice["action"]:
                 continue
 
-            # Evaluate costs/requirements/shown
-            if not "missing" in choice:
-                choice["missing"] = []
-            if not "modifications" in choice:
-                choice["modifications"] = []
             var_dict_vals = utility.collect_vars(state, choice["choice_address"])
+
+            # Evaluate costs/requirements/shown
+            # This is sorta duplicated between here and gameloop
+            # TODO: Un-duplicate this
+            def parse_modification_spec(choice, spec, spec_type):
+                effects_text = ""
+                if spec_type == "cost":
+                    effects_text = "\033[0m [\033[31mCost:\033[0m "
+                if spec_type == "require":
+                    effects_text = "\033[0m [\033[38;2;255;165;0mRequired:\033[0m "
+                if spec_type == "shown":
+                    effects_text = "\033[0m [\033[34mEffects:\033[0m "
+                for modification in spec:
+                    expr_val = eval(modification["amount"], {}, var_dict_vals)
+                    sign = ""
+                    if expr_val >= 0:
+                        sign = "+"
+                    if spec_type == "require":
+                        sign = ""
+                    effects_text += f"{sign}{expr_val} {utility.localize(modification["var"], choice["choice_address"])}, "
+                effects_text = effects_text[:-2]
+                effects_text += "]"
+                return effects_text
             effects_text = ""
             if "cost_spec" in choice and len(choice["cost_spec"]) > 0:
-                effects_text += "\033[0m [\033[31mCost:\033[0m "
-                for cost in choice["cost_spec"]:
-                    localized_var = utility.localize(cost["var"], choice["choice_address"])
-                    expr_val = eval(cost["amount"], {}, var_dict_vals)
-                    var_val = var_dict_vals[cost["var"]]
-
-                    effects_text += f"{expr_val} {localized_var}, "
-                    if var_val < expr_val:
-                        choice["missing"].append(localized_var)
-                    choice["modifications"].append({"var": cost["var"], "amount": -expr_val})
-                effects_text = effects_text[:-2]
-                effects_text += "]"
+                effects_text += parse_modification_spec(choice, choice["cost_spec"], "cost")
             if "req_spec" in choice and len(choice["req_spec"]) > 0:
-                effects_text += "\033[0m [\033[38;2;255;165;0mRequired:\033[0m "
-                for req in choice["req_spec"]:
-                    localized_var = utility.localize(req["var"], choice["choice_address"])
-                    expr_val = eval(req["amount"], {}, var_dict_vals)
-                    var_val = var_dict_vals[req["var"]]
-
-                    effects_text += f"{expr_val} {localized_var}, "
-                    if var_val < expr_val:
-                        choice["missing"].append(localized_var)
-                effects_text = effects_text[:-2]
-                effects_text += "]"
+                effects_text += parse_modification_spec(choice, choice["req_spec"], "require")
             if "shown_spec" in choice and len(choice["shown_spec"]) > 0:
-                effects_text += "\033[0m [\033[34mEffects:\033[0m "
-                for shown in choice["shown_spec"]:
-                    localized_var = utility.localize(shown["var"], choice["choice_address"])
-                    expr_val = eval(shown["amount"], {}, var_dict_vals)
-                    var_val = var_dict_vals[shown["var"]]
-
-                    sign = ""
-                    if expr_val > 0:
-                        sign = "+"
-                    effects_text += f"{sign}{expr_val} {localized_var}, "
-                    choice["modifications"].append({"var": shown["var"], "amount": expr_val})
-                effects_text = effects_text[:-2]
-                effects_text += "]"
+                effects_text += parse_modification_spec(choice, choice["shown_spec"], "shown")
 
             choice_color = "\033[32m"
             text_color = "\033[0m"
@@ -178,11 +186,16 @@ class View:
                 print(missing_text)
 
     def print_feedback_message(self, msg_type):
+        displayed_text = ""
         if not (msg_type in feedback_msg):
-            print(feedback_msg["default"])
-        print(feedback_msg[msg_type])
+            displayed_text += feedback_msg["default"]
+        else:
+            displayed_text += feedback_msg[msg_type]
+        state["displayed_text"] += displayed_text + "\n"
+        print(displayed_text)
 
     def print_settings(self):
+        displayed_text = ""
         for key in state["settings"].keys():
             print(f" * {key}")
 
@@ -231,7 +244,7 @@ class ViewForTesting:
     def clear(self):
         self.commands_called.append({"id": "clear"})
 
-    def print_choices(self):
+    def print_choices(self, display_actions = False):
         self.commands_called.append({"id": "print_choices"})
 
     def print_feedback_message(self, msg_type):

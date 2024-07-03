@@ -286,12 +286,18 @@ def step(game, state):
         text = ""
         if "text" in curr_node:
             text = curr_node["text"]
-        if "require" in curr_node:
-            state["choices"][curr_node["choice"]]["req_spec"] = utility.parse_requirement_spec(curr_node["require"])
         if "cost" in curr_node:
             state["choices"][curr_node["choice"]]["cost_spec"] = utility.parse_requirement_spec(curr_node["cost"])
+        if "require" in curr_node:
+            state["choices"][curr_node["choice"]]["req_spec"] = utility.parse_requirement_spec(curr_node["require"])
         if "shown" in curr_node:
             state["choices"][curr_node["choice"]]["shown_spec"] = utility.parse_requirement_spec(curr_node["shown"])
+        if "per_cost" in curr_node:
+            state["choices"][curr_node["choice"]]["per_cost_spec"] = utility.parse_requirement_spec(curr_node["per_cost"])
+        if "per_require" in curr_node:
+            state["choices"][curr_node["choice"]]["per_req_spec"] = utility.parse_requirement_spec(curr_node["per_require"])
+        if "per_shown" in curr_node:
+            state["choices"][curr_node["choice"]]["per_shown_spec"] = utility.parse_requirement_spec(curr_node["per_shown"])
 
         effect_address = ""
         if not "effects" in curr_node:
@@ -311,6 +317,10 @@ def step(game, state):
         state["choices"][curr_node["choice"]]["modifications"] = modify_list
         state["choices"][curr_node["choice"]]["choice_address"] = utility.get_curr_addr(state)
         state["choices"][curr_node["choice"]]["action"] = is_action
+    elif "command" in curr_node:
+        commands = curr_node["command"].split(";")
+        for subcommand in commands:
+            state["command_buffer"].append(subcommand.split())
     elif "error" in curr_node:
         raise ErrorNode("Error raised.")
     elif "flag" in curr_node:
@@ -442,7 +452,7 @@ def step(game, state):
         addr = utility.get_curr_addr(state)
         contents = utility.get_var(state["vars"], curr_node["run"], addr)["value"]
         temp_yaml = stories / "temp.yaml"
-        temp_yaml.write_bytes(yaml.dump(contents))
+        temp_yaml.write_bytes(yaml.dump(contents).encode('utf-8'))
 
         state["msg"]["signal_run_statement"] = True
 

@@ -1,3 +1,4 @@
 from gameloop import run
 
-run("exploration_basic_3.yaml")
+def main():
+    run("exploration_basic_3.yaml")

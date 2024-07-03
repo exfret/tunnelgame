@@ -1,7 +1,17 @@
 Currently:
   - Bags have vars inside of them, not values (I think this is actually done but gotta check)
   - Set statements and requirement specifications with vars (pull out requirement spec parsing into utility)
+  - per_cost etc. logic
+  - Save text with state
 
+108. Overwrite confirmation for saving over an old file?
+107. Default load value too?
+106. State organization overhaul?
+105. Exception handling when load tries to load something from a different story
+104. Implement pytest test cases for shops
+103. Catch exceptions from run command
+102. Colored title text for intro
+101. Print unlock function
 100. Going back with story re-running
 99. Make headers/footers proper blocks too
 98. Execute command for executing instructions from command console (more flexibility with changing state, etc.)
@@ -43,18 +53,17 @@ Currently:
 43. Automatic log of variable changes
 42. Interrupts when commands take too long (maybe test if the number of visits goes up too high).
 41. Pausing on repeat commands when, for example, you no longer have the materials for something, so it doesn't just spam console (maybe also a "max" option)
-36. Autosaves and overwrite confirmation
 26. Cost checking with passed args
 21. Setting for showing non-taken choices or not
 20. Player-defined macros via command line
-19. Repeat command to do something many times
 18. Autocomplete for commands
-15. Show off subroutine capabilities with time advancing subroutine
 13. Allow specification file for author-defined commands
-12. If a variable doesn't exist, still instantiate it, but give a warning.
-7. Allow float vars
 
 DONE
+36. Autosaves
+19. Repeat command to do something many times
+15. Show off subroutine capabilities with time advancing subroutine
+7. Allow float vars with costs and such
 72. Flag command that raises a new boolean var
 62. Master _requirement_specification parsing function
 60. What to do about vars that change after costs are evaluated? (Figured this out, costs are now evaluated on choice presentation)
@@ -89,6 +98,7 @@ DONE
 1. Checking that story is formatted correctly
 
 NOT DOING
+12. If a variable doesn't exist, still instantiate it, but give a warning
 76. Change _vars to dict
 55. Remove underscores and use protected keywords instead
 49. Introduce type annotations (learn them)

@@ -117,3 +117,14 @@ def test_game_objects(view):
     view.update_choice_list([])
     run("test/game_objects/simple_bags.yaml")
     assert view.get_text_commands_called() == ["0", "2", "2"]
+
+
+######################################################################
+# vars
+######################################################################
+
+
+def test_floats(view):
+    view.update_choice_list(["shop"])
+    run("test/vars/floats.yaml")
+    assert view.get_text_commands_called() == ["3.5", "2.7"]

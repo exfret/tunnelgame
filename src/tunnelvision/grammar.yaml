@@ -53,6 +53,7 @@ DICT_INSTR:
     back: BACK
     call: CALL
     choice: CHOICE
+    command: COMMAND
     error: ERROR
     flag: FLAG
     flavor: FLAVOR
@@ -99,6 +100,10 @@ EFFECTS_SPEC:
   type: union_with_types
   str: _addr
   list: CONTENT
+COMMAND:
+  type: dict
+  mandatory:
+    command: _text
 ERROR:
   type: dict
   mandatory:
