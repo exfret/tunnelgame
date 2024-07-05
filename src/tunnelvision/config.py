@@ -19,6 +19,8 @@ local_dir = Path(__file__).parent
 stories = local_dir / "stories"
 saves = local_dir / "saves"
 grammar = yaml.safe_load((local_dir / "grammar.yaml").read_text())
+max_num_steps = 20000
+choices_between_autosaves = 20
 
 
 ###########################################################

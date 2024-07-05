@@ -1,0 +1,18 @@
+---
+_vars:
+  - coin: 5
+  - item: 0
+_content:
+  - "{coin}"
+  - "{item}"
+  - choice: buy
+    cost: 3 coin
+    shown: 1 item
+    effects:
+      - bought
+      - goto: .
+  - choice: use
+    require: 1 item
+    effects:
+      - used
+      - goto: .

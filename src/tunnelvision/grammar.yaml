@@ -60,6 +60,7 @@ DICT_INSTR:
     gosub: GOSUB
     goto: GOTO
     if: IF
+    inject: INJECT
     insert: INSERT
     lose: LOSE
     once: ONCE
@@ -91,6 +92,7 @@ CHOICE:
     choice: _text # Custom checking
   optional:
     action: _null
+    selectable_once: _null
     text: _text
     require: _requirement_specification
     cost: _requirement_specification
@@ -158,6 +160,12 @@ CONDITION_HAS:
     in: _var_id
   optional:
     amount: _num_expr
+INJECT:
+  type: dict
+  mandatory:
+    inject: _addr
+  optional:
+    into_choices: _text
 INSERT:
   type: dict
   mandatory:

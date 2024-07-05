@@ -9,10 +9,13 @@ _vars:
   - tunnel_pass: training
   # Research vars
   - research_botany_1_chapter: 0
+  - research_reading_1_chapter: 0
   # Skill vars
   - skill_lemen: 3
     _locale: Lemen Gathering Skill
   # Inventory vars
+  - coin: 0
+    _locale: Coin
   - lemens: 0
     _locale: Lemens
   - rosalia: 0
@@ -21,7 +24,7 @@ _vars:
   - time_last_explored: 0
   - time_next_training: 0
 _content:
-  - command: input ready, walk, gather, return, next, exciting, give, next
+  #- command: input ready, walk, gather, return, next, exciting, give, next
   - goto: tunnel/training/first_journey/george_waiting
 _header:
   - choice: encyclopedia
@@ -42,6 +45,8 @@ _header:
         plants:
           - Flowers...
           - "\tRosalia: {rosalia}"
+        prized:
+          - TODO
         _default:
           - That's not a valid option for inventory. Valid options are "plants" to see plants and "prized" to see prized possessions.
 organization:
@@ -53,12 +58,19 @@ logic:
   time:
     _content:
       - set: time += 1
+      - A day passes...
+      # Checks for "environment" vars
       - if: 'tunnel_pass == "training" and not on_training_expedition and time_next_training <= time'
         then:
           - set: is_expedition_day = True
           - It's time for you to train in the Tunnel again! Meet George in his room.
         else:
           - set: is_expedition_day = False
+      # Unlocks
+      - if: time == 10
+        then:
+          - A new book has arrived at the orphanage study.
+          - flag: orphanage_study_unlocked_reading_1
 orphanage:
   _content:
     - set: on_training_expedition = False # TODO: Do I need to make sure training expedition is false anywhere else?
@@ -75,6 +87,7 @@ orphanage:
     - if: time % 7 == 5 # Thursday is work day again
       then:
         - goto: days/work
+    # Saturday/Sunday special?
     - goto: rooms/personal
   admin:
     _content:
@@ -86,6 +99,10 @@ orphanage:
         text: Go to the bedrooms
       - choice: study
         text: Visit the orphanage's study
+      - if: unlocked_courtyard_key
+        then:
+          - choice: courtyard
+            text: Go to the courtyard
       #- choice: courtyard
       #  text: Visit the orphanage's courtyard
     study:
@@ -101,27 +118,42 @@ orphanage:
             - You have a feeling that studying today would be have grave consequences, so you decide to leave.
             - separator:
             - goto: ..
+        - choice: common
+          text: Return to the commons area
+          effects: ..
         - choice: botany
           text: Read the textbook on Botany I
           effects:
-            - if: is_expedition_day
-              then:
-                - You might miss your expedition with George if you spend the day reading. Are you sure?
-                - choice: "yes"
-                  effects:
-                    - George abandons you and you grow up, get kicked out of the orphanage, then starve.
-                    - I guess you're just not cut out for Tunneling are ya?
-                    - The End
-                    - flag: study_on_expedition_day_undo
-                    - choice: undo
-                      effects: .
-                - choice: "no"
-                  effects: .
-              else:
-                - goto: botany_1
+            - goto: botany_1
+        - if: orphanage_study_unlocked_reading_1
+          then:
+            - choice: reading
+              text: Read the textbook on Reading I
+              effects:
+                - goto: reading_1
+        - inject: miss_expedition_inject
+          into_choices: botany reading
+      miss_expedition_inject:
+        _content:
+          - if: is_expedition_day
+            then:
+              - goto: miss_expedition
+      miss_expedition:
+        _content:
+          - You might miss your expedition with George if you spend the day reading. Are you sure?
+          - choice: "yes"
+            effects:
+              - George abandons you and you grow up, get kicked out of the orphanage, then starve.
+              - I guess you're just not cut out for Tunneling are ya?
+              - The End
+              - flag: study_on_expedition_day_undo
+              - choice: undo
+                effects: ../..
+          - choice: "no"
+            effects: ..
       botany_1:
         _content:
-          - You spend the day reading.
+          - You spend the day reading about plants.
           - switch: research_botany_1_chapter
             "0":
               - The first section is just a preface about the beauty of plants in the Tunnel. It goes over the author's love for the different flowers, which is why this first volume of his series on plants is devoted to them. They are also the most common useful type of plant to gather from the first layer of the Tunnel, which is why it's important to learn about them.
@@ -140,10 +172,33 @@ orphanage:
               - goto: /orphanage
       reading_1:
         _content:
-          - pass:
+          - You spend the day reading about reading.
+          - switch: research_reading_1_chapter
+            "1":
+              - The first chapter is a bit basic, you already know the alphabet and a good number of words, which is all it goes over.
+          - set: research_reading_1_chapter += 1
+          - choice: next
+            effects:
+              - gosub: /logic/time
+              - goto: /orphanage
     courtyard:
       _content:
-        - pass:
+        - The courtyard holds the small graveyard and a pond surrounded by slimy stones. The water is stagnant full of algae. You've never seen fish in it.
+        - choice: common
+          text: Go back to the commons hallway
+          effects: ..
+        - choice: read
+          text: Read the graves
+          effects:
+            - The older gravestones from back when the orphanage was prosperous have very ornate carvings, but recent ones don't even have the name of the deceased.
+            - separator:
+            - goto: .
+        - choice: pond
+          text: Examine the pond
+          effects:
+            - You check if a fish has magically appeared in the pond today, but there still aren't any there.
+            - separator:
+            - goto: .
   lobby:
     _content:
       - You're in the lobby.
@@ -225,6 +280,10 @@ orphanage:
         - choice: sleep
           text: Sleep the day away
           effects:
+            - if: is_expedition_day
+              then:
+                - You're too excited for the expedition to sleep!
+                - goto: .
             - gosub: /logic/time
             - goto: /orphanage
         - if: time - last_time_made_bed > 0
@@ -326,6 +385,7 @@ orphanage:
         - switch: _visits
           "1": first_work
           "2": second_work
+          "3": third_work
         # Don't do work day if the player explored recently
         #- if: time <= time_last_explored + 1
         #  then:
@@ -384,6 +444,51 @@ orphanage:
             effects:
               - gosub: /logic/time
               - goto: /orphanage
+      third_work:
+        _content:
+          - This time at the farm, Jaz, another orphan, approaches you. She's known for being somewhat nefarious, and has been caught several times stealing from the farm. She was almost kicked out of the orphanage.
+          - Just like you, her face is covered in freckles, and she's wearing a mischievous grin when she walks up to you in the field. "Hey", she says, "You should help me with something!"
+          - choice: reject
+            text: Nah
+            effects:
+              - She gawks, "What?! But you haven't even heard what it was!"
+              - choice: listen
+                text: Hear her out
+                effects: plan
+              - choice: nope
+                text: Go away
+                effects:
+                  - She huffs off. Better to stay away than get in trouble with her. The rest of the work day goes smoothly.
+                  - choice: next
+                    effects:
+                      - gosub: /logic/time
+                      - goto: /orphanage
+          - choice: accept
+            text: Sure
+            effects: plan
+        plan:
+          _content:
+            - She explains the plan... since she gets checked if she stole anything after each shift, she'll do the sneaky swiping some of the farmer's coin, and you'll pocket it for off the farm. "It's genius, trust me!" She exclaims.
+            - choice: accept
+            - choice: reject
+        accept:
+          _content:
+            - After you accept, she scurries off to find some goods to steal from the farmhouse before lunch. Then, at lunch, she slides you 30 coins. That's quite a lot!
+            - set: coin += 30
+              show:
+            - flag: orphanage_third_work_accepted_jaz_coins
+            - At the end of the day, Jaz is checked for coins. Of course, they find none; you have all of them.
+            - choice: next
+              effects:
+                - gosub: /logic/time
+                - goto: /orphanage
+        reject:
+          _content:
+            - She huffs off, mad that you didn't accept her deal. The rest of the work day goes smoothly.
+            - choice: next
+              effects:
+                - gosub: /logic/time
+                - goto: /orphanage
 tunnel:
   _header:
     - set: time_last_explored = time
@@ -424,10 +529,12 @@ tunnel:
                   - The necklace is all you have left of your parents. You remember little of them.
                   - On the other hand, the hairs knotted to the necklace are tied to a vivid memory. An orphan girl wailing just outside the doorway for a room in winter. Usually, the temperature in the Dome wasn't too bad, but that year was brutal. Director Dicky, the owner of the orphanage, refused to let her in since the place was already so full, and she later became unresponsive and motionless. To his credit, Dicky did let her in at last... to a small graveyard in the orphanage.
                   - You vow to become a great Tunnel explorer, someone who brings back riches and glory. That way, you can provide the funds for anyone to be taken in. You snuck a lock of hair you cut from the poor girl's head as a symbol of your promise.
+                  - separator:
                   - goto: .
           - choice: ready
             text: Tell George that I'm ready
             effects:
+              - set: on_training_expedition = True
               - goto: leave_orphanage
       leave_orphanage:
         _content:
@@ -488,15 +595,49 @@ tunnel:
           - choice: snatch
             text: Snatch some rosalia quickly
             effects:
-              - You don't gather as much
-          - set: lemen += skill_lemen
-            show:
+              - You don't gather as many lemens because the rosalia was a lot further away than you expected. At least you get some rosalia.
+              - flag: training_second_journey_gathered_rosalia
+              - set: lemens += skill_lemen
+                show:
+              - set: rosalia += 3
+                show:
+              - goto: reconvene
+          - choice: focus
+            text: Focus on gathering the lemens
+            effects:
+              - You focus on gathering the lemens and are able to be quite productive.
+              - set: lemens += 3 * skill_lemen
+                show:
+              - goto: reconvene
+      reconvene:
+        _content:
+          - You reconvene with George.
+          - if: training_second_journey_gathered_rosalia
+            then:
+              - George notices you didn't gather as many lemens as him, so he offers some of his.
+              - choice: tell
+                text: Tell George about getting distracted by the rosalia
+                effects:
+                  # TODO: A later encounter that is dangerous/has consequences if you wander off
+                  - George frowns. "You should follow my lead in the Tunnel, things can get dangerous if you wander off to other places."
+                  - goto: leave
+              - choice: silent
+                text: Stay silent about the rosalia
+                effects:
+                  - George hands you half of his lemens. He has a lot of lemens.
+                  - set: lemens += 12
+                    show:
+                  - goto: leave
+            else:
+              - goto: leave
+      leave:
+        _content:
           - separator:
           - gosub: /logic/time
           - The next day, it's time to head back. You feel sad, but this time you got to spend almost a whole week away from the orphanage, so you really can't complain.
           - choice: return
             effects:
-              - gosub: /logic/time
+              # Technically, it should take 2 days to get back, but it's more convenient to the plot to do only 1 since then they can come back on a workday
               - set: time_next_training = time + 6
               - gosub: /logic/time
               - separator:

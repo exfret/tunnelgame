@@ -30,7 +30,7 @@ def view():
 
 # Just make sure the examples compile
 def test_examples():
-    for story_yaml in (stories / "examples").glob("*.yaml"):
+    for story_yaml in (stories / "examples").rglob("*.yaml"):
         run(str(story_yaml.relative_to(stories)))
 
 
@@ -62,6 +62,12 @@ def test_list_block(view):
 def test_print_with_vars(view):
     run("test/basic_syntax/print_with_vars.yaml")
     assert view.get_text_commands_called() == ["Hello, World!"]
+
+
+def test_shop(view):
+    view.update_choice_list(["use", "buy", "buy", "use"])
+    run("test/basic_syntax/shop.yaml")
+    assert view.get_text_commands_called() == ["5", "0", "bought", "2", "1", "used", "2", "1"]
 
 
 def test_set_instr(view):

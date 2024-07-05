@@ -65,6 +65,9 @@ class VarDictValues(VarDict):
             return var["value"]
         else:
             return var
+    
+    def __setitem__(self, key, value):
+        super().__setitem__(key, value)
 
 
 def get_var(var_dict, var_name, curr_address):
@@ -140,6 +143,10 @@ def localize(var_name, address=None):
         return var["locale"]
     else:
         return var_name
+
+
+def create_choice(text, address):
+    return {"text": text, "address": address, "choice_address": (), "action": False, "missing": [], "modifications": []}
 
 
 def parse_requirement_spec(text_spec):

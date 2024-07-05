@@ -1,0 +1,13 @@
+---
+_content:
+  - choice: hi
+    effects:
+      - Did it inject?
+  - choice: bye
+    effects:
+      - Blop
+  - inject: inject
+    into_choices: hi
+inject:
+  _content:
+    - Injected!

@@ -1,3 +1,12 @@
+2024/7/4
+- Added injection instruction, which adds instructions to matching choices
+- Added histories and revert command
+- Added selectable_once tag for choices (makes it so choice can only be run once)
+- Added interrupts when too many instructions are run before the next choice (currently at 10000)
+- Fixed misuse of glob where rglob was correct in test_stories
+- Added pytest "shop" test
+- Fixed bug with print in view.py not converting to string before appending to displayed_text
+
 2024/7/3
 - Saving retains text in console/default view
 - Added autosaves (just once each choice for now)

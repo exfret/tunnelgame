@@ -20,14 +20,17 @@ def add_stack(game, state, address, partial_address):
         state["bookmark"] = state["bookmark"] + ((partial_address + ("_header", 0),),)
 
 
-def make_bookmark(game, state, address):
+def make_bookmark(game, state, address, injections = []):
     partial_address = ()
     add_stack(game, state, address, partial_address)
     for tag in address:
         partial_address = partial_address + (tag,)
         add_stack(game, state, address, partial_address)
 
-    # Add the _content node
+    for inj in injections:
+        state["bookmark"] = state["bookmark"] + ((inj,),)
+
+    # Add the actual instruction we're going to
     state["bookmark"] = state["bookmark"] + ((address,),)
 
 
@@ -277,46 +280,47 @@ def step(game, state):
 
         return True
     elif "choice" in curr_node:
-        vars_by_name = utility.collect_vars_with_dicts(state)
+        if not "selectable_once" in curr_node or not utility.get_curr_addr(state) in state["visits_choices"] or state["visits_choices"][utility.get_curr_addr(state)] == 0:
+            vars_by_name = utility.collect_vars_with_dicts(state)
 
-        state["choices"][curr_node["choice"]] = {}
+            state["choices"][curr_node["choice"]] = {}
 
-        missing_list = []
-        modify_list = []
-        text = ""
-        if "text" in curr_node:
-            text = curr_node["text"]
-        if "cost" in curr_node:
-            state["choices"][curr_node["choice"]]["cost_spec"] = utility.parse_requirement_spec(curr_node["cost"])
-        if "require" in curr_node:
-            state["choices"][curr_node["choice"]]["req_spec"] = utility.parse_requirement_spec(curr_node["require"])
-        if "shown" in curr_node:
-            state["choices"][curr_node["choice"]]["shown_spec"] = utility.parse_requirement_spec(curr_node["shown"])
-        if "per_cost" in curr_node:
-            state["choices"][curr_node["choice"]]["per_cost_spec"] = utility.parse_requirement_spec(curr_node["per_cost"])
-        if "per_require" in curr_node:
-            state["choices"][curr_node["choice"]]["per_req_spec"] = utility.parse_requirement_spec(curr_node["per_require"])
-        if "per_shown" in curr_node:
-            state["choices"][curr_node["choice"]]["per_shown_spec"] = utility.parse_requirement_spec(curr_node["per_shown"])
+            missing_list = []
+            modify_list = []
+            text = ""
+            if "text" in curr_node:
+                text = curr_node["text"]
+            if "cost" in curr_node:
+                state["choices"][curr_node["choice"]]["cost_spec"] = utility.parse_requirement_spec(curr_node["cost"])
+            if "require" in curr_node:
+                state["choices"][curr_node["choice"]]["req_spec"] = utility.parse_requirement_spec(curr_node["require"])
+            if "shown" in curr_node:
+                state["choices"][curr_node["choice"]]["shown_spec"] = utility.parse_requirement_spec(curr_node["shown"])
+            if "per_cost" in curr_node:
+                state["choices"][curr_node["choice"]]["per_cost_spec"] = utility.parse_requirement_spec(curr_node["per_cost"])
+            if "per_require" in curr_node:
+                state["choices"][curr_node["choice"]]["per_req_spec"] = utility.parse_requirement_spec(curr_node["per_require"])
+            if "per_shown" in curr_node:
+                state["choices"][curr_node["choice"]]["per_shown_spec"] = utility.parse_requirement_spec(curr_node["per_shown"])
 
-        effect_address = ""
-        if not "effects" in curr_node:
-            effect_address = addressing.parse_addr(utility.get_curr_addr(state), curr_node["choice"])
-        else:
-            effect_address = utility.get_curr_addr(state) + ("effects", 0)
-            if isinstance(curr_node["effects"], str):
-                effect_address = addressing.parse_addr(utility.get_curr_addr(state), curr_node["effects"])
+            effect_address = ""
+            if not "effects" in curr_node:
+                effect_address = addressing.parse_addr(utility.get_curr_addr(state), curr_node["choice"])
+            else:
+                effect_address = utility.get_curr_addr(state) + ("effects", 0)
+                if isinstance(curr_node["effects"], str):
+                    effect_address = addressing.parse_addr(utility.get_curr_addr(state), curr_node["effects"])
 
-        is_action = False
-        if "action" in curr_node:
-            is_action = True
+            is_action = False
+            if "action" in curr_node:
+                is_action = True
 
-        state["choices"][curr_node["choice"]]["text"] = text
-        state["choices"][curr_node["choice"]]["address"] = effect_address
-        state["choices"][curr_node["choice"]]["missing"] = missing_list
-        state["choices"][curr_node["choice"]]["modifications"] = modify_list
-        state["choices"][curr_node["choice"]]["choice_address"] = utility.get_curr_addr(state)
-        state["choices"][curr_node["choice"]]["action"] = is_action
+            state["choices"][curr_node["choice"]]["text"] = text
+            state["choices"][curr_node["choice"]]["address"] = effect_address
+            state["choices"][curr_node["choice"]]["missing"] = missing_list
+            state["choices"][curr_node["choice"]]["modifications"] = modify_list
+            state["choices"][curr_node["choice"]]["choice_address"] = utility.get_curr_addr(state)
+            state["choices"][curr_node["choice"]]["action"] = is_action
     elif "command" in curr_node:
         commands = curr_node["command"].split(";")
         for subcommand in commands:
@@ -364,6 +368,14 @@ def step(game, state):
                 set_curr_addr(state, utility.get_curr_addr(state) + ("else", 0))
 
                 return True
+    elif "inject" in curr_node:
+        if "into_choices" in curr_node:
+            choices_to_inject_into = curr_node["into_choices"].split()
+            for choice_id in choices_to_inject_into:
+                if choice_id in state["choices"]:
+                    if not "injections" in state["choices"][choice_id]:
+                        state["choices"][choice_id]["injections"] = []
+                    state["choices"][choice_id]["injections"].append(addressing.parse_addr(utility.get_curr_addr(state), curr_node["inject"]))
     elif "insert" in curr_node:
         vars_by_name = utility.collect_vars_with_dicts(state)
 

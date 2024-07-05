@@ -2,8 +2,9 @@ Currently:
   - Bags have vars inside of them, not values (I think this is actually done but gotta check)
   - Set statements and requirement specifications with vars (pull out requirement spec parsing into utility)
   - per_cost etc. logic
-  - Save text with state
 
+110. Revert command
+109. Attach which game "id" each save is from
 108. Overwrite confirmation for saving over an old file?
 107. Default load value too?
 106. State organization overhaul?
@@ -35,13 +36,11 @@ Currently:
 75. Should "stops" deconstruct the call stack like they do now? In general, how could we do choices within a gosub?
 74. Write a story that allows the reader to write their own story, just for the meta-ness nerd cred
 73. Test for substrings of commands and if it applies do those
-71. Re-implement "actions", which are always available choices not presented, but can be analyzed by typing "actions" (they also apply to all sub-blocks, like a footer)
 70. Plural/gender/etc. localizations
 69. Override variable subscripting, turning variables into special dicts before being passed to eval
 68. World object that exists separately for each block (or even just a macro)
 67. Actually write the tests
 65. Special addressing for the "root" block of a *file* rather than of the whole story
-64. Check "extra newline" with consecutive print statements.
 63. Check that insert commands and such are only used with bags
 61. Return command for gosub
 59. Save current text printed to terminal when file saved
@@ -51,15 +50,15 @@ Currently:
 46. Variables that are temporary/only relevant within a block, then they're not set anymore/block variables
 45. Better gameparser interaction with _args
 43. Automatic log of variable changes
-42. Interrupts when commands take too long (maybe test if the number of visits goes up too high).
 41. Pausing on repeat commands when, for example, you no longer have the materials for something, so it doesn't just spam console (maybe also a "max" option)
 26. Cost checking with passed args
 21. Setting for showing non-taken choices or not
 20. Player-defined macros via command line
 18. Autocomplete for commands
-13. Allow specification file for author-defined commands
 
 DONE
+71. Re-implement "actions", which are always available choices not presented, but can be analyzed by typing "actions" (they also apply to all sub-blocks, like a footer)
+42. Interrupts when commands take too long
 36. Autosaves
 19. Repeat command to do something many times
 15. Show off subroutine capabilities with time advancing subroutine
@@ -98,6 +97,7 @@ DONE
 1. Checking that story is formatted correctly
 
 NOT DOING
+64. Check "extra newline" with consecutive print statements
 12. If a variable doesn't exist, still instantiate it, but give a warning
 76. Change _vars to dict
 55. Remove underscores and use protected keywords instead
@@ -110,6 +110,7 @@ NOT DOING
 2. Unify actions and choices with actions as just "default choices"
 
 I FORGET WHAT THIS MEANS
+13. Allow specification file for author-defined commands
 53. Automatic checking for interpreter functions
 30. More complicated parsing system; add metadata into game itself and use this to make saving/loading more robust
 40. Search command to search for a place

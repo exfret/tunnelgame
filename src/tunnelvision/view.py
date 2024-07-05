@@ -4,6 +4,7 @@ import textwrap
 from tunnelvision import utility
 
 feedback_msg = {
+    "could_not_load_autosave": "Could not revert to autosave",
     "exec_no_story_given": "Must give path to story to execute.",
     "exec_invalid_file_given": "Invalid story given for exec.",
     "goto_invalid_address_given": "Incorrect address given.",
@@ -16,7 +17,9 @@ feedback_msg = {
     "repeat_no_num_times_given": "Must supply number of times to repeat command.",
     "repeat_no_command_given": "Must supply a command to repeat.",
     "repeat_incorrect_num_times_format": "Number times to repeat not an integer.",
+    "revert_no_reversions": "Can't revert any further.",
     "save_no_default_name_given": "Must supply default save name.",
+    "save_completed": "Save complete!",
     "set_no_variable_given": "Must supply a variable to set the value of.",
     "set_no_value_given": "Must supply a new value for the variable.",
     "set_invalid_variable_given": "Invalid variable given to set value of.",
@@ -32,7 +35,7 @@ feedback_msg = {
 old_print = print
 
 def print(text = ""):
-    state["displayed_text"] += text
+    state["displayed_text"] += str(text) + "\n"
     old_print(text)
 
 
@@ -57,7 +60,7 @@ class View:
 
     # Reprints displayed text for save/loads
     def print_displayed_text(self):
-        print(state["displayed_text"])
+        old_print(state["displayed_text"], end="")
     
     ######################################################################
     # Story board
@@ -121,10 +124,12 @@ class View:
         else:
             text_to_display += "\n        Actions...\n"
         for choice_id, choice in state["choices"].items():
+            is_action = "action" in choice and choice["action"]
+
             # Display only actions/choices, whichever is selected
-            if not display_actions and choice["action"]:
+            if not display_actions and is_action:
                 continue
-            if display_actions and not choice["action"]:
+            if display_actions and not is_action:
                 continue
 
             var_dict_vals = utility.collect_vars(state, choice["choice_address"])
@@ -134,18 +139,18 @@ class View:
             # TODO: Un-duplicate this
             def parse_modification_spec(choice, spec, spec_type):
                 effects_text = ""
-                if spec_type == "cost":
+                if spec_type == "cost_spec":
                     effects_text = "\033[0m [\033[31mCost:\033[0m "
-                if spec_type == "require":
+                if spec_type == "req_spec":
                     effects_text = "\033[0m [\033[38;2;255;165;0mRequired:\033[0m "
-                if spec_type == "shown":
+                if spec_type == "shown_spec":
                     effects_text = "\033[0m [\033[34mEffects:\033[0m "
                 for modification in spec:
                     expr_val = eval(modification["amount"], {}, var_dict_vals)
                     sign = ""
                     if expr_val >= 0:
                         sign = "+"
-                    if spec_type == "require":
+                    if spec_type == "req_spec" or spec_type == "cost_spec":
                         sign = ""
                     effects_text += f"{sign}{expr_val} {utility.localize(modification["var"], choice["choice_address"])}, "
                 effects_text = effects_text[:-2]
@@ -153,15 +158,15 @@ class View:
                 return effects_text
             effects_text = ""
             if "cost_spec" in choice and len(choice["cost_spec"]) > 0:
-                effects_text += parse_modification_spec(choice, choice["cost_spec"], "cost")
+                effects_text += parse_modification_spec(choice, choice["cost_spec"], "cost_spec")
             if "req_spec" in choice and len(choice["req_spec"]) > 0:
-                effects_text += parse_modification_spec(choice, choice["req_spec"], "require")
+                effects_text += parse_modification_spec(choice, choice["req_spec"], "req_spec")
             if "shown_spec" in choice and len(choice["shown_spec"]) > 0:
-                effects_text += parse_modification_spec(choice, choice["shown_spec"], "shown")
+                effects_text += parse_modification_spec(choice, choice["shown_spec"], "shown_spec")
 
             choice_color = "\033[32m"
             text_color = "\033[0m"
-            if len(choice["missing"]) > 0:
+            if "missing" in choice and len(choice["missing"]) > 0:
                 choice_color = "\033[90m"
                 text_color = "\033[90m"
             new_text = ""
@@ -183,16 +188,19 @@ class View:
                     else:
                         missing_text += missing + ", "
                 missing_text = missing_text[:-2]
-                print(missing_text)
+                print(missing_text + "\033[90m")
 
-    def print_feedback_message(self, msg_type):
-        displayed_text = ""
-        if not (msg_type in feedback_msg):
-            displayed_text += feedback_msg["default"]
+    def print_feedback_message(self, msg_type, dont_save = False):
+        if dont_save:
+            if not (msg_type in feedback_msg):
+                old_print(feedback_msg["default"])
+            else:
+                old_print(feedback_msg[msg_type])
         else:
-            displayed_text += feedback_msg[msg_type]
-        state["displayed_text"] += displayed_text + "\n"
-        print(displayed_text)
+            if not (msg_type in feedback_msg):
+                print(feedback_msg["default"])
+            else:
+                print(feedback_msg[msg_type])
 
     def print_settings(self):
         displayed_text = ""
@@ -209,8 +217,9 @@ class View:
         print(var_value)
 
     def get_input(self) -> str:
-        command_string = input("\n> ")
-        print()  # Add a new line
+        old_print()
+        command_string = input("> ")
+        old_print()  # Add a new line
         command = command_string.split()
         return command
 
