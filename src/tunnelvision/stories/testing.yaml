@@ -1,13 +1,6 @@
 ---
+_vars:
+  - test: 0
 _content:
-  - choice: hi
-    effects:
-      - Did it inject?
-  - choice: bye
-    effects:
-      - Blop
-  - inject: inject
-    into_choices: hi
-inject:
-  _content:
-    - Injected!
+  - modify: test
+    add: "1"

@@ -21,6 +21,11 @@ class CustomFormatter(Formatter):
 format = CustomFormatter()
 
 
+# TODO: Use this for custom indexing (make sure to index into value)
+class Var():
+    pass
+
+
 class VarDict(dict):
     def __contains__(self, key: object) -> bool:
         if isinstance(key, str) and len(key.split("__")) == 2:
@@ -84,7 +89,7 @@ def collect_vars_with_dicts(state, address=None):
     var_dict = VarDict()
 
     if address is None:
-        address = get_curr_addr(state)
+        address = addressing.get_curr_addr()
 
     for ind in range(len(address)):
         addr_to_check = address[:ind]
@@ -120,22 +125,35 @@ def collect_vars(state, address=None):
     return var_dict
 
 
-# TODO: Move to addressing
-def get_curr_addr(state):
-    # If queue is empty, we're done
-    if len(state["bookmark"]) == 0:
-        return False
+# Dereferences things in {}, can handle recursive nesting like {{foo}} where foo = "blop" and blop = "bar"
+def dereference_text(text):
+    # Keep formatting until we've stabilized
+    while True:
+        new_text = format.vformat(text, (), collect_vars(state))
+        if text == new_text:
+            break
+        else:
+            text = new_text
+    return text
 
-    if len(state["bookmark"][0]) == 0:
-        state["bookmark"] = state["bookmark"][1:]
-        return get_curr_addr(state)
 
-    return state["bookmark"][0][-1]
+def eval_values(text):
+    return eval(dereference_text(text), {}, collect_vars(state))
+
+
+def eval_vars(text):
+    return eval(dereference_text(text), {}, collect_vars_with_dicts(state))
+
+
+def set_value(var, new_val):
+    # TODO: Throw exceptions if we try to set a var without value
+    if "value" in var:
+        var["value"] = new_val
 
 
 def localize(var_name, address=None):
     if address is None:
-        address = get_curr_addr(state)
+        address = addressing.get_curr_addr()
     var_dict = collect_vars_with_dicts(state, address)
     var = var_dict[var_name]
 

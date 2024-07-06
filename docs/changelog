@@ -1,4 +1,14 @@
+2024/7/6
+- Reworked addressing
+
+2024/7/5
+Tunnel:
+- Worked on part after second expedition
+Excavator:
+- Added unflag command (just two lines of code...)
+
 2024/7/4
+- Phased out add and lose instructions for future "modify" instruction
 - Added injection instruction, which adds instructions to matching choices
 - Added histories and revert command
 - Added selectable_once tag for choices (makes it so choice can only be run once)

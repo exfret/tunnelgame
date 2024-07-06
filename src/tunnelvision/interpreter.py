@@ -13,141 +13,6 @@ class UnrecognizedInstruction(Exception):
     pass
 
 
-def add_stack(game, state, address, partial_address):
-    curr_node = get_instr(game, partial_address)
-
-    if isinstance(curr_node, dict) and "_header" in curr_node:
-        state["bookmark"] = state["bookmark"] + ((partial_address + ("_header", 0),),)
-
-
-def make_bookmark(game, state, address, injections = []):
-    partial_address = ()
-    add_stack(game, state, address, partial_address)
-    for tag in address:
-        partial_address = partial_address + (tag,)
-        add_stack(game, state, address, partial_address)
-
-    for inj in injections:
-        state["bookmark"] = state["bookmark"] + ((inj,),)
-
-    # Add the actual instruction we're going to
-    state["bookmark"] = state["bookmark"] + ((address,),)
-
-
-# TODO: Change to "get_node"
-def get_instr(curr_node, addr):
-    if addr == ():
-        return curr_node
-
-    if isinstance(curr_node, list) and addr[0] >= len(curr_node):
-        return False  # TODO: Instead throw/catch error
-
-    return get_instr(curr_node[addr[0]], addr[1:])  # TODO: Check map/address compatibility
-
-
-def set_curr_addr(state, new_addr):
-    new_first_stack = state["bookmark"][0][:-1] + (new_addr,)
-    new_bookmark = (new_first_stack,) + state["bookmark"][1:]
-
-    state["bookmark"] = new_bookmark
-
-
-def get_next_addr(game, addr):
-    if addr == ():
-        return False
-
-    # If it's a string key, it's not an incrementable address piece
-    if isinstance(addr[-1], str):
-        if addr[-1] == "effects":  # If it's a choice effects section, don't spill over into the remaining block
-            return False
-        return get_next_addr(game, addr[:-1])
-
-    new_addr = addr[:-1] + ((addr[-1] + 1),)  # TODO: Error check that last element is indeed an int
-
-    if get_instr(game, new_addr) == False:
-        return get_next_addr(game, addr[:-1])
-    else:
-        return new_addr
-
-
-def trim_footer(addr):
-    if addr == ():
-        return True
-
-    if addr[-1] == "_footer":
-        if len(addr) == 1:
-            return False
-
-        return addr[:-2]
-    else:
-        return trim_footer(addr[:-1])
-
-
-def search_for_footers(game, call_stack):
-    curr_node = get_instr(game, call_stack[0])
-
-    if isinstance(curr_node, dict) and "_footer" in curr_node:
-        return (call_stack[0] + ("_footer", 0),)
-    else:
-        if call_stack[0] == ():
-            return ()
-
-        return search_for_footers(game, (call_stack[0][:-1],))
-
-
-def get_next_call_stack(game, call_stack):
-    if call_stack == ():
-        return False
-
-    if get_next_addr(game, call_stack[-1]) == False:
-        # If this is the last part of the call stack, check for footers to execute
-        if len(call_stack) == 1:
-            trimmed = trim_footer(call_stack[0])
-            if trimmed == True:
-                trimmed = call_stack[0]
-            elif trimmed == False:
-                return False
-
-            return search_for_footers(game, (trimmed,))
-
-        return get_next_call_stack(game, call_stack[:-1])
-    else:
-        return call_stack[:-1] + (get_next_addr(game, call_stack[-1]),)
-
-
-def get_next_bookmark(game, bookmark):
-    if bookmark == ():
-        return False
-
-    if get_next_call_stack(game, bookmark[0]) == False:
-        return bookmark[1:]  # We don't need to increment because in the queue this hasn't been touched at all
-    else:
-        return bookmark[1:] + (get_next_call_stack(game, bookmark[0]),)
-
-
-# Note: Duplicate code, also in addressing
-def get_parent_block(game, addr, state):
-    node = get_instr(game, addr)
-
-    is_content = False
-    if addr != ():
-        parent = get_instr(game, addr[:-1])
-        if isinstance(parent, dict):
-            for key, val in parent.items():
-                if val == node and key == "_content":
-                    is_content = True
-
-    node_types = state["metadata"]["node_types"][addr]  # TODO: Remove backwards compatibility quirk (need to add "story" to address)
-    if "START" in node_types or "BLOCK" in node_types:
-        return addr
-    # Check for list blocks
-    # TODO: Make this more elegant, maybe metadate for what's a list and not
-    elif (not is_content) and addr != () and isinstance(get_instr(game, addr[:-1]), dict) and ("_type" in get_instr(game, addr[:-1])) and isinstance(node, list):
-        return addr
-    else:
-        return get_parent_block(game, addr[:-1], state)
-
-
 def do_print(text, state, style={}):  # TODO: Move ansi code handling to view as well
     view.print_text(text, style)
 
@@ -209,52 +74,54 @@ def eval_conditional(game, state, node):
 
 
 def step(game, state):
-    if utility.get_curr_addr(state) == False:
+    curr_addr = addressing.get_curr_addr()
+    
+    if curr_addr == False:
         return False
 
-    parent_block = get_parent_block(game, utility.get_curr_addr(state), state)
+    parent_block = addressing.get_block_part(curr_addr)
     # Don't save footer addresses
     if len(parent_block) == 0 or parent_block[-1] != "_footer":
-        state["last_address"] = utility.get_curr_addr(state)
+        state["last_address"] = curr_addr
 
-    curr_node = get_instr(game, utility.get_curr_addr(state))
+    curr_node = addressing.get_node(curr_addr)
     # Mark that we've visited this node (again)
-    if not (utility.get_curr_addr(state) in state["visits"]):
-        state["visits"][utility.get_curr_addr(state)] = 0
-    state["visits"][utility.get_curr_addr(state)] += 1
+    if not (curr_addr in state["visits"]):
+        state["visits"][curr_addr] = 0
+    state["visits"][curr_addr] += 1
 
     if isinstance(curr_node, str):
         do_print(curr_node, state)
 
-        state["bookmark"] = get_next_bookmark(game, state["bookmark"])
+        state["bookmark"] = addressing.get_next_bookmark(state["bookmark"])
 
         return True
 
     # Since this is an instruction, it must be a map
     # TODO: Verify this part of stories
-    if "add" in curr_node:
+    if False and "add" in curr_node: # TODO: Remove
         try:
             do_shown_var_modification(curr_node["add"], state, "+", game)
         except Exception:
             # Just move on and do nothing if we get an exception, and print warning
-            print(f"WARNING: Exception occurred evaluating 'ADD' node at address {utility.get_curr_addr(state)}")
+            print(f"WARNING: Exception occurred evaluating 'ADD' node at address {curr_addr}")
     elif "back" in curr_node:
         while True:
             if len(state["last_address_list"]) == 0:
                 break
 
-            new_addr = get_parent_block(game, state["last_address_list"].pop(), state)
+            new_addr = addressing.get_block_part(state["last_address_list"].pop())
 
             # Don't count footers
-            if get_parent_block(game, state["last_address"], state) != new_addr:
-                parent_node = get_instr(game, new_addr)
+            if addressing.get_block_part(state["last_address"]) != new_addr:
+                parent_node = addressing.get_node(new_addr)
 
                 if isinstance(parent_node, list):
                     new_addr = new_addr + (0,)
                 else:
                     new_addr = new_addr + ("_content", 0)
 
-                set_curr_addr(state, new_addr)
+                addressing.set_curr_addr(new_addr)
 
                 return True
     elif "call" in curr_node:
@@ -262,9 +129,8 @@ def step(game, state):
         # Right now no variables persist after calls
         state["call_stack"].append({"bookmark": state["bookmark"], "vars": state["vars"]})
 
-        curr_addr = utility.get_curr_addr(state)
         state["bookmark"] = ()
-        make_bookmark(game, state, addressing.parse_addr(curr_addr, curr_node["call"]))
+        addressing.make_bookmark(addressing.parse_addr(curr_addr, curr_node["call"]))
 
         state["vars"] = {}
         gameparser.add_flags(game)
@@ -280,7 +146,7 @@ def step(game, state):
 
         return True
     elif "choice" in curr_node:
-        if not "selectable_once" in curr_node or not utility.get_curr_addr(state) in state["visits_choices"] or state["visits_choices"][utility.get_curr_addr(state)] == 0:
+        if not "selectable_once" in curr_node or not curr_addr in state["visits_choices"] or state["visits_choices"][curr_addr] == 0:
             vars_by_name = utility.collect_vars_with_dicts(state)
 
             state["choices"][curr_node["choice"]] = {}
@@ -305,11 +171,11 @@ def step(game, state):
 
             effect_address = ""
             if not "effects" in curr_node:
-                effect_address = addressing.parse_addr(utility.get_curr_addr(state), curr_node["choice"])
+                effect_address = addressing.parse_addr(curr_addr, curr_node["choice"])
             else:
-                effect_address = utility.get_curr_addr(state) + ("effects", 0)
+                effect_address = curr_addr + ("effects", 0)
                 if isinstance(curr_node["effects"], str):
-                    effect_address = addressing.parse_addr(utility.get_curr_addr(state), curr_node["effects"])
+                    effect_address = addressing.parse_addr(curr_addr, curr_node["effects"])
 
             is_action = False
             if "action" in curr_node:
@@ -319,7 +185,7 @@ def step(game, state):
             state["choices"][curr_node["choice"]]["address"] = effect_address
             state["choices"][curr_node["choice"]]["missing"] = missing_list
             state["choices"][curr_node["choice"]]["modifications"] = modify_list
-            state["choices"][curr_node["choice"]]["choice_address"] = utility.get_curr_addr(state)
+            state["choices"][curr_node["choice"]]["choice_address"] = curr_addr
             state["choices"][curr_node["choice"]]["action"] = is_action
     elif "command" in curr_node:
         commands = curr_node["command"].split(";")
@@ -330,24 +196,24 @@ def step(game, state):
     elif "flag" in curr_node:
         state["vars"]["flags"][curr_node["flag"]] = True
     elif "flavor" in curr_node:
-        if state["settings"]["show_flavor_text"] != "never" and (state["visits"][utility.get_curr_addr(state)] <= 1 or state["settings"]["show_flavor_text"] == "always"):
+        if state["settings"]["show_flavor_text"] != "never" and (state["visits"][curr_addr] <= 1 or state["settings"]["show_flavor_text"] == "always"):
             if isinstance(curr_node["flavor"], str):  # TODO: Allow style spec tag with flavor text
                 view.print_flavor_text(curr_node["flavor"])
             else:
-                set_curr_addr(state, utility.get_curr_addr(state) + ("flavor", 0))
+                addressing.set_curr_addr(curr_addr + ("flavor", 0))
 
                 return True
     elif "gosub" in curr_node:
-        sub_address = addressing.parse_addr(utility.get_curr_addr(state), curr_node["gosub"])
+        sub_address = addressing.parse_addr(curr_addr, curr_node["gosub"])
 
-        new_first_stack = state["bookmark"][0] + (sub_address,)
-        new_bookmark = (new_first_stack,) + state["bookmark"][1:]
+        # Increment current address so that when we return we don't just go back to the gosub
+        state["bookmark"] = addressing.get_next_bookmark(state["bookmark"])
 
-        state["bookmark"] = new_bookmark
+        state["bookmark"] = (sub_address,) + state["bookmark"]
 
         return True
     elif "goto" in curr_node:
-        set_curr_addr(state, addressing.parse_addr(utility.get_curr_addr(state), curr_node["goto"]))
+        addressing.set_curr_addr(addressing.parse_addr(curr_addr, curr_node["goto"]))
 
         return True
     elif "if" in curr_node:
@@ -361,11 +227,11 @@ def step(game, state):
 
         if not exception_occurred:
             if condition_value:
-                set_curr_addr(state, utility.get_curr_addr(state) + ("then", 0))
+                addressing.set_curr_addr(curr_addr + ("then", 0))
 
                 return True
             elif "else" in curr_node:
-                set_curr_addr(state, utility.get_curr_addr(state) + ("else", 0))
+                addressing.set_curr_addr(curr_addr + ("else", 0))
 
                 return True
     elif "inject" in curr_node:
@@ -375,7 +241,7 @@ def step(game, state):
                 if choice_id in state["choices"]:
                     if not "injections" in state["choices"][choice_id]:
                         state["choices"][choice_id]["injections"] = []
-                    state["choices"][choice_id]["injections"].append(addressing.parse_addr(utility.get_curr_addr(state), curr_node["inject"]))
+                    state["choices"][choice_id]["injections"].append(addressing.parse_addr(curr_addr, curr_node["inject"]))
     elif "insert" in curr_node:
         vars_by_name = utility.collect_vars_with_dicts(state)
 
@@ -392,17 +258,25 @@ def step(game, state):
                 "value": 0,
             }
         vars_by_name[curr_node["into"]]["value"][curr_node["insert"]]["value"] += amount
-    elif "lose" in curr_node:
+    elif False and "lose" in curr_node: # TODO: Remove!
         try:
             do_shown_var_modification(curr_node["lose"], state, "-", game)
         except Exception:
-            print(f"WARNING: Exception occurred evaluating 'LOSE' node at address {utility.get_curr_addr(state)}")
+            print(f"WARNING: Exception occurred evaluating 'LOSE' node at address {curr_addr}")
+    elif "modify" in curr_node:
+        # TODO: Parse-time checks that this is a variable that can be modified (i.e.- it has a value)
+        var_to_change = utility.eval_vars(curr_node["modify"])
+        old_val = utility.eval_values(curr_node["modify"])
+        new_val = None
+        if "add" in curr_node:
+            new_val = old_val + utility.eval_values(curr_node["add"])
+        utility.set_value(var_to_change, new_val)
     elif "once" in curr_node:
-        if state["visits"][utility.get_curr_addr(state)] <= 1:
+        if state["visits"][curr_addr] <= 1:
             if isinstance(curr_node["once"], str):
                 do_print(curr_node["once"], state)
             else:
-                set_curr_addr(state, utility.get_curr_addr(state) + ("once", 0))
+                addressing.set_curr_addr(curr_addr + ("once", 0))
 
                 return True
     elif "pass" in curr_node:
@@ -426,7 +300,7 @@ def step(game, state):
             for id in curr_node["random"].split(","):
                 possibilities_list.append(id.strip())
 
-            set_curr_addr(state, addressing.parse_addr(utility.get_curr_addr(state), possibilities_list[random.randint(0, len(possibilities_list) - 1)]))
+            addressing.set_curr_addr(addressing.parse_addr(curr_addr, possibilities_list[random.randint(0, len(possibilities_list) - 1)]))
 
             return True
 
@@ -446,9 +320,9 @@ def step(game, state):
             curr_weight += possibility[0]
             if curr_weight >= target_weight:
                 if curr_node["random"][possibility[1]] is None:
-                    set_curr_addr(state, addressing.parse_addr(utility.get_curr_addr(state), possibility[1].split()[-1]))
+                    addressing.set_curr_addr(addressing.parse_addr(curr_addr, possibility[1].split()[-1]))
                 else:
-                    set_curr_addr(state, utility.get_curr_addr(state) + ("random", possibility[1], 0))
+                    addressing.set_curr_addr(curr_addr + ("random", possibility[1], 0))
 
                 return True
     elif "return" in curr_node:
@@ -461,14 +335,13 @@ def step(game, state):
 
             # Don't return true since we need to increment past the call instruction
     elif "run" in curr_node:
-        addr = utility.get_curr_addr(state)
-        contents = utility.get_var(state["vars"], curr_node["run"], addr)["value"]
+        contents = utility.get_var(state["vars"], curr_node["run"], curr_addr)["value"]
         temp_yaml = stories / "temp.yaml"
         temp_yaml.write_bytes(yaml.dump(contents).encode('utf-8'))
 
         state["msg"]["signal_run_statement"] = True
 
-        state["bookmark"] = get_next_bookmark(game, state["bookmark"])
+        state["bookmark"] = addressing.get_next_bookmark(state["bookmark"])
 
         return False
     elif "separator" in curr_node:
@@ -528,21 +401,23 @@ def step(game, state):
         switch_value = eval(curr_node["switch"], {}, utility.collect_vars(state))
         if str(switch_value) in curr_node:
             if isinstance(curr_node[str(switch_value)], str):
-                set_curr_addr(state, addressing.parse_addr(utility.get_curr_addr(state), curr_node[str(switch_value)]))
+                addressing.set_curr_addr(addressing.parse_addr(curr_addr, curr_node[str(switch_value)]))
             else:
-                set_curr_addr(state, utility.get_curr_addr(state) + (str(switch_value), 0))
+                addressing.set_curr_addr(curr_addr + (str(switch_value), 0))
 
             return True
         elif "_default" in curr_node:
             if isinstance(curr_node["_default"], str):
-                set_curr_addr(state, addressing.parse_addr(utility.get_curr_addr(state), curr_node[str(switch_value)]))
+                addressing.set_curr_addr(curr_node[str(switch_value)])
             else:
-                set_curr_addr(state, utility.get_curr_addr(state) + ("_default", 0))
+                addressing.set_curr_addr(curr_addr + ("_default", 0))
 
             return True
+    elif "unflag" in curr_node:
+        state["vars"]["flags"][curr_node["unflag"]] = False
     else:
         raise UnrecognizedInstruction(f"Unrecognized instruction: {curr_node}")
 
-    state["bookmark"] = get_next_bookmark(game, state["bookmark"])
+    state["bookmark"] = addressing.get_next_bookmark(state["bookmark"])
 
     return True

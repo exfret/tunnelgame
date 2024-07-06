@@ -1,9 +1,19 @@
 Currently:
-  - Bags have vars inside of them, not values (I think this is actually done but gotta check)
+  - "set to" statements
   - Set statements and requirement specifications with vars (pull out requirement spec parsing into utility)
   - per_cost etc. logic
 
-110. Revert command
+121. Change gosub to persist through choices
+120. Create/Global keyword for locally defined vars
+119. Give inform a look for object features
+118. "all the eggs" talk about all eggs
+117. Warning for choices that lead to "todo" sections
+116. Special ways to access variables, for example, from different scopes with custom parsing of variables in {} curly braces
+115. Tag/filter system... filter only for blocks with a certain tag when doing instructions/commands
+114. Make list of definitive features to test
+113. Ability to organize vars more into "blocks" that are just for organizational purposes
+112. Tags about story elements for debugging? What would these do? Maybe built-in changelogs and messages.
+111. Make random number generator deterministic
 109. Attach which game "id" each save is from
 108. Overwrite confirmation for saving over an old file?
 107. Default load value too?
@@ -31,7 +41,6 @@ Currently:
 83. Use _default in switch statements
 81. Error on choices that are more than one word
 80. Iteration loops (iterate through a list and do something for each thing in the list)
-78. Treat footers more like macros that get executed within the blocks
 77. _args overhaul to use list of variable dicts, not just numbers
 75. Should "stops" deconstruct the call stack like they do now? In general, how could we do choices within a gosub?
 74. Write a story that allows the reader to write their own story, just for the meta-ness nerd cred
@@ -47,7 +56,7 @@ Currently:
 58. SPILL command for when we do want to "spill" from an effects section to the parent area
 56. Disallow random intervals in choice specs?
 47. no_flavor alternative text
-46. Variables that are temporary/only relevant within a block, then they're not set anymore/block variables
+46. Temp variables that are temporary/only relevant within a block, then they're not set anymore/block variables
 45. Better gameparser interaction with _args
 43. Automatic log of variable changes
 41. Pausing on repeat commands when, for example, you no longer have the materials for something, so it doesn't just spam console (maybe also a "max" option)
@@ -57,6 +66,8 @@ Currently:
 18. Autocomplete for commands
 
 DONE
+78. Treat footers more like macros that get executed within the blocks (Note: I'm reverting this but it was done)
+110. Revert command
 71. Re-implement "actions", which are always available choices not presented, but can be analyzed by typing "actions" (they also apply to all sub-blocks, like a footer)
 42. Interrupts when commands take too long
 36. Autosaves

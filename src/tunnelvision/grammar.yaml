@@ -49,7 +49,7 @@ INSTR:
 DICT_INSTR:
   type: union_with_keys
   contexts:
-    add: ADD
+    #add: ADD
     back: BACK
     call: CALL
     choice: CHOICE
@@ -62,7 +62,8 @@ DICT_INSTR:
     if: IF
     inject: INJECT
     insert: INSERT
-    lose: LOSE
+    #lose: LOSE
+    modify: MODIFY
     once: ONCE
     pass: PASS
     print: PRINT
@@ -74,6 +75,7 @@ DICT_INSTR:
     set: SET
     stop: STOP
     switch: SWITCH
+    unflag: UNFLAG
 ADD:
   type: dict
   mandatory:
@@ -176,6 +178,12 @@ LOSE:
   type: dict
   mandatory:
     lose: _requirement_specification
+MODIFY:
+  type: dict
+  mandatory:
+    modify: _var_id
+  optional:
+    add: _expr
 ONCE:
   type: dict
   mandatory:
@@ -245,3 +253,7 @@ CASE_SPEC:
   type: union_with_types
   str: _addr
   list: CONTENT
+UNFLAG:
+  type: dict
+  mandatory:
+    unflag: _id

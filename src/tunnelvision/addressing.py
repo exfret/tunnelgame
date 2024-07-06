@@ -3,11 +3,12 @@ class InvalidAddressError(Exception):
 
 
 def get_node(addr, curr_node=None):
-    if not curr_node:
+    if curr_node is None:
         curr_node = game
     if addr == ():
         return curr_node
 
+    # We can't do print statements here because these exceptions can be caught
     if not isinstance(addr[0], (int, str)):
         raise InvalidAddressError("Address has index of type neither int or str.")
     if isinstance(addr[0], int) and not isinstance(curr_node, list):
@@ -22,8 +23,128 @@ def get_node(addr, curr_node=None):
     return get_node(addr[1:], curr_node[addr[0]])
 
 
-def make_bookmark(address):
-    return (address,)
+def get_curr_addr(bookmark=None):
+    if bookmark is None:
+        bookmark = state["bookmark"]
+
+    # If queue is empty, we're done
+    if bookmark == False or len(bookmark) == 0:
+        return False
+
+    return bookmark[0]
+
+
+# Remove current address and add new address
+def set_curr_addr(addr):
+    state["bookmark"] = (addr,) + state["bookmark"][1:]
+
+
+# Get's next instruction's address; returns False if there is no next instruction (i.e.- we're at the end of a block)
+def get_next_addr(addr):
+    if addr == ():
+        return False
+    
+    # If it's a string key, it's not an incrementable address piece
+    if isinstance(addr[-1], str):
+        # If it's a choice effects section, don't spill over into the remaining block
+        if addr[-1] == "effects":
+            return False
+        return get_next_addr(addr[:-1])
+
+    new_addr = addr[:-1] + (addr[-1] + 1,)  # TODO: Error check that last element is indeed an int and not something weird
+
+    # Check to see if we spill out of this numerical block
+    # TODO: Check manually that the only issue is iterating past the end of a numerical section
+    try:
+        get_node(new_addr)
+    except InvalidAddressError:
+        return get_next_addr(addr[:-1])
+    else:
+        return new_addr
+
+
+# Goes a block up if this is a footer so we don't loop inside a footer
+def trim_footer(addr):
+    # Case where we weren't in a footer
+    if addr == ():
+        return True
+
+    # If this is a footer of the root block, we're done and stop
+    if addr[-1] == "_footer":
+        # Case where we were in the root footer (thus we're done executing)
+        if len(addr) == 1:
+            return False
+
+        return addr[:-2]
+    else:
+        return trim_footer(addr[:-1])
+    
+
+# Searches for footer as a child of the current address, if not goes up a block
+def search_for_footers(addr):
+    curr_node = get_node(addr)
+
+    if isinstance(curr_node, dict) and "_footer" in curr_node:
+        return addr + ("_footer", 0)
+    else:
+        # No footers found
+        if addr == ():
+            return False
+
+        # Try next higher block
+        return search_for_footers(addr[:-1])
+
+
+def get_next_bookmark(bookmark):
+    # Case where there's no addresses in the queue left
+    if bookmark == ():
+        return False
+    
+    curr_addr = get_curr_addr(bookmark)
+    next_addr = get_next_addr(curr_addr)
+    
+    # Check if we reached the end of execution for this queue entry
+    if next_addr == False:
+        # If this is the last part of the call stack, check for footers to execute
+        if len(bookmark) == 1:
+            # Ignore any footers that we currently are in
+            trimmed = trim_footer(curr_addr)
+            if trimmed == True:
+                trimmed = curr_addr
+            elif trimmed == False:
+                return False
+
+            footer = search_for_footers(trimmed)
+            if footer == False:
+                return False
+            else:
+                return (search_for_footers(trimmed),)
+
+        return bookmark[1:]
+    else:
+        return (next_addr,) + bookmark[1:]
+
+
+def add_header(addr):
+    curr_node = get_node(addr)
+
+    if isinstance(curr_node, dict) and "_header" in curr_node:
+        # TODO: Check during parse-time that headers are lists with at least one instruction
+        state["bookmark"] = state["bookmark"] + (addr + ("_header", 0),)
+
+
+def make_bookmark(addr, injections = []):
+    partial_addr = ()
+
+    add_header(partial_addr)
+    for tag in addr:
+        partial_addr = partial_addr + (tag,)
+        add_header(partial_addr)
+
+    for inj in injections:
+        state["bookmark"] = state["bookmark"] + (inj,)
+    
+    state["bookmark"] = state["bookmark"] + (addr,)
 
 
 def get_block_part(curr_addr, index=0):

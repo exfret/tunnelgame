@@ -165,7 +165,7 @@ class View:
                 effects_text += parse_modification_spec(choice, choice["shown_spec"], "shown_spec")
 
             choice_color = "\033[32m"
-            text_color = "\033[0m"
+            text_color = "\033[0m" # This appears to actually just be the color for the initial * in a choice?
             if "missing" in choice and len(choice["missing"]) > 0:
                 choice_color = "\033[90m"
                 text_color = "\033[90m"
@@ -178,7 +178,7 @@ class View:
                 text_for_choice = f" {choice['text']}"
             print(f"        {text_color} * {new_text}{choice_color}{choice_id}{text_color}{text_for_choice}{effects_text}")
             if len(choice["missing"]) > 0:
-                missing_text = "              Missing: "
+                missing_text = "\033[90m              Missing: "
                 for missing in choice["missing"]:
                     if isinstance(missing, dict):
                         if missing["type_missing"] == "bag":
@@ -188,7 +188,7 @@ class View:
                     else:
                         missing_text += missing + ", "
                 missing_text = missing_text[:-2]
-                print(missing_text + "\033[90m")
+                print(missing_text + "\033[0m")
 
     def print_feedback_message(self, msg_type, dont_save = False):
         if dont_save:
@@ -225,7 +225,6 @@ class View:
 
 
 class ViewForTesting:
-
     def __init__(self, choice_list=[]):
         self.num_choices_made = 0
         self.choice_list = choice_list

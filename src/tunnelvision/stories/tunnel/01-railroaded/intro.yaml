@@ -5,6 +5,7 @@ _vars:
   - temp: 0
   - is_expedition_day: False
   - on_training_expedition: False
+  - num_training_expeditions: 0
   # Progress vars
   - tunnel_pass: training
   # Research vars
@@ -16,6 +17,8 @@ _vars:
   # Inventory vars
   - coin: 0
     _locale: Coin
+  # TODO: Add lemen spoilage
+  # TODO: Add unlock for lemens
   - lemens: 0
     _locale: Lemens
   - rosalia: 0
@@ -24,7 +27,10 @@ _vars:
   - time_last_explored: 0
   - time_next_training: 0
 _content:
-  #- command: input ready, walk, gather, return, next, exciting, give, next
+  # Skip to first free day
+  - command: input ready, walk, gather, return, next, exciting, give, next
+  # Skip to the second free day
+  - command: input leave, common, study, botany, next, next, leave, george, embark, next, focus, return, accept, accept, next
   - goto: tunnel/training/first_journey/george_waiting
 _header:
   - choice: encyclopedia
@@ -71,6 +77,103 @@ logic:
         then:
           - A new book has arrived at the orphanage study.
           - flag: orphanage_study_unlocked_reading_1
+# Common events that aren't tied to a specific story location (uses gosub)
+world:
+  characters:
+    orphanage:
+      jaz:
+        third_work_coin_event:
+          _vars:
+            - bargain_amount: 0
+          _content:
+            - flag: orphanage_third_work_jaz_coins_resolved
+            - if: orphanage_rooms_jaz_third_work_coin_event_split_choices_went_back
+              # Case where Jaz was visited before
+              then:
+                - She asks, "Okay, what do you think about the 20-10 split?"
+              # Case where this is the first time visiting Jaz after the coin thing
+              else:
+                - "Okay, so I was thinking we could split the coins with me getting 20 and you getting 10. I did most of the work after all. What do you think of that?"
+            - goto: split_choices
+          split_choices:
+            _content:
+              - choice: back
+                text: Decide later
+                effects:
+                  # TODO: Change flag names now that this is in its own block
+                  - flag: orphanage_rooms_jaz_third_work_coin_event_split_choices_went_back
+                  - unflag: orphanage_third_work_jaz_coins_resolved
+                  - You tell Jaz you'll think about it and decide later. She frowns and says she expects the coins soon, though.
+              - choice: sure
+                text: Accept the deal
+                cost: 20 coin
+                effects:
+                  - She says, "Thanks! Pleasure doing business."
+              - choice: even
+                text: Split the coins 50-50
+                require: 15 coin
+                effects:
+                  - set: bargain_amount = 15
+                  - She shakes her head. "There's always a master planner and they deserve more. Here, that's me, don't you get it?"
+                  - goto: bargain
+              - choice: more
+                text: Explain that you deserve 20 coins and her only 10 coins
+                require: 10 coin
+                effects:
+                  - set: bargain_amount = 20
+                  - She tilts her head. "You drive a hard bargain. Why do you think you deserve more?"
+                  - goto: bargain
+              - choice: give
+                text: Give her all the 30 coins
+                cost: 30 coin
+                effects:
+                  - Her head jerks back in surprise. "Really? I mean, sure." Then she scoops up all the coins and shows you out before you have time to reconsider.
+              - choice: bye
+                selectable_once:
+                text: Leave with all the coins
+                effects:
+                  - She yaps out "wait!"
+                  - choice: ignore
+                    text: Ignore her
+                    effects:
+                      - flag: orphanage_third_work_jaz_coins_walked_out
+                  - choice: reconsider
+                    text: Decide to split the coins
+                    effects:
+                      - You reconsider how much to split.
+                      - separator:
+                      - goto: .
+          bargain:
+            _content:
+              - choice: threaten
+                text: Say that if she doesn't accept the deal, you'll tell on her
+                effects:
+                  - She drops her mouth open. "You wouldn't!" You stare her down and she accepts the deal.
+                  - set: coin -= bargain_amount
+                    show:
+              - if: bargain_amount == 20
+                then:
+                  - choice: compromise
+                    text: Compromise at 50-50
+                    effects:
+                      - She accepts and says, "I like your bargaining skills, miss!"
+                      - set: coin -= 15
+                        show:
+              - choice: give_in
+                text: Accept the original deal of her getting 20 and you getting 10
+                effects:
+                  - She calls you a wuss and takes her share of the coins grinning. Then, she boots you out.
+                  - set: coin -= 20
+                    show:
+              - if: bargain_amount == 15
+                then:
+                  - choice: fairness
+                    selectable_once:
+                    text: Appeal to fairness
+                    effects:
+                      - She shakes her head and says, "Life isn't fair, I thought you would have learned that by now?"
+                      - separator:
+                      - goto: .
 orphanage:
   _content:
     - set: on_training_expedition = False # TODO: Do I need to make sure training expedition is false anywhere else?
@@ -300,6 +403,7 @@ orphanage:
                 - separator:
                 - goto: .
     george:
+      # TODO: ability to talk to George for your free day? What do you get out of it? Hm...
       _content:
         - What do you want to talk to George about?
         - if: is_expedition_day
@@ -308,8 +412,9 @@ orphanage:
               text: Go on your next venture into the Tunnel
               effects:
                 - set: on_training_expedition = True
+                - set: num_training_expeditions += 1
                 # Switch on the number of visits plus one goes to the expedition number, since the first expedition was from the start label
-                - switch: _visits
+                - switch: num_training_expeditions
                   "1": /tunnel/training/second_journey
         #- choice: explore
         #  text:
@@ -352,12 +457,29 @@ orphanage:
             - goto: absent
         - if: not first_orphanage_work_day_gave_chloe_rosalia
           then:
-            - Chloe doesn't open the door, but you can hear some rustling inside.
-            - separator:
-            - goto: ..
+            # If it's after the second expedition, Chloe can forgive you
+            - if: num_training_expeditions >= 2
+              then:
+                - Chloe opens the door. She says she was hurt that you didn't give her a rosalia. Maybe you can make it up to her by bringing her 13 lemens?
+                - choice: _back
+                - choice: give
+                  text: Give her 13 lemens
+                  cost: 13 lemens
+                  effects:
+                    - flag: orphanage_rooms_chloe_gave_lemens
+                    - You give her 13 of your lemens.
+                    - goto: .
+              else:
+                - Chloe doesn't open the door, but you can hear some rustling inside.
+                - separator:
+                - goto: ..
         - if: first_orphanage_work_day_gave_chloe_rosalia and not orphanage_rooms_chloe_offer_courtyard_key
           then:
             - Chloe greets you at her door. She says she loves the Rosalia you gave her. She has a key to the courtyard that she'll trade for more Rosalia.
+            - flag: orphanage_rooms_chloe_offer_courtyard_key
+        - if: orphanage_rooms_chloe_gave_lemens and not orphanage_rooms_chloe_offer_courtyard_key
+          then:
+            - Chloe greets you at her door. She says she loves the lemens you gave her and they had such a pretty glow! She has a key to the courtyard that she'll trade for some Rosalia.
             - flag: orphanage_rooms_chloe_offer_courtyard_key
         - choice: _back
         - if: orphanage_rooms_chloe_offer_courtyard_key and not unlocked_courtyard_key
@@ -377,7 +499,33 @@ orphanage:
         - goto: ../..
     jaz:
       _content:
-        - pass:
+        # After coins event - accepted plan, before coins resolved
+        - if: orphanage_third_work_accepted_jaz_coins and not orphanage_third_work_jaz_coins_resolved
+          then:
+            - Jaz opens the door just a crack and looks through. "Is anyone else there?" She whispers. You answer that it's just you and she lets you in.
+            #- gosub: /world/characters/orphanage/jaz/third_work_coin_event
+            - TODO
+            # TODO: gosub does not persist between choices, but call does not keep vars global, make more flexible subroutines
+            - You leave Jaz's room.
+            - separator:
+            - goto: ..
+        # After coins event - did not accept plan
+        - if: not orphanage_third_work_accepted_jaz_coins and not orphanage_third_work_jaz_coins_resolved
+          then:
+            - She opens the door, but says she won't talk to you until you do one of her plans.
+            - separator:
+            - goto: ..
+        # After coins event and resolving who gets coins
+        - if: orphanage_third_work_accepted_jaz_coins and orphanage_third_work_jaz_coins_resolved
+          then:
+            # Case where you walked out with the coins on Jaz
+            - if: orphanage_third_work_jaz_coins_walked_out
+              then:
+                - Jaz yells out while her door is closed to go away.
+              else:
+                - Jaz yells out from her room "thanks for the business, but I'm busy now".
+            - separator:
+            - goto: /orphanage/rooms
   days:
     work:
       _content:
@@ -386,6 +534,7 @@ orphanage:
           "1": first_work
           "2": second_work
           "3": third_work
+          "4": fourth_work
         # Don't do work day if the player explored recently
         #- if: time <= time_last_explored + 1
         #  then:
@@ -446,6 +595,7 @@ orphanage:
               - goto: /orphanage
       third_work:
         _content:
+          - flag: unlocked_jaz_room
           - This time at the farm, Jaz, another orphan, approaches you. She's known for being somewhat nefarious, and has been caught several times stealing from the farm. She was almost kicked out of the orphanage.
           - Just like you, her face is covered in freckles, and she's wearing a mischievous grin when she walks up to you in the field. "Hey", she says, "You should help me with something!"
           - choice: reject
@@ -485,6 +635,59 @@ orphanage:
         reject:
           _content:
             - She huffs off, mad that you didn't accept her deal. The rest of the work day goes smoothly.
+            - choice: next
+              effects:
+                - gosub: /logic/time
+                - goto: /orphanage
+      fourth_work:
+        _content:
+          # Things to happen:
+          #   - Jaz asks about coins if you haven't resolved the event yet. Do this at lunch.
+          #   - Explain farm more?
+          - You arrive at the farm for the next day of work. This time, Ms. Bee, one of the two full-time staff at the orphanage, leads everyone to the farm. It's not a long walk, but today is particularly hot. The seasons hit the Town particularly hard due to its proximity to the Dome, the source of much of the heat fluctuation. The stones heat and cool, causing a temperature rippling effect for everything within its interior.
+          # TODO: Unlock for encyclopedia entry about weather in the Dome?
+          - goto: karo_talk
+        karo_talk:
+          _content:
+            - Today, you're assigned to harvest grains from the field closest to the farm building. Karo, the owner of the farm comes out to talk to you early in the day. He's a heavy-set man with a black scruffy beard and balding black hair. Despite his weight, he still moves gracefully. Karo asks how the Tunnel's been treating you.
+            - choice: wonderful
+              effects:
+                - You explain that the Tunnel is just a wondrous place and there's really nothing else that compares.
+                - goto: karo_son
+            - choice: exciting
+              effects:
+                - Your eyes light up as you talk about the excitement of adventures to somewhere new.
+                - goto: karo_son
+            - choice: horrendous
+              effects:
+                - You say your Tunnel adventures have been horrendous... horrendously amazing that is!
+                - goto: karo_son
+        karo_son:
+          _content:
+            - Karo nods and tells you, "Just be careful, kid, I lost my son in there." You hadn't heard about this before.
+            - choice: ask
+              text: Ask Karo about his son
+              effects:
+                - Karo explains that he doesn't know much, just that his son liked to sneak over into the layer without any a valid pass or even any training just to see what was beyond. Karo warned his son, but he kept going until one day he didn't come back. Karo says, "I still miss him. If you ever find out what happened to him, I'll give you a hefty reward."
+                - goto: karo_warning
+            - choice: sympathy
+              text: Express your sympthy but don't inquire further
+              effects:
+                - Karo looks off into this distance. "I still miss him. If you ever find out what happened to him, I'll give you a hefty reward."
+                - goto: karo_warning
+        karo_warning:
+          _content:
+            - Karo goes on, "Just make sure to always be on a lookout. I know you orphans have a hard life, and I wish I could pay the orphanage more for your work. You have a lot of potential in the Tunnel, but don't feel like you need to do it. It's dangerous out there." Then Karo wanders off.
+            - separator:
+            - goto: lunch
+        lunch:
+          _content:
+            # If took coins and didn't talk to Jaz yet
+            - if: orphanage_third_work_accepted_jaz_coins and not orphanage_third_work_jaz_coins_resolved
+              then:
+                # TODO: Jaz second encounter
+                - pass:
+            - After lunch, you finish the grueling rest of the day's work.
             - choice: next
               effects:
                 - gosub: /logic/time

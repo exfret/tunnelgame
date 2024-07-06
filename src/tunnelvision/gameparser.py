@@ -505,7 +505,7 @@ def parse_node(node, context, address):
                 continue
         if not could_be_parsed:
             print(f"\033[31mError:\033[0m Invalid Disjunct at address {address} node {node}")
-            raise InvalidDisjunctError(f"Could not instantiate union node of type {context} as any of its member types.")
+            raise InvalidDisjunctError()
     elif curr_rule["type"] == "union_with_keys":
         could_be_parsed = False
         for key, context in curr_rule["contexts"].items():
@@ -534,6 +534,7 @@ def parse_node(node, context, address):
         elif "null" in curr_rule and node is None:
             parse_node(node, curr_rule["null"], address)
         else:
+            print(f"\033[31mError:\033[0m Invalid Disjunct at address {address} node {node}")
             raise InvalidDisjunctError()
     else:
         print(f"\033[31mError:\033[0m Invalid 'type' key for grammar rule {context} while parsing at {address} node {node}")

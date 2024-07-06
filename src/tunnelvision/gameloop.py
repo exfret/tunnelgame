@@ -38,7 +38,7 @@ def run(game_name):
             inj_list = choice["injections"]
 
         state["bookmark"] = ()
-        interpreter.make_bookmark(game, state, new_addr, inj_list)
+        addressing.make_bookmark(new_addr, inj_list)
 
         # Only get rid of old choices if this was a proper choice, not an action
         is_action = "action" in choice and choice["action"]
