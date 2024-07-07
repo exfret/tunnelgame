@@ -14,6 +14,11 @@ _vars:
   # Skill vars
   - skill_lemen: 3
     _locale: Lemen Gathering Skill
+  # Personal vars
+  # TODO: Ability to inspect self and see what clothes you're wearing
+  - curr_clothes: light_gray_plain
+  - clothes_owned_light_gray_plain: true
+  - clothes_owned_dark_gray_plain: true
   # Inventory vars
   - coin: 0
     _locale: Coin
@@ -26,6 +31,9 @@ _vars:
   # Misc. vars
   - time_last_explored: 0
   - time_next_training: 0
+  - orphanage_rooms_george_num_times_nvm_in_a_row: 0
+  - orphanage_rooms_george_num_times_chatted_things_in_a_row: 0
+  - orphanage_rooms_personal_last_day_slept: 0
 _content:
   # Skip to first free day
   - command: input ready, walk, gather, return, next, exciting, give, next
@@ -77,7 +85,23 @@ logic:
         then:
           - A new book has arrived at the orphanage study.
           - flag: orphanage_study_unlocked_reading_1
-# Common events that aren't tied to a specific story location (uses gosub)
+      # Random logic things
+      - set: orphanage_rooms_george_num_times_nvm_in_a_row = 0
+      - set: orphanage_rooms_george_num_times_chatted_things_in_a_row = 0
+      # Return
+      - separator:
+      - subreturn:
+  text:
+    clothes_description:
+      _content:
+        - if: curr_clothes == "light_gray_plain"
+          then:
+            - You are currently in your light gray plain outfit.
+        - if: curr_clothes == "dark_gray_plain"
+          then:
+            - You are currently in your dark gray plain outfit.
+        - subreturn:
+# Common events that aren't tied to a specific story location (uses sub)
 world:
   characters:
     orphanage:
@@ -104,11 +128,13 @@ world:
                   - flag: orphanage_rooms_jaz_third_work_coin_event_split_choices_went_back
                   - unflag: orphanage_third_work_jaz_coins_resolved
                   - You tell Jaz you'll think about it and decide later. She frowns and says she expects the coins soon, though.
+                  - subreturn:
               - choice: sure
                 text: Accept the deal
                 cost: 20 coin
                 effects:
                   - She says, "Thanks! Pleasure doing business."
+                  - subreturn:
               - choice: even
                 text: Split the coins 50-50
                 require: 15 coin
@@ -128,6 +154,7 @@ world:
                 cost: 30 coin
                 effects:
                   - Her head jerks back in surprise. "Really? I mean, sure." Then she scoops up all the coins and shows you out before you have time to reconsider.
+                  - subreturn:
               - choice: bye
                 selectable_once:
                 text: Leave with all the coins
@@ -137,6 +164,7 @@ world:
                     text: Ignore her
                     effects:
                       - flag: orphanage_third_work_jaz_coins_walked_out
+                      - subreturn:
                   - choice: reconsider
                     text: Decide to split the coins
                     effects:
@@ -151,6 +179,7 @@ world:
                   - She drops her mouth open. "You wouldn't!" You stare her down and she accepts the deal.
                   - set: coin -= bargain_amount
                     show:
+                  - subreturn:
               - if: bargain_amount == 20
                 then:
                   - choice: compromise
@@ -159,12 +188,14 @@ world:
                       - She accepts and says, "I like your bargaining skills, miss!"
                       - set: coin -= 15
                         show:
+                      - subreturn:
               - choice: give_in
                 text: Accept the original deal of her getting 20 and you getting 10
                 effects:
                   - She calls you a wuss and takes her share of the coins grinning. Then, she boots you out.
                   - set: coin -= 20
                     show:
+                  - subreturn:
               - if: bargain_amount == 15
                 then:
                   - choice: fairness
@@ -188,6 +219,9 @@ orphanage:
       then:
         - Today is free day at the orphanage. The only day you have to yourself. You can go wander around the halls if you want.
     - if: time % 7 == 5 # Thursday is work day again
+      then:
+        - goto: days/work
+    - if: time % 7 == 6 # Friday is yet another work day
       then:
         - goto: days/work
     # Saturday/Sunday special?
@@ -271,7 +305,7 @@ orphanage:
           - set: research_botany_1_chapter += 1
           - choice: next
             effects:
-              - gosub: /logic/time
+              - sub: /logic/time
               - goto: /orphanage
       reading_1:
         _content:
@@ -282,7 +316,7 @@ orphanage:
           - set: research_reading_1_chapter += 1
           - choice: next
             effects:
-              - gosub: /logic/time
+              - sub: /logic/time
               - goto: /orphanage
     courtyard:
       _content:
@@ -387,8 +421,58 @@ orphanage:
               then:
                 - You're too excited for the expedition to sleep!
                 - goto: .
-            - gosub: /logic/time
+            - set: orphanage_rooms_personal_last_day_slept = time
+            - sub: /logic/time
             - goto: /orphanage
+        - choice: look
+          text: Look around the room
+          effects:
+            - if: orphanage_rooms_personal_looked_around
+              then:
+                - The room is still as it was, your bed against the far wall with the window, your dresser next to your door, and your desk over on the right.
+              else:
+                - flag: orphanage_rooms_personal_looked_around
+                - Opposite the door, there is your bed, with a window on the far wall bringing in light from the courtyard. To the right of the door is a dresser, and then on the right far wall a table with a chair to study.
+                - There is barely enough room to sit down in the remaining space, and sometimes your feet dangle off the bed onto your desk, especially as you've grown older. But it's a place to live and that's enough.
+            - separator:
+            - goto: .
+        # Offer options to sit or examine dresser if they've looked around
+        - if: orphanage_rooms_personal_looked_around
+          then:
+            - choice: sit
+              text: Sit at the desk
+              effects:
+                # TODO: Change description with environment/age?
+                - You sit at the desk and stare out at the window. You can partially see your reflection in the dusty window. It's hard to distinguish between the freckles and specks of dirt on your face, and your flaming red hair is messy and knotted.
+                - separator:
+                - goto: .
+            - choice: change
+              text: Change clothes
+              effects:
+                - What would you like to change into?
+                - sub: /logic/text/clothes_description
+                - choice: stay
+                  text: Stay in the same clothes you're wearing now
+                  effects:
+                    - goto: .
+                - if: curr_clothes != "light_gray_plain" and clothes_owned_light_gray_plain
+                  then:
+                    - choice: light_gray
+                      text: Light Gray Plain Outfit
+                      effects:
+                        - set: curr_clothes = "light_gray_plain"
+                        - You change into your new clothes.
+                        - separator:
+                        - goto: .
+                - if: curr_clothes != "dark_gray_plain" and clothes_owned_dark_gray_plain
+                  then:
+                    - choice: dark_gray
+                      text: Dark Gray Plain Outfit
+                      effects:
+                        - set: curr_clothes = "dark_gray_plain"
+                        - You change into your new clothes.
+                        - separator:
+                        - goto: .
         - if: time - last_time_made_bed > 0
           then:
             - choice: make_bed
@@ -403,9 +487,10 @@ orphanage:
                 - separator:
                 - goto: .
     george:
-      # TODO: ability to talk to George for your free day? What do you get out of it? Hm...
+      _vars:
+        - num_times_nvm_in_a_row: 0
       _content:
-        - What do you want to talk to George about?
+        - George asks what you would like.
         - if: is_expedition_day
           then:
             - choice: embark
@@ -440,7 +525,43 @@ orphanage:
       chat:
         _content:
           - What would you like to chat with him about?
-          - choice: _back
+          - if: orphanage_rooms_george_num_times_nvm_in_a_row < 3
+            then:
+              - choice: nvm
+                text: I don't actually want to talk to him
+                effects:
+                  - set: orphanage_rooms_george_num_times_nvm_in_a_row += 1
+                  - if: orphanage_rooms_george_num_times_nvm_in_a_row == 2
+                    then:
+                      - George says, "It's fine if you don't want to chat, I won't be offended."
+                      - separator:
+                  - if: orphanage_rooms_george_num_times_nvm_in_a_row == 3
+                    then:
+                      - George rolls his eyes. "Do you want to chat or not?"
+                      - separator:
+                  - goto: ..
+          - choice: parents
+            selectable_once:
+            text: Ask him about his parents
+            effects:
+              - George tells you, "Oh, I never got to know my mother, died when I was a child, but my dad talked highly of her. Beautiful black hair and green eyes. I didn't care much to hear about her but loved my dad."
+              - He goes on, "He was a Tunnel adventurer like me, a great one too. Sorta like me." Then George smiles weakly. "Anyways, he didn't come back one day. Still don't know why, but that's how it goes with the Tunnel..."
+              - separator:
+              - goto: ..
+          - choice: things
+            text: Talk about things and stuff
+            effects:
+              - set: orphanage_rooms_george_num_times_chatted_things_in_a_row += 1
+              - It's easy to talk about things and stuff with George. He's the most similar to you at the orphanage with his grand dreams of Tunnel exploring. And he's your closest friend here too.
+              - The conversation feels warm and flows smoothly along. Before you know it, a good bit of time has passed.
+              - if: orphanage_rooms_george_num_times_chatted_things_in_a_row == 3
+                then:
+                  - In fact, you've chatted so much, that a whole day has passed. As the sun sets, you head off to bed.
+                  - sub: /logic/time
+                  - goto: /orphanage
+                else:
+                  - separator:
+                  - goto: ..
     caroline:
       _content:
         - Caroline is a cheerful woman with long black hair. Her hair has strands that fall out a lot all over her room (though somehow without leaving bald spots). She was cursed with a forever-child curse and must now be a child her whole life despite being physically an adult. But she really likes playing with all the new stuff you get from the Tunnel, and watching that helps you learn, so, like, give her stuff and get experience.
@@ -503,9 +624,7 @@ orphanage:
         - if: orphanage_third_work_accepted_jaz_coins and not orphanage_third_work_jaz_coins_resolved
           then:
             - Jaz opens the door just a crack and looks through. "Is anyone else there?" She whispers. You answer that it's just you and she lets you in.
-            #- gosub: /world/characters/orphanage/jaz/third_work_coin_event
-            - TODO
-            # TODO: gosub does not persist between choices, but call does not keep vars global, make more flexible subroutines
+            - sub: /world/characters/orphanage/jaz/third_work_coin_event
             - You leave Jaz's room.
             - separator:
             - goto: ..
@@ -535,6 +654,7 @@ orphanage:
           "2": second_work
           "3": third_work
           "4": fourth_work
+          "5": fifth_work
         # Don't do work day if the player explored recently
         #- if: time <= time_last_explored + 1
         #  then:
@@ -581,7 +701,7 @@ orphanage:
             - "[Encyclopedia Entry: The Light]"
             - choice: next
               effects:
-                - gosub: /logic/time
+                - sub: /logic/time
                 - goto: /orphanage
       second_work:
         _content:
@@ -591,7 +711,7 @@ orphanage:
           - flag: unlocked_george_room
           - choice: next
             effects:
-              - gosub: /logic/time
+              - sub: /logic/time
               - goto: /orphanage
       third_work:
         _content:
@@ -611,7 +731,7 @@ orphanage:
                   - She huffs off. Better to stay away than get in trouble with her. The rest of the work day goes smoothly.
                   - choice: next
                     effects:
-                      - gosub: /logic/time
+                      - sub: /logic/time
                       - goto: /orphanage
           - choice: accept
             text: Sure
@@ -630,14 +750,14 @@ orphanage:
             - At the end of the day, Jaz is checked for coins. Of course, they find none; you have all of them.
             - choice: next
               effects:
-                - gosub: /logic/time
+                - sub: /logic/time
                 - goto: /orphanage
         reject:
           _content:
             - She huffs off, mad that you didn't accept her deal. The rest of the work day goes smoothly.
             - choice: next
               effects:
-                - gosub: /logic/time
+                - sub: /logic/time
                 - goto: /orphanage
       fourth_work:
         _content:
@@ -685,13 +805,15 @@ orphanage:
             # If took coins and didn't talk to Jaz yet
             - if: orphanage_third_work_accepted_jaz_coins and not orphanage_third_work_jaz_coins_resolved
               then:
-                # TODO: Jaz second encounter
-                - pass:
+                - sub: /world/characters/orphanage/jaz/third_work_coin_event
             - After lunch, you finish the grueling rest of the day's work.
             - choice: next
               effects:
-                - gosub: /logic/time
+                - sub: /logic/time
                 - goto: /orphanage
+      fifth_work:
+        _content:
+          - pass:
 tunnel:
   _header:
     - set: time_last_explored = time
@@ -747,7 +869,7 @@ tunnel:
           - choice: walk
             text: Walk with George to the Tunnel
             effects:
-              - gosub: /logic/time
+              - sub: /logic/time
               - goto: tunnel_entrance
       tunnel_entrance:
         _content:
@@ -760,7 +882,7 @@ tunnel:
       gather_rosalia:
         _content:
           # TODO: Use scraps explanation
-          - gosub: /logic/time
+          - sub: /logic/time
           - George teaches you how to pluck the small leaves from the red flower for use in teas. You already know some about it due to Mabel's love for it. The orphanage's study doesn't hold many books, but she often goes out of her way to find more for those who are able to fetch her some rosalia.
           - set: rosalia += 3
             show:
@@ -771,7 +893,7 @@ tunnel:
       return:
         _content:
           - set: time_next_training = time + 4
-          - gosub: /logic/time
+          - sub: /logic/time
           - Despite the short trip, you feel exhaustion kick in as soon as you get back to the orphanage. Both you and George go straight to bed.
           - choice: next
             effects: /orphanage
@@ -780,11 +902,11 @@ tunnel:
         - You tighten your straps of your pack for your second ever journey into the tunnel. George grins freckled cheek to freckled cheek. "I'm so excited to show you the lemen fields!" He exclaims. "The whatnow?" You ask. "You'll see," George assures you.
         - And with that, you're off!
         - separator:
-        - gosub: /logic/time
+        - sub: /logic/time
         - George shows his Yellow Pass to the guard, and you hold up your white Training Pass. The guard examines the passes and lets you both through.
         - You spend another day just walking to the spot where George wants to go. You don't even reach the place by nightfall, though George seems to have had a river in mind as a water-source at least.
         - separator:
-        - gosub: /logic/time
+        - sub: /logic/time
         - The next day, after about 30 minutes of walking, he starts to hike up a steep hill. The Dome is comparatively flat, so you're not used to the steep elevation. George, on the other hand, is able to speed ahead. You're afraid to lose him, but he stops at the top. Then, he turns to look down at you and yells out, "Don't worry, when I was your age, my stamina wasn't so great either." Then he chuckles. "You'll do just fine."
         - He makes it sound like he's had soooo much more time to progress, but really he's only three years older than you.
         - Once you get to the top, you slouch your hands onto your knees and wheeze in and out. When you're done panting, you look up and drop your mouth.
@@ -836,12 +958,12 @@ tunnel:
       leave:
         _content:
           - separator:
-          - gosub: /logic/time
+          - sub: /logic/time
           - The next day, it's time to head back. You feel sad, but this time you got to spend almost a whole week away from the orphanage, so you really can't complain.
           - choice: return
             effects:
               # Technically, it should take 2 days to get back, but it's more convenient to the plot to do only 1 since then they can come back on a workday
               - set: time_next_training = time + 6
-              - gosub: /logic/time
+              - sub: /logic/time
               - separator:
               - goto: /orphanage

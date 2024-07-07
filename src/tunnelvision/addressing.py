@@ -133,7 +133,7 @@ def add_header(addr):
         state["bookmark"] = state["bookmark"] + (addr + ("_header", 0),)
 
 
-def make_bookmark(addr, injections = []):
+def make_bookmark(bookmark, addr, injections = []):
     partial_addr = ()
 
     add_header(partial_addr)
@@ -142,9 +142,11 @@ def make_bookmark(addr, injections = []):
         add_header(partial_addr)
 
     for inj in injections:
-        state["bookmark"] = state["bookmark"] + (inj,)
+        bookmark = bookmark + (inj,)
     
-    state["bookmark"] = state["bookmark"] + (addr,)
+    bookmark = bookmark + (addr,)
+
+    return bookmark
 
 
 def get_block_part(curr_addr, index=0):

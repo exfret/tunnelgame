@@ -74,6 +74,8 @@ DICT_INSTR:
     separator: SEPARATOR
     set: SET
     stop: STOP
+    sub: SUB
+    subreturn: SUBRETURN
     switch: SWITCH
     unflag: UNFLAG
 ADD:
@@ -244,6 +246,14 @@ STOP:
   type: dict
   mandatory:
     stop: _null
+SUB:
+  type: dict
+  mandatory:
+    sub: _addr
+SUBRETURN:
+  type: dict
+  mandatory:
+    subreturn: _null
 SWITCH:
   type: dict
   mandatory:

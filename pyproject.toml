@@ -12,7 +12,7 @@ urls = { Homepage = "https://github.com/exfret/tunnelgame" }
 keywords = ["IF", "Interactive Fiction"]
 classifiers = ["Topic :: Games/Entertainment :: Role-Playing"]
 requires-python = ">=3.10"
-dependencies = ["build", "black", "pytest", "pyyaml", "rich", "twine"]
+dependencies = ["build", "black", "pytest", "pyyaml", "rich", "twine", "subprocess", "flask"]
 
 [project.scripts]
 tunnelvision = "tunnelvision:main"

@@ -396,7 +396,28 @@ def step(game, state):
         if "show" in curr_node:
             view.print_var_modification(text_to_show_spec)
     elif "stop" in curr_node:
+        # Need to remove this address now from the queue
+        state["bookmark"] = state["bookmark"][1:]
+
         return False
+    elif "sub" in curr_node:
+        # TODO: Make this interact better with "call"
+        # (Right now, they each have their own call stacks that interact noncommutatively with each other)
+        
+        # Need to get next bookmark so after return we increment past the sub command
+        state["sub_stack"] = (addressing.get_next_bookmark(state["bookmark"]),) + state["sub_stack"]
+        state["bookmark"] = addressing.make_bookmark((), addressing.parse_addr(curr_addr, curr_node["sub"]))
+
+        return True
+    elif "subreturn" in curr_node:
+        if len(state["sub_stack"]) == 0:
+            # TODO: Throw error in this case, this is where we try to return from a subroutine but we're not in one
+            pass
+        else:
+            state["bookmark"] = state["sub_stack"][0]
+            state["sub_stack"] = state["sub_stack"][1:]
+
+            return True
     elif "switch" in curr_node:
         switch_value = eval(curr_node["switch"], {}, utility.collect_vars(state))
         if str(switch_value) in curr_node:

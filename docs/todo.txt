@@ -1,12 +1,15 @@
 Currently:
-  - "set to" statements
-  - Set statements and requirement specifications with vars (pull out requirement spec parsing into utility)
   - per_cost etc. logic
 
+126. Fix goto command (I think broken in choice effects)
+125. Warnings for = in text (for set statements)
+124. Var printing in text of choices?
+123. Test dereferencing abilities
+122. Ability to name vars based on the current block?
 121. Change gosub to persist through choices
 120. Create/Global keyword for locally defined vars
 119. Give inform a look for object features
-118. "all the eggs" talk about all eggs
+118. "all the eggs" talks about all eggs
 117. Warning for choices that lead to "todo" sections
 116. Special ways to access variables, for example, from different scopes with custom parsing of variables in {} curly braces
 115. Tag/filter system... filter only for blocks with a certain tag when doing instructions/commands
@@ -35,10 +38,8 @@ Currently:
 90. Titles for locations
 89. Fix gameparser for requirement specifications
 88. Make sure "help" string is up to date
-87. Change "stop" to "wait" statement? Maybe "pause".
-86. Implement unflagging
+87. Change "stop" to "wait" statement? Maybe "pause". Make wait keep execution stack and stop get rid of it. How to do headers?
 85. Use python ast module to check for undefined variables
-83. Use _default in switch statements
 81. Error on choices that are more than one word
 80. Iteration loops (iterate through a list and do something for each thing in the list)
 77. _args overhaul to use list of variable dicts, not just numbers
@@ -66,6 +67,8 @@ Currently:
 18. Autocomplete for commands
 
 DONE
+86. Implement unflagging
+83. Use _default in switch statements
 78. Treat footers more like macros that get executed within the blocks (Note: I'm reverting this but it was done)
 110. Revert command
 71. Re-implement "actions", which are always available choices not presented, but can be analyzed by typing "actions" (they also apply to all sub-blocks, like a footer)
@@ -89,7 +92,7 @@ DONE
 22. Update 'help' string for new commands (#1 - 5/22/2024)
 84. Fix eval not actually evaluating whether all variables in an expression exist
 4. Catch exceptions from eval, for things like if statements assume falseness, for set statements don't modify
-82. Fix goto . command
+82. Fix goto . instruction
 66. Remove list block/dict block distinction
 50. Finish view class implementation for command line
 39. Make _content a root type

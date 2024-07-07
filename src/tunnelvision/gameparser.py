@@ -1,7 +1,6 @@
 import ast
 import copy
 import math
-import queue
 import random
 import yaml
 
@@ -89,6 +88,7 @@ def open_game(game_name):
         "settings": {
             "show_flavor_text": "once",
         },
+        "sub_stack": (), # A "stack" of bookmarks
         "vars": {},
         "visits": {},
         "visits_choices": {}

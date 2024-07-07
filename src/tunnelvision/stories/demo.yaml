@@ -1,5 +1,11 @@
 ---
 _content:
-  - choice: test
-    effects:
-      - Blop
+  - sub: blop
+  - Bye
+blop:
+  _content:
+    - Hi
+    - choice: continue
+      effects:
+        - Hi again
+        - subreturn:
