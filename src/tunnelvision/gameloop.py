@@ -1,6 +1,5 @@
 # Standard imports
 import copy
-import keyboard
 from pathlib import Path
 import pickle
 

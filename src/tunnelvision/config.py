@@ -31,7 +31,7 @@ injections = ["game", "state", "view"]
 # Default values
 game = {}
 state = {}
-view = V.View()
+view = V.CLIView()
 targets = [
     addressing,  # game
     gameloop,  # game, state, view

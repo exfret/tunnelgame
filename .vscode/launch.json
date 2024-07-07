@@ -5,6 +5,13 @@
             "type": "debugpy",
             "request": "launch",
             "module": "tunnelvision"
+        },
+        {
+            "type": "java",
+            "name": "Java Debugger",
+            "request": "launch",
+            "mainClass": "com.example.tunnelvision.JavaView",
+            "projectName": "tunnelvision"
         }
     ]
 }

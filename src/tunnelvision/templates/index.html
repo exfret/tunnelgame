@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Page Title</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            position: relative;
+            height: 0.143;
+            background: linear-gradient(to right, #6495ED 20%, #4169E1 80%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 20px;
+            color: white;
+        }
+
+        html,
+        body {
+            height: 100%;
+        }
+
+        .settings {
+            width: 40px;
+            height: 40px;
+            background: url("/settings.png") no-repeat center center;
+            background-size: contain;
+            margin: 15px;
+        }
+
+        .title {
+            font-size: 50px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .container {
+            flex: 1;
+            width: 100vw;
+            display: flex;
+        }
+
+        .left-section,
+        .middle-section,
+        .right-section {
+            padding: 10px;
+            overflow: auto;
+        }
+
+        .left-section {
+            flex: 0 0 100px;
+            background: #f0f0f0;
+        }
+
+        .buttons {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .button {
+            margin-bottom: 10px;
+            padding: 5px 10px;
+            background: lightgray;
+            border-radius: 5px;
+        }
+
+        .nav-button {
+            width: 100%;
+        }
+
+        .middle-section {
+            flex: 1;
+            background: #ffffff;
+        }
+
+        .text-area {
+            padding: 10px;
+        }
+
+        .alert {
+            background: #ffe3e3;
+            border: 1px solid #ff9999;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+
+        .middle-section hr {
+            border: none;
+            border-top: 1px solid #ccc;
+            margin: 20px 0;
+        }
+
+        .right-section {
+            flex: 0 0 350px;
+            background: #f0f0f0;
+        }
+
+        .image-area {
+            padding: 10px;
+        }
+
+        img {
+            width: 100%;
+        }
+
+        footer {
+            background: #000000;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        p {
+            margin: 0;
+            padding: 0;
+            margin-top: 0;
+            margin-bottom: 0;
+            line-height: 1.2;
+            font-size: 1rem;
+            font-family: "Georgia";
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+
+        <div class="settings"></div>
+        <h1 class="title">Tunnel</h1>
+    </header>
+
+    <div class="container">
+        <div class="left-section">
+            <div class="buttons">
+                <button class="button nav-button">Stats</button>
+            </div>
+        </div>
+
+        <div class="middle-section">
+            <div class="text-area">
+                <p id="story-text">
+                    <button class="button" id="startButton">Start</button>
+                </p>
+            </div>
+        </div>
+
+        <div class="right-section">
+            <div class="image-area">
+                <img id="flavor-img" src="img/main.png" alt="Image">
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        &copy; 2023 Kyle Hess | Contact: hess.kyler@gmail.com
+    </footer>
+</body>
+
+</html>

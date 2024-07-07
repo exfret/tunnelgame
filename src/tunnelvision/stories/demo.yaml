@@ -1,25 +1,5 @@
 ---
-_vars:
-  - curr_garden_plot: garden_plot_1
-  - garden_plot_1: tomato
-  - counter: 0
 _content:
-  - Hello, Lizzy.
-  - choice: good
+  - choice: test
     effects:
-      - You made a good choice.
-  - choice: bad
-    effects:
-      - You made a bad choice.
-  - set: counter += 1
-  - goto: hello
-hello:
-  _vars:
-    - counter: 0
-  _content:
-    - "{counter}"
-    - goto: bye
-  bye:
-    _content:
-      - Bye
-      - "{counter}"
+      - Blop

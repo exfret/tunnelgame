@@ -4,3 +4,4 @@ venv/
 .venv/
 dist/
 .DS_Store
+**.class
