@@ -1,4 +1,6 @@
+import os
 from pathlib import Path
+import sys
 import yaml
 
 from tunnelvision import (
@@ -11,13 +13,22 @@ from tunnelvision import (
 )
 
 
+# Make new data dir
+data_dir = Path.home() / "tunnelgame"
+data_dir.mkdir(exist_ok=True)
+story_dir = data_dir / "stories"
+story_dir.mkdir(exist_ok=True)
+saves_dir = data_dir / "saves"
+saves_dir.mkdir(exist_ok=True)
+
+
 ###########################################################
 # Data sources
 ###########################################################
 
-local_dir = Path(__file__).parent
-stories = local_dir / "stories"
-saves = local_dir / "saves"
+local_dir = Path(getattr(sys, '_MEIPASS', os.path.abspath('.')))
+stories = story_dir
+saves = saves_dir
 grammar = yaml.safe_load((local_dir / "grammar.yaml").read_text())
 max_num_steps = 20000
 choices_between_autosaves = 20

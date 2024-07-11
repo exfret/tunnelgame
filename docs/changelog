@@ -1,5 +1,20 @@
-2024/7/7
+2024/7/11
+
+2024/7/10 (6k words - 7k words)
+- Sam story test
+- Wrote third training expedition
+
+2024/7/9 (6k words - 6k words)
+- Added pop_queue instruction
+- Added word_count and words_seen commands
+
+2024/7/8 (6k words - 6k words)
+- Made pyinstaller proof of concept compiled story
+- Split intro.yaml in first new tunnel story draft into multiple files with _includes
+
+2024/7/7 (? - 6k words)
 - Implemented better subroutines with "sub" and "subreturn" commands; subroutines now persist between choices
+- Reset master, which was behind
 
 2024/7/6
 - Implemented proof-of-concept Java View and Web View

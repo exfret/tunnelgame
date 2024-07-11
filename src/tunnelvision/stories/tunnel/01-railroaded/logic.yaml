@@ -1,0 +1,37 @@
+time:
+  _content:
+    - set: time += 1
+    - A day passes...
+    # Checks for "environment" vars
+    - if: 'tunnel_pass == "training" and not on_training_expedition and time_next_training <= time'
+      then:
+        - set: is_expedition_day = True
+        - It's time for you to train in the Tunnel again! Meet George in his room.
+      else:
+        - set: is_expedition_day = False
+    # Unlocks
+    - if: time == 10
+      then:
+        - A new book has arrived at the orphanage study.
+        - flag: orphanage_study_unlocked_reading_1
+    # Random logic things
+    - set: orphanage_rooms_george_num_times_nvm_in_a_row = 0
+    - set: orphanage_rooms_george_num_times_chatted_things_in_a_row = 0
+    # Return
+    - separator:
+    - subreturn:
+text:
+  clothes_description:
+    _content:
+      - sub: clothes_locale
+      - You are currently in your {curr_clothes_locale} outfit.
+      - subreturn:
+    clothes_locale:
+      _content:
+        - if: curr_clothes == "light_gray_plain"
+          then:
+            - set: curr_clothes_locale = "light gray plain outfit"
+        - if: curr_clothes == "dark_gray_plain"
+          then:
+            - set: curr_clothes_locale = "dark gray plain outfit"
+        - subreturn:

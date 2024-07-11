@@ -1,6 +1,5 @@
 # Tests for:
 #   - Local variables
-#   -
 
 # In test_gameloop.py
 import pytest

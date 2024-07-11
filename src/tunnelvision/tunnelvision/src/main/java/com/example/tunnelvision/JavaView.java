@@ -125,12 +125,17 @@ public class JavaView extends JFrame {
     }
 
     public static void main(String[] args) {
+        // Comment this out when running, I only use this because it was running on save every time
+        //return;
+
         JavaView win = new JavaView();
 
         Scanner scanner = new Scanner(System.in);
 
         while (true) {
             if (scanner.hasNextLine()) {
+                win.addText(scanner.nextLine());
+
                 String input = scanner.nextLine();
 
                 String[] msg = input.split(":", 2);

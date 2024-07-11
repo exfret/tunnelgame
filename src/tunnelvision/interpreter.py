@@ -281,6 +281,15 @@ def step(game, state):
                 return True
     elif "pass" in curr_node:
         pass
+    elif "pop_queue" in curr_node:
+        # Pop the first element of the queue that's not the current stack element
+        # Useful for injections
+        # TODO: Label what parts of the bookmark queue represent (subroutine, injection, header, etc.) and use this to more easily manipulate it
+        try:
+            state["bookmark"] = state["bookmark"][:1] + state["bookmark"][2:]
+        except Exception:
+            # If there was out of index error, do nothing
+            pass
     elif "print" in curr_node:
         style = None
         if "style" in curr_node:
@@ -400,6 +409,11 @@ def step(game, state):
         state["bookmark"] = state["bookmark"][1:]
 
         return False
+    elif "storypoint" in curr_node:
+        if curr_node["storypoint"] is None:
+            state["story_points"][curr_addr] = True
+        else:
+            state["story_points"][curr_node["storypoint"]] = True
     elif "sub" in curr_node:
         # TODO: Make this interact better with "call"
         # (Right now, they each have their own call stacks that interact noncommutatively with each other)

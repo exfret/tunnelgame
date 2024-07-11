@@ -1,16 +1,20 @@
 # Standard imports
 import copy
-from pathlib import Path
 import pickle
 
 from tunnelvision import addressing, interpreter, gameparser, utility
-from tunnelvision.config import saves, max_num_steps, choices_between_autosaves
+from tunnelvision.config import local_dir, stories, saves, max_num_steps, choices_between_autosaves
 
-def run(game_name):
-    gameparser.open_game(game_name)
+def run(game_name, packaged=True):
+    curr_story_dir = None
+    if packaged:
+        curr_story_dir = local_dir / "stories" / game_name
+    else:
+        curr_story_dir = stories / game_name
+    gameparser.open_game(game_name, curr_story_dir)
 
     def setup_game():
-        gameparser.construct_game(game)
+        gameparser.construct_game(game, curr_story_dir)
         gameparser.expand_macros(game)
         gameparser.add_flags(game)
         gameparser.add_vars_with_address(game, state, game, ())
@@ -149,6 +153,22 @@ def run(game_name):
             view.print_choices(True)  # Print actions
         elif command[0] == "choices":
             view.print_choices()
+        elif command[0] == "completion":
+            if len(state["story_points"]) == 0:
+                view.print_feedback_message("completion_not_supported")
+                continue
+
+            num_complete = 0
+            total_num = 0
+            for val in state["story_points"].values():
+                if val:
+                    num_complete += 1
+                total_num += 1
+
+            try:
+                view.print_completion_percentage(num_complete / total_num)
+            except Exception:
+                view.print_feedback_message("command_not_supported")
         elif command[0] == "exec":
             continue # Not yet implemented
             if len(command) < 2:
@@ -283,6 +303,18 @@ def run(game_name):
                         view.print_settings_flavor_text_set(command[2])
                     else:
                         view.print_feedback_message("settings_flavor_invalid_val")
+        elif command[0] == "word_count":
+            # TODO: Only error when view doesn't have given method
+            try:
+                view.print_num_words(utility.count_words(game))
+            except Exception:
+                view.print_feedback_message("command_not_supported")
+        elif command[0] == "words_seen":
+            # TODO: Only error when view doesn't have given method
+            try:
+                view.print_num_words(utility.count_words(game, True))
+            except Exception:
+                view.print_feedback_message("command_not_supported")
         elif command[0] in state["choices"]:
             choice = state["choices"][command[0]]
             if not ("missing" in choice):

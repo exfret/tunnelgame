@@ -7,6 +7,7 @@ from tunnelvision import utility
 
 feedback_msg = {
     "could_not_load_autosave": "Could not revert to autosave",
+    "completion_not_supported": "This story doesn't support completion percentage.",
     "exec_no_story_given": "Must give path to story to execute.",
     "exec_invalid_file_given": "Invalid story given for exec.",
     "goto_invalid_address_given": "Incorrect address given.",
@@ -28,6 +29,7 @@ feedback_msg = {
     "set_command_successful": "Successfully set variable to new value.",
     "settings_no_setting_given": "Must give a setting to give a new value to or test the current value of. Here is a list of settings:",
     "settings_flavor_invalid_val": "That's not an allowed value of show_flavor_text. Allowed values are 'always', 'once', and 'never'",
+    "command_not_supported": "This command is not supported by the current view",
     "choice_missing_requirements": "Missing requirements.",
     "unrecognized_command": "Unrecognized command/choice. Type 'help' for commands or 'choices' for a list of choices.",
     "default": "Error: Invalid feedback message key.",
@@ -192,6 +194,9 @@ class CLIView:
                 missing_text = missing_text[:-2]
                 print(missing_text + "\033[0m")
 
+    def print_completion_percentage(self, percentage):
+        print(f"Completed {(100 * percentage):.1f}% of the story!")
+
     def print_feedback_message(self, msg_type, dont_save = False):
         if dont_save:
             if not (msg_type in feedback_msg):
@@ -203,6 +208,9 @@ class CLIView:
                 print(feedback_msg["default"])
             else:
                 print(feedback_msg[msg_type])
+    
+    def print_num_words(self, num_words):
+        print(num_words)
 
     def print_settings(self):
         displayed_text = ""
@@ -342,6 +350,7 @@ class JavaView:
         pass # TODO
 
     def print_text(self, text, style=""):
+        old_print("hi")
         self.send_message(f"print:{text}")
 
     ######################################################################

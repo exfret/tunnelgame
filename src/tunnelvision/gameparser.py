@@ -5,7 +5,7 @@ import random
 import yaml
 
 from tunnelvision import addressing
-from tunnelvision.config import grammar, stories
+from tunnelvision.config import grammar, stories, local_dir
 from tunnelvision.utility import *  # TODO: Make it not import *, use proper namespace
 
 # TODO: Check addresses in program are valid
@@ -58,10 +58,10 @@ class UndefinedVariableChecker(ast.NodeVisitor):
 expr_checker = UndefinedVariableChecker()
 
 
-def open_game(game_name):
+def open_game(game_name, curr_story_dir):
     game.clear()
     state.clear()
-    contents = yaml.safe_load((stories / game_name).read_text())
+    contents = yaml.safe_load(curr_story_dir.read_text())
     game.update(contents)
 
     starting_state = {
@@ -88,6 +88,7 @@ def open_game(game_name):
         "settings": {
             "show_flavor_text": "once",
         },
+        "story_points": {},
         "sub_stack": (), # A "stack" of bookmarks
         "vars": {},
         "visits": {},
@@ -96,17 +97,17 @@ def open_game(game_name):
     state.update(copy.deepcopy(starting_state))
 
 
-def construct_game(node):
+def construct_game(node, curr_story_dir):
     if "_include" in node:
         for block_name, file_name in node["_include"].items():
-            subgame = yaml.safe_load((stories / file_name).read_text())
+            subgame = yaml.safe_load((curr_story_dir.parent / file_name).read_text())
             node[block_name] = copy.deepcopy(subgame)
     if not "_meta" in node:
         node["_meta"] = {}
 
     for key, subnode in node.items():
         if isinstance(subnode, dict) and not key[0] == "_":  # Only recurse into sub-blocks
-            construct_game(subnode)  # Note: This can result in exponentially long games with the right setups...
+            construct_game(subnode, curr_story_dir)  # Note: This can result in exponentially long games with the right setups...
             # TODO: Smarter stitching that does not just duplicate everything
 
 
@@ -409,6 +410,16 @@ def parse_node(node, context, address):
         # NOTE: No checking for array length yet!
 
         parse_node(var_expr_pair[1].strip(), "_expr", address)
+    elif context == "_story_point":
+        if node is None:
+            # Don't include the storypoint part of the address
+            state["story_points"][address[:-1]] = False
+        else:
+            if not isinstance(node, str):
+                print(f"\033[31mError:\033[0m Non-string story point at {address} node {node}")
+                raise IncorrectTypeError()
+
+            state["story_points"][node] = False
     elif context == "_table_id":
         # First check it's a valid variable reference
         parse_node(node, "_var_id", address)

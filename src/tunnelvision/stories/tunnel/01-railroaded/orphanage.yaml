@@ -1,0 +1,761 @@
+_content:
+  - set: on_training_expedition = False # TODO: Do I need to make sure training expedition is false anywhere else?
+  - if: is_expedition_day # Skip work if it's expedition time
+    then:
+      - goto: rooms/personal
+  # Evaluate events for returning to orphanage here
+  - if: time % 7 == 0 # Saturday is volunteering day
+    then:
+      - goto: days/volunteer
+  - if: time % 7 == 1 # Sunday is volunteering day
+    then:
+      - goto: days/volunteer
+  - if: time % 7 == 2 # Monday is town day?
+    then:
+      - pass: # TODO
+  - if: time % 7 == 3 # Tuesday is work day (at least initially)
+    then:
+      - goto: days/work
+  - if: time % 7 == 4 # Wednesday is free day
+    then:
+      - Today is free day at the orphanage. The only day you have to yourself. You can go wander around the halls if you want.
+  - if: time % 7 == 5 # Thursday is work day again
+    then:
+      - goto: days/work
+  - if: time % 7 == 6 # Friday is yet another work day
+    then:
+      - goto: days/work
+  # Saturday/Sunday special?
+  - goto: rooms/personal
+admin:
+  _content:
+    - pass:
+common:
+  _content:
+    - You're in the common hallway.
+    - choice: rooms
+      text: Go to the bedrooms
+    - choice: study
+      text: Visit the orphanage's study
+    - if: unlocked_courtyard_key
+      then:
+        - choice: courtyard
+          text: Go to the courtyard
+    #- choice: courtyard
+    #  text: Visit the orphanage's courtyard
+  study:
+    _content:
+      - if: study_on_expedition_day_undo
+        then:
+          - You have a feeling that studying today would be have grave consequences, so you decide to leave.
+          - separator:
+          - goto: ..
+      - if: not met_mabel
+        then:
+          - flag: met_mabel
+          - A young, thin woman looks up from a desk at the front of the orphanage's study. "I'm Mabel. I heard you have started exploring. It would only make sense to give you access to our dismal collection of knowledge and folklore surrounding the Tunnel. You'll have to get access to the main town library for more in-depth knowledge. Just choose a subject to study and you can make progress on that book."
+        else:
+          - Mabel stares at you briefly, as if suspicious of what you might do next, before returning to her dusty book.
+      - choice: common
+        text: Return to the commons area
+        effects: ..
+      - choice: botany
+        text: Read the textbook on Botany I
+        effects:
+          - goto: botany_1
+      - if: orphanage_study_unlocked_reading_1
+        then:
+          - choice: reading
+            text: Read the textbook on Reading I
+            effects:
+              - goto: reading_1
+      - inject: miss_expedition_inject
+        into_choices: botany reading
+    miss_expedition_inject:
+      _content:
+        - if: is_expedition_day
+          then:
+            # Pop the queue so that we don't go back from this injection
+            - pop_queue:
+            - goto: miss_expedition
+    miss_expedition:
+      _content:
+        - You might miss your expedition with George if you spend the day reading. Are you sure?
+        - choice: "yes"
+          effects:
+            - George abandons you and you grow up, get kicked out of the orphanage, then starve.
+            - I guess you're just not cut out for Tunneling are ya?
+            - The End
+            - flag: study_on_expedition_day_undo
+            - choice: undo
+              effects: ../..
+        - choice: "no"
+          effects: ..
+    botany_1:
+      _content:
+        - You spend the day reading about plants.
+        - switch: research_botany_1_chapter
+          "0":
+            - storypoint:
+            - The first section is just a preface about the beauty of plants in the Tunnel. It goes over the author's love for the different flowers, which is why this first volume of his series on plants is devoted to them. They are also the most common useful type of plant to gather from the first layer of the Tunnel, which is why it's important to learn about them.
+          "1":
+            - storypoint:
+            - The next section is the first real chapter. It goes over lemens. You remember these from your trip with George, but the book also mentions how they have never been successfully grown in the Dome. This has led many to believe there is a special aura in the Tunnel that keep them alive. You know there's a special aura though, you could feel it.
+            - At the very least, it goes over some better techniques for gathering them for next time you're out there.
+            - set: skill_lemen += 1
+              show:
+          "2":
+            - storypoint:
+            # TODO: Also increase harvesting skill
+            - The third section is about rosalia. You gain an appreciation for how different leaves taste different, with the smallest hardest-to-get ones actually being the most potent and tasteful.
+        - set: research_botany_1_chapter += 1
+        - choice: next
+          effects:
+            - sub: /logic/time
+            - goto: /orphanage
+    reading_1:
+      _content:
+        - You spend the day reading about reading.
+        - switch: research_reading_1_chapter
+          "1":
+            - storypoint:
+            - The first chapter is a bit basic, you already know the alphabet and a good number of words, which is all it goes over.
+        - set: research_reading_1_chapter += 1
+        - choice: next
+          effects:
+            - sub: /logic/time
+            - goto: /orphanage
+  courtyard:
+    _content:
+      - storypoint:
+      - The courtyard holds the small graveyard and a pond surrounded by slimy stones. The water is stagnant full of algae. You've never seen fish in it.
+      - choice: common
+        text: Go back to the commons hallway
+        effects: ..
+      - choice: read
+        text: Read the graves
+        effects:
+          - The older gravestones from back when the orphanage was prosperous have very ornate carvings, but recent ones don't even have the name of the deceased.
+          - separator:
+          - goto: .
+      - choice: pond
+        text: Examine the pond
+        effects:
+          - You check if a fish has magically appeared in the pond today, but there still aren't any there.
+          - separator:
+          - goto: .
+lobby:
+  _content:
+    - You're in the lobby.
+    - choice: admin
+      text: Go to the administrative area
+      effects:
+        - You're not allowed there.
+        - separator:
+        - goto: .
+    - choice: common
+      text: Go to the commons hallway
+    - choice: rooms
+      text: Go to the bedrooms
+    - choice: town
+      text: Go into town
+      effects:
+        - You're not allowed into town yet.
+        - separator:
+        - goto: .
+rooms:
+  _content:
+    - You stand in the hallway where the orphanage bedrooms are. There are 7 bedrooms, and as usual, they're all full. You're at the very beginning, close to the administrative offices on the other end across the lobby. The lobby also opens up to another hallway on the right across from the exit. At the end of all the rooms is a door to the basement.
+    #- choice: admin
+    #  text: Go to the administrative area
+    #  effects:
+    #    - You're not allowed there.
+    #    - separator:
+    #    - goto: .
+    #- choice: lobby
+    #  text: Go to the lobby
+    - choice: common
+      text: Go to the commons hallway on the right
+    - choice: personal
+      text: Visit my own room
+    - if: unlocked_george_room
+      then:
+        - choice: george
+          text: Visit George's room
+          effects: george/knock
+    # TODO: Ways to unlock these rooms
+    #- choice: caroline
+    #  text: Visit Caroline's room
+    #- choice: benedict
+    #  text: Visit Benedict's room
+    #- choice: rose
+    #  text: Visit Rose's room
+    - if: unlocked_chloe_room
+      then:
+        - choice: chloe
+          text: Visit Chloe's room
+    - if: unlocked_jaz_room
+      then:
+        - choice: jaz
+          text: Visit Jaz's room
+  personal:
+    _vars:
+      - last_time_made_bed: 0
+    _content:
+      - if: is_expedition_day
+        then:
+          - You're in your room, which is mostly empty since things are packed up for exploring.
+        else:
+          - You're in your room.
+      - if: (time - last_time_made_bed) == 0
+        then:
+          - Your bed is pristine and neatly tucked.
+      - if: (time - last_time_made_bed) >= 1 and (time - last_time_made_bed) < 7
+        then:
+          - Your bed is pretty neat. The covers are a little shifted but it looks pretty nice.
+      - if: (time - last_time_made_bed) >= 7 and (time - last_time_made_bed) < 30
+        then:
+          - Your bed is a little messy. There is a bit of the sheet poking out where it should be tucked in and there are some crinkles in the cover.
+      - if: (time - last_time_made_bed) >= 30
+        then:
+          - Your bed is pretty much completely untucked, the covers are thrown off, and the mattress sheet is no longer on one of the corners of the mattress.
+      - choice: leave
+        text: Leave your room
+        effects: ..
+      - choice: sleep
+        text: Sleep the day away
+        effects:
+          - if: is_expedition_day
+            then:
+              - You're too excited for the expedition to sleep!
+              - goto: .
+          - set: orphanage_rooms_personal_last_day_slept = time
+          - set: orphanage_training_num_times_slept += 1
+          - sub: /logic/time
+          - goto: /orphanage
+      - choice: look
+        text: Look around the room
+        effects:
+          - storypoint:
+          - if: orphanage_rooms_personal_looked_around
+            then:
+              - The room is still as it was, your bed against the far wall with the window, your dresser next to your door, and your desk over on the right.
+            else:
+              - flag: orphanage_rooms_personal_looked_around
+              - Opposite the door, there is your bed, with a window on the far wall bringing in light from the courtyard. To the right of the door is a dresser, and then on the right far wall a table with a chair to study.
+              - There is barely enough room to sit down in the remaining space, and sometimes your feet dangle off the bed onto your desk, especially as you've grown older. But it's a place to live and that's enough.
+          - separator:
+          - goto: .
+      # Offer options to sit or examine dresser if they've looked around
+      - if: orphanage_rooms_personal_looked_around
+        then:
+          - choice: sit
+            text: Sit at the desk
+            effects:
+              # TODO: Change description with environment/age?
+              - You sit at the desk and stare out at the window. You can partially see your reflection in the dusty window. It's hard to distinguish between the freckles and specks of dirt on your face, and your flaming red hair is messy and knotted.
+              - separator:
+              - goto: .
+          - choice: change
+            text: Change clothes
+            effects:
+              - What would you like to change into?
+              - sub: /logic/text/clothes_description
+              - choice: stay
+                text: Stay in the same clothes you're wearing now
+                effects:
+                  - goto: .
+              - if: curr_clothes != "light_gray_plain" and clothes_owned_light_gray_plain
+                then:
+                  - choice: light_gray
+                    text: Light Gray Plain Outfit
+                    effects:
+                      - set: curr_clothes = "light_gray_plain"
+                      - You change into your new clothes.
+                      - separator:
+                      - goto: .
+              - if: curr_clothes != "dark_gray_plain" and clothes_owned_dark_gray_plain
+                then:
+                  - choice: dark_gray
+                    text: Dark Gray Plain Outfit
+                    effects:
+                      - set: curr_clothes = "dark_gray_plain"
+                      - You change into your new clothes.
+                      - separator:
+                      - goto: .
+      - if: time - last_time_made_bed > 0
+        then:
+          - choice: make_bed
+            text: Make your bed
+            effects:
+              - if: is_expedition_day
+                then:
+                  - You have no time to make your bed. It's time for an expedition with George!
+                else:
+                  - You make your bed.
+                  - set: last_time_made_bed = time
+              - separator:
+              - goto: .
+  george:
+    _vars:
+      - num_times_nvm_in_a_row: 0
+    _content:
+      - George asks what you would like.
+      - choice: back
+        effects:
+          - You exit the room and George waves bye.
+          - goto: /orphanage/rooms
+      - if: is_expedition_day
+        then:
+          - choice: embark
+            text: Go on your next venture into the Tunnel
+            effects:
+              - set: on_training_expedition = True
+              - set: num_training_expeditions += 1
+              # Switch on the number of visits plus one goes to the expedition number, since the first expedition was from the start label
+              - switch: num_training_expeditions
+                "1": /tunnel/training/second_journey
+                "2": /tunnel/training/third_journey
+      #- choice: explore
+      #  text:
+      - if: not is_expedition_day
+        then:
+          - choice: training
+            text: Ask when the next training in the Tunnel is
+            effects:
+              - set: temp = time_next_training - time
+              - if: temp <= 0
+                then:
+                  - He says it's time, and he's ready to go when you are.
+                else:
+                  - He says it's in {temp} days.
+              - separator:
+              - goto: .
+          - choice: chat
+            text: Chat with him
+    knock:
+      _content:
+        - You knock on George's door. He opens it and answers.
+        - goto: ..
+    chat:
+      _content:
+        - What would you like to chat with him about?
+        - if: orphanage_rooms_george_num_times_nvm_in_a_row < 3
+          then:
+            - choice: nvm
+              text: I don't actually want to talk to him
+              effects:
+                - set: orphanage_rooms_george_num_times_nvm_in_a_row += 1
+                - if: orphanage_rooms_george_num_times_nvm_in_a_row == 2
+                  then:
+                    - George says, "It's fine if you don't want to chat, I won't be offended."
+                    - separator:
+                - if: orphanage_rooms_george_num_times_nvm_in_a_row == 3
+                  then:
+                    - George rolls his eyes. "Do you want to chat or not?"
+                    - separator:
+                - goto: ..
+        - choice: parents
+          selectable_once:
+          text: Ask him about his parents
+          effects:
+            - George tells you, "Oh, I never got to know my mother, died when I was a child, but my dad talked highly of her. Beautiful black hair and green eyes. I didn't care much to hear about her but loved my dad."
+            - He goes on, "He was a Tunnel adventurer like me, a great one too. Sorta like me." Then George smiles weakly. "Anyways, he didn't come back one day. Still don't know why, but that's how it goes with the Tunnel..."
+            - separator:
+            - goto: ..
+        - choice: things
+          text: Talk about things and stuff
+          effects:
+            - set: orphanage_rooms_george_num_times_chatted_things_in_a_row += 1
+            - It's easy to talk about things and stuff with George. He's the most similar to you at the orphanage with his grand dreams of Tunnel exploring. And he's your closest friend here too.
+            - The conversation feels warm and flows smoothly along. Before you know it, a good bit of time has passed.
+            - if: orphanage_rooms_george_num_times_chatted_things_in_a_row == 3
+              then:
+                - In fact, you've chatted so much, that a whole day has passed. As the sun sets, you head off to bed.
+                - sub: /logic/time
+                - goto: /orphanage
+              else:
+                - separator:
+                - goto: ..
+  caroline:
+    _content:
+      - Caroline is a cheerful woman with long black hair. Her hair has strands that fall out a lot all over her room (though somehow without leaving bald spots). She was cursed with a forever-child curse and must now be a child her whole life despite being physically an adult. But she really likes playing with all the new stuff you get from the Tunnel, and watching that helps you learn, so, like, give her stuff and get experience.
+  benedict:
+    _content:
+      - pass:
+  rose:
+    _content:
+      - pass:
+  chloe:
+    _content:
+      # TODO: Should other orphans not answer on non-work days either? How to deal with George?
+      - if: time % 7 != 4 # Chloe doesn't answer on non-free days
+        then:
+          - goto: absent
+      - if: not first_orphanage_work_day_gave_chloe_rosalia
+        then:
+          # If it's after the second expedition, Chloe can forgive you
+          - if: num_training_expeditions >= 2
+            then:
+              - Chloe opens the door. She says she was hurt that you didn't give her a rosalia. Maybe you can make it up to her by bringing her 13 lemens?
+              - choice: back
+                effects: /orphanage/rooms
+              - choice: give
+                text: Give her 13 lemens
+                cost: 13 lemens
+                effects:
+                  - flag: orphanage_rooms_chloe_gave_lemens
+                  - You give her 13 of your lemens.
+                  - goto: .
+              # Only present the above choices
+              - stop:
+            else:
+              - Chloe doesn't open the door, but you can hear some rustling inside.
+              - separator:
+              - goto: ..
+      - if: first_orphanage_work_day_gave_chloe_rosalia and not orphanage_rooms_chloe_offer_courtyard_key
+        then:
+          - Chloe greets you at her door. She says she loves the Rosalia you gave her. She has a key to the courtyard that she'll trade for more Rosalia.
+          - flag: orphanage_rooms_chloe_offer_courtyard_key
+      - if: orphanage_rooms_chloe_gave_lemens and not orphanage_rooms_chloe_offer_courtyard_key
+        then:
+          - Chloe greets you at her door. She says she loves the lemens you gave her and they had such a pretty glow! She has a key to the courtyard that she'll trade for some Rosalia.
+          - flag: orphanage_rooms_chloe_offer_courtyard_key
+      - choice: _back
+      - if: orphanage_rooms_chloe_offer_courtyard_key and not unlocked_courtyard_key
+        then:
+          - choice: key
+            cost: 5 rosalia
+            effects:
+              - flag: unlocked_courtyard_key
+              - separator:
+              - goto: .
+      - if: unlocked_courtyard_key
+        then:
+          - Chloe thanks you for giving her the rosalia and says she hopes you enjoy the courtyard.
+    absent:
+      - Chloe doesn't answer the door, probably since it's not a free day for the others at the orphanage.
+      - separator:
+      - goto: /orphanage/rooms
+  jaz:
+    _content:
+      - if: time % 7 != 4
+        then:
+          - goto: absent
+      # After coins event - accepted plan, before coins resolved
+      - if: orphanage_third_work_accepted_jaz_coins and not orphanage_third_work_jaz_coins_resolved
+        then:
+          - Jaz opens the door just a crack and looks through. "Is anyone else there?" She whispers. You answer that it's just you and she lets you in.
+          - sub: /world/characters/orphanage/jaz/third_work_coin_event
+          - You leave Jaz's room.
+          - separator:
+          - goto: ..
+      # After coins event - did not accept plan
+      - if: not orphanage_third_work_accepted_jaz_coins and not orphanage_third_work_jaz_coins_resolved
+        then:
+          - She opens the door, but says she won't talk to you until you do one of her plans.
+          - separator:
+          - goto: ..
+      # After coins event and resolving who gets coins
+      - if: orphanage_third_work_accepted_jaz_coins and orphanage_third_work_jaz_coins_resolved
+        then:
+          # Case where you walked out with the coins on Jaz
+          - if: orphanage_third_work_jaz_coins_walked_out
+            then:
+              - Jaz yells out while her door is closed to go away.
+            else:
+              - Jaz yells out from her room "thanks for the business, but I'm busy now".
+          - separator:
+          - goto: /orphanage/rooms
+    absent:
+      _content:
+        - There's no response, probably since it's not a free day for the others.
+        - separator:
+        - goto: /orphanage/rooms
+days:
+  volunteer:
+    _content:
+      - Today is volunteer day at the orphanage.
+      - switch: _visits
+        "1": first_volunteer
+    first_volunteer:
+      _content:
+        - storypoint:
+        - Due to the poor public perception of orphans, the orphanage has you all volunteer over the weekend performing projects for the community. Today, you all are repairing a worn-down walking path.
+        - It's hard work, and you have to dig up a lot of rocks. In fact, you start wheezing and get lightheaded as you constantly pick up the pointy rocks. You wonder how much energy you should expend on this. (See encyclopedia for details on energy).
+        - "[Unlocked: Energy]"
+        - flag: unlocked_energy
+        # Set base energy dependent on number times slept
+        - if: orphanage_training_num_times_slept >= 2
+          then:
+            - You slept a lot recently and so you have a lot of energy.
+            - set: energy = 10
+        - if: orphanage_training_num_times_slept == 1
+          then:
+            - You slept a good amount recently and so you have a decent amount of energy.
+            - set: energy = 5
+        - if: orphanage_training_num_times_slept == 0
+          then:
+            - You haven't been sleeping much so you don't have any energy.
+            - set: energy = 0
+        - choice: lots
+          text: Use a lot of energy to get this job done efficiently
+          cost: 4 energy
+          effects:
+            - You do so well that Ms. Bee gives you 3 coins for your hard labor.
+            - set: coin += 3
+              show:
+            - goto: done_volunteering
+        - choice: some
+          text: Use a decent amount of energy to get the job done efficiently
+          cost: 2 energy
+          effects:
+            - Once the work day is done, Ms. Bee lines everyone up and congratulates you all for your hard work. She gives each of you a coin to spend in town next time you all visit there. Not that a single coin could be used for much.
+            - set: coin += 1
+              show:
+            - goto: done_volunteering
+        - choice: little
+          text: Use only a little energy and let others get the job done
+          effects:
+            - Once the work day is done, Ms. Bee lines everyone up and congratulates you all for your hard work, shooting you a stern look. She gives everyone but you a single coin.
+            - set: coin += 1
+              show:
+            - goto: done_volunteering
+      done_volunteering:
+        _content:
+          - sub: /logic/time
+          - goto: /orphanage
+  work:
+    _content:
+      - Today is a work day at the orphanage.
+      - switch: _visits
+        "1": first_work
+        "2": second_work
+        "3": third_work
+        "4": fourth_work
+        "5": fifth_work
+        # TODO: sixth work with Troy
+      # Don't do work day if the player explored recently
+      #- if: time <= time_last_explored + 1
+      #  then:
+      #    - However, since you are resting from your recent venture into the Tunnel, you're allowed to rest today.
+      #    - goto: /orphanage/rooms/personal
+    first_work:
+      _content:
+        - storypoint:
+        - As usual, you, George, and the other 3 children old enough at the orphanage to work line up in front of the double oak doors while Ms. Bee and Mabel stare down at everyone. Then, they open the doors and lead everyone to the farm a 10 minute walk away.
+        - Older residents of Sleepy Hollow Orphanage have to work at Karo's farm. He doesn't pay well for the untrained labor, but the orphanage needs all the money it can get. Of course, you don't get a single coin from it. That's just the cost of having a safe place to live and eat.
+        - During lunch break, Chloe, another orphan, sits next to you and asks how your first visit to the tunnel went.
+        - flag: unlocked_chloe_room
+        - choice: exciting
+          effects:
+            - You explain how exciting it was to be outside the flat barren ground of the Dome and in a new environment.
+            - goto: chloe_response
+        - choice: sublime
+          effects:
+            - You say it's hard to explain just how different and "nature"-y things are in the Tunnel as compared to the Dome. The "essence" of the place is just... well, different.
+            - goto: chloe_response
+        - choice: short
+          effects:
+            - You sigh and complain that your trip was too short, but you look forward to going again soon!
+            - goto: chloe_response
+      chloe_response:
+        _content:
+          - Chloe rolls her eyes and says she wishes she could go. Because your parents were master tunnel explorers themselves, the orphanage has prioritized its resources in you in the hopes that you'll be similar, bringing back treasures abound. Sometimes, you've noticed the other orphans getting jealous of you and George as a result.
+          - Of course, it makes sense when you two are the only ones who don't have to worry about getting kicked out each day. Chloe asks, "Could I at least have something you got from the Tunnel? I just want to know what it looks like."
+          - choice: give
+            text: Give Chloe one of my Rosalia
+            cost: 1 rosalia
+            effects:
+              - flag: first_orphanage_work_day_gave_chloe_rosalia
+              - Chloe smiles from ear to ear. "Thanks!" She chirps.
+              - goto: back_to_work
+          - choice: nah
+            text: Don't give Chloe any Rosalia
+            effects:
+              - Chloe frowns. The rest of the conversation is somewhat flat.
+              - goto: back_to_work
+      back_to_work:
+        _content:
+          - After lunch, you both get back to work. The day ends a bit past the traditional rest period for those in the Dome. The light that permeates the Dome never vanishes, but at least it's easy to block out with buildings, and timepieces are common enough to know when rest is warranted.
+          - flag: encyclopedia_the_light
+          - "[Encyclopedia Entry: The Light]"
+          - choice: next
+            effects:
+              - sub: /logic/time
+              - goto: /orphanage
+    second_work:
+      _content:
+        - storypoint:
+        - You all go back to the farm, kicking off the next week of work. You always dread Thursdays, since it means 6 days of work ahead until the next Wednesday rest day.
+        - George nudges you in the side with his elbow, "Hey, look at the bright side, we'll be exploring the Tunnel again tomorrow." Your eyes widen. Your work week won't be as long as you thought it would be. George continues, "Just visit my room tomorrow and we'll head out."
+        - The rest of the day goes as normal, sweating as you do farmwork all day.
+        - flag: unlocked_george_room
+        - choice: next
+          effects:
+            - sub: /logic/time
+            - goto: /orphanage
+    third_work:
+      _content:
+        - storypoint:
+        - flag: unlocked_jaz_room
+        - This time at the farm, Jaz, another orphan, approaches you. She's known for being somewhat nefarious, and has been caught several times stealing from the farm. She was almost kicked out of the orphanage.
+        - Just like you, her face is covered in freckles, and she's wearing a mischievous grin when she walks up to you in the field. "Hey", she says, "You should help me with something!"
+        - choice: reject
+          text: Nah
+          effects:
+            - She gawks, "What?! But you haven't even heard what it was!"
+            - choice: listen
+              text: Hear her out
+              effects: plan
+            - choice: nope
+              text: Go away
+              effects:
+                - She huffs off. Better to stay away than get in trouble with her. The rest of the work day goes smoothly.
+                - choice: next
+                  effects:
+                    - sub: /logic/time
+                    - goto: /orphanage
+        - choice: accept
+          text: Sure
+          effects: plan
+      plan:
+        _content:
+          - She explains the plan... since she gets checked if she stole anything after each shift, she'll do the sneaky swiping some of the farmer's coin, and you'll pocket it for off the farm. "It's genius, trust me!" She exclaims.
+          - choice: accept
+          - choice: reject
+      accept:
+        _content:
+          - After you accept, she scurries off to find some goods to steal from the farmhouse before lunch. Then, at lunch, she slides you 30 coins. That's quite a lot!
+          - set: coin += 30
+            show:
+          - flag: orphanage_third_work_accepted_jaz_coins
+          - At the end of the day, Jaz is checked for coins. Of course, they find none; you have all of them.
+          - choice: next
+            effects:
+              - sub: /logic/time
+              - goto: /orphanage
+      reject:
+        _content:
+          - She huffs off, mad that you didn't accept her deal. The rest of the work day goes smoothly.
+          - choice: next
+            effects:
+              - sub: /logic/time
+              - goto: /orphanage
+    fourth_work:
+      _content:
+        - storypoint:
+        # Things to happen:
+        #   - Jaz asks about coins if you haven't resolved the event yet. Do this at lunch.
+        #   - Explain farm more?
+        - You arrive at the farm for the next day of work. This time, Ms. Bee, one of the two full-time staff at the orphanage, leads everyone to the farm. It's not a long walk, but today is particularly hot. The seasons hit the Town particularly hard due to its proximity to the Dome, the source of much of the heat fluctuation. The stones heat and cool, causing a temperature rippling effect for everything within its interior.
+        # TODO: Unlock for encyclopedia entry about weather in the Dome?
+        - goto: karo_talk
+      karo_talk:
+        _content:
+          - Today, you're assigned to harvest grains from the field closest to the farm building. Karo, the owner of the farm comes out to talk to you early in the day. He's a heavy-set man with a black scruffy beard and balding black hair. Despite his weight, he still moves gracefully. Karo asks how the Tunnel's been treating you.
+          - choice: wonderful
+            effects:
+              - You explain that the Tunnel is just a wondrous place and there's really nothing else that compares.
+              - goto: karo_son
+          - choice: exciting
+            effects:
+              - Your eyes light up as you talk about the excitement of adventures to somewhere new.
+              - goto: karo_son
+          - choice: horrendous
+            effects:
+              - You say your Tunnel adventures have been horrendous... horrendously amazing that is!
+              - goto: karo_son
+      karo_son:
+        _content:
+          - Karo nods and tells you, "Just be careful, kid, I lost my son in there." You hadn't heard about this before.
+          - choice: ask
+            text: Ask Karo about his son
+            effects:
+              - Karo explains that he doesn't know much, just that his son liked to sneak over into the layer without any a valid pass or even any training just to see what was beyond. Karo warned his son, but he kept going until one day he didn't come back. Karo says, "I still miss him. If you ever find out what happened to him, I'll give you a hefty reward."
+              - goto: karo_warning
+          - choice: sympathy
+            text: Express your sympthy but don't inquire further
+            effects:
+              - Karo looks off into this distance. "I still miss him. If you ever find out what happened to him, I'll give you a hefty reward."
+              - goto: karo_warning
+      karo_warning:
+        _content:
+          - Karo goes on, "Just make sure to always be on a lookout. I know you orphans have a hard life, and I wish I could pay the orphanage more for your work. You have a lot of potential in the Tunnel, but don't feel like you need to do it. It's dangerous out there." Then Karo wanders off.
+          - separator:
+          - goto: lunch
+      lunch:
+        _content:
+          # If took coins and didn't talk to Jaz yet
+          - if: orphanage_third_work_accepted_jaz_coins and not orphanage_third_work_jaz_coins_resolved
+            then:
+              - flag: days_work_fourth_lunch_jaz
+              - sub: /world/characters/orphanage/jaz/third_work_coin_event
+          - After lunch, you finish the grueling rest of the day's work.
+          - choice: next
+            effects:
+              - sub: /logic/time
+              - goto: /orphanage
+    fifth_work:
+      _content:
+        - storypoint:
+        # Choice of who to talk to
+        - sub: /logic/text/clothes_description/clothes_locale
+        - This time at work, you feel particularly energized. The air isn't too hot, and there's a refreshing slow breeze that ruffles your {curr_clothes_locale}.
+        - Lunch is no different, and you even feel a bit social. While sitting at the usual lunch picnic tables under the tarp next to the farmhouse, you decide where to sit.
+        - choice: george
+          selectable_once:
+          text: Sit next to George
+          effects:
+            - Strangely, you can't find George around.
+            - separator:
+            - goto: .
+        - choice: jaz
+          selectable_once:
+          text: Sit next to Jaz
+          effects:
+            # Jaz doesn't want to sit next to you if you "stole" her coins
+            # TODO: Option to rectify the situation
+            - if: orphanage_third_work_jaz_coins_walked_out
+              then:
+                - Jaz says she doesn't want to sit next to you after you stole her coins.
+                - goto: .
+            - Jaz is delighted to see you, and immediately starts whispering about a new plan to you to steal some candy from the market in town. However, Mabel, one of the orphanage staff, shoots you both a stern look. Jaz finishes off, "Just meet me on one of the free days and I can explain more!"
+            # TODO: candy event!
+            - flag: orphanage_days_work_fifth_jaz_market_candy_offered
+            - goto: after_lunch
+        - choice: chloe
+          text: Sit next to Chloe
+          effects:
+            # Case where not on good terms with Chloe
+            - if: not (first_orphanage_work_day_gave_chloe_rosalia or orphanage_rooms_chloe_gave_lemens)
+              then:
+                - Chloe looks down at her food, a little dejected. She says she's always dreamed of being in the Tunnel, and that she's sorry for being so pushy about getting stuff from it.
+                - choice: lemens
+                  text: Give her 13 lemens
+                  cost: 13 lemens
+                  effects:
+                    - flag: orphanage_rooms_chloe_gave_lemens
+                    - Her eyes brighten up and she gives a full smile, showing her inexplicably white teeth. "Thanks so much, I'll always hold onto them!"
+                    - goto: after_lunch
+                - choice: sympathy
+                  text: Express sympathy
+                  effects:
+                    - She mumbles, "it's okay".
+                    - goto: after_lunch
+                - stop:
+            - Chloe asks how your second training expedition went. She seems excited to hear about it. You tell her all about the lemens and she listens intently.
+            # What does Chloe have to offer the player?
+            # TODO: expand this section
+            - goto: after_lunch
+        - choice: alone
+          text: Sit alone
+          effects:
+            - Lunch is peaceful and also uneventful
+            - goto: after_lunch
+        # TODO: Option to sit next to Mabel
+      after_lunch:
+        _content:
+          - After lunch, you finish off the day's work.
+          - sub: /logic/time
+          - goto: /orphanage

@@ -1,0 +1,289 @@
+_header:
+  - set: time_last_explored = time
+training:
+  first_journey:
+    george_waiting:
+      _vars:
+        - first_choice_made: False
+        - second_choice_made: False
+        - third_choice_made: False
+      _content:
+        - storypoint:
+        - George is standing at the dusty entrance to the orphanage, his ruffled brown hair blending with the oak double round-top door that leads outside. He's flipping a doubloon to pass the time as he waits for you to finish packing for your trip to the Tunnel with him.
+        - if: not first_choice_made
+          then:
+            - choice: review
+              text: Review your encyclopedia notes on rosalia, which you will be gathering with George
+              effects:
+                - set: first_choice_made = True
+                - You're able to navigate to your encyclopedia by typing in "encyclopedia" to the command line. You note that you can also see other actions available by typing "actions", or a complete list of commands by typing "help".
+                - You keep in mind to always check your encyclopedia when you get a new entry, since the entries explain important game mechanics, and often include some lore as well!
+                - separator:
+                - goto: .
+        - if: not second_choice_made
+          then:
+            - choice: check
+              text: Check that you have your training pass, which is required for entering the Tunnel
+              effects:
+                - set: second_choice_made = True
+                - You can see easily by typing in "inventory" to the command line that you have your training pass with you.
+                - separator:
+                - goto: .
+        - if: not third_choice_made
+          then:
+            - choice: touch
+              text: Touch the necklace my parents gave me for comfort
+              effects:
+                - set: third_choice_made = True
+                - The necklace is all you have left of your parents. You remember little of them.
+                - On the other hand, the hairs knotted to the necklace are tied to a vivid memory. An orphan girl wailing just outside the doorway for a room in winter. Usually, the temperature in the Dome wasn't too bad, but that year was brutal. Director Dicky, the owner of the orphanage, refused to let her in since the place was already so full, and she later became unresponsive and motionless. To his credit, Dicky did let her in at last... to a small graveyard in the orphanage.
+                - You vow to become a great Tunnel explorer, someone who brings back riches and glory. That way, you can provide the funds for anyone to be taken in. You snuck a lock of hair you cut from the poor girl's head as a symbol of your promise.
+                - separator:
+                - goto: .
+        - choice: ready
+          text: Tell George that I'm ready
+          effects:
+            - set: on_training_expedition = True
+            - goto: leave_orphanage
+    leave_orphanage:
+      _content:
+        - George opens the doors, allowing the light that permeates the outside of the Dome to flood in.
+        - You hunker along with your heavy packs, heading for the gaping miles-wide gap in the Dome's rocky walls. It's the Tunnel, which is the only way out, and today will be your first day exploring it.
+        - It's only a day's walk from your small town to the Tunnel.
+        - choice: walk
+          text: Walk with George to the Tunnel
+          effects:
+            - sub: /logic/time
+            - goto: tunnel_entrance
+    tunnel_entrance:
+      _content:
+        - You reach the entrance to the Tunnel, the only exit from the 100-mile or so Dome to which humanity is confined. From here, you finally get a sense of its true magnitude. It's about half a day's walk from one side to the other, but its width is still nothing compared to its depth. No one has gotten to the end, or at least, no one has gotten to the end and returned. Some even think it never ends. Maybe you'll be the first to prove them wrong.
+        - "A guard to the entrance booth checks George's Yellow Pass and your Training Pass. There are multiple reasons for the 10-foot stone wall that bars those without passes from getting through: safety, bureaucracy, tradition, preservation. All you care for, though, is to finally see the lush rolling landscape of the first layer."
+        - George is unusually adept at Tunnel exploration. Despite only being only a Yellow Pass holder (already a feat for a 19-year-old like him), he was allowed via special agreement to train you. Also due to his natural ability, it doesn't take long for you both to find a rosalia patch.
+        - choice: gather
+          text: Gather rosalia with George
+          effects: gather_rosalia
+    gather_rosalia:
+      _content:
+        # TODO: Use scraps explanation
+        - sub: /logic/time
+        - George teaches you how to pluck the small leaves from the red flower for use in teas. You already know some about it due to Mabel's love for it. The orphanage's study doesn't hold many books, but she often goes out of her way to find more for those who are able to fetch her some rosalia.
+        - set: rosalia += 3
+          show:
+        - After a day's work of gathering rosalia, George tells you its time to head home. You're disappointed that your first journey was so short, but he explains he just wanted somethings simple the first time. Then he pats you on the back and says, "You did great".
+        - choice: return
+          text: Return to the orphanage
+          effects: return
+    return:
+      _content:
+        - set: time_next_training = time + 4
+        - sub: /logic/time
+        - Despite the short trip, you feel exhaustion kick in as soon as you get back to the orphanage. Both you and George go straight to bed.
+        - choice: next
+          effects: /orphanage
+  second_journey:
+    _content:
+      - storypoint:
+      - You tighten your straps of your pack for your second ever journey into the tunnel. George grins freckled cheek to freckled cheek. "I'm so excited to show you the lemen fields!" He exclaims. "The whatnow?" You ask. "You'll see," George assures you.
+      - And with that, you're off!
+      - separator:
+      - sub: /logic/time
+      - George shows his Yellow Pass to the guard, and you hold up your white Training Pass. The guard examines the passes and lets you both through.
+      - You spend another day just walking to the spot where George wants to go. You don't even reach the place by nightfall, though George seems to have had a river in mind as a water-source at least.
+      - separator:
+      - sub: /logic/time
+      - The next day, after about 30 minutes of walking, he starts to hike up a steep hill. The Dome is comparatively flat, so you're not used to the steep elevation. George, on the other hand, is able to speed ahead. You're afraid to lose him, but he stops at the top. Then, he turns to look down at you and yells out, "Don't worry, when I was your age, my stamina wasn't so great either." Then he chuckles. "You'll do just fine."
+      - He makes it sound like he's had soooo much more time to progress, but really he's only three years older than you.
+      - Once you get to the top, you slouch your hands onto your knees and wheeze in and out. When you're done panting, you look up and drop your mouth.
+      - choice: next
+        effects: harvest
+    harvest:
+      _content:
+        - In front of you is the largest field of flowers that you've ever seen. And it's glowing! George announces proudly, "I just wanted to show you the lemen patch I always like to use. She's a beauty." He goes on, explaining what lemens are... a bulbous, yellow, luminous plant that dims over time. Also, they're used for lighting across the dome.
+        - You ask, "So those bright bulb-y things are what gets put in the orphanage for lighting? But the ones down there are so much brighter." George explains, "Ah, but we usually use cheaper secondhand lemens. I sell the fresh ones I gather for a higher price." To be fair, the lighting is probably one of the smaller concerns at the orphanage anyways.
+        - George and you split up to gather lemens. He says lemen-bushels is a good amount. As you start, you notice some rosalia off in the distance.
+        - choice: snatch
+          text: Snatch some rosalia quickly
+          effects:
+            - You don't gather as many lemens because the rosalia was a lot further away than you expected. At least you get some rosalia.
+            - flag: training_second_journey_gathered_rosalia
+            - set: lemens += skill_lemen
+              show:
+            - set: rosalia += 3
+              show:
+            - goto: reconvene
+        - choice: focus
+          text: Focus on gathering the lemens
+          effects:
+            - You focus on gathering the lemens and are able to be quite productive.
+            - set: lemens += 3 * skill_lemen
+              show:
+            - goto: reconvene
+    reconvene:
+      _content:
+        - You reconvene with George.
+        - if: training_second_journey_gathered_rosalia
+          then:
+            - George notices you didn't gather as many lemens as him, so he offers some of his.
+            - choice: tell
+              text: Tell George about getting distracted by the rosalia
+              effects:
+                # TODO: A later encounter that is dangerous/has consequences if you wander off
+                - George frowns. "You should follow my lead in the Tunnel, things can get dangerous if you wander off to other places."
+                - goto: leave
+            - choice: silent
+              text: Stay silent about the rosalia
+              effects:
+                - George hands you half of his lemens. He has a lot of lemens.
+                - set: lemens += 12
+                  show:
+                - goto: leave
+          else:
+            - goto: leave
+    leave:
+      _content:
+        - separator:
+        - sub: /logic/time
+        - The next day, it's time to head back. You feel sad, but this time you got to spend almost a whole week away from the orphanage, so you really can't complain.
+        - choice: return
+          effects:
+            # Technically, it should take 2 days to get back, but it's more convenient to the plot to do only 1 since then they can come back on a workday
+            - set: time_next_training = time + 6
+            - sub: /logic/time
+            - separator:
+            - goto: /orphanage
+  third_journey:
+    _content:
+      - storypoint:
+      - You and George reminisce on the past as you walk along the miles-long dirt path toward the Tunnel again. What do you reminisce on?
+      - choice: trick
+        selectable_once:
+        text: When you and George tricked Chloe into thinking she had a ghost in her room
+        effects:
+          - You laugh about when you moved around the furniture in Chloe's room and claimed it was a ghost. She didn't believe you until George backed you up.
+          - goto: .
+      - choice: trouble
+        selectable_once:
+        text: When you pretended to be sick to get out of work
+        effects:
+          - George found a mixture of water and certain plants in the Tunnel that together looked exactly like vomit. He used it once to pretend being sick so that he wouldn't have to work that day. He was only found out after showing you. Since you were much younger at the time, you didn't understand to be discrete about it, and after several days of being "sick" in a row, Ms. Bee looked more into what was happening and busted you both.
+          - goto: .
+      - choice: first
+        selectable_once:
+        text: When you and George first met
+        effects:
+          - You remember when George first entered the orphanage, his eyes red but without tears. You'd already been there almost since you were born. He was silent for a while, but after hearing your parents were also Tunnel adventurers he immediately started warming up to you. Now you're both best friends at the orphanage.
+          - goto: .
+      - choice: done
+        text: You're done reminiscing
+        effects:
+          - After spending the day's walk to the Tunnel reminiscing, you both cross into the first layer and set up camp.
+          - sub: /logic/time
+          - goto: enter
+    enter:
+      _content:
+        - George talks about the layers of the Tunnel. There are currently 7 known layers, with each one more treacherous than the last. Each layer requires a new pass to get to. The green pass is the one that's required to go to the first layer alone. George himself has a yellow pass, which allows him into the third layer. George also lays out the day's plans, which are to get to the lemen patch and harvest some lemens.
+        - You get to the lemen patch a bit quicker this time now, with just a bit of time to harvest them before the day's end.
+        - set: lemens += 2 * skill_lemen
+          show:
+        - Then, you both head to bed.
+        - sub: /logic/time
+        - choice: next
+          effects: night
+    night:
+      _content:
+        - You wake up in the middle of the night to a howl in the distance.
+        - choice: investigate
+          text: Investigate the source of the howl
+        - choice: nope
+          text: That sounds like a bad idea
+          effects:
+            - You fall back asleep, which is definitely a much better idea than searching out a mysterious sound in the woods.
+            - goto: next_day
+      investigate:
+        _content:
+          - You get up and listen for another howl. It seems to be coming from the direction of layer 2. You start walking that way, wondering what that sort of thing would make that noise. You've never heard anything like it in the Dome.
+          - After a brief period, the howling stops, and you lose track of the direction it's from. You turn around to walk back, but after a few minutes of walking things just don't look the same.
+          - It feels like an hour passes as you get more and more panicked, what if you can't find your way back? Then, a twig snaps. Someone's here.
+          - choice: freeze
+      freeze:
+        _content:
+          - You hear George's familiar voice yell out from the direction of the twig's snap, "Hey, why'd you go wandering off? I heard you get up and went after you."
+          - choice: apologize
+            text: Apologize and beg for forgiveness
+            effects:
+              - George says, "It's fine, just don't do it again. I know the Tunnel can be alluring but you've gotta stay with me until you have more experience."
+              - goto: walk_back
+          - choice: silent
+            text: Stay silent since you don't really have a good reason
+            effects:
+              - George just shakes his head and says, "I know the Tunnel is alluring, but you can't just go wandering off like this. Stay around me until you have more experience."
+              - goto: walk_back
+          - choice: howl
+            text: Talk about the cool howling
+            effects:
+              - You can't make out his brown eyes well under the dark canopy of the woods you wandered into, but from the tone of his voice you can almost hear them widening. "You what?!" He asks. Then he just shakes his head and says, "Nevermind, let's just get back, don't do it again."
+              - goto: walk_back
+          - choice: insult
+            text: Insult George for thinking you couldn't handle this
+            effects:
+              - Why would you do that?
+              - separator:
+              - goto: .
+      walk_back:
+        _content:
+          - On the walk back, George explains that you entered a shifting forest. The trees emit a pollen that impairs one's sense of direction for a short period of time. George himself has been trained in how to deal with it, but it's an easy trap for new adventures. "This is why you should stick around me," he adds.
+          - goto: ../next_day
+    next_day:
+      _content:
+        - The next day is a day full of gathering lemens. You both have slightly more time for gathering so you get to collect more lemens.
+        - set: lemens += 4 * skill_lemen
+          show:
+        # While gathering lemens, shorwolves come (figure out what shorwolves are)
+        - separator:
+        - When night starts to set at the end of the day, you and George meet up and head back. There's a patch of trees with a lot of foliage around that you both cut through. When you reach the middle of the patch, a spotted creature cuts out in front of you. It looks like a small dog, but its snout is much longer and wider.
+        - Then, several more appear from your sides, behind, and there are even some that have climbed the trees. "Shorwolves," George mutters. Then, he draws his shortsword. It's the first time you've seen it unsheathed. Immediately, the creatures dart, leaving you free of trouble. George puts his sword back away.
+        - George tells you, "I've had them bother me a few times. Usually, if they judge you to be more of a threat, they leave you alone, but there are accounts of those less experienced who've been hunted down by those things. It's a shame you had to see that on your third expedition, I promise layer one is usually not so bad."
+        - choice: thrilling
+          text: Tell George that was a thrilling experience
+          effects:
+            - George furrows his brows and states sharply, "Who knows what would have happened to you if I wasn't here? That was a serious situation."
+            - goto: return
+        - choice: scary
+          text: Say that was scary
+          effects:
+            - George sighs and tells you "That's just the way the Tunnel is sometimes. But I'm sure you'll handle it. You're strong."
+            - goto: return
+        - choice: thanks
+          text: Thank George for being there
+          effects:
+            - George grins and says, "That's what I'm here for. Gotta keep you safe!" Then, he pats your back.
+            - goto: return
+    return:
+      _content:
+        - You both head back to camp and sleep the night without any trouble.
+        - sub: /logic/time
+        - The next day, you head back to the orphanage.
+        - choice: next
+          effects:
+            - It's a days walk back to the orphanage. On the way back, you and George pass by a man sitting next to the road and begging for coins. George says he's sorry to the man that he didn't bring any with him. What about you?
+            - choice: three
+              text: Give the man 3 coins
+              cost: 3 coin
+              effects:
+                - The man smiles and says thank you. Then, you and George finish the day walking back.
+                - sub: /logic/time
+                - goto: /orphanage
+            - choice: one
+              text: Give the man 1 coin
+              cost: 1 coin
+              effects:
+                - The man nods at you for your gift. Then, you and George finish the day walking back.
+                - sub: /logic/time
+                - goto: /orphanage
+            - choice: none
+              text: Give the man 0 coins
+              effects:
+                - The man simply looks down the road for the next passerby, hoping to get coins from them instead. Then, you and George finish the day walking back.
+                - sub: /logic/time
+                - goto: /orphanage

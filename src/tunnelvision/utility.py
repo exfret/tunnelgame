@@ -212,3 +212,29 @@ def parse_requirement_spec(text_spec):
             grouped_specs[int(index / 2)]["var"] = non_grouped_spec
 
     return grouped_specs
+
+
+# Used in word counting commands
+def count_words(node, only_count_visited=False, address=()):
+    count_node = True
+    if only_count_visited and state["visits"][address] == 0:
+        count_node = False
+
+    num_words = 0
+
+    if isinstance(node, str):
+        if count_node:
+            num_words += len(node.split())
+    elif isinstance(node, (int, float)):
+        if count_node:
+            num_words += 1
+    elif isinstance(node, list):
+        for ind, subnode in enumerate(node):
+            num_words += count_words(subnode, only_count_visited, address + (ind,))
+    elif isinstance(node, dict):
+        for key, subnode in node.items():
+            if count_node:
+                num_words += len(key.split())
+            num_words += count_words(subnode, only_count_visited, address + (key,))
+    
+    return num_words

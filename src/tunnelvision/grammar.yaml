@@ -66,6 +66,7 @@ DICT_INSTR:
     modify: MODIFY
     once: ONCE
     pass: PASS
+    pop_queue: POP_QUEUE
     print: PRINT
     print_table: PRINT_TABLE
     random: RANDOM
@@ -74,6 +75,7 @@ DICT_INSTR:
     separator: SEPARATOR
     set: SET
     stop: STOP
+    storypoint: STORYPOINT
     sub: SUB
     subreturn: SUBRETURN
     switch: SWITCH
@@ -198,6 +200,10 @@ PASS:
   type: dict
   mandatory:
     pass: _null
+POP_QUEUE:
+  type: dict
+  mandatory:
+    pop_queue: _null
 PRINT:
   type: dict
   mandatory:
@@ -246,6 +252,10 @@ STOP:
   type: dict
   mandatory:
     stop: _null
+STORYPOINT:
+  type: dict
+  mandatory:
+    storypoint: _story_point
 SUB:
   type: dict
   mandatory:

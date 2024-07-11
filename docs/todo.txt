@@ -1,6 +1,14 @@
 Currently:
   - per_cost etc. logic
 
+134. Fix back command... it went back to the root of the story once?
+133. Definitely do search along for blocks with certain names (maybe option to disable)
+132. Warning for choice/effects without gotos
+131. Persistent stats about a story, like how much completion you've achieved across all your runs of it
+130. Composite repo logic that looks in both built-in and non-built-in stories
+129. Print error for too many args in commands?
+128. Test for stop commands
+127. Compound instructions (separated by ;?)
 126. Fix goto command (I think broken in choice effects)
 125. Warnings for = in text (for set statements)
 124. Var printing in text of choices?

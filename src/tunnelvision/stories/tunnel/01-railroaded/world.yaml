@@ -1,0 +1,105 @@
+characters:
+  orphanage:
+    jaz:
+      third_work_coin_event:
+        _vars:
+          - bargain_amount: 0
+        _content:
+          - flag: orphanage_third_work_jaz_coins_resolved
+          - if: orphanage_rooms_jaz_third_work_coin_event_split_choices_went_back
+            # Case where Jaz was visited before
+            then:
+              - She asks, "Okay, what do you think about the 20-10 split?"
+            # Case where this is the first time visiting Jaz after the coin thing
+            else:
+              - "Okay, so I was thinking we could split the coins with me getting 20 and you getting 10. I did most of the work after all. What do you think of that?"
+          - goto: split_choices
+        split_choices:
+          _content:
+            # Don't offer back option if this is during work day
+            - if: not days_work_fourth_lunch_jaz
+              then:
+                - choice: back
+                  text: Decide later
+                  effects:
+                    # TODO: Change flag names now that this is in its own block
+                    - flag: orphanage_rooms_jaz_third_work_coin_event_split_choices_went_back
+                    - unflag: orphanage_third_work_jaz_coins_resolved
+                    - You tell Jaz you'll think about it and decide later. She frowns and says she expects the coins soon, though.
+                    - subreturn:
+            - choice: sure
+              text: Accept the deal
+              cost: 20 coin
+              effects:
+                - She says, "Thanks! Pleasure doing business."
+                - subreturn:
+            - choice: even
+              text: Split the coins 50-50
+              require: 15 coin
+              effects:
+                - set: bargain_amount = 15
+                - She shakes her head. "There's always a master planner and they deserve more. Here, that's me, don't you get it?"
+                - goto: bargain
+            - choice: more
+              text: Explain that you deserve 20 coins and her only 10 coins
+              require: 10 coin
+              effects:
+                - set: bargain_amount = 20
+                - She tilts her head. "You drive a hard bargain. Why do you think you deserve more?"
+                - goto: bargain
+            - choice: give
+              text: Give her all the 30 coins
+              cost: 30 coin
+              effects:
+                - Her head jerks back in surprise. "Really? I mean, sure." Then she scoops up all the coins and shows you out before you have time to reconsider.
+                - subreturn:
+            - choice: bye
+              selectable_once:
+              text: Leave with all the coins
+              effects:
+                - She yaps out "wait!"
+                - choice: ignore
+                  text: Ignore her
+                  effects:
+                    - flag: orphanage_third_work_jaz_coins_walked_out
+                    - subreturn:
+                - choice: reconsider
+                  text: Decide to split the coins
+                  effects:
+                    - You reconsider how much to split.
+                    - separator:
+                    - goto: .
+        bargain:
+          _content:
+            - choice: threaten
+              text: Say that if she doesn't accept the deal, you'll tell on her
+              effects:
+                - She drops her mouth open. "You wouldn't!" You stare her down and she accepts the deal.
+                - set: coin -= bargain_amount
+                  show:
+                - subreturn:
+            - if: bargain_amount == 20
+              then:
+                - choice: compromise
+                  text: Compromise at 50-50
+                  effects:
+                    - She accepts and says, "I like your bargaining skills, miss!"
+                    - set: coin -= 15
+                      show:
+                    - subreturn:
+            - choice: give_in
+              text: Accept the original deal of her getting 20 and you getting 10
+              effects:
+                - She calls you a wuss and takes her share of the coins grinning. Then, she boots you out.
+                - set: coin -= 20
+                  show:
+                - subreturn:
+            - if: bargain_amount == 15
+              then:
+                - choice: fairness
+                  selectable_once:
+                  text: Appeal to fairness
+                  effects:
+                    - She shakes her head and says, "Life isn't fair, I thought you would have learned that by now?"
+                    - separator:
+                    - goto: .
