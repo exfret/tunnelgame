@@ -1,0 +1,11 @@
+---
+_content:
+  - set: on_training_expedition = False
+  - if: is_expedition_day # Expeditions take priority
+    then:
+      - goto: rooms/personal
+rooms:
+  personal:
+    _content:
+      - print: Your Room
+        style: bold

@@ -7,7 +7,7 @@ Next steps:
 Currently:
   - Jaz candy event (from fifth work)
 
-9. Flavor text levels
+9. Descriptiveness levels
 8. Something bad happens for lying to George about going after rosalia?
 7. Regenerate energy if unlocked_energy
 6. A tunnel encounter that is forced to show dangers

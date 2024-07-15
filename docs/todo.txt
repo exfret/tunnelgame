@@ -1,6 +1,8 @@
 Currently:
   - per_cost etc. logic
 
+136. Rename print in View back to normal (I don't like overriding it)
+135. Remove old commands like flavor, once, and gosub
 134. Fix back command... it went back to the root of the story once?
 133. Definitely do search along for blocks with certain names (maybe option to disable)
 132. Warning for choice/effects without gotos

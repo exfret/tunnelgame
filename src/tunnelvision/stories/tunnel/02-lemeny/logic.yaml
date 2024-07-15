@@ -1,0 +1,14 @@
+time:
+  _content:
+    - set: time += 1
+    - A day passes... --> __null__
+    # Checks for "environment" vars
+    # TODO: Something happens if you miss expedition day?
+    - if: tunnel_pass == "training" and not on_training_expedition and time_next_training == time
+      then:
+        - set: is_expedition_day = True
+        - It's time for another training expedition! Meet George in his room. --> Training expedition today!
+      else:
+        - set: is_expedition_day = False
+    # Return
+    - subreturn:

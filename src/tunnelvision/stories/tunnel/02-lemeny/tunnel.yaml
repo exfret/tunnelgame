@@ -1,0 +1,10 @@
+---
+_content:
+  - pass:
+training:
+  _content:
+    - switch: _visits
+      "1": first/george_waiting
+  first:
+    george_waiting:
+      - George waits at the orphanage's dusty entrance, flipping a coin. --> __null__

@@ -1,0 +1,21 @@
+---
+_content:
+  - goto: /orphanage
+_include:
+  logic: logic.yaml
+  orphanage: orphanage.yaml
+  tunnel: tunnel.yaml
+_vars:
+  # Important vars
+  - energy: 0
+    _locale: Energy
+  - time: 0
+  # Logic vars
+  # Progress vars
+  - tunnel_pass: training
+  # Misc. vars
+  - is_expedition_day: True # It's initially an expedition day when the story starts
+  - on_training_expedition: False
+  - time_next_training: 0
+_header:
+  - pass:

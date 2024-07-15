@@ -1,3 +1,4 @@
+---
 _content:
   - set: on_training_expedition = False # TODO: Do I need to make sure training expedition is false anywhere else?
   - if: is_expedition_day # Skip work if it's expedition time

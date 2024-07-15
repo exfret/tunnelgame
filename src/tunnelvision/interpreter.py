@@ -191,6 +191,28 @@ def step(game, state):
         commands = curr_node["command"].split(";")
         for subcommand in commands:
             state["command_buffer"].append(subcommand.split())
+    elif "descriptive" in curr_node:
+        # Default to setting that's at least as descriptive
+        if state["settings"]["descriptiveness"] == "descriptive":
+            if not curr_node["descriptive"] is None:
+                do_print(curr_node["descriptive"], state)
+        elif state["settings"]["descriptiveness"] == "moderate":
+            if "moderate" in curr_node:
+                if not curr_node["moderate"] is None:
+                    do_print(curr_node["moderate"], state)
+            else:
+                if not curr_node["descriptive"] is None:
+                    do_print(curr_node["descriptive"], state)
+        elif state["settings"]["descriptiveness"] == "minimal":
+            if "minimal" in curr_node:
+                if not curr_node["minimal"] is None:
+                    do_print(curr_node["minimal"], state)
+            elif "moderate" in curr_node:
+                if not curr_node["moderate"] is None:
+                    do_print(curr_node["moderate"], state)
+            else:
+                if not curr_node["descriptive"] is None:
+                    do_print(curr_node["descriptive"], state)
     elif "error" in curr_node:
         raise ErrorNode("Error raised.")
     elif "flag" in curr_node:

@@ -303,6 +303,14 @@ def run(game_name, packaged=True):
                         view.print_settings_flavor_text_set(command[2])
                     else:
                         view.print_feedback_message("settings_flavor_invalid_val")
+                elif command[1] == "descriptiveness":
+                    if len(command) < 3:
+                        view.print_settings_descriptiveness_get()
+                    elif command[2] == "descriptive" or command[2] == "moderate" or command[2] == "minimal":
+                        state["settings"]["descriptiveness"] = command[2]
+                        view.print_settings_descriptiveness_set(command[2])
+                    else:
+                        view.print_feedback_message("settings_descriptiveness_invalid_val")
         elif command[0] == "word_count":
             # TODO: Only error when view doesn't have given method
             try:

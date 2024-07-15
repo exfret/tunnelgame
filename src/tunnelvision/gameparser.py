@@ -86,7 +86,8 @@ def open_game(game_name, curr_story_dir):
         },  # TODO: Rename to 'story_data' or something such, maybe remove after parsing overhaul
         "msg": {},  # Hacky way for things to communicate to gameloop
         "settings": {
-            "show_flavor_text": "once",
+            "descriptiveness": "descriptive",
+            "show_flavor_text": "once"
         },
         "story_points": {},
         "sub_stack": (), # A "stack" of bookmarks
@@ -542,8 +543,8 @@ def parse_node(node, context, address):
             parse_node(node, curr_rule["str"], address)
         elif "num" in curr_rule and isinstance(node, (int, float)):
             parse_node(node, curr_rule["num"], address)
-        elif "null" in curr_rule and node is None:
-            parse_node(node, curr_rule["null"], address)
+        elif "none" in curr_rule and node is None:
+            parse_node(node, curr_rule["none"], address)
         else:
             print(f"\033[31mError:\033[0m Invalid Disjunct at address {address} node {node}")
             raise InvalidDisjunctError()

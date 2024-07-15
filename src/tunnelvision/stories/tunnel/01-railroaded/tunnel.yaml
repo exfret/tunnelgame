@@ -1,3 +1,4 @@
+---
 _header:
   - set: time_last_explored = time
 training:
@@ -9,24 +10,31 @@ training:
         - third_choice_made: False
       _content:
         - storypoint:
-        - George is standing at the dusty entrance to the orphanage, his ruffled brown hair blending with the oak double round-top door that leads outside. He's flipping a doubloon to pass the time as he waits for you to finish packing for your trip to the Tunnel with him.
+        - descriptive: George is standing at the dusty entrance to the orphanage, his ruffled brown hair blending with the oak double round-top door that leads outside. He's flipping a doubloon to pass the time as he waits for you to finish packing for your trip to the Tunnel with him.
+          moderate: George waits at the dusty entrance to the orphanage as you to finish packing for your trip to the Tunnel.
+          minimal: George waits at the orphanage entrance.
         - if: not first_choice_made
           then:
             - choice: review
-              text: Review your encyclopedia notes on rosalia, which you will be gathering with George
+              text: Review your encyclopedia notes on rosalia
               effects:
                 - set: first_choice_made = True
-                - You're able to navigate to your encyclopedia by typing in "encyclopedia" to the command line. You note that you can also see other actions available by typing "actions", or a complete list of commands by typing "help".
-                - You keep in mind to always check your encyclopedia when you get a new entry, since the entries explain important game mechanics, and often include some lore as well!
+                - descriptive: You're able to navigate to your encyclopedia by typing in "encyclopedia" to the command line. You read up about rosalia, which you will be gathering with George. You also note that you can also see other actions available by typing "actions", or a complete list of commands by typing "help".
+                  moderate: Typing in "encyclopedia" to the command line shows your notes on rosalia. You can also see other actions with "actions" or "help" for all commands.
+                  minimal: Type "encyclopedia" for extra info, "actions" for all actions, and "help" for all commands.
+                - descriptive: You keep in mind to always check your encyclopedia when you get a new entry, since the entries explain important game mechanics, and often include some lore as well!
+                  moderate:
                 - separator:
                 - goto: .
         - if: not second_choice_made
           then:
             - choice: check
-              text: Check that you have your training pass, which is required for entering the Tunnel
+              text: Check that you have your training pass
               effects:
                 - set: second_choice_made = True
-                - You can see easily by typing in "inventory" to the command line that you have your training pass with you.
+                - descriptive: Your training pass is used for entering the Tunnel. You can easily see you can have it by typing in "inventory" to the command line.
+                  moderate: You can see you have your training pass by typing "inventory" into the command line.
+                  minimal: There is an "inventory" command.
                 - separator:
                 - goto: .
         - if: not third_choice_made
@@ -35,9 +43,16 @@ training:
               text: Touch the necklace my parents gave me for comfort
               effects:
                 - set: third_choice_made = True
-                - The necklace is all you have left of your parents. You remember little of them.
-                - On the other hand, the hairs knotted to the necklace are tied to a vivid memory. An orphan girl wailing just outside the doorway for a room in winter. Usually, the temperature in the Dome wasn't too bad, but that year was brutal. Director Dicky, the owner of the orphanage, refused to let her in since the place was already so full, and she later became unresponsive and motionless. To his credit, Dicky did let her in at last... to a small graveyard in the orphanage.
-                - You vow to become a great Tunnel explorer, someone who brings back riches and glory. That way, you can provide the funds for anyone to be taken in. You snuck a lock of hair you cut from the poor girl's head as a symbol of your promise.
+                - descriptive: The necklace is all you have left of your parents. You remember little of them.
+                  minimal:
+                - descriptive: On the other hand, the hairs knotted to the necklace are tied to a vivid memory. An orphan girl wailing just outside the doorway for a room in winter. Usually, the temperature in the Dome wasn't too bad, but that year was brutal. Director Dicky, the owner of the orphanage, refused to let her in since the place was already so full, and she later became unresponsive and motionless. To his credit, Dicky did let her in at last... to a small graveyard in the orphanage.
+                  moderate: On the other hand, you recall the hairs knotted to the necklace vividly. They were from an orphan girl who died outside in the cold because the orphanage couldn't take her in.
+                  minimal:
+                - descriptive: You vow to become a great Tunnel explorer, someone who brings back riches and glory. That way, you can provide the funds for anyone to be taken in. You snuck a lock of hair you cut from the poor girl's head as a symbol of your promise.
+                  moderate: You vow to become a great Tunnel explorer to provide for the orphanage, so that they never have to turn someone away.
+                  minimal:
+                - descriptive:
+                  minimal: Tied to the necklace are hairs from an orphan girl who froze to death outside since there was no space here for her. You vow to become a great Tunnel explorer so the orphanage doesn't have to turn anyone away.
                 - separator:
                 - goto: .
         - choice: ready

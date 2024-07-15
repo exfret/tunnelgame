@@ -1,4 +1,7 @@
+# Web UI stuff
 from flask import Flask, render_template
+from flask_socketio import SocketIO, emit
+
 import os
 from pathlib import Path # TODO: Move this back into config, currently hotfix to prevent circular dependency
 import subprocess # TODO: Add to dependencies?
@@ -28,7 +31,8 @@ feedback_msg = {
     "set_invalid_variable_given": "Invalid variable given to set value of.",
     "set_command_successful": "Successfully set variable to new value.",
     "settings_no_setting_given": "Must give a setting to give a new value to or test the current value of. Here is a list of settings:",
-    "settings_flavor_invalid_val": "That's not an allowed value of show_flavor_text. Allowed values are 'always', 'once', and 'never'",
+    "settings_descriptiveness_invalid_val": "That's not an allowed value of descriptiveness. Allowed values are 'descriptive', 'moderate', and 'minimal.'",
+    "settings_flavor_invalid_val": "That's not an allowed value of show_flavor_text. Allowed values are 'always', 'once', and 'never'.",
     "command_not_supported": "This command is not supported by the current view",
     "choice_missing_requirements": "Missing requirements.",
     "unrecognized_command": "Unrecognized command/choice. Type 'help' for commands or 'choices' for a list of choices.",
@@ -38,9 +42,28 @@ feedback_msg = {
 
 old_print = print
 
-def print(text = ""):
+def print(text=""):
+    # Having __null__ in the string indicates it should not be printed
+    # TODO: Some way to escape __null__ like with a backslash?
+    if "__null__" in text:
+        return
+
     state["displayed_text"] += str(text) + "\n"
     old_print(text)
+
+
+def parse_text(text):
+    # Decide what part of the text to print
+    split_text = text.split("-->")
+    if len(split_text) == 1:
+        text = split_text[0]
+    elif len(split_text) > 1:
+        if state["settings"]["descriptiveness"] == "minimal":
+            text = split_text[1].strip()
+        else:
+            text = split_text[0].strip()
+
+    return text
 
 
 # Story board (Left up) - Supports different views, currently just story view which displays story and flavor-related text
@@ -74,8 +97,7 @@ class CLIView:
         self.print_text(text)
 
     def print_separator(self):
-        print("-" * 90)
-        print()
+        print("-" * 90 + "\n")
 
     def print_table(self, tbl_to_display):
         border = f"+-{'-' * len(tbl_to_display[0])}-+"
@@ -91,8 +113,8 @@ class CLIView:
             ansi_code = "\033[1m"
 
         string_to_print = utility.format.vformat(text, (), utility.collect_vars(state))  # TODO: Exceptions in case of syntax errors
-        print(ansi_code + textwrap.fill(string_to_print, 100) + "\033[0m")
-        print()
+        string_to_print = parse_text(string_to_print)
+        print(ansi_code + textwrap.fill(string_to_print, 100) + "\033[0m\n")
 
     ######################################################################
     # Stats board
@@ -107,12 +129,11 @@ class CLIView:
         operation_text = None
         new_text = ""
         if text_to_show_spec["op"] == "add":
-            print(f"[+{text_to_show_spec['amount']} {text_to_show_spec['var']['locale']}]")
+            print(f"[+{text_to_show_spec['amount']} {text_to_show_spec['var']['locale']}]\n")
         elif text_to_show_spec["op"] == "subtract":
-            print(f"[-{text_to_show_spec['amount']} {text_to_show_spec['var']['locale']}]")
+            print(f"[-{text_to_show_spec['amount']} {text_to_show_spec['var']['locale']}]\n")
         elif text_to_show_spec["op"] == "set":
-            print(f"[Set {text_to_show_spec['var']['locale']} to {text_to_show_spec['amount']}]")
-        print()  # Print newline
+            print(f"[Set {text_to_show_spec['var']['locale']} to {text_to_show_spec['amount']}]\n")
 
     ######################################################################
     # Console
@@ -178,8 +199,8 @@ class CLIView:
                 new_text = "\033[33m(New) "
 
             text_for_choice = ""
-            if choice["text"]:
-                text_for_choice = f" {choice['text']}"
+            if "text" in choice:
+                text_for_choice = " " + parse_text(choice["text"])
             print(f"        {text_color} * {new_text}{choice_color}{choice_id}{text_color}{text_for_choice}{effects_text}")
             if len(choice["missing"]) > 0:
                 missing_text = "\033[90m              Missing: "
@@ -217,8 +238,14 @@ class CLIView:
         for key in state["settings"].keys():
             print(f" * {key}")
 
+    def print_settings_descriptiveness_get(self):
+        print(f"Allowed values are 'descriptive', 'moderate', and 'minimal'. The current value of this setting is '{state['settings']['descriptiveness']}'.")
+
+    def print_settings_descriptiveness_set(self, new_value):
+        print(f"Set descriptiveness to '{new_value}'")
+
     def print_settings_flavor_text_get(self):
-        print(f"Allowed values are 'always', 'once', and 'never'. The current value of this setting is '{state['settings']['show_flavor_text']}'")
+        print(f"Allowed values are 'always', 'once', and 'never'. The current value of this setting is '{state['settings']['show_flavor_text']}'.")
 
     def print_settings_flavor_text_set(self, new_value):
         print(f"Set show_flavor_text to '{new_value}'")
@@ -398,15 +425,17 @@ class JavaView:
             except Exception:
                 pass
 
+# TODO: Storing text for save/load
 class WebView:
     def __init__(self):
         self.app = Flask(__name__)
+        self.socketio = SocketIO(self.app, async_mode="eventlet")
         self.setup_routes()
-        self.app.run(port=5001, debug=True)
+        self.socketio.run(self.app, port=5001, debug=True)
     
     def setup_routes(self):
         @self.app.route('/')
-        def create_webpage():
+        def index():
             return render_template("index.html")
 
     ######################################################################
@@ -435,7 +464,7 @@ class WebView:
         pass # TODO
 
     def print_text(self, text, style=""):
-        pass # TODO
+        self.socketio.emit("print", {"text": text})
 
     ######################################################################
     # Stats board

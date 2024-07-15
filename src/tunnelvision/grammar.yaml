@@ -54,6 +54,7 @@ DICT_INSTR:
     call: CALL
     choice: CHOICE
     command: COMMAND
+    descriptive: DESCRIPTIVE
     error: ERROR
     flag: FLAG
     flavor: FLAVOR
@@ -112,6 +113,17 @@ COMMAND:
   type: dict
   mandatory:
     command: _text
+DESCRIPTIVE:
+  type: dict
+  mandatory:
+    descriptive: DESCRIPTION
+  optional:
+    moderate: DESCRIPTION
+    minimal: DESCRIPTION
+DESCRIPTION:
+  type: union_with_types
+  none: _null
+  str: _text
 ERROR:
   type: dict
   mandatory:
@@ -227,7 +239,7 @@ RANDOM_EVENT_DICT:
   other: RANDOM_EVENT
 RANDOM_EVENT:
   type: union_with_types
-  null: _null
+  none: _null
   list: CONTENT
 RETURN:
   type: dict
