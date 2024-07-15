@@ -2,15 +2,19 @@
 import copy
 import pickle
 
-from tunnelvision import addressing, interpreter, gameparser, utility
-from tunnelvision.config import local_dir, stories, saves, max_num_steps, choices_between_autosaves
+from engine import addressing, config, gameparser, interpreter, utility
+
 
 def run(game_name, packaged=True):
+    game = config.game
+    state = config.state
+    curr_view = config.view
+
     curr_story_dir = None
     if packaged:
-        curr_story_dir = local_dir / "stories" / game_name
+        curr_story_dir = config.local_dir / "stories" / game_name
     else:
-        curr_story_dir = stories / game_name
+        curr_story_dir = config.stories / game_name
     gameparser.open_game(game_name, curr_story_dir)
 
     def setup_game():
@@ -24,16 +28,16 @@ def run(game_name, packaged=True):
 
     def save_game(save_slot):
         gameparser.remove_module_vars(state)
-        (saves / save_slot).with_suffix(".pkl").write_bytes(pickle.dumps(state))
+        (config.saves / save_slot).with_suffix(".pkl").write_bytes(pickle.dumps(state))
         gameparser.add_module_vars(state)
 
     def load_game(load_slot):
-        contents = pickle.loads((saves / load_slot).with_suffix(".pkl").read_bytes())
+        contents = pickle.loads((config.saves / load_slot).with_suffix(".pkl").read_bytes())
         state.clear()
         state.update(contents)
         gameparser.add_module_vars(state)
-        view.clear(True) # True doesn't reset saved text
-        view.print_displayed_text()
+        curr_view.clear(True) # True doesn't reset saved text
+        curr_view.print_displayed_text()
 
     def make_choice(new_addr, command=["start"], choice={}):
         inj_list = []
@@ -55,17 +59,17 @@ def run(game_name, packaged=True):
             state["vars"]["_args"][i] = arg
 
         if not is_action:
-            view.clear()
+            curr_view.clear()
 
         num_steps = 0
         while True:
             while interpreter.step(game, state):
                 num_steps += 1
-                if num_steps >= max_num_steps:
+                if num_steps >= config.max_num_steps:
                     try:
                         load_game("autosave.yaml")
                     except FileNotFoundError:
-                        view.print_feedback_message("could_not_load_autosave")
+                        curr_view.print_feedback_message("could_not_load_autosave")
                     return
 
             if "signal_run_statement" in state["msg"] and state["msg"]["signal_run_statement"]:
@@ -85,7 +89,7 @@ def run(game_name, packaged=True):
 
                 gameparser.add_module_vars(state)
 
-                view.clear()
+                curr_view.clear()
             else:
                 break
         
@@ -129,9 +133,9 @@ def run(game_name, packaged=True):
         if not is_action:
             state["last_address_list"].append(state["last_address"])
 
-            view.print_choices()
+            curr_view.print_choices()
 
-    view.print_choices()
+    curr_view.print_choices()
 
     autostart = True
 
@@ -142,7 +146,7 @@ def run(game_name, packaged=True):
 
     while True:
         if len(state["command_buffer"]) == 0:
-            command = view.get_input()
+            command = curr_view.get_input()
         else:
             command = state["command_buffer"].pop(0)
 
@@ -150,12 +154,12 @@ def run(game_name, packaged=True):
             continue
 
         if command[0] == "actions":
-            view.print_choices(True)  # Print actions
+            curr_view.print_choices(True)  # Print actions
         elif command[0] == "choices":
-            view.print_choices()
+            curr_view.print_choices()
         elif command[0] == "completion":
             if len(state["story_points"]) == 0:
-                view.print_feedback_message("completion_not_supported")
+                curr_view.print_feedback_message("completion_not_supported")
                 continue
 
             num_complete = 0
@@ -166,13 +170,13 @@ def run(game_name, packaged=True):
                 total_num += 1
 
             try:
-                view.print_completion_percentage(num_complete / total_num)
+                curr_view.print_completion_percentage(num_complete / total_num)
             except Exception:
-                view.print_feedback_message("command_not_supported")
+                curr_view.print_feedback_message("command_not_supported")
         elif command[0] == "exec":
             continue # Not yet implemented
             if len(command) < 2:
-                view.print_feedback_message("exec_no_story_given")
+                curr_view.print_feedback_message("exec_no_story_given")
                 continue
             # Save game and state, then make the new game a "subgame" of the old one
             old_game = copy.deepcopy(game)
@@ -185,7 +189,7 @@ def run(game_name, packaged=True):
                 new_game = copy.deepcopy(game)
             except Exception as e:
                 print(e)
-                view.print_feedback_message("exec_invalid_file_given")
+                curr_view.print_feedback_message("exec_invalid_file_given")
             finally:
                 game.clear()
                 game.update(old_game)
@@ -201,7 +205,7 @@ def run(game_name, packaged=True):
             break
         elif command[0] == "goto":
             if len(command) < 2:
-                view.print_feedback_message("goto_no_address_given")
+                curr_view.print_feedback_message("goto_no_address_given")
             else:
                 address_to_goto = None
                 try:
@@ -209,11 +213,11 @@ def run(game_name, packaged=True):
                         state["last_address_list"][-1], command[1]
                     )  # last_address_list should always be nonempty here since we just made a choice
                 except Exception as e:  # TODO: Catch only relevant exceptions
-                    view.print_feedback_message("goto_invalid_address_given")
+                    curr_view.print_feedback_message("goto_invalid_address_given")
                 if not (address_to_goto is None):
                     make_choice(address_to_goto) # TODO: Don't add to last_address_list for "back" command with gotos?
         elif command[0] == "help":
-            view.print_feedback_message("help")
+            curr_view.print_feedback_message("help")
         elif command[0] == "input":
             reconstructed_input = ""
             for subcommand in command[1:]:
@@ -222,26 +226,26 @@ def run(game_name, packaged=True):
                 state["command_buffer"].insert(0, subcommand.split())
         elif command[0] == "inspect":
             if len(command) < 2:
-                view.print_feedback_message("inspect_no_variable_given")
+                curr_view.print_feedback_message("inspect_no_variable_given")
             else:
                 try:
-                    view.print_var_value(utility.collect_vars(state, state["last_address_list"][-1])[command[1]])
+                    curr_view.print_var_value(utility.collect_vars(state, state["last_address_list"][-1])[command[1]])
                 except KeyError: # TODO: Make this custom MissingReference Error
-                    view.print_feedback_message("inspect_invalid_variable_given")
+                    curr_view.print_feedback_message("inspect_invalid_variable_given")
         elif command[0] == "load":
             if len(command) == 1:
-                view.print_feedback_message("load_no_file_given")
+                curr_view.print_feedback_message("load_no_file_given")
                 continue
             try:
                 load_game(command[1])
             except FileNotFoundError:
-                view.print_feedback_message("load_invalid_file_given")
+                curr_view.print_feedback_message("load_invalid_file_given")
         elif command[0] == "repeat":
             if len(command) < 2:
-                view.print_feedback_message("repeat_no_num_times_given")
+                curr_view.print_feedback_message("repeat_no_num_times_given")
                 continue
             elif len(command) < 3:
-                view.print_feedback_message("repeat_no_command_given")
+                curr_view.print_feedback_message("repeat_no_command_given")
                 continue
             else:
                 num_repeats = 0
@@ -249,13 +253,13 @@ def run(game_name, packaged=True):
                 try:
                     num_repeats = int(command[1])
                 except Exception:
-                    view.print_feedback_message("repeat_incorrect_num_times_format")
+                    curr_view.print_feedback_message("repeat_incorrect_num_times_format")
                 else:
                     for i in range(num_repeats):
                         state["command_buffer"].insert(0, command[2:])
         elif command[0] == "revert":
             if len(state["history"]) == 0:
-                view.print_feedback_message("revert_no_reversions")
+                curr_view.print_feedback_message("revert_no_reversions")
                 continue
             
             history = state["history"]
@@ -264,65 +268,65 @@ def run(game_name, packaged=True):
             gameparser.add_module_vars(state)
             state["history"] = history
 
-            view.clear(True)
-            view.print_displayed_text()
+            curr_view.clear(True)
+            curr_view.print_displayed_text()
         elif command[0] == "save":
             try:
                 save_slot = command[1]
             except IndexError:
                 save_slot = state["file_data"]["filename"]
             if not save_slot:
-                view.print_feedback_message("save_no_default_name_given")
+                curr_view.print_feedback_message("save_no_default_name_given")
                 continue
-            view.print_feedback_message("save_completed", True) # "True" makes sure it doesn't save the "saved game" message to state
+            curr_view.print_feedback_message("save_completed", True) # "True" makes sure it doesn't save the "saved game" message to state
             save_game(save_slot)
         elif command[0] == "set":
             if len(command) < 2:
-                view.print_feedback_message("set_no_variable_given")
+                curr_view.print_feedback_message("set_no_variable_given")
             else:
                 if len(command) < 3:
-                    view.print_feedback_message("set_no_value_given")
+                    curr_view.print_feedback_message("set_no_value_given")
                 else:
                     var_dict = utility.collect_vars_with_dicts(state, state["last_address_list"][-1])
                     var_dict_vals = utility.collect_vars(state, state["last_address_list"][-1])
                     try:
                         var_dict[command[1]]["value"] = eval(command[2], {}, var_dict_vals)
-                        view.print_feedback_message("set_command_successful")
+                        curr_view.print_feedback_message("set_command_successful")
                     except:
-                        view.print_feedback_message("set_invalid_variable_given")
+                        curr_view.print_feedback_message("set_invalid_variable_given")
         elif command[0] == "settings":
             if len(command) < 2:
-                view.print_feedback_message("settings_no_setting_given")
-                view.print_settings()
+                curr_view.print_feedback_message("settings_no_setting_given")
+                curr_view.print_settings()
             else:
                 if command[1] == "show_flavor_text":
                     if len(command) < 3:
-                        view.print_settings_flavor_text_get()
+                        curr_view.print_settings_flavor_text_get()
                     elif command[2] == "always" or command[2] == "once" or command[2] == "never":
                         state["settings"]["show_flavor_text"] = command[2]
-                        view.print_settings_flavor_text_set(command[2])
+                        curr_view.print_settings_flavor_text_set(command[2])
                     else:
-                        view.print_feedback_message("settings_flavor_invalid_val")
+                        curr_view.print_feedback_message("settings_flavor_invalid_val")
                 elif command[1] == "descriptiveness":
                     if len(command) < 3:
-                        view.print_settings_descriptiveness_get()
+                        curr_view.print_settings_descriptiveness_get()
                     elif command[2] == "descriptive" or command[2] == "moderate" or command[2] == "minimal":
                         state["settings"]["descriptiveness"] = command[2]
-                        view.print_settings_descriptiveness_set(command[2])
+                        curr_view.print_settings_descriptiveness_set(command[2])
                     else:
-                        view.print_feedback_message("settings_descriptiveness_invalid_val")
+                        curr_view.print_feedback_message("settings_descriptiveness_invalid_val")
         elif command[0] == "word_count":
             # TODO: Only error when view doesn't have given method
             try:
-                view.print_num_words(utility.count_words(game))
+                curr_view.print_num_words(utility.count_words(game))
             except Exception:
-                view.print_feedback_message("command_not_supported")
+                curr_view.print_feedback_message("command_not_supported")
         elif command[0] == "words_seen":
             # TODO: Only error when view doesn't have given method
             try:
-                view.print_num_words(utility.count_words(game, True))
+                curr_view.print_num_words(utility.count_words(game, True))
             except Exception:
-                view.print_feedback_message("command_not_supported")
+                curr_view.print_feedback_message("command_not_supported")
         elif command[0] in state["choices"]:
             choice = state["choices"][command[0]]
             if not ("missing" in choice):
@@ -342,11 +346,11 @@ def run(game_name, packaged=True):
             #for spec_type in ["cost_spec", "req_spec", "shown_spec", "per_cost_spec", "per_req_spec", "per_shown_spec"]:
 
             if len(choice["missing"]) > 0:
-                view.print_feedback_message("choice_missing_requirements")
+                curr_view.print_feedback_message("choice_missing_requirements")
             else:
                 # First, save the state in an autosave after every 20 choices
                 state["last_autosave"] += 1
-                if state["last_autosave"] >= choices_between_autosaves:
+                if state["last_autosave"] >= config.choices_between_autosaves:
                     state["last_autosave"] = 0
                     save_game("autosave")
 
@@ -373,4 +377,4 @@ def run(game_name, packaged=True):
 
                 make_choice(choice["address"], command, choice)
         else:
-            view.print_feedback_message("unrecognized_command")
+            curr_view.print_feedback_message("unrecognized_command")

@@ -4,7 +4,7 @@
             "name": "Python Debugger: Module",
             "type": "debugpy",
             "request": "launch",
-            "module": "tunnelvision"
+            "module": "engine"
         },
         {
             "type": "java",

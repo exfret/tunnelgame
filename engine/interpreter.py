@@ -1,8 +1,11 @@
 import yaml
 import random
 
-from tunnelvision import addressing, gameparser, utility
-from tunnelvision.config import stories
+from engine import addressing, config, gameparser, utility
+
+
+game = config.game
+state = config.state
 
 
 class ErrorNode(Exception):
@@ -14,7 +17,7 @@ class UnrecognizedInstruction(Exception):
 
 
 def do_print(text, state, style={}):  # TODO: Move ansi code handling to view as well
-    view.print_text(text, style)
+    config.view.print_text(text, style)
 
 
 def do_shown_var_modification(modification, state, symbol, game):  # TODO: Remove... Only used for "add" and "lose", which are defunct
@@ -74,6 +77,8 @@ def eval_conditional(game, state, node):
 
 
 def step(game, state):
+    curr_view = config.view
+    
     curr_addr = addressing.get_curr_addr()
     
     if curr_addr == False:
@@ -220,7 +225,7 @@ def step(game, state):
     elif "flavor" in curr_node:
         if state["settings"]["show_flavor_text"] != "never" and (state["visits"][curr_addr] <= 1 or state["settings"]["show_flavor_text"] == "always"):
             if isinstance(curr_node["flavor"], str):  # TODO: Allow style spec tag with flavor text
-                view.print_flavor_text(curr_node["flavor"])
+                curr_view.print_flavor_text(curr_node["flavor"])
             else:
                 addressing.set_curr_addr(curr_addr + ("flavor", 0))
 
@@ -323,7 +328,7 @@ def step(game, state):
 
         tbl_to_display = vars_by_name[curr_node["print_table"]]["value"]
 
-        view.print_table(tbl_to_display)
+        curr_view.print_table(tbl_to_display)
     elif "random" in curr_node:
         possibilities_list = []
 
@@ -376,7 +381,7 @@ def step(game, state):
 
         return False
     elif "separator" in curr_node:
-        view.print_separator()
+        curr_view.print_separator()
     elif "set" in curr_node:
         text_to_show_spec = {}
         vars_by_name = utility.collect_vars_with_dicts(state)
@@ -425,7 +430,7 @@ def step(game, state):
                 vars_by_name[curr_node["set"]]["value"] = eval(curr_node["to"], {}, utility.collect_vars(state))  # TODO: Catch exceptions in case of syntax errors
 
         if "show" in curr_node:
-            view.print_var_modification(text_to_show_spec)
+            curr_view.print_var_modification(text_to_show_spec)
     elif "stop" in curr_node:
         # Need to remove this address now from the queue
         state["bookmark"] = state["bookmark"][1:]

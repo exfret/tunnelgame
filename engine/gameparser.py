@@ -4,9 +4,13 @@ import math
 import random
 import yaml
 
-from tunnelvision import addressing
-from tunnelvision.config import grammar, stories, local_dir
-from tunnelvision.utility import *  # TODO: Make it not import *, use proper namespace
+from engine import addressing, config
+from engine.utility import *  # TODO: Make it not import *, use proper namespace
+
+
+game = config.game
+state = config.state
+
 
 # TODO: Check addresses in program are valid
 

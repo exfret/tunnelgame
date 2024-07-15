@@ -1,6 +1,7 @@
 from string import Formatter
 
-from tunnelvision import addressing
+from engine.config import *
+from engine import addressing
 
 
 class CustomFormatter(Formatter):

@@ -1,11 +1,15 @@
 import sys
 
-from tunnelvision.gameloop import run
+from engine import config, view
+from engine.gameloop import run
 
+config.view = view.CLIView()
 
 def main():
     if len(sys.argv) == 1:
         run("tunnel/02-lemeny/intro.yaml", packaged=True)
-        #run("demo.yaml", packaged=True)
     else:
         run(sys.argv[1], packaged=False)
+
+if __name__ == "__main__":
+    main()

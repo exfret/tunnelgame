@@ -1,5 +1,5 @@
 Currently:
-  - per_cost etc. logic
+  - Make state/game into classes
 
 136. Rename print in View back to normal (I don't like overriding it)
 135. Remove old commands like flavor, once, and gosub
