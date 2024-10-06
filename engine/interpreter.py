@@ -135,7 +135,7 @@ def step(game, state):
         state["call_stack"].append({"bookmark": state["bookmark"], "vars": state["vars"]})
 
         state["bookmark"] = ()
-        addressing.make_bookmark(addressing.parse_addr(curr_addr, curr_node["call"]))
+        addressing.make_bookmark(state["bookmark"], addressing.parse_addr(curr_addr, curr_node["call"]))
 
         state["vars"] = {}
         gameparser.add_flags(game)
@@ -372,7 +372,7 @@ def step(game, state):
             # Don't return true since we need to increment past the call instruction
     elif "run" in curr_node:
         contents = utility.get_var(state["vars"], curr_node["run"], curr_addr)["value"]
-        temp_yaml = stories / "temp.yaml"
+        temp_yaml = config.stories / "_temp.yaml"
         temp_yaml.write_bytes(yaml.dump(contents).encode('utf-8'))
 
         state["msg"]["signal_run_statement"] = True

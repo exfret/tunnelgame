@@ -69,9 +69,10 @@ def open_game(game_name, curr_story_dir):
     game.update(contents)
 
     starting_state = {
-        "bookmark": (),  # bookmark is a queue (tuple) of call stacks (tuples) containing addresses (tuples)
+        "bookmark": (),  # bookmark is a tuple of addresses, which are themselves tuples
         "call_stack": [],  # List of dicts with bookmarks and vars (TODO: Maybe do last_address_list and choices here too?)
         "command_buffer": [],
+        "command_macros": {},
         "choices": {
             "start": create_choice("Start the game", ("_content", 0)),
         },  # Dict of choice ID's to new locations and descriptions
@@ -83,7 +84,7 @@ def open_game(game_name, curr_story_dir):
         "last_address": (),
         "last_address_list": [],
         "last_autosave": 0,
-        "macros": {},
+        "macros": {}, # TODO: I think this is unused and was meant for command_macros
         "map": {},  # TODO: What was map again? I think it was the game object, probably need to implement this
         "metadata": {
             "node_types": {},

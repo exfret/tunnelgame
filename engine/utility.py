@@ -215,6 +215,37 @@ def parse_requirement_spec(text_spec):
     return grouped_specs
 
 
+# Not used yet; for when I get around to per_cost_specs
+def parse_modification_spec(choice, amount=1):
+    vars_to_amounts_cost = {}
+    vars_to_amounts_req = {}
+    vars_to_amounts_shown = {}
+
+    for spec_type in ["cost_spec", "req_spec", "shown_spec", "per_cost_spec", "per_req_spec", "per_shown_spec"]:
+        if spec_type in choice and len(choice[spec_type]) > 0:
+            for modification in choice[spec_type]:
+                var_dict_vals = collect_vars(state, choice["choice_address"])
+                expr_val = eval(modification["amount"], {}, var_dict_vals)
+
+                def dict_add(dict, key, val):
+                    if not key in dict:
+                        dict[key] = 0
+                    dict[key] += val
+
+                if spec_type == "cost_spec":
+                    dict_add(vars_to_amounts_cost, modification["var"], expr_val)
+                elif spec_type == "per_cost_spec":
+                    dict_add(vars_to_amounts_cost, modification["var"], amount * expr_val)
+                elif spec_type == "req_spec":
+                    dict_add(vars_to_amounts_req, modification["var"], expr_val)
+                elif spec_type == "per_req_spec":
+                    dict_add(vars_to_amounts_req, modification["var"], amount * expr_val)
+                elif spec_type == "shown_spec":
+                    dict_add(vars_to_amounts_shown, modification["var"], expr_val)
+                elif spec_type == "per_shown_spec":
+                    dict_add(vars_to_amounts_shown, modification["var"], amount * expr_val)
+
+
 # Used in word counting commands
 def count_words(node, only_count_visited=False, address=()):
     count_node = True

@@ -155,7 +155,7 @@
 
         <div class="middle-section">
             <div class="text-area">
-                <p id="story-text">
+                <p id="story-board">
                     <button class="button" id="startButton">Start</button>
                 </p>
             </div>
@@ -168,8 +168,10 @@
         </div>
     </div>
 
+    <button onclick="displayMessage()">Hi</button>
+
     <footer>
-        &copy; 2023 Kyle Hess | Contact: hess.kyler@gmail.com
+        &copy; 2024 Kyle Hess | Contact: hess.kyler@gmail.com
     </footer>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
@@ -184,9 +186,21 @@
             socket.on("print", (data) => {
                 const newElement = document.createElement("div");
                 newElement.innerHTML = data.text
-                document.getElementById("story-text").appendChild(newElement);
+                document.getElementById("story-board").appendChild(newElement);
             });
         });
+
+        function displayMessage() {
+            fetch("/update", {
+                method: "POST"
+            })
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById("story-board").innerHTML = ""
+                    document.getElementById("story-board").innerHTML.appendChild("<div>" + data.story_text + "</div>")
+                    document.getElementById("story-board").innerHTML.appendChild("<div>" + choices + "</div>")
+                });
+        }
     </script>
 </body>
 

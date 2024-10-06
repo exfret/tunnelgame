@@ -1,10 +1,10 @@
-from flask import Flask, render_template
-from flask_socketio import SocketIO, emit
+from flask import Flask, render_template, jsonify
+from flask_socketio import SocketIO
 import os
 import textwrap
 
 # Module imports
-from engine import config, utility
+from engine import addressing, config, utility
 
 
 game = config.game
@@ -14,11 +14,15 @@ state = config.state
 feedback_msg = {
     "could_not_load_autosave": "Could not revert to autosave",
     "completion_not_supported": "This story doesn't support completion percentage.",
+    "define_no_name_given": "Must give a name for the macro.",
+    "define_successful": "Macro successfully bound.",
     "exec_no_story_given": "Must give path to story to execute.",
     "exec_invalid_file_given": "Invalid story given for exec.",
     "goto_invalid_address_given": "Incorrect address given.",
     "goto_no_address_given": "Must give an address.",
-    "help": "Valid commands are 'actions', 'choices', 'exit', 'goto', 'help', 'inspect', 'load', 'save', 'set', and 'settings'.",
+    "help": "Valid commands are 'define', 'exit', 'goto', 'help', 'info', 'inspect', 'load', 'repeat', revert', 'save', 'set', and 'settings', and 'undefine'.",
+    "info_options": "Valid options for info are 'actions', 'choices', 'completion', 'macros', 'vars', 'word_count', and 'words_seen'.",
+    "info_invalid_option": "Invalid option given for info. Type 'info' for valid options.",
     "inspect_invalid_variable_given": "That's not a valid variable.",
     "inspect_no_variable_given": "Must give a variable to print the value of.",
     "load_invalid_file_given": "File to be loaded not found.",
@@ -36,7 +40,11 @@ feedback_msg = {
     "settings_no_setting_given": "Must give a setting to give a new value to or test the current value of. Here is a list of settings:",
     "settings_descriptiveness_invalid_val": "That's not an allowed value of descriptiveness. Allowed values are 'descriptive', 'moderate', and 'minimal.'",
     "settings_flavor_invalid_val": "That's not an allowed value of show_flavor_text. Allowed values are 'always', 'once', and 'never'.",
-    "command_not_supported": "This command is not supported by the current view",
+    "undefine_no_macro_given": "No macro given to undefine.",
+    "undefine_invalid_macro_given": "Invalid macro given.",
+    "undefine_successful": "Macro successfully unbound.",
+    "max_macro_depth_exceeded": "Error: maximum macro expansion depth exceeded. Make sure there are no circular macro definitions.",
+    "command_not_supported": "This command is not supported by the current view.",
     "choice_missing_requirements": "Missing requirements.",
     "unrecognized_command": "Unrecognized command/choice. Type 'help' for commands or 'choices' for a list of choices.",
     "default": "Error: Invalid feedback message key.",
@@ -47,13 +55,14 @@ old_print = print
 def print(text=""):
     # Having __null__ in the string indicates it should not be printed
     # TODO: Some way to escape __null__ like with a backslash?
-    if "__null__" in text:
+    if isinstance(text, str) and "__null__" in text:
         return
 
     state["displayed_text"] += str(text) + "\n"
     old_print(text)
 
 
+# In newer versions, this only accepts two descriptiveness levels, descriptive/moderate (equivalent), and minimal
 def parse_text(text):
     # Decide what part of the text to print
     split_text = text.split("-->")
@@ -232,6 +241,14 @@ class CLIView:
             else:
                 print(feedback_msg[msg_type])
     
+    def print_macros(self):
+        if len(state["command_macros"].items()) == 0:
+            print("No macros defined.")
+            return
+        
+        for macro_name, macro_def in state["command_macros"].items():
+            print(macro_name + ": " + " ".join(macro_def))
+    
     def print_num_words(self, num_words):
         print(num_words)
 
@@ -254,6 +271,19 @@ class CLIView:
 
     def print_var_value(self, var_value):
         print(var_value)
+    
+    def print_vars_defined(self):
+        var_names = {}
+
+        curr_addr = addressing.get_block_part(state["last_address"])
+        for ind in range(len(curr_addr) + 1):
+            addr_to_check = curr_addr[:ind]
+
+            for var_name in state["vars"][addr_to_check].keys():
+                var_names[var_name] = True
+        
+        for name in sorted(var_names):
+            print(name)
 
     def get_input(self) -> str:
         old_print()
@@ -343,6 +373,10 @@ class WebView:
         @self.app.route('/')
         def index():
             return render_template("index.html")
+        
+        @self.app.route("/update", methods=["POST"])
+        def update_page():
+            return jsonify(message="HI")
 
     ######################################################################
     # Miscellaneous

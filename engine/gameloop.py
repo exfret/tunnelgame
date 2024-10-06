@@ -153,27 +153,47 @@ def run(game_name, packaged=True):
         if len(command) == 0:
             continue
 
-        if command[0] == "actions":
-            curr_view.print_choices(True)  # Print actions
-        elif command[0] == "choices":
-            curr_view.print_choices()
-        elif command[0] == "completion":
-            if len(state["story_points"]) == 0:
-                curr_view.print_feedback_message("completion_not_supported")
+        # Check for macros first so that they can be reversed if needed
+        if command[0] == "define":
+            if len(command) < 2:
+                curr_view.print_feedback_message("define_no_name_given")
                 continue
+            state["command_macros"][command[1]] = command[2:]
+            curr_view.print_feedback_message("define_successful")
+            continue
+        elif command[0] == "undefine":
+            if len(command) < 2:
+                curr_view.print_feedback_message("undefine_no_macro_given")
+                continue
+            if not command[1] in state["command_macros"]:
+                curr_view.print_feedback_message("undefine_invalid_macro_given")
+                continue
+            curr_view.print_feedback_message("undefine_successful")
+            del state["command_macros"][command[1]]
+            continue
 
-            num_complete = 0
-            total_num = 0
-            for val in state["story_points"].values():
-                if val:
-                    num_complete += 1
-                total_num += 1
+        # Recursively expand any macros
+        macro_depth = 0
+        macro_expanded = True
+        while macro_expanded:
+            macro_expanded = False
+            curr_command = []
+            for subcommand in command:
+                if subcommand in state["command_macros"]:
+                    for macro_subcommand in state["command_macros"][subcommand]:
+                        macro_expanded = True
+                        curr_command.append(macro_subcommand)
+                else:
+                    curr_command.append(subcommand)
+            command = curr_command
+            macro_depth += 1
+            if macro_depth >= config.max_macro_depth:
+                curr_view.print_feedback_message("max_macro_depth_exceeded")
+                break
+        if macro_depth >= config.max_macro_depth:
+            continue
 
-            try:
-                curr_view.print_completion_percentage(num_complete / total_num)
-            except Exception:
-                curr_view.print_feedback_message("command_not_supported")
-        elif command[0] == "exec":
+        if command[0] == "exec":
             continue # Not yet implemented
             if len(command) < 2:
                 curr_view.print_feedback_message("exec_no_story_given")
@@ -218,6 +238,48 @@ def run(game_name, packaged=True):
                     make_choice(address_to_goto) # TODO: Don't add to last_address_list for "back" command with gotos?
         elif command[0] == "help":
             curr_view.print_feedback_message("help")
+        elif command[0] == "info":
+            if len(command) < 2:
+                curr_view.print_feedback_message("info_options")
+                continue
+            if command[1] == "actions":
+                curr_view.print_choices(True)  # Print actions
+            elif command[1] == "choices":
+                curr_view.print_choices()
+            elif command[1] == "completion":
+                if len(state["story_points"]) == 0:
+                    curr_view.print_feedback_message("completion_not_supported")
+                    continue
+
+                num_complete = 0
+                total_num = 0
+                for val in state["story_points"].values():
+                    if val:
+                        num_complete += 1
+                    total_num += 1
+
+                if hasattr(curr_view, "print_completion_percentage"):
+                    curr_view.print_completion_percentage(num_complete / total_num)
+                else:
+                    curr_view.print_feedback_message("command_not_supported")
+            elif command[1] == "macros":
+                curr_view.print_macros()
+            elif command[1] == "vars":
+                curr_view.print_vars_defined()
+            elif command[1] == "word_count":
+                # TODO: Only error when view doesn't have given method
+                try:
+                    curr_view.print_num_words(utility.count_words(game))
+                except Exception:
+                    curr_view.print_feedback_message("command_not_supported")
+            elif command[1] == "words_seen":
+                # TODO: Only error when view doesn't have given method
+                try:
+                    curr_view.print_num_words(utility.count_words(game, True))
+                except Exception:
+                    curr_view.print_feedback_message("command_not_supported")
+            else:
+                curr_view.print_feedback_message("info_invalid_option")
         elif command[0] == "input":
             reconstructed_input = ""
             for subcommand in command[1:]:
@@ -315,18 +377,6 @@ def run(game_name, packaged=True):
                         curr_view.print_settings_descriptiveness_set(command[2])
                     else:
                         curr_view.print_feedback_message("settings_descriptiveness_invalid_val")
-        elif command[0] == "word_count":
-            # TODO: Only error when view doesn't have given method
-            try:
-                curr_view.print_num_words(utility.count_words(game))
-            except Exception:
-                curr_view.print_feedback_message("command_not_supported")
-        elif command[0] == "words_seen":
-            # TODO: Only error when view doesn't have given method
-            try:
-                curr_view.print_num_words(utility.count_words(game, True))
-            except Exception:
-                curr_view.print_feedback_message("command_not_supported")
         elif command[0] in state["choices"]:
             choice = state["choices"][command[0]]
             if not ("missing" in choice):

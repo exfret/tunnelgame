@@ -23,6 +23,7 @@ stories = story_dir
 saves = saves_dir
 grammar = yaml.safe_load((local_dir / "engine" / "grammar.yaml").read_text())
 max_num_steps = 20000
+max_macro_depth = 100
 choices_between_autosaves = 20
 
 

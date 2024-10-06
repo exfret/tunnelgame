@@ -7,7 +7,7 @@ config.view = view.CLIView()
 
 def main():
     if len(sys.argv) == 1:
-        run("tunnel/02-lemeny/intro.yaml", packaged=True)
+        run("meta_story.yaml", packaged=True)
     else:
         run(sys.argv[1], packaged=False)
 

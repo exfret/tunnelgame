@@ -7,4 +7,47 @@ training:
       "1": first/george_waiting
   first:
     george_waiting:
-      - George waits at the orphanage's dusty entrance, flipping a coin. --> __null__
+      - George is standing at the dusty entrance to the orphanage, his ruffled brown hair blending with the oak double round-top door that leads outside. He's flipping a coin to pass the time as he waits for you to finish packing.
+      - choice: review
+        selectable_once:
+        text: Review your encyclopedia notes on rosalia
+        effects:
+          - You're able to navigate to your encyclopedia with the "encyclopedia" command. You read up about rosalia, which you will be gathering with George. You also note that you can also see other actions by typing "info actions", or a complete list of commands by typing "help".
+          - separator:
+          - goto: .
+      - choice: check
+        selectable_once:
+        text: Check that you have your training pass
+        effects:
+          - Your training pass is used for entering the Tunnel. You can easily see you can have it by typing "inventory".
+          - separator:
+          - goto: .
+      - choice: touch
+        selectable_once:
+        text: Touch the necklace my parents gave me for comfort
+        effects:
+          - The necklace is all you have left of your parents. You remember little of them.
+          - On the other hand, you have vivid memories tied to the hairs knotted around the necklace. They were from an orphan girl who died outside in the cold because the orphanage couldn't take her in.
+          - You vow to become a great Tunnel explorer, someone who brings back riches and glory. That way, you can provide the funds for anyone to be taken in. You snuck a lock of hair you cut from the poor girl's head as a symbol of your promise.
+      - choice: ready
+        text: Tell George that I'm ready
+    ready:
+      - George opens the doors, allowing the light that permeates the outside of the Dome to flood in.
+      - You both hunker along with your heavy packs, heading for the Tunnel, a gaping miles-wide gap in the Dome's rocky walls. It's only a day's walk from your small town to the Tunnel.
+      - George interrupts the silence by asking how you feel about your first trip.
+      # Gives a coin or a rosalia
+      - choice: anxious
+        effects:
+          - He gives you a rosalia and says, "Hopefully now that you see what you'll be gathering, you can have a more concrete picture of what we'll be doing. It's nothing too bad!"
+          - set: rosalia += 1
+            show:
+          - goto: tunnel_entrance
+      - choice: excited
+        effects:
+          - He gives you a coin for your good attitude!
+          - set: coin += 1
+            show:
+          - goto: tunnel_entrance
+    tunnel_entrance:
+      - It's a day's journey from your small town to the entrance of the Tunnel.
+      - sub: /logic/time

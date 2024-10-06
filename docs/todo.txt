@@ -1,6 +1,20 @@
 Currently:
-  - Make state/game into classes
+  - Working on expanding lemeny version
 
+Big Todo:
+  - UI
+
+148. Figure out why meta_story isn't working (typing in content choice then displays nothing)
+147. Make choice command for making a choice that's overriden by a standard command? Renaming commands even perhaps?
+146. Idea: Headers that always activate when moving into a block, but are tied to that specific block and don't propagate.
+145. Allow int argument with revert command for amount to revert
+144. Pause ability on input/repeat commands when a new option is presented or new text happens (make it an option that can be disabled but is on by default)
+143. Repeat until command that repeats until a condition is met, like not being able to do more commands
+142. Check if commands inputted have extraneous arguments (maybe also a more general schema for defining commands)
+141. Update help command
+140. Check if collect_vars with non-block addresses works
+138. Redo GUI so that autocomplete is more possible
+137. Consider whether to make game and state into classes
 136. Rename print in View back to normal (I don't like overriding it)
 135. Remove old commands like flavor, once, and gosub
 134. Fix back command... it went back to the root of the story once?
@@ -59,10 +73,8 @@ Currently:
 70. Plural/gender/etc. localizations
 69. Override variable subscripting, turning variables into special dicts before being passed to eval
 68. World object that exists separately for each block (or even just a macro)
-67. Actually write the tests
 65. Special addressing for the "root" block of a *file* rather than of the whole story
 63. Check that insert commands and such are only used with bags
-61. Return command for gosub
 59. Save current text printed to terminal when file saved
 58. SPILL command for when we do want to "spill" from an effects section to the parent area
 56. Disallow random intervals in choice specs?
@@ -72,11 +84,11 @@ Currently:
 43. Automatic log of variable changes
 41. Pausing on repeat commands when, for example, you no longer have the materials for something, so it doesn't just spam console (maybe also a "max" option)
 26. Cost checking with passed args
-21. Setting for showing non-taken choices or not
-20. Player-defined macros via command line
-18. Autocomplete for commands
 
 DONE
+61. Return command for gosub
+20. Player-defined macros via command line
+139. Info command, with ability to inspect all vars in current scope
 86. Implement unflagging
 83. Use _default in switch statements
 78. Treat footers more like macros that get executed within the blocks (Note: I'm reverting this but it was done)
@@ -121,6 +133,8 @@ DONE
 1. Checking that story is formatted correctly
 
 NOT DOING
+21. Setting for showing non-taken choices or not
+18. Autocomplete for commands
 64. Check "extra newline" with consecutive print statements
 12. If a variable doesn't exist, still instantiate it, but give a warning
 76. Change _vars to dict
@@ -134,6 +148,7 @@ NOT DOING
 2. Unify actions and choices with actions as just "default choices"
 
 I FORGET WHAT THIS MEANS
+67. Actually write the tests
 13. Allow specification file for author-defined commands
 53. Automatic checking for interpreter functions
 30. More complicated parsing system; add metadata into game itself and use this to make saving/loading more robust
