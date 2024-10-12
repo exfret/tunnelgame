@@ -1,9 +1,23 @@
 Currently:
   - Working on expanding lemeny version
+  - Changed autosave name to _autosave (test)
+    - Note: allow exec'ing a given file
+    - Try statements on run?
+    - Allow story to be given that's exec'd (have to test for story's existence)
+    - Undo storypoint modifications (since they're not named like they should be...)
 
 Big Todo:
   - UI
 
+157. Goto commands don't seem to be resetting the address
+156. Label commands that can be goto'd rather than needed whole new blocks
+155. Tags for keeping track of people/places/things etc.
+154. Todo instruction and other marker instructions
+153. Revisit packaging and where stories can be saved
+152. Allow saving game/state on stack when recursively calling run (currently this isn't saved), or at least save it before run is called
+151. Make autosaves compatible with re-calling "run"
+150. Make sure game and state are the only things that can be changed in the run function, or at least that other things are properly saved and loaded
+149. Double check eval is done safely
 148. Figure out why meta_story isn't working (typing in content choice then displays nothing)
 147. Make choice command for making a choice that's overriden by a standard command? Renaming commands even perhaps?
 146. Idea: Headers that always activate when moving into a block, but are tied to that specific block and don't propagate.

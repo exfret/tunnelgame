@@ -2,7 +2,7 @@ bookmark: !!python/tuple []
 choices: {}
 file_data:
   filename: ''
-metadata:
+story_data:
   node_types:
     !!python/tuple []:
       START: true

@@ -265,6 +265,7 @@ def step(game, state):
         if "into_choices" in curr_node:
             choices_to_inject_into = curr_node["into_choices"].split()
             for choice_id in choices_to_inject_into:
+                # TODO: Warning when trying to inject into a choice that doesn't exist
                 if choice_id in state["choices"]:
                     if not "injections" in state["choices"][choice_id]:
                         state["choices"][choice_id]["injections"] = []

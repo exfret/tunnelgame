@@ -1,6 +1,3 @@
 ---
-_vars:
-  - test: 0
 _content:
-  - modify: test
-    add: "1"
+  - set: skill_lemen = 100

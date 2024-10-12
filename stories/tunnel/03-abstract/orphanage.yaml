@@ -1,0 +1,146 @@
+---
+_content:
+  - goto: rooms/lily
+rooms:
+  _content:
+    - You stand in the hallway where the orphanage bedrooms are. There are 7 bedrooms, and as usual, they're all full.
+    - choice: common
+      text: Go to the commons hallway on the right
+    - choice: lily
+      text: Visit my room
+    - choice: george
+      text: Visit George's room
+    - if: unlock_orphanage_jaz_room
+      then:
+        - choice: jaz
+          text: Visit Jaz's room
+  lily:
+    # Your room will always be the "home base"
+    _vars:
+      - timestamp_bed_last_made: 0
+    _content:
+      - You're in your room.
+      - if: (time - timestamp_bed_last_made) < 3
+        then:
+          - Your bed is pristinely tucked.
+      - if: (time - timestamp_bed_last_made) >= 3 and (time - timestamp_bed_last_made) < 10
+        then:
+          - Your bed is neatly tucked.
+      - if: (time - timestamp_bed_last_made) >= 10 and (time - timestamp_bed_last_made) < 20
+        then:
+          - Your bed is a little messy.
+      - if: (time - timestamp_bed_last_made) >= 20
+        then:
+          - Your bedsheets are all over.
+      - choice: leave
+        text: Leave your room
+        effects: ..
+      - if: (time - timestamp_bed_last_made) >= 3
+        then:
+          - choice: make
+            text: Make your bed
+            effects:
+              - You make your bed.
+              - set: timestamp_bed_last_made = time
+              - separator:
+              - goto: .
+  george:
+    _content:
+      - George brushes back his ruffled brown hair.
+      - choice: leave
+        text: Leave George's room
+        effects: ..
+      - if: tunnel_pass == "training"
+        then:
+          - choice: train
+            text: Explore the Tunnel under George's supervision
+            effects: /tunnel/training
+      - choice: steal
+        text: Steal a sock from George when he isn't looking
+        require: 10 skill_sneak
+        effects:
+          - pass:
+  jaz:
+    _content:
+      - Jaz is wearing her usual mischievous grin on a face freckled similarly to yours. "Whatcha want, miss?"
+      - choice: leave
+        text: Leave Jaz's room
+        effects: ..
+      - choice: key
+        text: Buy a key to the orphanage courtyard that Jaz stole
+        selectable_once:
+        cost: 3 inv_petunal
+        shown: 1 key_orphanage_courtyard
+        effects:
+          - The courtyard can be accessed from the commons hallway.
+          - separator:
+          - goto: .
+      - choice: compliment
+        text: Pay for validation from Jaz
+        cost: 1 inv_petunal
+        effects:
+          - random:
+              compliment_1:
+                - '"You''re cool, I guess."'
+              compliment_2:
+                - '"You have an okay vibe."'
+              compliment_3:
+                - '"Look in my mirror. In there is a beautiful, wonderful girl with a promising future. That''s me. Isn''t that neat?"'
+              compliment_4:
+                - '"You''ll probably be forgotten. Hey, that''s a good thing for some people!"'
+              compliment_5:
+                - '"I''m pretty great. Wait, you wanted me to validate you? Oh."'
+              compliment_6:
+                - '"I''m lovin'' that grimy-face, hair-full-of-knots look you got going."'
+              compliment_7:
+                - '"You''re nice."'
+          - separator:
+          - goto: .
+      - choice: steal
+        text: Steal a sock from Jaz when she isn't looking
+        require: 15 skill_sneak
+        effects:
+          - pass:
+common:
+  _content:
+    - You'll get access to more stuff here as you explore the Tunnel more.
+    - choice: rooms
+      text: Go to the bedrooms on the left
+    - if: unlock_orphanage_study
+      then:
+        - choice: study
+          text: Visit the study
+  study:
+    - if: not met_mabel
+      then:
+        - flag: met_mabel
+        - A young, thin woman looks up from a desk at the front of the orphanage's study. "I'm Mabel. Welcome to our dismal collection of knowledge and folklore surrounding the Tunnel. You'll have to get access to the main town library for more in-depth knowledge."
+        - She goes on, "Oh, and the knowledge doesn't come for free. You'll have to trade in some rosalia to study anything. It's how we keep the orphanage running."
+      else:
+        - Mabel stares at you briefly, as if suspicious of what you might do next. Then, she returns to her dusty book.
+    - choice: common
+      text: Return to the commons hallway
+      effects: ..
+    - if: not researched_botany_1
+      then:
+        - choice: botany
+          text: Study Botany I
+          cost: 3 inv_rosalia
+          effects:
+            - flag: researched_botany_1
+            - sub: /logic/time
+            - This book teaches about Starblossoms, a flower with large, broad petals shaped like a 5-pointed star. It is perpetually in bloom and valued for its beauty. A special tool called a SHTG2 is required to harvest it due to its deep roots.
+            - flag: knowledge_starblossom
+            - The book also teaches you better gathering methods for rosalia.
+            - set: skill_gather_rosalia += 3
+            - goto: .
+    - if: not researched_writing_1
+      then:
+        - choice: writing
+          text: Study Writing I
+          cost: 4 inv_rosalia
+          effects:
+            - flag: researched_writing_1
+            - flag: unlock_journal
+            - You unlocked the journal, which holds information about the world. Access it by typing 'journal'. You can see all hidden choices by typing 'info actions'.
+            - goto: .

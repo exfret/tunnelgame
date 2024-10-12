@@ -1,5 +1,6 @@
 ---
 _content:
+  - command: input ready, excited, vibe
   - goto: /tunnel/training
 _include:
   logic: logic.yaml

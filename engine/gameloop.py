@@ -5,7 +5,7 @@ import pickle
 from engine import addressing, config, gameparser, interpreter, utility
 
 
-def run(game_name, packaged=True):
+def run(game_name, packaged=True, parent_game=None, parent_state=None, exec_block=None):
     game = config.game
     state = config.state
     curr_view = config.view
@@ -20,11 +20,38 @@ def run(game_name, packaged=True):
     def setup_game():
         gameparser.construct_game(game, curr_story_dir)
         gameparser.expand_macros(game)
+
+        # We need to do this after construct game and expand macros or else includes and such will be attempted again
+        if exec_block is not None:
+            addressing.get_node(exec_block, parent_game)["_exec"] = copy.deepcopy(game)
+            game.clear()
+            game.update(parent_game)
+
         gameparser.add_flags(game)
         gameparser.add_vars_with_address(game, state, game, ())
         gameparser.add_module_vars(state)
         gameparser.parse_game()
     setup_game()
+
+    # Sync state vars so that upstream state can be modified
+    if exec_block is not None:
+        state["command_macros"] = parent_state["command_macros"]
+        # Choices won't be presented during exec, but new ones can be added
+        state["choices"] = parent_state["choices"]
+        state["story_points"] = parent_state["story_points"]
+        # Vars added below
+        state["visits"] = parent_state["visits"]
+        state["visits_choices"] = parent_state["visits_choices"]
+        
+        for var_key, var_tbl in parent_state["vars"].items():
+        # Don't override global vars
+            if var_key not in state["vars"]:
+                state["vars"][var_key] = var_tbl
+            # Case of var_key being an address
+            elif isinstance(var_key, tuple):
+                for var_name, var in var_tbl.items():
+                    # Override address vars
+                    state["vars"][var_key][var_name] = var
 
     def save_game(save_slot):
         gameparser.remove_module_vars(state)
@@ -67,7 +94,7 @@ def run(game_name, packaged=True):
                 num_steps += 1
                 if num_steps >= config.max_num_steps:
                     try:
-                        load_game("autosave.yaml")
+                        load_game("_autosave")
                     except FileNotFoundError:
                         curr_view.print_feedback_message("could_not_load_autosave")
                     return
@@ -80,7 +107,10 @@ def run(game_name, packaged=True):
                 temp_game = copy.deepcopy(game)
                 temp_state = copy.deepcopy(state)  # TODO: Store view!
 
-                run("temp.yaml")
+                try:
+                    run("_temp.yaml", packaged=False)
+                except:
+                    curr_view.print_feedback_message("run_instr_failed")
 
                 game.clear()
                 game.update(temp_game)
@@ -135,12 +165,17 @@ def run(game_name, packaged=True):
 
             curr_view.print_choices()
 
+    # If this is an exec command, only run the block and then return
+    if exec_block is not None:
+        make_choice(exec_block + ("_exec", "_content", 0))
+        return
+
     curr_view.print_choices()
 
     autostart = True
 
     if autostart:
-        save_game("autosave")
+        save_game("_autosave")
         
         make_choice(state["choices"]["start"]["address"])
 
@@ -194,33 +229,36 @@ def run(game_name, packaged=True):
             continue
 
         if command[0] == "exec":
-            continue # Not yet implemented
+            # Note: Favor specific statements like "set" over doing an exec, this is more for show than anything
+            # Enters a "ghost game" with added exec statements, then returns, keeping some modifications to state
+
             if len(command) < 2:
                 curr_view.print_feedback_message("exec_no_story_given")
                 continue
-            # Save game and state, then make the new game a "subgame" of the old one
+
             old_game = copy.deepcopy(game)
             gameparser.remove_module_vars(state)
             old_state = copy.deepcopy(state)
-            new_game = None
+
             try:
-                gameparser.open_game(command[1])
-                setup_game()
-                new_game = copy.deepcopy(game)
-            except Exception as e:
-                print(e)
-                curr_view.print_feedback_message("exec_invalid_file_given")
-            finally:
+                exec_block = addressing.get_block_part(state["last_address"])
+                run(command[1], parent_game=old_game, parent_state=old_state, exec_block=exec_block)
                 game.clear()
                 game.update(old_game)
                 state.clear()
                 state.update(old_state)
                 gameparser.add_module_vars(state)
+            except:
+                # Need to restor game/state before printing feedback message
+                game.clear()
+                game.update(old_game)
+                state.clear()
+                state.update(old_state)
+                gameparser.add_module_vars(state)
+                curr_view.print_feedback_message("exec_error_running_game")
             
-            # Check if we were able to load the new game
-            if new_game is not None:
-                game["_exec"] = new_game
-                make_choice() # Do this as an action... TODO: Figure out how to make the signature right
+            curr_view.clear(True)
+            curr_view.print_displayed_text()
         elif command[0] == "exit":
             break
         elif command[0] == "goto":
@@ -402,7 +440,7 @@ def run(game_name, packaged=True):
                 state["last_autosave"] += 1
                 if state["last_autosave"] >= config.choices_between_autosaves:
                     state["last_autosave"] = 0
-                    save_game("autosave")
+                    save_game("_autosave")
 
                 gameparser.remove_module_vars(state)
                 state_to_save = copy.deepcopy(state)

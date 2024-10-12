@@ -1,0 +1,55 @@
+---
+_content:
+  - choice: skip
+    action:
+    effects:
+      # Skip to first training
+      - if: int(_args[0]) >= 0
+        then:
+          - command: input begin, leave, george, train
+      # Skip to second training
+      - if: int(_args[0]) >= 1
+        then:
+          - command: input well, next, leave, george, train
+      # Skip to third training
+      - if: int(_args[0]) >= 2
+        then:
+          - command: input camp, leave, leave, george, train
+  - You are Lily.
+  - Right now, you are only known as an orphan.
+  - However, you are sure that one day, you will be known as the greatest adventurer into the Tunnel that there ever was!
+  - choice: begin
+    effects: orphanage
+_include:
+  logic: logic.yaml
+  orphanage: orphanage.yaml
+  tunnel: tunnel.yaml
+  world: world.yaml
+_vars:
+  # Important
+  - tunnel_pass: training
+  - time: 0
+  - coin: 0
+    _locale: Coin
+  # Inventory
+  - inv_petunal: 0
+    _locale: Petunal Blossoms
+  - inv_rosalia: 0
+    _locale: Rosalia
+  # Keys/Other things that are flags but need to be shown
+  - key_orphanage_courtyard: 0
+    _locale: Orphanage Courtyard Key
+  # Skills
+  - skill_gather_rosalia: 3
+    _locale: Rosalia Gather Skill
+  - skill_sneak: 0
+    _locale: Sneakiness
+  # Misc.
+  - times_trained: 0
+_header:
+  - if: unlock_journal
+    then:
+      - choice: journal
+        action:
+        effects:
+          - goto: /world/journal

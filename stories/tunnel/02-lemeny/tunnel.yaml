@@ -7,7 +7,8 @@ training:
       "1": first/george_waiting
   first:
     george_waiting:
-      - George is standing at the dusty entrance to the orphanage, his ruffled brown hair blending with the oak double round-top door that leads outside. He's flipping a coin to pass the time as he waits for you to finish packing.
+      - You are Lily, an aspiring orphan Tunnel adventurer.
+      - George, your mentor, is standing at the dusty entrance to the orphanage, his ruffled brown hair blending with the oak double round-top door that leads outside. He's flipping a coin to pass the time as he waits for you to finish packing.
       - choice: review
         selectable_once:
         text: Review your encyclopedia notes on rosalia
@@ -29,6 +30,7 @@ training:
           - The necklace is all you have left of your parents. You remember little of them.
           - On the other hand, you have vivid memories tied to the hairs knotted around the necklace. They were from an orphan girl who died outside in the cold because the orphanage couldn't take her in.
           - You vow to become a great Tunnel explorer, someone who brings back riches and glory. That way, you can provide the funds for anyone to be taken in. You snuck a lock of hair you cut from the poor girl's head as a symbol of your promise.
+          - goto: .
       - choice: ready
         text: Tell George that I'm ready
     ready:
@@ -51,3 +53,29 @@ training:
     tunnel_entrance:
       - It's a day's journey from your small town to the entrance of the Tunnel.
       - sub: /logic/time
+      - You reach the entrance to the Tunnel, the only exit from the hundred mile wide Dome to which humanity is confined. No one has gotten to the end of this Tunnel, some even think it is endless. Maybe you'll prove them wrong one day.
+      - A guard checks your Training Pass, which allows you into the Tunnel only under George's supervision. After entering, you both spend the day hiking to the new rosalia patch.
+      - George asks you, "What do you like the most about the Tunnel?"
+      # TODO: Based on the response, modify some sort of character trait
+      - choice: green
+        text: The greenery, which contrasts the Dome's dead brown ground
+        effects:
+          - pass:
+      - choice: chirps
+        text: The chirps of the Tunnel's birds, which rarely inhabit the Dome
+        effects:
+          - pass:
+      - choice: landscape
+        text: The rolling hills, which is a nice change from the Dome's flat interior
+        effects:
+          - pass:
+      - choice: vibe
+        text: Just, like, the general vibe, man
+        effects:
+          - pass:
+      - inject: gather_rosalia
+        into_choices: green chirps landscape vibe
+    gather_rosalia:
+      - You finish the hike and set up camp near a large patch of rosalia.
+      - sub: /logic/time
+      - The next day, George teaches you how to pluck the small leaves from the red flower for use in teas.

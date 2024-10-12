@@ -68,6 +68,7 @@ def open_game(game_name, curr_story_dir):
     contents = yaml.safe_load(curr_story_dir.read_text())
     game.update(contents)
 
+    # NOTE: Update exec command too!
     starting_state = {
         "bookmark": (),  # bookmark is a tuple of addresses, which are themselves tuples
         "call_stack": [],  # List of dicts with bookmarks and vars (TODO: Maybe do last_address_list and choices here too?)
@@ -84,11 +85,10 @@ def open_game(game_name, curr_story_dir):
         "last_address": (),
         "last_address_list": [],
         "last_autosave": 0,
-        "macros": {}, # TODO: I think this is unused and was meant for command_macros
         "map": {},  # TODO: What was map again? I think it was the game object, probably need to implement this
-        "metadata": {
+        "story_data": {
             "node_types": {},
-        },  # TODO: Rename to 'story_data' or something such, maybe remove after parsing overhaul
+        },
         "msg": {},  # Hacky way for things to communicate to gameloop
         "settings": {
             "descriptiveness": "descriptive",
@@ -272,9 +272,9 @@ def remove_module_vars(state):
 
 
 def parse_node(node, context, address):
-    if not (address in state["metadata"]["node_types"]):
-        state["metadata"]["node_types"][address] = {}
-    state["metadata"]["node_types"][address][context] = True
+    if not (address in state["story_data"]["node_types"]):
+        state["story_data"]["node_types"][address] = {}
+    state["story_data"]["node_types"][address][context] = True
 
     if not (address in state["visits"]):
         state["visits"][address] = 0

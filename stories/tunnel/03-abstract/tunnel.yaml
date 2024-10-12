@@ -1,0 +1,111 @@
+---
+training:
+  _content:
+    - switch: _visits
+      "1": first/depart
+      "2": second/depart
+      "3": third/depart
+  first:
+    depart:
+      - It's a day's journey from your small town in the Dome to the entrance of the Tunnel. The Tunnel is the only exit from the 100-mile Dome to which humanity is confined. But it's so big no one has found the other end.
+      - sub: /logic/time
+      - You both reach the entrance to the Tunnel, and a guard checks your passes. Then, you head onward to camp.
+      - George asks how you feel your training has gone so far.
+      # Maybe reference this choice way later in the story
+      - choice: well
+        effects:
+          - He gives you a coin for your good attitude.
+          - set: coin += 1
+            show:
+          - goto: camp
+      - choice: bad
+        effects:
+          - flag: training_first_was_feeling_bad
+          - He frowns and expresses his sympathies, but reassures you that things have been going well.
+          - goto: camp
+    camp:
+      - After walking a bit further, you set up camp.
+      - sub: /logic/time
+      - The next day, George teaches you how to pluck the small leaves from the red flower for use in teas.
+      - set: inv_rosalia += skill_gather_rosalia
+        show:
+      - set: skill_gather_rosalia += 1
+        show:
+      - Then, you pack up and head home.
+      - choice: next
+        effects: return
+    return:
+      - It's another day's walk back to the orphanage.
+      - sub: /logic/time
+      - if: training_first_was_feeling_bad
+        then:
+          - George says he's sorry you weren't feeling so great at the beginning of the trip and offers you a rosalia to cheer you up.
+          - set: inv_rosalia += 1
+            show:
+        else:
+          - George smiles and says he likes your positive attitude toward adventuring. He even flips you another coin!
+          - set: coin += 1
+            show:
+      - (Unlocked Study)
+      - flag: unlock_orphanage_study
+      - goto: /orphanage
+  second:
+    depart:
+      - sub: /logic/time
+      - You get to the entrance to the first layer of the Tunnel. Once you get the Green Pass, which will allow you to explore on your own, you can work toward a Blue Pass, which will allow you to enter the second layer as well. Other passes allow entrance into yet deeper regions of the Tunnel.
+      - Once, you've been hiking a bit, George tells you that you'll both be gathering petunal blossoms, which are purple flowers with yellow specks. They are very nutritious when ground up.
+      - sub: /logic/time
+      - choice: camp
+        text: Set up camp
+    camp:
+      - The next day, you both gather the petunal blossoms.
+      - set: inv_petunal += 2
+        show:
+      - While gathering the petunal blossoms, you stumble across a hastily made dirt grave. You recall that it's customary to leave rosalia as respects for the dead.
+      - goto: grave
+    grave:
+      - choice: respect
+        text: Pay respects
+        cost: 1 inv_rosalia
+        effects:
+          - flag: tunnel_layer_1_petunal_grave_paid_respects
+          - You set a rosalia down on the grave and stand there for a moment in silence before returning to work.
+          - goto: return
+      - choice: george
+        selectable_once:
+        text: Find George and call him over
+        effects:
+          - George isn't nearby. They say not to call too much attention to fallen explorers anwyays.
+          - goto: .
+      - choice: leave
+        text: Move on
+        effects:
+          - goto: return
+      - choice: destroy
+        text: Destroy the grave
+        effects:
+          - flag: tunnel_layer_1_petunal_grave_destroyed
+          - You kick away the stones laid down to mark the grave and cover the dirt with grass so that no one can find it any more.
+          - You get the feeling that this may come back to haunt you.
+          - goto: return
+    return:
+      - After a day of gathering petunal blossoms, you head back.
+      - sub: /logic/time
+      - (Unlocked Jaz's Room)
+      - flag: unlock_orphanage_jaz_room
+      - goto: /orphanage
+  third:
+    depart:
+      - sub: /logic/time
+      - On the way to the Tunnel, you and George pass a merchant moving wares from the City to the town in which the orphanage is located, Lokton. She's lugging a ton of stuff.
+      - choice: offer
+        text: Offer some pennies for the large glass sphere that the merchant is holding
+        cost: 2 coin
+        effects:
+          - She happily parts with it. "I was told this would be very useful, but so far it's only been weighing me down." She says.
+          - goto: camp
+      - choice: ignore
+        text: Move on
+        effects: camp
+    camp:
+      - pass:
