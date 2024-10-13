@@ -95,10 +95,29 @@ CHOICE:
     action: _null
     selectable_once: _null
     text: _text
+    args: CHOICE_ARGS
+    enforce: CONDITION
     require: _requirement_specification
     cost: _requirement_specification
     shown: _requirement_specification
     effects: EFFECTS_SPEC
+  priority:
+    - args
+CHOICE_ARGS:
+  type: list
+  elements: CHOICE_ARG
+CHOICE_ARG:
+  type: union_with_keys
+  contexts:
+    selection: CHOICE_ARGS_SELECTION
+CHOICE_ARGS_SELECTION:
+  type: dict
+  mandatory:
+    selection: _null
+    options: CHOICE_ARGS_SELECTION_OPTIONS
+CHOICE_ARGS_SELECTION_OPTIONS:
+  type: list
+  elements: _id
 EFFECTS_SPEC:
   type: union_with_types
   str: _addr

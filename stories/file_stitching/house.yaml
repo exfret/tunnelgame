@@ -1,6 +1,13 @@
 ---
 _include:
-  yard: file_stitching/yard.yaml
+  yard: yard.yaml
 _content:
   - You're in house.
-  - goto: yard
+  - if: not been_to_house
+    then:
+      - flag: been_to_house
+      - goto: child
+  - subreturn:
+child:
+  - In child of house
+  - goto: "~"

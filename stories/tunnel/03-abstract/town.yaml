@@ -1,0 +1,89 @@
+---
+_header:
+  - choice: home
+    text: Return to the orphanage
+    effects: /orphanage/rooms
+_content:
+  - Where in town would you like to go?
+  - if: unlock_town_market
+    then:
+      - choice: market
+        text: Buy and sell stuff and things in the market
+market:
+  _content:
+    - choice: town
+      text: Go somewhere else in town
+      effects: ..
+    - if: unlock_town_market_general_store
+      then:
+        # TODO: Remove "newly opened" text after some time
+        - choice: general
+          text: Go to the newly opened general store
+  general:
+    _content:
+      - if: not town_market_general_store_visited
+        then:
+          - flag: town_market_general_store_visited
+          - You walk into a newly opened market building and recognize the person running the place as the merchant you passed earlier!
+          - '"Oh hey! I recognize you." He shouts out.'
+          - if: tunnel_training_third_merchant_bought_glass_sphere
+            then:
+              - goto: ghostly_orb_bought
+            else:
+              - '"I''m actually glad I lugged this orb all the way back with me. I found out it''s kind of priceless. Isn''t that funny?"'
+      - The shopkeeper asks, "So what can I do you for today?"
+      - choice: leave
+        text: Return to the main market area
+        effects: ..
+      - choice: ask_orb
+        selectable_once:
+        text: Ask why the orb is so valuable
+        effects:
+          - He says, "Unfortunately, I can't reveal that information to you."
+          - goto: .
+      # TODO: Make some way to track that the shopkeeper has the orb now and tie that to this if statement
+      - if: not tunnel_training_third_merchant_bought_glass_sphere
+        then:
+          - choice: orb
+            selectable_once:
+            text: Offer to buy the orb off the shopkeeper
+            cost: 2 coin
+            shown: 1 artifact_ghostly_orb_purple
+            effects:
+              - He bellows and then tells you, "Nice try! I'm not parting with this thing if I can help it, though, now that I've learned its value."
+              - (You get your items back)
+              - set: coin += 2
+                show:
+              - set: artifact_ghostly_orb_purple -= 1
+                show:
+              - goto: .
+      # Option to ask why the ghostly orb is so important
+    ghostly_orb_bought:
+      - On a sidenote I sort of regret selling the ball to you actually. I learned that it was actually really valuable.
+      - choice: sell
+        text: Offer to sell the glass ball back to him for 2 coins
+        cost: 1 artifact_ghostly_orb_purple
+        shown: 2 coin
+        effects:
+          - He says, "No, no I couldn't take it off you, you got it fair and square. And I don't have the money to pay you properly for it either."
+          - (You get your items back)
+          - set: artifact_ghostly_orb_purple += 1
+            show:
+          - set: coin -= 2
+            show:
+          - goto: ..
+      - choice: money
+        text: Offer to sell it back for a ton of money
+        cost: 1 artifact_ghostly_orb_purple
+        shown: 345 coin
+        effects:
+          - He laughs and tells you, "Tricky little girl aren't you? Even if I had that amount of money it wouldn't be enough to buy the orb back. I'd recommend you just hold onto it."
+          - (You get your items back)
+          - set: artifact_ghostly_orb_purple += 1
+            show:
+          - set: coin += 345
+            show:
+          - goto: ..
+      - choice: okay
+        text: Nod, but don't offer it back
+        effects: ..

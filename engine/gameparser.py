@@ -87,33 +87,37 @@ def open_game(game_name, curr_story_dir):
         "last_autosave": 0,
         "map": {},  # TODO: What was map again? I think it was the game object, probably need to implement this
         "story_data": {
-            "node_types": {},
+            "file_homes": set(),
+            "node_types": {}
         },
         "msg": {},  # Hacky way for things to communicate to gameloop
         "settings": {
+            "autocomplete": "on",
             "descriptiveness": "descriptive",
             "show_flavor_text": "once"
         },
         "story_points": {},
         "sub_stack": (), # A "stack" of bookmarks
         "vars": {},
+        "view_displayed_text": {"console": "", "game": ""}, # TODO: Rename to subview displayed text or something along those lines?
         "visits": {},
         "visits_choices": {}
     }
     state.update(copy.deepcopy(starting_state))
 
 
-def construct_game(node, curr_story_dir):
+def construct_game(node, curr_story_dir, address=()):
     if "_include" in node:
         for block_name, file_name in node["_include"].items():
             subgame = yaml.safe_load((curr_story_dir.parent / file_name).read_text())
             node[block_name] = copy.deepcopy(subgame)
+            state["story_data"]["file_homes"].add(address + (block_name,))
     if not "_meta" in node:
         node["_meta"] = {}
 
     for key, subnode in node.items():
         if isinstance(subnode, dict) and not key[0] == "_":  # Only recurse into sub-blocks
-            construct_game(subnode, curr_story_dir)  # Note: This can result in exponentially long games with the right setups...
+            construct_game(subnode, curr_story_dir, address + (key,))  # Note: This can result in exponentially long games with the right setups...
             # TODO: Smarter stitching that does not just duplicate everything
 
 
@@ -154,7 +158,7 @@ def add_flags(node):
             add_flags(subnode)
 
 
-def add_vars_with_address(game, state, node, address):  # TODO: Finish up so that it has the other extra features of vars too
+def add_vars_with_address(node, address):  # TODO: Finish up so that it has the other extra features of vars too
     if isinstance(node, list):  # In this case, the inner part of the node is just content
         return
 
@@ -249,10 +253,10 @@ def add_vars_with_address(game, state, node, address):  # TODO: Finish up so tha
     for tag, subnode in node.items():
         # Anything that's not a keyword must be a block right now
         if tag[0] != "_":
-            add_vars_with_address(game, state, subnode, address + (tag,))
+            add_vars_with_address(subnode, address + (tag,))
 
 
-def add_module_vars(state):
+def add_module_vars():
     # Add special variables
     state["vars"]["random"] = random
     state["vars"]["rand"] = lambda num: random.randint(1, num)
@@ -262,7 +266,7 @@ def add_module_vars(state):
     state["vars"]["pow"] = math.pow
 
 
-def remove_module_vars(state):
+def remove_module_vars():
     del state["vars"]["random"]
     del state["vars"]["rand"]
     del state["vars"]["math"]
@@ -296,7 +300,7 @@ def parse_node(node, context, address):
         if isinstance(node, str):
             # Try to eval the node to make sure it works
             # TODO: Add variable sensing
-            if not "no_parse_eval" in game["_meta"]:  # TODO: Local _meta tags repected
+            if not "no_parse_eval" in game["_meta"]:  # TODO: Make local _meta tags repected
                 expr_checker.check(node, collect_vars(state, address))
         elif isinstance(node, (int, float)):
             return  # Plain numerical expression
@@ -486,24 +490,33 @@ def parse_node(node, context, address):
                 if not mandatory_key in node:
                     print(f"\033[31mError:\033[0m Missing required tag {mandatory_key} at {address} node {node}")
                     raise MissingRequiredTagError()
-        for key, val in node.items():
+        
+        def parse_key():
             if "mandatory" in curr_rule and key in curr_rule["mandatory"]:
-                parse_node(
-                    node[key],
-                    curr_rule["mandatory"][key],
-                    address + (key,),
-                )
+                parse_node(node[key], curr_rule["mandatory"][key], address + (key,))
             elif "optional" in curr_rule and key in curr_rule["optional"]:
-                parse_node(
-                    node[key],
-                    curr_rule["optional"][key],
-                    address + (key,),
-                )
+                parse_node(node[key], curr_rule["optional"][key], address + (key,))
             elif "other" in curr_rule:
                 parse_node(node[key], curr_rule["other"], address + (key,))
             else:
                 print(f"\033[31mError:\033[0m Invalid tag {key} at address {address} node {node}")
                 raise InvalidTagError()
+
+        # Parse priority keys in order
+        priority_keys = {}
+        if "priority" in curr_rule:
+            if not isinstance(curr_rule["priority"], list):
+                print(f"\033[31mError:\033[0m The value for the 'priority' key of grammar rule {context} is not of type list")
+                raise GrammarParsingError()
+            for key in curr_rule["priority"]:
+                if key in node:
+                    priority_keys[key] = True
+                    parse_key()
+
+        # Parse other keys
+        for key in node.keys():
+            if key not in priority_keys:
+                parse_key()
     elif curr_rule["type"] == "list":
         if not isinstance(node, list):
             print(f"\033[31mError:\033[0m Expected list node at {address} node {node}")

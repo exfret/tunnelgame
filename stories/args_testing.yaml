@@ -1,0 +1,22 @@
+---
+_vars:
+  - test: 0
+_content:
+  - set: test += 1
+    show:
+  - choice: journal
+    args:
+      - selection:
+        options:
+          - rosalia
+          - starblossom
+    effects:
+      - switch: len(_args[0])
+        "7":
+          - Rosalia is cool.
+        "10":
+          - Starblossoms are cooler.
+  - choice: args
+    enforce: _args[0] == "hi"
+    effects:
+      - You typed "hi"

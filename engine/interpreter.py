@@ -20,63 +20,7 @@ def do_print(text, state, style={}):  # TODO: Move ansi code handling to view as
     config.view.print_text(text, style)
 
 
-def do_shown_var_modification(modification, state, symbol, game):  # TODO: Remove... Only used for "add" and "lose", which are defunct
-    amount_to_modify = 0
-    modification_var = ""
-    if modification.find("(") != -1 and modification.rfind(")") != -1:
-        modification_amount_spec = modification[modification.find("(") + 1 : modification.rfind(")")]
-
-        amount_to_modify = eval(modification_amount_spec, {}, utility.collect_vars(state))
-        modification_var = modification[modification.rfind(")") + 2 :]
-    else:
-        modification_specification = modification.split()
-        modification_amount_spec = modification_specification[0].split("-")
-        if len(modification_amount_spec) == 1:
-            amount_to_modify = int(modification_amount_spec[0])
-        else:
-            amount_to_modify = random.randint(int(modification_amount_spec[0]), int(modification_amount_spec[1]))
-        modification_var = modification_specification[1]
-
-    # Check if we're actually losing this amount
-    if symbol == "-":
-        amount_to_modify *= -1
-        symbol = ""  # The negative sign already shows up by virtue of it being a negative number
-
-    vars_by_name = utility.collect_vars_with_dicts(state)
-    vars_by_name[modification_var]["value"] += amount_to_modify
-    print(f"[{symbol}{amount_to_modify} {utility.localize(modification_var)}]")
-
-
-def eval_conditional(game, state, node):
-    vars_by_name = utility.collect_vars_with_dicts(state)
-
-    if isinstance(node, str):
-        return eval(node, {}, utility.collect_vars(state))
-    elif isinstance(node, list):  # Lists are automatically ANDS, unless they're part of an OR tag covered later
-        condition = True
-        for subnode in node:
-            if not eval_conditional(game, state, subnode):
-                return False
-        return True
-    elif isinstance(node, dict):
-        if "has" in node:
-            bag = vars_by_name[node["in"]]["value"]
-            amount = 1
-            if "amount" in node:
-                amount = node["amount"]
-
-            if node["has"] in bag and bag[node["has"]] >= amount:
-                return True
-            else:
-                return False
-        elif "or" in node:
-            for subnode in node["or"]:
-                if eval_conditional(game, state, subnode):
-                    return True
-            return False
-
-
-def step(game, state):
+def step():
     curr_view = config.view
     
     curr_addr = addressing.get_curr_addr()
@@ -104,13 +48,7 @@ def step(game, state):
 
     # Since this is an instruction, it must be a map
     # TODO: Verify this part of stories
-    if False and "add" in curr_node: # TODO: Remove
-        try:
-            do_shown_var_modification(curr_node["add"], state, "+", game)
-        except Exception:
-            # Just move on and do nothing if we get an exception, and print warning
-            print(f"WARNING: Exception occurred evaluating 'ADD' node at address {curr_addr}")
-    elif "back" in curr_node:
+    if "back" in curr_node:
         while True:
             if len(state["last_address_list"]) == 0:
                 break
@@ -139,8 +77,8 @@ def step(game, state):
 
         state["vars"] = {}
         gameparser.add_flags(game)
-        gameparser.add_vars_with_address(game, state, game, ())
-        gameparser.add_module_vars(state)
+        gameparser.add_vars_with_address(game, ())
+        gameparser.add_module_vars()
 
         # Add back "global" vars values
         for key, val in state["call_stack"][-1]["vars"].items():
@@ -155,6 +93,16 @@ def step(game, state):
             vars_by_name = utility.collect_vars_with_dicts(state)
 
             state["choices"][curr_node["choice"]] = {}
+
+            choice_args = []
+            if "args" in curr_node:
+                for arg in curr_node["args"]:
+                    pass # TODO: Remove this sort of args checking
+            
+            # By default there is nothing enforced
+            state["choices"][curr_node["choice"]]["enforce"] = "True"
+            if "enforce" in curr_node:
+                state["choices"][curr_node["choice"]]["enforce"] = curr_node["enforce"]
 
             missing_list = []
             modify_list = []
@@ -247,7 +195,7 @@ def step(game, state):
         exception_occurred = False
         condition_value = None  # Bool representing the end condition value
         try:
-            condition_value = eval_conditional(game, state, curr_node["if"])
+            condition_value = utility.eval_conditional(curr_node["if"])
         except Exception as e:
             exception_occurred = True
             print(f'Warning, exception "{e}" occurred while evaluating if condition. Skipping if statement.')
@@ -286,11 +234,6 @@ def step(game, state):
                 "value": 0,
             }
         vars_by_name[curr_node["into"]]["value"][curr_node["insert"]]["value"] += amount
-    elif False and "lose" in curr_node: # TODO: Remove!
-        try:
-            do_shown_var_modification(curr_node["lose"], state, "-", game)
-        except Exception:
-            print(f"WARNING: Exception occurred evaluating 'LOSE' node at address {curr_addr}")
     elif "modify" in curr_node:
         # TODO: Parse-time checks that this is a variable that can be modified (i.e.- it has a value)
         var_to_change = utility.eval_vars(curr_node["modify"])

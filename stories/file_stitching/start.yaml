@@ -1,12 +1,15 @@
+---
 _include:
-  house: file_stitching/house.yaml
+  house: house.yaml
 _content:
-  - gosub: house
-  - goto: child_block
+  - You're at the start.
+  - sub: house
+  - You returned to start.
+  - goto: "~"
+  #- goto: child_block
 child_block:
   _include:
-    house: file_stitching/house.yaml
+    house: house.yaml
   _content:
     - You're in child block.
-    - gosub: house
-    - goto: /house
+    - sub: house

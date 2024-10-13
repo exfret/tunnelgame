@@ -15,6 +15,8 @@ feedback_msg = {
     "run_instr_failed": "Warning: Run statement failed, returning to main game.",
     "could_not_load_autosave": "Could not revert to autosave",
     "completion_not_supported": "This story doesn't support completion percentage.",
+    "autocomplete_no_possibilities": "No possibilities for autocompleting invalid command.",
+    "autocomplete_multiple_possibilities": "Multiple possibilities for autocompleting invalid command.",
     "define_no_name_given": "Must give a name for the macro.",
     "define_successful": "Macro successfully bound.",
     "exec_no_story_given": "Must give path to story to execute.",
@@ -22,7 +24,7 @@ feedback_msg = {
     "exec_error_running_game": "Error occurred while running game. Changes to state may have still occurred. Resuming outer game.",
     "goto_invalid_address_given": "Incorrect address given.",
     "goto_no_address_given": "Must give an address.",
-    "help": "Valid commands are 'define', 'exit', 'goto', 'help', 'info', 'inspect', 'load', 'repeat', revert', 'save', 'set', and 'settings', and 'undefine'.",
+    "help": "Valid commands are 'clear', 'define', 'exec', 'exit', 'goto', 'help', 'info', 'input', 'inspect', 'load', 'repeat', revert', 'save', 'set', 'settings', and 'undefine'.",
     "info_options": "Valid options for info are 'actions', 'choices', 'completion', 'macros', 'vars', 'word_count', and 'words_seen'.",
     "info_invalid_option": "Invalid option given for info. Type 'info' for valid options.",
     "inspect_no_variable_given": "Must give a variable to print the value of.",
@@ -40,7 +42,8 @@ feedback_msg = {
     "set_invalid_variable_given": "Invalid variable given to set value of.",
     "set_command_successful": "Successfully set variable to new value.",
     "settings_no_setting_given": "Must give a setting to give a new value to or test the current value of. Here is a list of settings:",
-    "settings_descriptiveness_invalid_val": "That's not an allowed value of descriptiveness. Allowed values are 'descriptive', 'moderate', and 'minimal.'",
+    "settings_autocomplete_invalid_val": "That's not an allowed value of descriptiveness. Allowed values are 'on' and 'off'.'",
+    "settings_descriptiveness_invalid_val": "That's not an allowed value of descriptiveness. Allowed values are 'descriptive', 'moderate', and 'minimal'.",
     "settings_flavor_invalid_val": "That's not an allowed value of show_flavor_text. Allowed values are 'always', 'once', and 'never'.",
     "undefine_no_macro_given": "No macro given to undefine.",
     "undefine_invalid_macro_given": "Invalid macro given.",
@@ -48,19 +51,26 @@ feedback_msg = {
     "max_macro_depth_exceeded": "Error: maximum macro expansion depth exceeded. Make sure there are no circular macro definitions.",
     "command_not_supported": "This command is not supported by the current view.",
     "choice_missing_requirements": "Missing requirements.",
+    "choice_enforce_false": "You can't make this choice.",
     "unrecognized_command": "Unrecognized command/choice. Type 'help' for commands or 'choices' for a list of choices.",
     "default": "Error: Invalid feedback message key.",
 }
 
 old_print = print
 
-def print(text=""):
+# Valid views are game and console
+# Only game is currently implemented (everything else is just "console")
+def print(text="", view=None):
     # Having __null__ in the string indicates it should not be printed
     # TODO: Some way to escape __null__ like with a backslash?
     if isinstance(text, str) and "__null__" in text:
         return
-
+    
+    if view is not None and view in state["view_displayed_text"]:
+        # TODO: Some sort of warning if view is not in state["view_displayed_text"]
+        state["view_displayed_text"][view] += str(text) + "\n"
     state["displayed_text"] += str(text) + "\n"
+
     old_print(text)
 
 
@@ -88,37 +98,60 @@ class CLIView:
     def __init__(self):
         pass
 
+
     ######################################################################
     # Miscellaneous
     ######################################################################
 
+
     # Clears console and story view
-    def clear(self, dont_reset_displayed_text = False):
+    def clear(self, dont_reset_displayed_text=False):
         if not dont_reset_displayed_text:
             state["displayed_text"] = ""
-        os.system("clear")
+            
+            for key in state["view_displayed_text"].keys():
+                state["view_displayed_text"][key] = ""
+
+        # Clears console with ansi code
+        old_print("\033[H\033[J", end="")
+
+    
+    # Sets the displayed text to just be the text from one display
+    def set_displayed_text(self, view):
+        if view in state["view_displayed_text"]:
+            state["displayed_text"] = state["view_displayed_text"][view]
+
 
     # Reprints displayed text for save/loads
-    def print_displayed_text(self):
+    def print_displayed_text(self, view=None, add_save_text=False):
         old_print(state["displayed_text"], end="")
-    
+
+        # Whether to print a mock "save text" since the "Save complete!" text isn't saved
+        if add_save_text:
+            self.print_feedback_message("save_completed")
+
+
     ######################################################################
     # Story board
     ######################################################################
 
+
     def print_flavor_text(self, text):
-        self.print_text(text)
+        self.print_text(text, view="game")
+
 
     def print_separator(self):
-        print("-" * 90 + "\n")
+        print("-" * 90 + "\n", view="game")
+
 
     def print_table(self, tbl_to_display):
         border = f"+-{'-' * len(tbl_to_display[0])}-+"
-        print(border)
+        print(border, view="game")
         for row in tbl_to_display:
             row = map(str, row)
-            print(f"| {''.join(row)} |")
-        print(border)
+            print(f"| {''.join(row)} |", view="game")
+        print(border, view="game")
+
 
     def print_text(self, text, style=""):
         ansi_code = "\033[0m"
@@ -127,16 +160,13 @@ class CLIView:
 
         string_to_print = utility.format.vformat(text, (), utility.collect_vars(state))  # TODO: Exceptions in case of syntax errors
         string_to_print = parse_text(string_to_print)
-        print(ansi_code + textwrap.fill(string_to_print, 100) + "\033[0m\n")
+        print(ansi_code + textwrap.fill(string_to_print, 100) + "\033[0m\n", view="game")
+
 
     ######################################################################
     # Stats board
     ######################################################################
 
-    def print_stat_change(self, text):
-        displayed_text = text + "\n"
-        state["displayed_text"] += displayed_text + "\n"
-        print(displayed_text)
 
     def print_var_modification(self, text_to_show_spec):
         operation_text = None
@@ -148,9 +178,11 @@ class CLIView:
         elif text_to_show_spec["op"] == "set":
             print(f"[Set {text_to_show_spec['var']['locale']} to {text_to_show_spec['amount']}]\n")
 
+
     ######################################################################
     # Console
     ######################################################################
+
 
     def print_choices(self, display_actions=False):
         # Choices now have cost_spec, req_spec, and shown_spec
@@ -228,8 +260,10 @@ class CLIView:
                 missing_text = missing_text[:-2]
                 print(missing_text + "\033[0m")
 
+
     def print_completion_percentage(self, percentage):
         print(f"Completed {(100 * percentage):.1f}% of the story!")
+
 
     def print_feedback_message(self, msg_type, dont_save = False):
         if dont_save:
@@ -243,6 +277,7 @@ class CLIView:
             else:
                 print(feedback_msg[msg_type])
     
+
     def print_macros(self):
         if len(state["command_macros"].items()) == 0:
             print("No macros defined.")
@@ -251,29 +286,45 @@ class CLIView:
         for macro_name, macro_def in state["command_macros"].items():
             print(macro_name + ": " + " ".join(macro_def))
     
+
     def print_num_words(self, num_words):
         print(num_words)
+
 
     def print_settings(self):
         displayed_text = ""
         for key in state["settings"].keys():
             print(f" * {key}")
 
+    
+    def print_settings_autocomplete_get(self):
+        print(f"Allowed values are 'on' and 'off'. The current value of this setting is '{state['settings']['autocomplete']}'.")
+
+
+    def print_settings_autocomplete_set(self, new_value):
+        print(f"Set autocomplete to '{new_value}'.")
+
+
     def print_settings_descriptiveness_get(self):
         print(f"Allowed values are 'descriptive', 'moderate', and 'minimal'. The current value of this setting is '{state['settings']['descriptiveness']}'.")
 
+
     def print_settings_descriptiveness_set(self, new_value):
-        print(f"Set descriptiveness to '{new_value}'")
+        print(f"Set descriptiveness to '{new_value}'.")
+
 
     def print_settings_flavor_text_get(self):
         print(f"Allowed values are 'always', 'once', and 'never'. The current value of this setting is '{state['settings']['show_flavor_text']}'.")
 
+
     def print_settings_flavor_text_set(self, new_value):
-        print(f"Set show_flavor_text to '{new_value}'")
+        print(f"Set show_flavor_text to '{new_value}'.")
+
 
     def print_var_value(self, var_value):
         print(var_value)
     
+
     def print_vars_defined(self):
         var_names = {}
 
@@ -287,10 +338,13 @@ class CLIView:
         for name in sorted(var_names):
             print(name)
 
+
     def get_input(self) -> str:
-        old_print()
+        old_print() # Add a new line
         command_string = input("> ")
-        old_print()  # Add a new line
+        old_print()
+        state["displayed_text"] += "\n> " + command_string + "\n\n"
+
         command = command_string.split()
         return command
 

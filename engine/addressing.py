@@ -1,4 +1,8 @@
-from engine.config import *
+from engine import config
+
+
+game = config.game
+state = config.state
 
 
 class InvalidAddressError(Exception):
@@ -214,5 +218,13 @@ def parse_addr_from_block(block_addr, path):
         return parse_addr_from_block(block_addr[:-1], path)
     elif index[0] == "_":
         raise InvalidAddressError("Attempt to index into non-block address.")
+    elif index[0] == "~": # Corresponds to root of a given file
+        while True:
+            if block_addr in state["story_data"]["file_homes"] or len(block_addr) == 0:
+                break
+            else:
+                block_addr = block_addr[:-1]
+
+        return parse_addr_from_block(block_addr, path)
     else:
         return parse_addr_from_block(block_addr + (index,), path)

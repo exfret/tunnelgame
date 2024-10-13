@@ -29,8 +29,6 @@ training:
       - The next day, George teaches you how to pluck the small leaves from the red flower for use in teas.
       - set: inv_rosalia += skill_gather_rosalia
         show:
-      - set: skill_gather_rosalia += 1
-        show:
       - Then, you pack up and head home.
       - choice: next
         effects: return
@@ -97,15 +95,47 @@ training:
   third:
     depart:
       - sub: /logic/time
-      - On the way to the Tunnel, you and George pass a merchant moving wares from the City to the town in which the orphanage is located, Lokton. She's lugging a ton of stuff.
+      - On the way to the Tunnel, you and George pass a scruffy merchant with a long, black beard moving wares from the City to the town in which the orphanage is located, Lokton. He's lugging a ton of stuff.
       - choice: offer
         text: Offer some pennies for the large glass sphere that the merchant is holding
         cost: 2 coin
+        shown: 1 artifact_ghostly_orb_purple
         effects:
-          - She happily parts with it. "I was told this would be very useful, but so far it's only been weighing me down." She says.
+          - flag: tunnel_training_third_merchant_bought_glass_sphere
+          - He happily parts with it. "I was told this would be very useful, but so far it's only been weighing me down." He says.
           - goto: camp
       - choice: ignore
         text: Move on
         effects: camp
     camp:
-      - pass:
+      - if: knowledge_starblossom
+        then:
+          - As you venture into the Tunnel, you see a starblossom. Its leaves see to be shimmering. Maybe it's special?
+          - flag: layer_1_found_starblossom
+        else:
+          - You pass a shimmering plant but don't know what to make of it.
+      - This time, George lets you decide what to gather.
+      - choice: rosalia
+        text: Gather rosalia
+      - choice: petunal
+        text: Gather petunal blossoms
+    rosalia:
+      - You and George both gather plenty of rosalia.
+      - set: inv_rosalia += skill_gather_rosalia
+        show:
+      - goto: return
+    petunal:
+      - You're more productive this time and manage to gather 3 petunal bushels.
+      - set: inv_petunal += 3
+        show:
+      - sub: /logic/time
+      - goto: return
+    return:
+      - You head back home after a productive trip.
+      - (Unlocked Town)
+      - (Unlocked Market)
+      - (Unlocked General Store)
+      - flag: unlock_town
+      - flag: unlock_town_market
+      - flag: unlock_town_market_general_store
+      - goto: /orphanage

@@ -28,8 +28,8 @@ def run(game_name, packaged=True, parent_game=None, parent_state=None, exec_bloc
             game.update(parent_game)
 
         gameparser.add_flags(game)
-        gameparser.add_vars_with_address(game, state, game, ())
-        gameparser.add_module_vars(state)
+        gameparser.add_vars_with_address(game, ())
+        gameparser.add_module_vars()
         gameparser.parse_game()
     setup_game()
 
@@ -54,17 +54,17 @@ def run(game_name, packaged=True, parent_game=None, parent_state=None, exec_bloc
                     state["vars"][var_key][var_name] = var
 
     def save_game(save_slot):
-        gameparser.remove_module_vars(state)
+        gameparser.remove_module_vars()
         (config.saves / save_slot).with_suffix(".pkl").write_bytes(pickle.dumps(state))
-        gameparser.add_module_vars(state)
+        gameparser.add_module_vars()
 
-    def load_game(load_slot):
+    def load_game(load_slot, add_save_text=False):
         contents = pickle.loads((config.saves / load_slot).with_suffix(".pkl").read_bytes())
         state.clear()
         state.update(contents)
-        gameparser.add_module_vars(state)
+        gameparser.add_module_vars()
         curr_view.clear(True) # True doesn't reset saved text
-        curr_view.print_displayed_text()
+        curr_view.print_displayed_text(add_save_text=add_save_text)
 
     def make_choice(new_addr, command=["start"], choice={}):
         inj_list = []
@@ -80,17 +80,12 @@ def run(game_name, packaged=True, parent_game=None, parent_state=None, exec_bloc
         if not is_action:
             state["choices"] = {}
 
-        # Populate the state vars with args
-        state["vars"]["_args"] = [0] * 10000
-        for i, arg in enumerate(command[1:]):
-            state["vars"]["_args"][i] = arg
-
         if not is_action:
             curr_view.clear()
 
         num_steps = 0
         while True:
-            while interpreter.step(game, state):
+            while interpreter.step():
                 num_steps += 1
                 if num_steps >= config.max_num_steps:
                     try:
@@ -102,7 +97,7 @@ def run(game_name, packaged=True, parent_game=None, parent_state=None, exec_bloc
             if "signal_run_statement" in state["msg"] and state["msg"]["signal_run_statement"]:
                 state["msg"]["signal_run_statement"] = False
                 # Store state, game, and view
-                gameparser.remove_module_vars(state)
+                gameparser.remove_module_vars()
 
                 temp_game = copy.deepcopy(game)
                 temp_state = copy.deepcopy(state)  # TODO: Store view!
@@ -117,7 +112,7 @@ def run(game_name, packaged=True, parent_game=None, parent_state=None, exec_bloc
                 state.clear()
                 state.update(temp_state)
 
-                gameparser.add_module_vars(state)
+                gameparser.add_module_vars()
 
                 curr_view.clear()
             else:
@@ -188,6 +183,33 @@ def run(game_name, packaged=True, parent_game=None, parent_state=None, exec_bloc
         if len(command) == 0:
             continue
 
+        # Autocomplete
+        if state["settings"]["autocomplete"] == "on":
+            autocomplete_possibilities = set()
+            for built_in_command in {"clear", "define", "exec", "exit", "goto", "help", "info", "input", "inspect", "load", "repeat", "revert", "save", "set", "settings", "undefine"}:
+                if command[0] == built_in_command:
+                    autocomplete_possibilities = False
+                    break
+                elif built_in_command.startswith(command[0]):
+                    autocomplete_possibilities.add(built_in_command)
+            if autocomplete_possibilities is not False:
+                for choice_command in state["choices"]:
+                    if command[0] == choice_command:
+                        autocomplete_possibilities = False
+                        break
+                    elif choice_command.startswith(command[0]):
+                        autocomplete_possibilities.add(choice_command)
+            if autocomplete_possibilities is False:
+                pass
+            elif len(autocomplete_possibilities) == 0:
+                curr_view.print_feedback_message("autocomplete_no_possibilities")
+                continue
+            elif len(autocomplete_possibilities) == 1:
+                command[0] = next(iter(autocomplete_possibilities))
+            elif len(autocomplete_possibilities) > 1:
+                curr_view.print_feedback_message("autocomplete_multiple_possibilities")
+                continue
+
         # Check for macros first so that they can be reversed if needed
         if command[0] == "define":
             if len(command) < 2:
@@ -228,7 +250,12 @@ def run(game_name, packaged=True, parent_game=None, parent_state=None, exec_bloc
         if macro_depth >= config.max_macro_depth:
             continue
 
-        if command[0] == "exec":
+        if command[0] == "clear":
+            curr_view.clear(True)
+            curr_view.set_displayed_text("game")
+            curr_view.print_displayed_text()
+            curr_view.print_choices()
+        elif command[0] == "exec":
             # Note: Favor specific statements like "set" over doing an exec, this is more for show than anything
             # Enters a "ghost game" with added exec statements, then returns, keeping some modifications to state
 
@@ -237,7 +264,7 @@ def run(game_name, packaged=True, parent_game=None, parent_state=None, exec_bloc
                 continue
 
             old_game = copy.deepcopy(game)
-            gameparser.remove_module_vars(state)
+            gameparser.remove_module_vars()
             old_state = copy.deepcopy(state)
 
             try:
@@ -247,14 +274,14 @@ def run(game_name, packaged=True, parent_game=None, parent_state=None, exec_bloc
                 game.update(old_game)
                 state.clear()
                 state.update(old_state)
-                gameparser.add_module_vars(state)
+                gameparser.add_module_vars()
             except:
                 # Need to restor game/state before printing feedback message
                 game.clear()
                 game.update(old_game)
                 state.clear()
                 state.update(old_state)
-                gameparser.add_module_vars(state)
+                gameparser.add_module_vars()
                 curr_view.print_feedback_message("exec_error_running_game")
             
             curr_view.clear(True)
@@ -337,7 +364,7 @@ def run(game_name, packaged=True, parent_game=None, parent_state=None, exec_bloc
                 curr_view.print_feedback_message("load_no_file_given")
                 continue
             try:
-                load_game(command[1])
+                load_game(command[1], add_save_text=True)
             except FileNotFoundError:
                 curr_view.print_feedback_message("load_invalid_file_given")
         elif command[0] == "repeat":
@@ -365,7 +392,7 @@ def run(game_name, packaged=True, parent_game=None, parent_state=None, exec_bloc
             history = state["history"]
             state.clear()
             state.update(history.pop(0))
-            gameparser.add_module_vars(state)
+            gameparser.add_module_vars()
             state["history"] = history
 
             curr_view.clear(True)
@@ -399,7 +426,15 @@ def run(game_name, packaged=True, parent_game=None, parent_state=None, exec_bloc
                 curr_view.print_feedback_message("settings_no_setting_given")
                 curr_view.print_settings()
             else:
-                if command[1] == "show_flavor_text":
+                if command[1] == "autocomplete":
+                    if len(command) < 3:
+                        curr_view.print_settings_autocomplete_get()
+                    elif command[2] in {"on", "off"}:
+                        state["settings"]["autocomplete"] = command[2]
+                        curr_view.print_settings_autocomplete_set(command[2])
+                    else:
+                        curr_view.print_feedback_message("settings_autocomplete_invalid_val")
+                elif command[1] == "show_flavor_text":
                     if len(command) < 3:
                         curr_view.print_settings_flavor_text_get()
                     elif command[2] == "always" or command[2] == "once" or command[2] == "never":
@@ -417,10 +452,17 @@ def run(game_name, packaged=True, parent_game=None, parent_state=None, exec_bloc
                         curr_view.print_feedback_message("settings_descriptiveness_invalid_val")
         elif command[0] in state["choices"]:
             choice = state["choices"][command[0]]
-            if not ("missing" in choice):
+            if "enforce" not in choice:
+                choice["enforce"] = "True"
+            if "missing" not in choice:
                 choice["missing"] = []
-            if not ("modifications" in choice):
+            if "modifications" not in choice:
                 choice["modifications"] = []
+            
+            # Populate the state vars with any given args
+            state["vars"]["_args"] = [0] * 10000
+            for i, arg in enumerate(command[1:]):
+                state["vars"]["_args"][i] = arg
             
             # Unfinished code, I should have committed before writing this since it started requiring large-scale changes that I wasn't ready to make
             #def find_modifications_and_missing(choice, spec_type):
@@ -435,6 +477,8 @@ def run(game_name, packaged=True, parent_game=None, parent_state=None, exec_bloc
 
             if len(choice["missing"]) > 0:
                 curr_view.print_feedback_message("choice_missing_requirements")
+            elif not utility.eval_conditional(choice["enforce"], choice["choice_address"]):
+                curr_view.print_feedback_message("choice_enforce_false")
             else:
                 # First, save the state in an autosave after every 20 choices
                 state["last_autosave"] += 1
@@ -442,9 +486,9 @@ def run(game_name, packaged=True, parent_game=None, parent_state=None, exec_bloc
                     state["last_autosave"] = 0
                     save_game("_autosave")
 
-                gameparser.remove_module_vars(state)
+                gameparser.remove_module_vars()
                 state_to_save = copy.deepcopy(state)
-                gameparser.add_module_vars(state)
+                gameparser.add_module_vars()
                 del state_to_save["history"]
                 state["history"] = [state_to_save,] + state["history"]
                 if len(state["history"]) > 10:
@@ -459,7 +503,7 @@ def run(game_name, packaged=True, parent_game=None, parent_state=None, exec_bloc
 
                         var_ref["value"] += modification["amount"]  # TODO: Print modifications
 
-                if not choice["address"] in state["visits_choices"]:
+                if choice["choice_address"] not in state["visits_choices"]:
                     state["visits_choices"][choice["choice_address"]] = 0
                 state["visits_choices"][choice["choice_address"]] += 1
 

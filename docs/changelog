@@ -1,8 +1,16 @@
-2024/10/11
-- Worked on abstract version, added up to third training
+2024/10/12 (1k words - ?)
+- Removed some old extraneous passing of state and game
+- Addressing to the root of a file rather than the whole story
+- Added autocomplete (sorta)
+- Saves now also save input text
+- Added enforceable conditions that are checked before making a choice
 
-2024/10/7
-- Started abstract version
+2024/10/11 (0k words - 1k words)
+- Worked on abstract version, added up to third training
+- Added "clear" command
+
+2024/10/7 (0k words - 0k words)
+- Started abstract version of tunnel story
 
 2024/10/6
 - exec commands

@@ -4,6 +4,11 @@ _content:
 rooms:
   _content:
     - You stand in the hallway where the orphanage bedrooms are. There are 7 bedrooms, and as usual, they're all full.
+    - if: unlock_town
+      then:
+        - choice: town
+          text: Leave to town
+          effects: /town
     - choice: common
       text: Go to the commons hallway on the right
     - choice: lily
@@ -125,20 +130,20 @@ common:
       then:
         - choice: botany
           text: Study Botany I
-          cost: 3 inv_rosalia
+          cost: 4 inv_rosalia
           effects:
             - flag: researched_botany_1
             - sub: /logic/time
             - This book teaches about Starblossoms, a flower with large, broad petals shaped like a 5-pointed star. It is perpetually in bloom and valued for its beauty. A special tool called a SHTG2 is required to harvest it due to its deep roots.
             - flag: knowledge_starblossom
             - The book also teaches you better gathering methods for rosalia.
-            - set: skill_gather_rosalia += 3
+            - set: skill_gather_rosalia += 1
             - goto: .
     - if: not researched_writing_1
       then:
         - choice: writing
           text: Study Writing I
-          cost: 4 inv_rosalia
+          cost: 3 inv_rosalia
           effects:
             - flag: researched_writing_1
             - flag: unlock_journal

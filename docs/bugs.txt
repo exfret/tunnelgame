@@ -1,1 +1,3 @@
 - The goto command occasionally doesn't take into account last address?
+  - Note: I think that it doesn't reset the last address var
+- The console display clearing doesn't work consistently when it's small

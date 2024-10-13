@@ -146,6 +146,34 @@ def eval_vars(text):
     return eval(dereference_text(text), {}, collect_vars_with_dicts(state))
 
 
+def eval_conditional(node, address=None):
+    vars_by_name = collect_vars_with_dicts(state, address)
+
+    if isinstance(node, str):
+        return eval(node, {}, collect_vars(state, address))
+    elif isinstance(node, list):  # Lists are automatically ANDS, unless they're part of an OR tag covered later
+        for subnode in node:
+            if not eval_conditional(subnode, address):
+                return False
+        return True
+    elif isinstance(node, dict):
+        if "has" in node:
+            bag = vars_by_name[node["in"]]["value"]
+            amount = 1
+            if "amount" in node:
+                amount = node["amount"]
+
+            if node["has"] in bag and bag[node["has"]] >= amount:
+                return True
+            else:
+                return False
+        elif "or" in node:
+            for subnode in node["or"]:
+                if eval_conditional(subnode, address):
+                    return True
+            return False
+
+
 def set_value(var, new_val):
     # TODO: Throw exceptions if we try to set a var without value
     if "value" in var:

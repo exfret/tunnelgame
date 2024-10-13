@@ -1,14 +1,25 @@
 Currently:
+  - Get rid of passing game and state everywhere
   - Working on expanding lemeny version
-  - Changed autosave name to _autosave (test)
     - Note: allow exec'ing a given file
-    - Try statements on run?
+    - "Try" statements on run?
     - Allow story to be given that's exec'd (have to test for story's existence)
     - Undo storypoint modifications (since they're not named like they should be...)
 
 Big Todo:
   - UI
 
+168. Ability to play as multiple people at once
+167. Investigate that headers seem to be running after everything else
+166. Connectivity tester that tests if there are gotos from a block to every other block in the story or at least specified blocks
+165. Test on windows computer
+164. Warnings at parse time for possibly unintended things
+163. Move eval conditional to utility from interpreter
+162. Catch exceptions for any errors from expressions
+161. Think about whether to do type checking in expressions
+160. An interrupt for repeat/input commands when they're taking too long
+159. Test speed of program
+158. Named storypoints
 157. Goto commands don't seem to be resetting the address
 156. Label commands that can be goto'd rather than needed whole new blocks
 155. Tags for keeping track of people/places/things etc.
@@ -67,7 +78,6 @@ Big Todo:
 100. Going back with story re-running
 99. Make headers/footers proper blocks too
 98. Execute command for executing instructions from command console (more flexibility with changing state, etc.)
-97. Separator instruction
 96. Local flags
 95. "Disable-able" choices
 94. Make _footer's back into distinguished blocks not macros (or maybe a special type of block)
@@ -77,29 +87,24 @@ Big Todo:
 89. Fix gameparser for requirement specifications
 88. Make sure "help" string is up to date
 87. Change "stop" to "wait" statement? Maybe "pause". Make wait keep execution stack and stop get rid of it. How to do headers?
-85. Use python ast module to check for undefined variables
-81. Error on choices that are more than one word
+81. Error on choices in story that are more than one word
 80. Iteration loops (iterate through a list and do something for each thing in the list)
 77. _args overhaul to use list of variable dicts, not just numbers
 75. Should "stops" deconstruct the call stack like they do now? In general, how could we do choices within a gosub?
 74. Write a story that allows the reader to write their own story, just for the meta-ness nerd cred
-73. Test for substrings of commands and if it applies do those
 70. Plural/gender/etc. localizations
 69. Override variable subscripting, turning variables into special dicts before being passed to eval
 68. World object that exists separately for each block (or even just a macro)
-65. Special addressing for the "root" block of a *file* rather than of the whole story
 63. Check that insert commands and such are only used with bags
-59. Save current text printed to terminal when file saved
-58. SPILL command for when we do want to "spill" from an effects section to the parent area
-56. Disallow random intervals in choice specs?
-47. no_flavor alternative text
-46. Temp variables that are temporary/only relevant within a block, then they're not set anymore/block variables
-45. Better gameparser interaction with _args
-43. Automatic log of variable changes
-41. Pausing on repeat commands when, for example, you no longer have the materials for something, so it doesn't just spam console (maybe also a "max" option)
-26. Cost checking with passed args
+58. SPILL instruction for when we do want to "spill" from an effects section to the parent area
 
 DONE
+65. Special addressing for the "root" block of a *file* rather than of the whole story
+97. Separator instruction
+73. Test for substrings of commands and if it applies do those
+85. Use python ast module to check for undefined variables
+59. Save current input text printed to console when file saved
+45. Better interaction with _args (with enforce tags)
 61. Return command for gosub
 20. Player-defined macros via command line
 139. Info command, with ability to inspect all vars in current scope
@@ -147,6 +152,11 @@ DONE
 1. Checking that story is formatted correctly
 
 NOT DOING
+56. Disallow random intervals in choice specs (maybe once I get warnings, then it can just be a warning)
+46. Temp variables that are temporary/only relevant within a block, then they're not set anymore/block variables
+26. Cost checking with passed args (can be done with enforced conditions now)
+47. no_flavor alternative text
+41. Pausing on repeat commands when, for example, you no longer have the materials for something, so it doesn't just spam console (maybe also a "max" option)
 21. Setting for showing non-taken choices or not
 18. Autocomplete for commands
 64. Check "extra newline" with consecutive print statements
@@ -162,6 +172,7 @@ NOT DOING
 2. Unify actions and choices with actions as just "default choices"
 
 I FORGET WHAT THIS MEANS
+43. Automatic log of variable changes
 67. Actually write the tests
 13. Allow specification file for author-defined commands
 53. Automatic checking for interpreter functions

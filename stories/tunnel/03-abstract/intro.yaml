@@ -17,12 +17,13 @@ _content:
           - command: input camp, leave, leave, george, train
   - You are Lily.
   - Right now, you are only known as an orphan.
-  - However, you are sure that one day, you will be known as the greatest adventurer into the Tunnel that there ever was!
+  - However, you are sure that one day, you will be known as the greatest Tunnel adventurer that there ever was!
   - choice: begin
     effects: orphanage
 _include:
   logic: logic.yaml
   orphanage: orphanage.yaml
+  town: town.yaml
   tunnel: tunnel.yaml
   world: world.yaml
 _vars:
@@ -39,6 +40,8 @@ _vars:
   # Keys/Other things that are flags but need to be shown
   - key_orphanage_courtyard: 0
     _locale: Orphanage Courtyard Key
+  - artifact_ghostly_orb_purple: 0
+    _locale: Purple Ghostly Orb
   # Skills
   - skill_gather_rosalia: 3
     _locale: Rosalia Gather Skill
