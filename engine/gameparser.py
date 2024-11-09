@@ -23,6 +23,10 @@ class InvalidTagError(Exception):
     pass
 
 
+class InvalidValueError(Exception):
+    pass
+
+
 class IncorrectTypeError(Exception):
     pass
 
@@ -53,7 +57,7 @@ class UndefinedVariableChecker(ast.NodeVisitor):
         try:
             tree = ast.parse(expression, mode="eval")
         except Exception:
-            print(f"\033[31mError:\033[0m Parsing error at for expression {expression}")
+            print(f"\033[31mError:\033[0m Parsing error for expression {expression}")
             raise WrongFormattingError()
         self.var_dict = var_dict
         self.visit(tree)
@@ -62,14 +66,15 @@ class UndefinedVariableChecker(ast.NodeVisitor):
 expr_checker = UndefinedVariableChecker()
 
 
-def open_game(game_name, curr_story_dir):
+def open_game(story_path):
     game.clear()
     state.clear()
-    contents = yaml.safe_load(curr_story_dir.read_text())
+    contents = yaml.safe_load(story_path.read_text())
     game.update(contents)
 
     # NOTE: Update exec command too!
     starting_state = {
+        "attached_blocks": [], # Attached blocks
         "bookmark": (),  # bookmark is a tuple of addresses, which are themselves tuples
         "call_stack": [],  # List of dicts with bookmarks and vars (TODO: Maybe do last_address_list and choices here too?)
         "command_buffer": [],
@@ -81,12 +86,16 @@ def open_game(game_name, curr_story_dir):
         "file_data": {
             "filename": "",
         },  # TODO: Include some sort of hash or name of game
+        "game": {}, # The current game object
         "history": [],
         "last_address": (),
         "last_address_list": [],
         "last_autosave": 0,
         "map": {},  # TODO: What was map again? I think it was the game object, probably need to implement this
-        "story_data": {
+        "story_data": { # NOTE: When adding to this, make sure to update move instruction
+             # dict of old address ("block uuid") to new address
+             # Used to modify content of blocks upon update
+            "block_moves": {}, # TODO: Not actually updated in move instruction yet
             "file_homes": set(),
             "node_types": {}
         },
@@ -104,21 +113,28 @@ def open_game(game_name, curr_story_dir):
         "visits_choices": {}
     }
     state.update(copy.deepcopy(starting_state))
+    state["game"] = game
 
 
-def construct_game(node, curr_story_dir, address=()):
+def construct_game(node, story_path, address=()):
     if "_include" in node:
         for block_name, file_name in node["_include"].items():
-            subgame = yaml.safe_load((curr_story_dir.parent / file_name).read_text())
+            subgame = yaml.safe_load((story_path.parent / file_name).read_text())
             node[block_name] = copy.deepcopy(subgame)
             state["story_data"]["file_homes"].add(address + (block_name,))
     if not "_meta" in node:
         node["_meta"] = {}
 
     for key, subnode in node.items():
-        if isinstance(subnode, dict) and not key[0] == "_":  # Only recurse into sub-blocks
-            construct_game(subnode, curr_story_dir, address + (key,))  # Note: This can result in exponentially long games with the right setups...
-            # TODO: Smarter stitching that does not just duplicate everything
+        if not key[0] == "_":  # Only recurse into sub-blocks
+            # Turn this block into a dict block if it isn't already
+            if isinstance(subnode, list):
+                node[key] = {
+                    "_content": subnode
+                }
+            else:
+                construct_game(subnode, story_path, address + (key,))  # Note: This can result in exponentially long games with the right setups...
+                # TODO: Smarter stitching that does not just duplicate everything
 
 
 def expand_macros(node):
@@ -180,6 +196,7 @@ def add_vars_with_address(node, address):  # TODO: Finish up so that it has the 
             var_value = None
             global_value = False
             locale = None
+            possible_values = None
 
             num_var_keys = 0
             for key, val in var.items():
@@ -197,6 +214,16 @@ def add_vars_with_address(node, address):  # TODO: Finish up so that it has the 
                         print(f"\033[31mError:\033[0m _locale is not of type string at {address} node {node}")
                         raise IncorrectTypeError()
                     locale = var["_locale"]
+                elif key == "_possible_values":
+                    if not isinstance(var["_possible_values"], list):
+                        print(f"\033[31mError:\033[0m _possible_values is not of type list at {address} node {node}")
+                        raise IncorrectTypeError()
+                    for value in var["_possible_values"]:
+                        # Check that values are terminal nodes
+                        if not isinstance(value, str) and not isinstance(value, bool) and not isinstance(value, int) and not isinstance(value, str):
+                            print(f"\033[31mError:\033[0m A possible value is not of terminal type at {address} node {node}")
+                            raise IncorrectTypeError()
+                        possible_values = var["_possible_values"]
                 elif key == "_type":
                     if not isinstance(var["_type"], str):
                         print(f"\033[31mError:\033[0m _type is not of type string at {address} node {node}")
@@ -247,7 +274,7 @@ def add_vars_with_address(node, address):  # TODO: Finish up so that it has the 
                 curr_ind = () * len(dims)
                 arr = get_arrs(curr_ind, dims)
 
-            state["vars"][address][var_name] = {"address": address, "locale": locale, "value": var_value, "global": global_value}
+            state["vars"][address][var_name] = {"address": address, "locale": locale, "possible_values": possible_values, "value": var_value, "global": global_value}
 
     # Recurse into all sub-blocks
     for tag, subnode in node.items():
@@ -284,8 +311,10 @@ def parse_node(node, context, address):
         state["visits"][address] = 0
 
     if context == "_addr":
-        # Try to access this address to ensure it's valid
-        addressing.parse_addr(address, node)
+        # TODO: Make local _meta tags respected here too
+        if not "no_addr_eval" in game["_meta"]:
+            # Try to access this address to ensure it's valid
+            addressing.parse_addr(address, node)
     elif context == "_addr_list":
         if not isinstance(node, str):
             print(f"\033[31mError:\033[0m _addr_list is not of type string at {address} node {node}")
@@ -316,6 +345,14 @@ def parse_node(node, context, address):
         if node[0] == "_" or len(node.split()) != 1:
             print(f"\033[31mError:\033[0m Id's can't start with an underscore or have whitespace at {address} node {node}")
             raise WrongFormattingError()
+    elif context == "_inject_position":
+        if not isinstance(node, str):
+            print(f"\033[31mError:\033[0m _inject_position is not of type string at {address} node {node}")
+            raise IncorrectTypeError()
+        
+        if node not in {"before", "after"}:
+            print(f"\033[31mError:\033[0m _inject_position is not a valid value at {address} node {node}")
+            raise InvalidValueError()
     elif context == "_num_expr":  # TODO: Is there a difference between this and _expr?
         if isinstance(node, (int, float)):
             pass

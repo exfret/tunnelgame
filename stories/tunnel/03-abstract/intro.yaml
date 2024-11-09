@@ -6,20 +6,27 @@ _content:
       # Skip to first training
       - if: int(_args[0]) >= 0
         then:
-          - command: input begin, leave, george, train
+          - command: input begin, george, train
       # Skip to second training
       - if: int(_args[0]) >= 1
         then:
-          - command: input well, next, leave, george, train
+          - command: input well, next, george, train
       # Skip to third training
       - if: int(_args[0]) >= 2
         then:
-          - command: input camp, leave, leave, george, train
+          - command: input camp, leave, george, train
+      # Skip to fourth training
+      - if: int(_args[0]) >= 3
+        then:
+          - command: input offer, rosalia, george, train
   - You are Lily.
   - Right now, you are only known as an orphan.
   - However, you are sure that one day, you will be known as the greatest Tunnel adventurer that there ever was!
   - choice: begin
     effects: orphanage
+  # Initialization stuff
+  - flag: clothes_owned_light_gray_plain
+  - flag: clothes_owned_dark_gray_plain
 _include:
   logic: logic.yaml
   orphanage: orphanage.yaml
@@ -29,14 +36,25 @@ _include:
 _vars:
   # Important
   - tunnel_pass: training
+    #_possible_values:
+    #  - training
   - time: 0
   - coin: 0
     _locale: Coin
+  - exp: 0
+    _locale: Experience
+  # Currencies
+  - inv_blue_coin: 0
+    _locale: Blue Coin
   # Inventory
   - inv_petunal: 0
     _locale: Petunal Blossoms
   - inv_rosalia: 0
     _locale: Rosalia
+  - inv_torch: 0
+    _locale: Torch
+  - inv_building_materials: 0
+    _locale: Building Materials
   # Keys/Other things that are flags but need to be shown
   - key_orphanage_courtyard: 0
     _locale: Orphanage Courtyard Key
@@ -47,8 +65,13 @@ _vars:
     _locale: Rosalia Gather Skill
   - skill_sneak: 0
     _locale: Sneakiness
-  # Misc.
-  - times_trained: 0
+  - skill_athleticism: 0
+    _locale: Athleticism
+  - skill_nimbleness: 0
+    _locale: Nimbleness
+  # Character
+  - curr_clothes: light_gray_plain
+  - curr_clothes_locale: light gray plain outfit
 _header:
   - if: unlock_journal
     then:
@@ -56,3 +79,7 @@ _header:
         action:
         effects:
           - goto: /world/journal
+  - choice: wonder
+    action:
+    effects:
+      - goto: /world/wonder

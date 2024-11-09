@@ -1,29 +1,42 @@
 ---
 _content:
-  - goto: rooms/lily
+  - goto: rooms
 rooms:
   _content:
     - You stand in the hallway where the orphanage bedrooms are. There are 7 bedrooms, and as usual, they're all full.
+    - if: _visits == 1
+      then:
+        - (You'll get the ability to visit more as you go).
+        - You should visit George to get some training in the Tunnel.
     - if: unlock_town
       then:
         - choice: town
           text: Leave to town
           effects: /town
-    - choice: common
-      text: Go to the commons hallway on the right
-    - choice: lily
-      text: Visit my room
+    - if: orphanage_rooms_george_trained or not orphanage_common_visited_beginning
+      then:
+        - choice: common
+          text: Go to the commons hallway on the right
+    - if: unlock_orphanage_lily_room
+      then:
+        - choice: lily
+          text: Visit my room
     - choice: george
       text: Visit George's room
     - if: unlock_orphanage_jaz_room
       then:
         - choice: jaz
           text: Visit Jaz's room
+    - if: unlock_orphanage_caroline_room
+      then:
+        - choice: caroline
+          text: Visit Caroline's room
   lily:
     # Your room will always be the "home base"
     _vars:
       - timestamp_bed_last_made: 0
     _content:
+      - storypoint:
       - You're in your room.
       - if: (time - timestamp_bed_last_made) < 3
         then:
@@ -40,6 +53,8 @@ rooms:
       - choice: leave
         text: Leave your room
         effects: ..
+      - choice: change
+        text: Change clothes
       - if: (time - timestamp_bed_last_made) >= 3
         then:
           - choice: make
@@ -49,17 +64,74 @@ rooms:
               - set: timestamp_bed_last_made = time
               - separator:
               - goto: .
+      - choice: look
+        text: Look around
+        effects:
+          - if: _visits == 1
+            then:
+              - Opposite the door, there is your bed, with a window on the wall above bringing in light from the courtyard. To the right of the door is a dresser, and then on the right far wall a table with a chair to study.
+              - There is barely enough room to sit down in the remaining space, and sometimes your feet dangle off the bed onto your desk, especially as you've grown older. But it's a place to live and that's enough.
+            else:
+              - The room is still as it was, your bed against the far wall with the window, your dresser next to your door, and your desk over on the right.
+          - goto: .
+    change:
+      - What would you like to change into?
+      - You are currently in your {curr_clothes_locale}.
+      - choice: stay
+        text: Stay in the same clothes you're wearing now
+        effects:
+          - goto: ..
+      - if: curr_clothes != "light_gray_plain" and clothes_owned_light_gray_plain
+        then:
+          - choice: light_gray
+            text: Light Gray Plain Outfit
+            effects:
+              - set: curr_clothes = "light_gray_plain"
+              - set: curr_clothes_locale = "light gray plain outfit"
+              - You change into your {curr_clothes_locale}.
+              - separator:
+              - goto: ..
+      - if: curr_clothes != "dark_gray_plain" and clothes_owned_dark_gray_plain
+        then:
+          - choice: dark_gray
+            text: Dark Gray Plain Outfit
+            effects:
+              - set: curr_clothes = "dark_gray_plain"
+              - set: curr_clothes_locale = "dark gray plain outfit"
+              - You change into your {curr_clothes_locale}.
+              - separator:
+              - goto: ..
+      - if: curr_clothes != "street_attire" and clothes_owned_street_attire
+        then:
+          - choice: street_attire
+            text: Street Attire
+            effects:
+              - set: curr_clothes = "street_attire"
+              - set: curr_clothes_locale = "street attire"
+              - You change into your {curr_clothes_locale}.
+              - separator:
+              - goto: .
   george:
     _content:
+      - storypoint:
+      - tag: george
       - George brushes back his ruffled brown hair.
-      - choice: leave
-        text: Leave George's room
-        effects: ..
+      - if: _visits == 1
+        then:
+          - He asks, "Are you ready to train?"
+      - if: _visits != 1
+        then:
+          - choice: leave
+            text: Leave George's room
+            effects: ..
       - if: tunnel_pass == "training"
         then:
           - choice: train
             text: Explore the Tunnel under George's supervision
-            effects: /tunnel/training
+            effects:
+              - flag: orphanage_rooms_george_trained
+              - goto: /tunnel/training
+      - tag: sock
       - choice: steal
         text: Steal a sock from George when he isn't looking
         require: 10 skill_sneak
@@ -67,6 +139,8 @@ rooms:
           - pass:
   jaz:
     _content:
+      - storypoint:
+      - tag: jaz
       - Jaz is wearing her usual mischievous grin on a face freckled similarly to yours. "Whatcha want, miss?"
       - choice: leave
         text: Leave Jaz's room
@@ -101,21 +175,64 @@ rooms:
                 - '"You''re nice."'
           - separator:
           - goto: .
+      - tag: sock
       - choice: steal
         text: Steal a sock from Jaz when she isn't looking
         require: 15 skill_sneak
         effects:
           - pass:
+  caroline:
+    _vars:
+      # Set to a negative number so that she'll be looking for a gift when she's unlocked
+      - time_last_gift: -100
+      - time_between_gifts: 10
+      - gift_num: 1
+    _content:
+      # Get the leave option out of the way now
+      - choice: leave
+        text: Leave Caroline's room
+        effects: ..
+      - if: _visits == 1
+        then:
+          - Caroline is a cheerful woman with long black hair. Her hair has strands that fall out a lot all over her room. She was cursed to forever have a child's mind. But she really likes playing with all the new stuff you get from the Tunnel, and watching that helps you learn/get experience.
+      - if: time - time_last_gift >= time_between_gifts
+        then:
+          - goto: gift
+        else:
+          - Caroline is still content with the last gift you gave her.
+    gift:
+      - Caroline waits in anticipation to see if you'll give her something.
+      - switch: gift_num
+        "1":
+          - choice: give
+            text: Give her a rosalia
+            cost: 1 inv_rosalia
+            shown: 5 exp
+            effects:
+              - She crushes up part of the dried leaf and smells it, then puts it on her tongue and let's it sit there.
+              - separator:
+              - goto: ..
+        _default:
+          - Wow, it seems there's nothing more she wants that you can give her actually!
 common:
   _content:
-    - You'll get access to more stuff here as you explore the Tunnel more.
+    - You're in the long commons hallways, a dusty passage that will only grow longer as you unlock more rooms here!
     - choice: rooms
       text: Go to the bedrooms on the left
+    - if: not orphanage_rooms_george_trained
+      then:
+        - flag: orphanage_common_visited_beginning
+        - Right now, it's empty.
+        - tag: ms_bee
+        - Ms. Bee, one of the orphanage supervisors (and a strict one at that!) stares you down. "Weren't you going exploring with George today?"
+        - You should probably go see George.
     - if: unlock_orphanage_study
       then:
         - choice: study
           text: Visit the study
   study:
+    - storypoint:
+    - tag: mabel
     - if: not met_mabel
       then:
         - flag: met_mabel
@@ -126,6 +243,7 @@ common:
     - choice: common
       text: Return to the commons hallway
       effects: ..
+    - tag: research
     - if: not researched_botany_1
       then:
         - choice: botany
@@ -138,14 +256,42 @@ common:
             - flag: knowledge_starblossom
             - The book also teaches you better gathering methods for rosalia.
             - set: skill_gather_rosalia += 1
+            - separator:
             - goto: .
     - if: not researched_writing_1
       then:
         - choice: writing
           text: Study Writing I
-          cost: 3 inv_rosalia
+          cost: 2 inv_rosalia
           effects:
             - flag: researched_writing_1
             - flag: unlock_journal
             - You unlocked the journal, which holds information about the world. Access it by typing 'journal'. You can see all hidden choices by typing 'info actions'.
+            - separator:
             - goto: .
+    - if: not researched_artifacts_1
+      then:
+        - choice: artifacts
+          text: Study Artifacts I
+          cost: 6 inv_rosalia
+          effects:
+            - flag: researched_artifacts_1
+            - You read about different artifacts that the Tunnel holds. These are powerful unique objects found only within the Tunnel. Most of the ones in layer 1 have already been dug out, but the most powerful artifacts are usually in the later layers.
+            - The book also discusses blue coins, which come from the Tunnel, unlike the common currency of coins which are manufactured in the Dome's salt flats. Many people think of blue coins as the superior currency and therefore will only accept those.
+            - In fact, you even find a blue in the book!
+            - set: inv_blue_coin += 1
+              show:
+            - separator:
+            - goto: .
+    - if: "False"
+      then:
+        - if: not researched_reading_1
+          then:
+            - choice: reading
+              text: Study Reading I
+              cost: 7 inv_rosalia
+              effects:
+                - flag: researched_reading_1
+                - You read about reading, and in the process you hone your skills so that more research is available!
+                - separator:
+                - goto: .

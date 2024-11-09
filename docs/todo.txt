@@ -1,4 +1,15 @@
 Currently:
+  - Possible values (just finished parsing, need to check that starting value is possible)
+
+  - Block moving
+    - New way to check for whether address id's work
+    - except tags with handling content for instructions that can raise errors
+    - Getting block metadata by id
+    - Deal with cyclic moves
+  - Migration function!
+  - Plenty of tests
+  - References to blocks so they can be in multiple spots at the same time?
+  
   - Get rid of passing game and state everywhere
   - Working on expanding lemeny version
     - Note: allow exec'ing a given file
@@ -9,6 +20,15 @@ Currently:
 Big Todo:
   - UI
 
+177. Templates with parameters?
+176. Inject into more things, to prevent copying text a lot
+175. More explicit "modify" instruction with more checks than I could do with "set" expressions
+174. "seed" command that forces the next few "random" values to prechosen values (doesn't actually seed generator)
+173. An "all" tag for injecting into choices
+172. Keep track of block permutations with block moving
+171. State settings for config constant changes like max_macro_depth
+170. Ponder custom editor UI (maybe I can move to a more graph-like block structure then)
+169. Think about whether to do inform-like interrupts (could also have interrupts on certain choices, or choices with certain tags, etc.)
 168. Ability to play as multiple people at once
 167. Investigate that headers seem to be running after everything else
 166. Connectivity tester that tests if there are gotos from a block to every other block in the story or at least specified blocks
@@ -18,7 +38,6 @@ Big Todo:
 162. Catch exceptions for any errors from expressions
 161. Think about whether to do type checking in expressions
 160. An interrupt for repeat/input commands when they're taking too long
-159. Test speed of program
 158. Named storypoints
 157. Goto commands don't seem to be resetting the address
 156. Label commands that can be goto'd rather than needed whole new blocks
@@ -99,6 +118,7 @@ Big Todo:
 58. SPILL instruction for when we do want to "spill" from an effects section to the parent area
 
 DONE
+159. Test speed of program (the printing is just slow in VSCode unfortunately)
 65. Special addressing for the "root" block of a *file* rather than of the whole story
 97. Separator instruction
 73. Test for substrings of commands and if it applies do those

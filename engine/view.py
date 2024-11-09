@@ -2,6 +2,7 @@ from flask import Flask, render_template, jsonify
 from flask_socketio import SocketIO
 import os
 import textwrap
+import time
 
 # Module imports
 from engine import addressing, config, utility
@@ -22,9 +23,12 @@ feedback_msg = {
     "exec_no_story_given": "Must give path to story to execute.",
     "exec_invalid_file_given": "Story to be loaded not found.",
     "exec_error_running_game": "Error occurred while running game. Changes to state may have still occurred. Resuming outer game.",
+    "flag_no_flag_given": "Must provide flag.",
+    "flag_invalid_flag": "Invalid flag given.",
+    "flag_set_successfully": "Flag set successfully",
     "goto_invalid_address_given": "Incorrect address given.",
     "goto_no_address_given": "Must give an address.",
-    "help": "Valid commands are 'clear', 'define', 'exec', 'exit', 'goto', 'help', 'info', 'input', 'inspect', 'load', 'repeat', revert', 'save', 'set', 'settings', and 'undefine'.",
+    "help": "Valid commands are 'clear', 'define', 'exec', 'exit', 'flag', 'goto', 'help', 'info', 'input', 'inspect', 'load', 'repeat', revert', 'save', 'set', 'settings', 'undefine', 'unflag'.",
     "info_options": "Valid options for info are 'actions', 'choices', 'completion', 'macros', 'vars', 'word_count', and 'words_seen'.",
     "info_invalid_option": "Invalid option given for info. Type 'info' for valid options.",
     "inspect_no_variable_given": "Must give a variable to print the value of.",
@@ -45,6 +49,9 @@ feedback_msg = {
     "settings_autocomplete_invalid_val": "That's not an allowed value of descriptiveness. Allowed values are 'on' and 'off'.'",
     "settings_descriptiveness_invalid_val": "That's not an allowed value of descriptiveness. Allowed values are 'descriptive', 'moderate', and 'minimal'.",
     "settings_flavor_invalid_val": "That's not an allowed value of show_flavor_text. Allowed values are 'always', 'once', and 'never'.",
+    "unflag_no_flag_given": "Must provide flag.",
+    "unflag_invalid_flag": "Invalid flag given.",
+    "unflag_set_successfully": "Flag unset successfully",
     "undefine_no_macro_given": "No macro given to undefine.",
     "undefine_invalid_macro_given": "Invalid macro given.",
     "undefine_successful": "Macro successfully unbound.",
@@ -153,14 +160,14 @@ class CLIView:
         print(border, view="game")
 
 
-    def print_text(self, text, style=""):
+    def print_text(self, text, style="", view="game"):
         ansi_code = "\033[0m"
         if style == "bold":
             ansi_code = "\033[1m"
 
         string_to_print = utility.format.vformat(text, (), utility.collect_vars(state))  # TODO: Exceptions in case of syntax errors
         string_to_print = parse_text(string_to_print)
-        print(ansi_code + textwrap.fill(string_to_print, 100) + "\033[0m\n", view="game")
+        print(ansi_code + textwrap.fill(string_to_print, 100) + "\033[0m\n", view=view)
 
 
     ######################################################################
@@ -423,48 +430,58 @@ class WebView:
         self.app = Flask(__name__)
         self.socketio = SocketIO(self.app, async_mode="eventlet")
         self.setup_routes()
-        self.socketio.run(self.app, port=5001, debug=True)
     
+
     def setup_routes(self):
         @self.app.route('/')
         def index():
             return render_template("index.html")
-        
+
         @self.app.route("/update", methods=["POST"])
         def update_page():
             return jsonify(message="HI")
+
 
     ######################################################################
     # Miscellaneous
     ######################################################################
 
+
     # Clears console and story view
     def clear(self, dont_reset_displayed_text = False):
         pass # TODO
+
 
     # Reprints displayed text for save/loads
     def print_displayed_text(self):
         pass # TODO
     
+
     ######################################################################
     # Story board
     ######################################################################
 
+
     def print_flavor_text(self, text):
         pass # TODO
+
 
     def print_separator(self):
         pass # TODO
 
+
     def print_table(self, tbl_to_display):
         pass # TODO
+
 
     def print_text(self, text, style=""):
         self.socketio.emit("print", {"text": text})
 
+
     ######################################################################
     # Stats board
     ######################################################################
+
 
     def print_stat_change(self, text):
         pass # TODO
@@ -472,27 +489,36 @@ class WebView:
     def print_var_modification(self, text_to_show_spec):
         pass # TODO
 
+
     ######################################################################
     # Console
     ######################################################################
 
+
     def print_choices(self, display_actions=False):
         pass # TODO
+
 
     def print_feedback_message(self, msg_type, dont_save = False):
         pass # TODO
 
+
     def print_settings(self):
         pass # TODO
+
 
     def print_settings_flavor_text_get(self):
         pass # TODO
 
+
     def print_settings_flavor_text_set(self, new_value):
         pass # TODO
+
 
     def print_var_value(self, var_value):
         pass # TODO
 
+
     def get_input(self) -> str:
+        return []
         pass # TODO

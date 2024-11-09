@@ -148,10 +148,17 @@ def make_bookmark(bookmark, addr, injections = []):
         partial_addr = partial_addr + (tag,)
         add_header(partial_addr)
 
+    # Before injections
     for inj in injections:
-        bookmark = bookmark + (inj,)
+        if inj["position"] == "before":
+            bookmark = bookmark + (inj["address"],)
     
     bookmark = bookmark + (addr,)
+
+    # After injections
+    for inj in injections:
+        if inj["position"] == "after":
+            bookmark = bookmark + (inj["address"],)
 
     return bookmark
 
@@ -166,7 +173,7 @@ def get_block_part(curr_addr, index=0):
         return get_block_part(curr_addr, index + 1)
 
 
-def parse_addr(curr_addr, addr_id):
+def parse_addr(curr_addr, addr_id, only_block_part=False):
     # Blocks are simply children of the root node with purely string addresses having leading underscores
     curr_addr = get_block_part(curr_addr, 0)
     path = tuple(addr_id.split("/"))
@@ -192,7 +199,12 @@ def parse_addr(curr_addr, addr_id):
 
     curr_addr = new_addr
 
-    if isinstance(node, list):
+    # If we're just trying to get a block, we can return that now
+    if only_block_part:
+        return curr_addr
+
+    # Otherwise, get the start of the instructions to execute
+    if isinstance(node, list): # Note: this if statement is now defunct because all blocks are converted into dict blocks at parsetime
         return curr_addr + (0,)
     elif isinstance(node, dict) and ("_content" in node):
         return curr_addr + ("_content", 0)

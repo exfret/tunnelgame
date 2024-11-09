@@ -1,0 +1,40 @@
+---
+_meta:
+  no_addr_eval:
+_include:
+  test_file: listeners_include.yaml
+_listeners:
+  - on_receive: bye
+    handler:
+      - This should not print
+_content:
+  - move: test_file
+    to: child_block_2
+  - move: child_block
+    to: child_block_2/test_file
+  - goto: child_block_2/test_file/child_block/~
+  - Hi
+  #- send: hi
+  - goto: child_block
+child_block:
+  _listeners:
+    - on_receive: bye
+      handler:
+        - bye!
+  _content:
+    - Hi4
+  child_block_3:
+    _listeners:
+      - on_receive: bye
+        handler:
+          - This should print
+child_block_2:
+  _content:
+    - Hi2
+#listener_block:
+#_listeners:
+#hi:
+#  - attach:
+#bye:
+#  - Bye!
+#  - unattach:

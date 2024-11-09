@@ -122,13 +122,20 @@ def step():
             if "per_shown" in curr_node:
                 state["choices"][curr_node["choice"]]["per_shown_spec"] = utility.parse_requirement_spec(curr_node["per_shown"])
 
-            effect_address = ""
-            if not "effects" in curr_node:
-                effect_address = addressing.parse_addr(curr_addr, curr_node["choice"])
-            else:
-                effect_address = curr_addr + ("effects", 0)
-                if isinstance(curr_node["effects"], str):
-                    effect_address = addressing.parse_addr(curr_addr, curr_node["effects"])
+            def get_effect_address(key):
+                effect_address = ""
+                if not key in curr_node:
+                    if key == "effects":
+                        effect_address = addressing.parse_addr(curr_addr, curr_node["choice"])
+                    elif key == "alt_effects":
+                        effect_address = None
+                else:
+                    effect_address = curr_addr + (key, 0)
+                    if isinstance(curr_node[key], str):
+                        effect_address = addressing.parse_addr(curr_addr, curr_node[key])
+                return effect_address
+            effect_address = get_effect_address("effects")
+            alt_effect_address = get_effect_address("alt_effects")
 
             is_action = False
             if "action" in curr_node:
@@ -136,6 +143,7 @@ def step():
 
             state["choices"][curr_node["choice"]]["text"] = text
             state["choices"][curr_node["choice"]]["address"] = effect_address
+            state["choices"][curr_node["choice"]]["alt_address"] = alt_effect_address
             state["choices"][curr_node["choice"]]["missing"] = missing_list
             state["choices"][curr_node["choice"]]["modifications"] = modify_list
             state["choices"][curr_node["choice"]]["choice_address"] = curr_addr
@@ -211,13 +219,22 @@ def step():
                 return True
     elif "inject" in curr_node:
         if "into_choices" in curr_node:
-            choices_to_inject_into = curr_node["into_choices"].split()
+            choices_to_inject_into = None
+            if curr_node["into_choices"] == "_all":
+                choices_to_inject_into = list(state["choices"].keys())
+            else:
+                choices_to_inject_into = curr_node["into_choices"].split()
+
+            position = "before"
+            if "position" in curr_node:
+                position = curr_node["position"]
+
             for choice_id in choices_to_inject_into:
                 # TODO: Warning when trying to inject into a choice that doesn't exist
                 if choice_id in state["choices"]:
                     if not "injections" in state["choices"][choice_id]:
                         state["choices"][choice_id]["injections"] = []
-                    state["choices"][choice_id]["injections"].append(addressing.parse_addr(curr_addr, curr_node["inject"]))
+                    state["choices"][choice_id]["injections"].append({"address": addressing.parse_addr(curr_addr, curr_node["inject"]), "position": position})
     elif "insert" in curr_node:
         vars_by_name = utility.collect_vars_with_dicts(state)
 
@@ -242,6 +259,45 @@ def step():
         if "add" in curr_node:
             new_val = old_val + utility.eval_values(curr_node["add"])
         utility.set_value(var_to_change, new_val)
+    elif "move" in curr_node:
+        # Make sure to only get the block's address, not its inside instructions
+        block_to_move_addr = addressing.parse_addr(curr_addr, curr_node["move"], only_block_part=True)
+        # Make sure we're not trying to move the root block
+        # TODO: Throw some sort of warning if we try to move the root block
+        if block_to_move_addr != ():
+            block_to_move = addressing.get_node(block_to_move_addr)
+            # Move the block
+            new_block_addr = addressing.parse_addr(curr_addr, curr_node["to"], only_block_part=True)
+            new_block = addressing.get_node(new_block_addr)
+            parent_block = addressing.get_node(block_to_move_addr[:-1])
+            del parent_block[block_to_move_addr[-1]]
+            new_block[block_to_move_addr[-1]] = block_to_move
+
+            # Update block address stuff
+            def reset_node_info(block, old_addr):
+                new_addr = new_block_addr + old_addr[len(block_to_move_addr)-1:]
+                if old_addr in state["story_data"]["file_homes"]:
+                    state["story_data"]["file_homes"].add(new_addr)
+                    state["story_data"]["file_homes"].remove(old_addr)
+                if old_addr in state["story_data"]["node_types"]:
+                    state["story_data"]["node_types"][new_addr] = state["story_data"]["node_types"][old_addr]
+                    del state["story_data"]["node_types"][old_addr]
+
+                for key, val in block.items():
+                    if key[0] != "_":
+                        reset_node_info(val, old_addr + (key,))
+            reset_node_info(block_to_move, block_to_move_addr)
+
+            # If our address is now invalid, update it
+            # Check if our initial part of the address matches the moved block
+            if curr_addr[:len(block_to_move_addr)] == block_to_move_addr:
+                # Remove part that was previously the block
+                curr_addr = curr_addr[len(block_to_move_addr):]
+                # Add the new block part
+                curr_addr = new_block_addr + (block_to_move_addr[-1],) + curr_addr
+                # Set the address
+                addressing.set_curr_addr(curr_addr)
+                # Don't return anything because we actually still need to increment the address            
     elif "once" in curr_node:
         if state["visits"][curr_addr] <= 1:
             if isinstance(curr_node["once"], str):
@@ -324,6 +380,19 @@ def step():
         state["bookmark"] = addressing.get_next_bookmark(state["bookmark"])
 
         return False
+    elif "send" in curr_node:
+        # Just trigger child blocks and current block for now by default
+        parent_block_addr = addressing.get_block_part(curr_addr)
+        parent_block = addressing.get_node(parent_block_addr)
+        for child_block_name, child_block in list(parent_block.items()) + [((), parent_block)]:
+            if "_listeners" in child_block:
+                for index, listener in enumerate(child_block["_listeners"]):
+                    # TODO: Parse listeners beforehand into a dict that's easier/faster to access
+                    if "on_receive" in listener and listener["on_receive"] == curr_node["send"]:
+                        child_block_addr_name = (child_block_name,)
+                        if child_block_name == ():
+                            child_block_addr_name = ()
+                        state["bookmark"] = state["bookmark"] + (parent_block_addr + child_block_addr_name + ("_listeners", index, "handler", 0),)
     elif "separator" in curr_node:
         curr_view.print_separator()
     elif "set" in curr_node:
@@ -419,6 +488,8 @@ def step():
                 addressing.set_curr_addr(curr_addr + ("_default", 0))
 
             return True
+    elif "tag" in curr_node:
+        pass # Tags currently do nothing
     elif "unflag" in curr_node:
         state["vars"]["flags"][curr_node["unflag"]] = False
     else:

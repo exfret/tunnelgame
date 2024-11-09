@@ -1,4 +1,31 @@
-2024/10/12 (1k words - ?)
+2024/11/09 (4k words - ?)
+
+2024/11/08 (4k words - 4k words)
+- Worked on story
+
+2024/11/06 (4k words - 4k words)
+- Worked some on story (general exploration layer 1)
+
+2024/11/05 (4k words - 4k words)
+- Worked some on story (general exploration layer 1)
+
+2024/10/31 (4k words - 4k words)
+- Worked on story (fourth exploration)
+
+2024/10/17 (2k words - 4k words)
+- Added position tag for inject instruction and _all option for into_choices tag
+
+2024/10/14 (2k words - 2k words)
+- Added flag/unflag command (to activate/deactivate flags at runtime)
+- Added alt_effects when choice requirements via "enforce" aren't met
+- Updated block info when blocks are moved
+- Added event listeners to blocks
+
+2024/10/13 (2k words - 2k words)
+- Added move instruction
+- Started work on mutable games
+
+2024/10/12 (1k words - 2k words)
 - Removed some old extraneous passing of state and game
 - Addressing to the root of a file rather than the whole story
 - Added autocomplete (sorta)
@@ -9,68 +36,68 @@
 - Worked on abstract version, added up to third training
 - Added "clear" command
 
-2024/10/7 (0k words - 0k words)
+2024/10/07 (0k words - 0k words)
 - Started abstract version of tunnel story
 
-2024/10/6
+2024/10/06
 - exec commands
 
-2024/10/5
+2024/10/05
 - Renamed metadata in state to story_data
 
-2024/9/1
+2024/09/01
 - Worked on lemeny version
 
-2024/8/26
+2024/08/26
 - Worked on lemeny version
 - Worked on, but didn't finish, cost checking with passed args
 - Moved some commands to info
 
-2024/8/19
+2024/08/19
 - Added ability to define command macros
 - Moved completion command to a subcommand of info
 - Added info command and ability to see all vars defined
 
-2024/7/14
+2024/07/14
 - Used module pattern for globals game, state, and view rather than previous injection pattern
 - Cleaned up project directories and files
 
-2024/7/13
+2024/07/13
 - Started second iteration of story (lemeny version)
 
-2024/7/12
+2024/07/12
 - Worked on web view, added flask_socketio
 
-2024/7/11 (7k words - 7k words)
+2024/07/11 (7k words - 7k words)
 - Added descriptiveness levels
 
-2024/7/10 (6k words - 7k words)
+2024/07/10 (6k words - 7k words)
 - Sam old story test
 - Wrote third training expedition
 
-2024/7/9 (6k words - 6k words)
+2024/07/09 (6k words - 6k words)
 - Added pop_queue instruction
 - Added word_count and words_seen commands
 
-2024/7/8 (6k words - 6k words)
+2024/07/08 (6k words - 6k words)
 - Made pyinstaller proof of concept compiled story
 - Split intro.yaml in first new tunnel story draft into multiple files with _includes
 
-2024/7/7 (? - 6k words)
+2024/07/07 (? - 6k words)
 - Implemented better subroutines with "sub" and "subreturn" commands; subroutines now persist between choices
 - Reset master, which was behind
 
-2024/7/6
+2024/07/06
 - Implemented proof-of-concept Java View and Web View
 - Reworked addressing
 
-2024/7/5
+2024/07/05
 Tunnel:
 - Worked on part after second expedition
 Excavator:
 - Added unflag command (just two lines of code...)
 
-2024/7/4
+2024/07/04
 - Phased out add and lose instructions for future "modify" instruction
 - Added injection instruction, which adds instructions to matching choices
 - Added histories and revert command
@@ -80,17 +107,17 @@ Excavator:
 - Added pytest "shop" test
 - Fixed bug with print in view.py not converting to string before appending to displayed_text
 
-2024/7/3
+2024/07/03
 - Saving retains text in console/default view
 - Added autosaves (just once each choice for now)
 - Added repeat command
 
-2024/7/2
+2024/07/02
 - Added pytest test case for float vars
 - Added ability for vars to be floats (I think?)
 - Added choice parsing logic to gameloop as well since it was needed there, also moved some of it out of view
 
-2024/6/30
+2024/06/30
 - Interpreter instructions can now run gameloop commands; attempted the reverse direction, but that seems to be a bit more difficult
 - Added input command for inputting several commands at a time
 - Fixed missing conversion of yaml dump to utf-8 before write-bytes
@@ -98,35 +125,35 @@ Excavator:
 - Custom error handling for null blocks
 - Wrote a lot of tunnel story in new language (mostly intro stuff)
 
-2024/6/28
+2024/06/28
 - Added separator instruction
 - Added actions (choices that don't remove the other choices)
 - Work toward merge with Max changes to packaging and such
 - Pytest test case for example stories (just make sure they parse)
 - Got simple_bags test working again
 
-2024/6/27
+2024/06/27
 - Worked on exploration story (v3)
 
-2024/6/26
+2024/06/26
 - Made footers macros instead of separate content sections
 - Used python ast module for finding missing var references
 
-2024/6/25
+2024/06/25
 - Added set command for changing var values at runtime for testing
 
-2024/6/24
+2024/06/24
 - Moved requirement spec display logic to view
 
-2024/6/23
+2024/06/23
 - Fixed that require tags in choice instructions would crash the interpreter
 - Wrote some of the exploration basic 2 story for testing out the language
 
-2024/6/22
+2024/06/22
 - Added ability to run a story within a story
 - Added call statements that allow for a stack of variables, returns for call statements, and global variables that are persistent through calls
 
-2024/6/21
+2024/06/21
 - Added flag command
 - Added _num_choices special var
 - Added stop instruction
@@ -136,35 +163,35 @@ Excavator:
 - Dict blocks now also search for sibling blocks with the same name in local addressing (not just list blocks)
 - Worked on new variable dict types
 
-2024/6/19
+2024/06/19
 - Implemented testing for basic syntax
 - More specific parsing error messages
 
-2024/6/18
+2024/06/18
 - Big work on testing functionalities!
 - Moved terminal clearing to view
 - Moved source code to src file
 - Fixed bug with address . not going to parent block in list blocks
 - Fixed bug after variable refactoring that caused "set" command to not work at all
 
-2024/6/17
+2024/06/17
 - Added file stitching
 - Finished first section of user guide, "Getting Started", and started second section on "Organizational Concepts"
 
-2024/6/16
+2024/06/16
 - Moved some addressing functionality from interpreter into the addressing module
 - Fixed bug with the way I thought local addressing worked causing some example stories to not compile
 - Added "back" command, which returns to the innermost block that the program executed an INSTRUCTION node within during the *previous* stepping
 - Fixed error with new variable checking that didn't allow locales
 - Allowed bag functionality in "costs" (still need to implement for other requirement_spec)
 
-2024/6/15
+2024/06/15
 - Fixed bug where "set" command would cause crash on parsing with expressions that just set values rather than adding or subtracting them
 - Started moving print commands from interpreter to view
 
-2024/6/14
+2024/06/14
 - Fixed bug involving loading the state object in gameloop disconnecting the reference from the state object in other files
 - Moved all print statements from gameloop to a view object
 
-2024/6/12
+2024/06/12
 - Implemented changelog

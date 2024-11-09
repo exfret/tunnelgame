@@ -1,7 +1,21 @@
 ---
 journal:
   - You open your journal to read about what you have learned.
+  - tag: dome
   - Dome - The large dome to which humanity is confined, surrounded by unbreakable rock on all sides that's only broken by the Tunnel. Light inexplicably fills the Dome, and the temperatures rise and fall with the seasons despite the absence of the Sun.
   - if: knowledge_starblossom
     then:
+      - tag: starblossom
       - Starblossoms - A flower with large, broad petals shaped like a 5-pointed star. It is perpetually in bloom and valued for its beauty. A special tool called a SHTG2 is required to harvest it due to its deep roots.
+wonder:
+  _vars:
+    - curr_age: 0
+  _content:
+    - if: not isinstance(_args[0], str)
+      then:
+        - Type in something you are wondering about for information.
+      else:
+        - switch: _args[0]
+          age:
+            - set: curr_age = 16 + floor(time / 365)
+            - You are {curr_age} years old.

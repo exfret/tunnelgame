@@ -168,14 +168,20 @@
         </div>
     </div>
 
-    <button onclick="displayMessage()">Hi</button>
-
     <footer>
         &copy; 2024 Kyle Hess | Contact: hess.kyler@gmail.com
     </footer>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
     <script>
+        let socket = io();
+
+        socket.on("print", function (msg) {
+            const new_element = document.createElement("div");
+            new_element.innerHTML = msg.text
+            document.getElementById("story-board").appendChild(new_element);
+        });
+
         document.addEventListener("DOMContentLoaded", (event) => {
             var socket = io.connect("http://" + document.domain + ":" + location.port);
 

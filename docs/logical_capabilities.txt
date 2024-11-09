@@ -1,0 +1,7 @@
+Dereferencing
+Interrupts/Events system
+Runtime code injection/modification from other parts of the program
+
+Examples
+ - Garden example (dereferencing)
+ - Character following you example

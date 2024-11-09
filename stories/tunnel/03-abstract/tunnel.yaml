@@ -1,12 +1,15 @@
 ---
 training:
   _content:
+    - tag: george
     - switch: _visits
       "1": first/depart
       "2": second/depart
       "3": third/depart
+      "4": fourth/depart
   first:
     depart:
+      - storypoint:
       - It's a day's journey from your small town in the Dome to the entrance of the Tunnel. The Tunnel is the only exit from the 100-mile Dome to which humanity is confined. But it's so big no one has found the other end.
       - sub: /logic/time
       - You both reach the entrance to the Tunnel, and a guard checks your passes. Then, you head onward to camp.
@@ -25,8 +28,8 @@ training:
           - goto: camp
     camp:
       - After walking a bit further, you set up camp.
-      - sub: /logic/time
-      - The next day, George teaches you how to pluck the small leaves from the red flower for use in teas.
+      - tag: rosalia
+      - The next day, you gather rosalia. George teaches you how to pluck the small leaves from the red flower for use in teas.
       - set: inv_rosalia += skill_gather_rosalia
         show:
       - Then, you pack up and head home.
@@ -44,21 +47,35 @@ training:
           - George smiles and says he likes your positive attitude toward adventuring. He even flips you another coin!
           - set: coin += 1
             show:
+      - You can now find the study in the commons area.
       - (Unlocked Study)
+      - (Unlocked your room)
+      - flag: unlock_orphanage_lily_room
       - flag: unlock_orphanage_study
+      - separator:
       - goto: /orphanage
   second:
     depart:
+      - storypoint:
       - sub: /logic/time
       - You get to the entrance to the first layer of the Tunnel. Once you get the Green Pass, which will allow you to explore on your own, you can work toward a Blue Pass, which will allow you to enter the second layer as well. Other passes allow entrance into yet deeper regions of the Tunnel.
+      - if: curr_clothes == "dark_gray_plain"
+        then:
+          - flag: tunnel_training_guard_flipped_blue_coin
+          - tag: blue_coin
+          - The guard at the entrance says dark gray plain is her favorite color, so she flips you a blue coin for the nice outfit!
+          - set: inv_blue_coin += 1
+            show:
       - Once, you've been hiking a bit, George tells you that you'll both be gathering petunal blossoms, which are purple flowers with yellow specks. They are very nutritious when ground up.
       - sub: /logic/time
       - choice: camp
         text: Set up camp
     camp:
+      - tag: petunal
       - The next day, you both gather the petunal blossoms.
       - set: inv_petunal += 2
         show:
+      - tag: ghost
       - While gathering the petunal blossoms, you stumble across a hastily made dirt grave. You recall that it's customary to leave rosalia as respects for the dead.
       - goto: grave
     grave:
@@ -89,12 +106,17 @@ training:
     return:
       - After a day of gathering petunal blossoms, you head back.
       - sub: /logic/time
+      - tag: jaz
       - (Unlocked Jaz's Room)
       - flag: unlock_orphanage_jaz_room
+      - separator:
       - goto: /orphanage
   third:
     depart:
+      - storypoint:
       - sub: /logic/time
+      - tag: general_store_shopkeeper
+      - tag: ghostly_orb
       - On the way to the Tunnel, you and George pass a scruffy merchant with a long, black beard moving wares from the City to the town in which the orphanage is located, Lokton. He's lugging a ton of stuff.
       - choice: offer
         text: Offer some pennies for the large glass sphere that the merchant is holding
@@ -108,6 +130,13 @@ training:
         text: Move on
         effects: camp
     camp:
+      - if: tunnel_training_guard_flipped_blue_coin
+        then:
+          - There's a different guard this time at the entrance, so you don't get another blue coin.
+          - if: curr_clothes != "dark_gray_plain"
+            then:
+              - (Not that you're still wearing your dark gray outfit anymore anyways).
+      - tag: starblossom
       - if: knowledge_starblossom
         then:
           - As you venture into the Tunnel, you see a starblossom. Its leaves see to be shimmering. Maybe it's special?
@@ -120,11 +149,13 @@ training:
       - choice: petunal
         text: Gather petunal blossoms
     rosalia:
+      - tag: rosalia
       - You and George both gather plenty of rosalia.
       - set: inv_rosalia += skill_gather_rosalia
         show:
       - goto: return
     petunal:
+      - tag: petunal
       - You're more productive this time and manage to gather 3 petunal bushels.
       - set: inv_petunal += 3
         show:
@@ -132,10 +163,256 @@ training:
       - goto: return
     return:
       - You head back home after a productive trip.
+      - tag: general_store
       - (Unlocked Town)
       - (Unlocked Market)
       - (Unlocked General Store)
       - flag: unlock_town
       - flag: unlock_town_market
       - flag: unlock_town_market_general_store
+      - separator:
       - goto: /orphanage
+  fourth:
+    depart:
+      - storypoint:
+      - You and george depart on your fourth expedition. He says you'll be going on an exploration trip this time. On these trips, you'll travel somewhere random and have to make some choices based on where you end up. This is what you'll be doing once your training is over.
+      - sub: /logic/time
+      - After walking to the Tunnel, you wander somewhere.
+      # TODO: Only the first 5 explorations support training
+      - choice: next
+        effects:
+          - sub: /tunnel/layer_1/explore
+          - goto: walk_back
+    walk_back:
+      - sub: /logic/time
+      - As you walk back with George, he asks, "See that wasn't so hard, right? Did you like the exploring?"
+      - choice: "no"
+        text: It was actually awful
+        effects:
+          - George is sad that you said so. "Hopefully you get to see how exciting it is in time."
+          - if: training_first_was_feeling_bad
+            then:
+              - He goes on, "I remember you were feeling bad about the training a while back, too."
+              - He doesn't give you a rosalia this time.
+            else:
+              - He goes on, "Maybe you can muster some of that positive attitude from a few trips ago?"
+              - He gives you another coin and says, "Maybe this will help you recall your past positiveness!"
+              - set: coin += 1
+                show:
+      - choice: "yes"
+        text: It was great
+        effects:
+          - if: training_first_was_feeling_bad
+            then:
+              - George is ecstatic that your attitude has improved since a few days ago. In return, he gives you 5 coins.
+              - set: coin += 5
+                show:
+            else:
+              - George cheers, "Yeah, keep up that good attitude!"
+              - He doesn't give you anything this time.
+      - inject: return
+        into_choices: _all
+        position: after
+    return:
+      - You will get experience for certain tasks now, which will unlock more actions!
+      - (Unlocked Experience)
+      - (Unlocked Caroline's Room)
+      - flag: unlock_experience
+      - flag: unlock_orphanage_caroline_room
+      - separator:
+      - goto: /orphanage
+layer_1:
+  explore:
+    - sub: /logic/time
+    - set: exp += 2
+    - random: cave, rosalia_encounter, henry, gift, dagger
+  cave:
+    _content:
+      # TODO: Turn into union string check
+      - if: tunnel_pass == "training"
+        then:
+          - goto: cave
+    cave:
+      _content:
+        - flag: tunnel_layer_1_cave_cave_visited
+        - You come across some rocks rising up from the ground. They stick straight up an lean on each other like a house of cards, leaving a hole between them.
+        - This hole is the entrance to a cave with an abyssal, dark interior. The ground slopes downward toward the hole, as if to suck you in.
+        - choice: around
+          text: Go around the cave
+        - choice: inside
+          text: Go inside the cave
+        - choice: top
+          text: Go on top of the cave
+      around:
+        # Petunal, then tracks, also lake
+        - if: not tunnel_layer_1_cave_cave_around_petunal_taken
+          then:
+            - flag: tunnel_layer_1_cave_cave_around_petunal_taken
+            - You find a couple petunal blossoms behind the cave.
+            - if: tunnel_pass == "training"
+              then:
+                - George says, "Good job for finding them. You can keep them all."
+            - tag: petunal
+            - set: inv_petunal += 3
+              show:
+            - if: tunnel_pass == "training"
+              then:
+                - subreturn:
+      inside:
+        - The inside is really dark and drops suddenly downward into the earth.
+        - if: not tunnel_layer_1_cave_cave_inside_sewing_machine_taken
+          then:
+            - tag: sewing_machine
+            - You trip over an object, then examine it. It seems to be a sewing machine! But it's missing the needle.
+            - flag: own_sewing_machine
+            - flag: tunnel_layer_1_cave_cave_inside_sewing_machine_taken
+        - To go any further, you'll need a one-use torch.
+        - tag: torch
+        - choice: further
+          text: Go further into the cave
+          cost: 1 inv_torch
+          effects:
+            - pass:
+        # TODO: Maybe some explanation of why your adventure stops here (i.e.- why you can't explore around after this)
+        - choice: return
+          text: Go back outside
+          effects:
+            - if: tunnel_pass == "training"
+              then:
+                - subreturn:
+      top:
+        - You are able to climb up a layer of the cave, but need high athletic skill to get higher.
+        - if: not tunnel_layer_1_cave_cave_top_found_building_materials
+          then:
+            - flag: tunnel_layer_1_cave_cave_top_found_building_materials
+            - However, you do find some building materials!
+            - set: inv_building_materials += 2
+              show:
+        - choice: higher
+          text: Go higher
+          require: 10 skill_athleticism
+          effects:
+            - pass:
+        - choice: return
+          effects:
+            - if: tunnel_pass == "training"
+              then:
+                - subreturn:
+  rosalia_encounter:
+    _content:
+      - goto: duke
+    duke:
+      _content:
+        - You pass a gray squirrel with the bushiest tail you've ever seen. It sees you and runs away.
+        - goto: patch
+    patch:
+      _content:
+        - You come across a large rosalia patch, one much fresher than others you've picked from. This will help with your rosalia gathering!
+        - set: inv_rosalia += 1
+          show:
+        - goto: return
+    return:
+      _content:
+        - choice: return
+          effects:
+            - if: tunnel_pass == "training"
+              then:
+                - subreturn:
+  henry:
+    _vars:
+      # -1 Signals not having inserted coins yet
+      - coins_last_left_in_machine: -1
+    _content:
+      - goto: machine
+    machine:
+      _content:
+        - You're walking along a well-traveled dirt trail when you pass a tree with a coin symbol on it. It speaks, saying, "You may invest any number of coins now, and the next time we meet I will give you something depending on what you invested."
+        - goto: prizes
+      prizes:
+        _content:
+          # TODO: prizes from last input
+          - goto: input
+      input:
+        _content:
+          - So how many coins would you like to leave?
+          - choice: invest
+            enforce: _args[0] is not None and isinstance(_args[0], str) and _args[0].isdigit()
+            alt_effects:
+              - You have to choose a nonnegative integer amount to invest! (For example, "invest 2").
+              - goto: .
+            effects:
+              - set: coins_last_left_in_machine = int(_args[0])
+              - if: coins_last_left_in_machine == 0
+                then:
+                  - You stick you hand in as if you're inserting coins, but you don't actually insert anything. Hehe.
+                  - goto: ../../henry
+              - You leave {coins_last_left_in_machine} coins.
+              - goto: ../../henry
+          - choice: continue
+            effects:
+              - You move on with your day without paying attention to these silly shenanigans.
+              - goto: ../../henry
+    henry:
+      _content:
+        # TODO: Second time visit
+        - tag: henry
+        - You find a middle-aged traveler coming from the opposite direction. He waves and says in a friendly manner, "I'm Henry. How are you doing little lass?"
+        - if: tunnel_pass == "training"
+          then:
+            - George waves back, "Hey, Henry!" Henry's eyes brighten when he sees George.
+        - tag: language_cube
+        - He hands you a cube about the size of your fist on the way by. "I have so many artifacts," he says in a cheery tone, "You can have one!"
+        - choice: return
+          effects:
+            - if: tunnel_pass == "training"
+              then:
+                - subreturn:
+  gift:
+    _content:
+      - if: not layer_1_gift_gift_found
+        then:
+          - goto: gift
+    gift:
+      _content:
+        - flag: layer_1_gift_gift_found
+        - tag: rosalia
+        - tag: petunal
+        - You some harvested flowers on the ground with a note. The note says, "I just wanted to be nice to the next person who came upon here. You're welcome!"
+        - set: inv_rosalia += 4
+          show:
+        - set: inv_petunal += 3
+          show:
+        - choice: return
+          effects:
+            - if: tunnel_pass == "training"
+              then:
+                - subreturn:
+  dagger:
+    _content:
+      - goto: flying_key
+    flying_key:
+      _content:
+        - tag: dagger_flying_key
+        - tag: nimbleness
+        - You spot a shiny object from afar through some tallgrass. Suddenly, it lifts of the ground and darts away.
+        - choice: chase
+          text: Chase the object
+          require: 20 skill_nimbleness
+          effects:
+            - pass:
+        - choice: continue
+          text: Continue on
+          effects: dagger
+    dagger:
+      _content:
+        - tag: weapon
+        - You find a dagger on the ground.
+        - if: tunnel_pass == "training"
+          then:
+            - George says to leave it on the ground. "You're not old enough to have weapons," he says.
+            - If you come back here later you could probably take it. Not that you'd want to defy George, right?
+        - choice: return
+          effects:
+            - if: tunnel_pass == "training"
+              then:
+                - subreturn:

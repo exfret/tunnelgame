@@ -1,0 +1,22 @@
+---
+# Example of how a knowledge base file might look
+alive:
+brown_hair:
+corpse:
+  _relationships:
+    - inherits: human
+    - trait: alive
+      invert: # Undos inheritance of being alive via human
+george:
+  _description:
+    - George is cool I guess.
+  _relationships:
+    - trait: brown_hair
+    - inherits: human
+human:
+  _relationships:
+    - inherits: object
+    - trait: alive
+mabel:
+  _relationships:
+    - inherits: human

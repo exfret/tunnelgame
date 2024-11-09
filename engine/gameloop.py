@@ -1,6 +1,7 @@
 # Standard imports
 import copy
 import pickle
+import time
 
 from engine import addressing, config, gameparser, interpreter, utility
 
@@ -10,15 +11,16 @@ def run(game_name, packaged=True, parent_game=None, parent_state=None, exec_bloc
     state = config.state
     curr_view = config.view
 
-    curr_story_dir = None
+    story_path = None
     if packaged:
-        curr_story_dir = config.local_dir / "stories" / game_name
+        story_path = config.local_dir / "stories" / game_name
     else:
-        curr_story_dir = config.stories / game_name
-    gameparser.open_game(game_name, curr_story_dir)
+        story_path = config.stories / game_name
+    gameparser.open_game(story_path)
+
 
     def setup_game():
-        gameparser.construct_game(game, curr_story_dir)
+        gameparser.construct_game(game, story_path)
         gameparser.expand_macros(game)
 
         # We need to do this after construct game and expand macros or else includes and such will be attempted again
@@ -32,6 +34,7 @@ def run(game_name, packaged=True, parent_game=None, parent_state=None, exec_bloc
         gameparser.add_module_vars()
         gameparser.parse_game()
     setup_game()
+
 
     # Sync state vars so that upstream state can be modified
     if exec_block is not None:
@@ -53,20 +56,28 @@ def run(game_name, packaged=True, parent_game=None, parent_state=None, exec_bloc
                     # Override address vars
                     state["vars"][var_key][var_name] = var
 
+
     def save_game(save_slot):
         gameparser.remove_module_vars()
         (config.saves / save_slot).with_suffix(".pkl").write_bytes(pickle.dumps(state))
         gameparser.add_module_vars()
 
+
     def load_game(load_slot, add_save_text=False):
         contents = pickle.loads((config.saves / load_slot).with_suffix(".pkl").read_bytes())
+        # Update state
         state.clear()
         state.update(contents)
         gameparser.add_module_vars()
+        # Update game with state's game
+        game.clear()
+        game.update(state["game"])
+        # Update view
         curr_view.clear(True) # True doesn't reset saved text
         curr_view.print_displayed_text(add_save_text=add_save_text)
 
-    def make_choice(new_addr, command=["start"], choice={}):
+
+    def make_choice(new_addr, command=["start"], choice={}, is_action_override=False):
         inj_list = []
         if "injections" in choice:
             inj_list = choice["injections"]
@@ -76,7 +87,7 @@ def run(game_name, packaged=True, parent_game=None, parent_state=None, exec_bloc
         state["bookmark"] = addressing.make_bookmark((), new_addr, inj_list) + state["bookmark"]
 
         # Only get rid of old choices if this was a proper choice, not an action
-        is_action = "action" in choice and choice["action"]
+        is_action = ("action" in choice and choice["action"]) or is_action_override
         if not is_action:
             state["choices"] = {}
 
@@ -118,6 +129,7 @@ def run(game_name, packaged=True, parent_game=None, parent_state=None, exec_bloc
             else:
                 break
         
+
         # Update the choices now with proper costs and such
         def update_choice_reqs():
             # Choices now have cost_spec, req_spec, and shown_spec
@@ -129,6 +141,7 @@ def run(game_name, packaged=True, parent_game=None, parent_state=None, exec_bloc
                     choice["missing"] = []
                 if not "modifications" in choice:
                     choice["modifications"] = []
+
 
                 def parse_modification_spec(choice, spec_type):
                     for modification in choice[spec_type]:
@@ -148,10 +161,10 @@ def run(game_name, packaged=True, parent_game=None, parent_state=None, exec_bloc
                         #choice[spec_type]["final_var"] = var_dict[modification["var"]]
                         #choice[spec_type]["final_val"] = eval(modification["amount"], {}, var_dict_vals)
 
+
                 for spec_type in ["cost_spec", "req_spec", "shown_spec", "per_cost_spec", "per_req_spec", "per_shown_spec"]:
                     if spec_type in choice and len(choice[spec_type]) > 0:
                         parse_modification_spec(choice, spec_type)
-        
         update_choice_reqs()
 
         # Only change where we were in the story for "proper" choices
@@ -159,6 +172,7 @@ def run(game_name, packaged=True, parent_game=None, parent_state=None, exec_bloc
             state["last_address_list"].append(state["last_address"])
 
             curr_view.print_choices()
+
 
     # If this is an exec command, only run the block and then return
     if exec_block is not None:
@@ -186,7 +200,7 @@ def run(game_name, packaged=True, parent_game=None, parent_state=None, exec_bloc
         # Autocomplete
         if state["settings"]["autocomplete"] == "on":
             autocomplete_possibilities = set()
-            for built_in_command in {"clear", "define", "exec", "exit", "goto", "help", "info", "input", "inspect", "load", "repeat", "revert", "save", "set", "settings", "undefine"}:
+            for built_in_command in {"clear", "define", "exec", "exit", "flag", "goto", "help", "info", "input", "inspect", "load", "repeat", "revert", "save", "set", "settings", "undefine", "unflag"}:
                 if command[0] == built_in_command:
                     autocomplete_possibilities = False
                     break
@@ -288,6 +302,15 @@ def run(game_name, packaged=True, parent_game=None, parent_state=None, exec_bloc
             curr_view.print_displayed_text()
         elif command[0] == "exit":
             break
+        elif command[0] == "flag":
+            if len(command) < 2:
+                curr_view.print_feedback_message("flag_no_flag_given")
+            else:
+                if command[1] not in state["vars"]["flags"]:
+                    curr_view.print_feedback_message("flag_invalid_flag")
+                else:
+                    state["vars"]["flags"][command[1]] = True
+                    curr_view.print_feedback_message("flag_set_successfully")
         elif command[0] == "goto":
             if len(command) < 2:
                 curr_view.print_feedback_message("goto_no_address_given")
@@ -450,6 +473,15 @@ def run(game_name, packaged=True, parent_game=None, parent_state=None, exec_bloc
                         curr_view.print_settings_descriptiveness_set(command[2])
                     else:
                         curr_view.print_feedback_message("settings_descriptiveness_invalid_val")
+        elif command[0] == "unflag":
+            if len(command) < 2:
+                curr_view.print_feedback_message("unflag_no_flag_given")
+            else:
+                if command[1] not in state["vars"]["flags"]:
+                    curr_view.print_feedback_message("unflag_invalid_flag")
+                else:
+                    state["vars"]["flags"][command[1]] = False
+                    curr_view.print_feedback_message("unflag_set_successfully")
         elif command[0] in state["choices"]:
             choice = state["choices"][command[0]]
             if "enforce" not in choice:
@@ -478,7 +510,10 @@ def run(game_name, packaged=True, parent_game=None, parent_state=None, exec_bloc
             if len(choice["missing"]) > 0:
                 curr_view.print_feedback_message("choice_missing_requirements")
             elif not utility.eval_conditional(choice["enforce"], choice["choice_address"]):
-                curr_view.print_feedback_message("choice_enforce_false")
+                if choice["alt_address"]:
+                    make_choice(choice["alt_address"], command, choice, is_action_override=True)
+                else:
+                    curr_view.print_feedback_message("choice_enforce_false")
             else:
                 # First, save the state in an autosave after every 20 choices
                 state["last_autosave"] += 1

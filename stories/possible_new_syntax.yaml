@@ -1,0 +1,31 @@
+---
+main_character:
+brown_hair:
+human:
+george:
+  _relationships:
+    - inherits: human
+    - trait: brown_hair
+    - with: main_character
+  _listeners:
+    - on_start:
+      handler:
+        - Hi
+    - on_receive: hi
+      priority: 1
+      handler:
+        - Oh, you responded!
+    - on_choice:
+      condition:
+        - related: george
+          to: main_character
+          by: with
+      handler:
+        - choice: talk
+          send: talk
+          to: george
+        - add_handler:
+            on_receive: talk
+            duration: once # Maybe also a remove_handler?
+            handler:
+              - Oh you want to talk?

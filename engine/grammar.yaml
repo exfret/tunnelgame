@@ -4,16 +4,30 @@ START:
   mandatory:
     _content: CONTENT
   optional:
+    _listeners: LISTENERS
     _include: INCLUDE_DICT
     _meta: META_DICT
     _vars: VARS
   other: BLOCK
+LISTENERS:
+  type: list
+  elements: LISTENER
+LISTENER:
+  type: union_with_keys
+  contexts:
+    on_receive: ON_RECEIVE_LISTENER
+ON_RECEIVE_LISTENER:
+  type: dict
+  mandatory:
+    on_receive: _id
+    handler: CONTENT
 INCLUDE_DICT:
   type: dict
   other: _text # Actually is a filename, but we don't have to pay attention to that for now
 META_DICT:
   type: dict
   optional:
+    no_addr_eval: _null
     no_parse_eval: _null
 VARS:
   type: list
@@ -33,6 +47,7 @@ DICT_BLOCK: # Has special built-in checking
   type: dict
   optional:
     _content: CONTENT
+    _listeners: LISTENERS
     _include: INCLUDE_DICT
     _vars: VARS
   other: BLOCK
@@ -63,6 +78,7 @@ DICT_INSTR:
     inject: INJECT
     insert: INSERT
     modify: MODIFY
+    move: MOVE
     once: ONCE
     pass: PASS
     pop_queue: POP_QUEUE
@@ -71,6 +87,7 @@ DICT_INSTR:
     random: RANDOM
     return: RETURN
     run: RUN
+    send: SEND
     separator: SEPARATOR
     set: SET
     stop: STOP
@@ -78,6 +95,7 @@ DICT_INSTR:
     sub: SUB
     subreturn: SUBRETURN
     switch: SWITCH
+    tag: TAG
     unflag: UNFLAG
 BACK:
   type: dict
@@ -97,6 +115,7 @@ CHOICE:
     text: _text
     args: CHOICE_ARGS
     enforce: CONDITION
+    alt_effects: EFFECTS_SPEC
     require: _requirement_specification
     cost: _requirement_specification
     shown: _requirement_specification
@@ -197,6 +216,7 @@ INJECT:
     inject: _addr
   optional:
     into_choices: _text
+    position: _inject_position
 INSERT:
   type: dict
   mandatory:
@@ -209,6 +229,11 @@ MODIFY:
     modify: _var_id
   optional:
     add: _expr
+MOVE:
+  type: dict
+  mandatory:
+    move: _addr
+    to: _addr
 ONCE:
   type: dict
   mandatory:
@@ -258,6 +283,10 @@ RUN:
   type: dict
   mandatory:
     run: _var_id
+SEND:
+  type: dict
+  mandatory:
+    send: _id
 SEPARATOR:
   type: dict
   mandatory:
@@ -294,6 +323,10 @@ CASE_SPEC:
   type: union_with_types
   str: _addr
   list: CONTENT
+TAG:
+  type: dict
+  mandatory:
+    tag: _id
 UNFLAG:
   type: dict
   mandatory:

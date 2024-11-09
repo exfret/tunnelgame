@@ -9,8 +9,38 @@ _content:
     then:
       - choice: market
         text: Buy and sell stuff and things in the market
+  - if: curr_clothes == "street_attire"
+    then:
+      - choice: square
+        text: Go to town square
+  - choice: abandoned
+    text: The abandoned building
+    enforce: town_market_general_store_bought_abandoned_key
+    alt_effects:
+      - It seems to be locked.
+    effects: abandoned
+abandoned:
+  - The door creaks open, it's really dark inside.
+  - if: not town_abandoned_found_street_attire
+    then:
+      - tag: street_attire
+      - if: not town_abandoned_found_street_attire
+        then:
+          - flag: town_abandoned_found_street_attire
+          - flag: clothes_owned_street_attire
+          # Unflag owning them since they're ripped, flag again when they're repaired
+          - unflag: clothes_owned_street_attire
+          - In a corner is some street attire. With this, you can be allowed into town square. But it's ripped. You'll need to sew it back in your room with a sewing machine for it to be presentable.
+          - (Got Street Attire)
+        else:
+          # TODO: Some other use for the warehouse
+          - Where the street attire once was, there is only a dark corner with some spiderwebs.
+  - choice: leave
+    text: Exit the warehouse
+    effects: ..
 market:
   _content:
+    - Where in the market would you like to go?
     - choice: town
       text: Go somewhere else in town
       effects: ..
@@ -21,6 +51,8 @@ market:
           text: Go to the newly opened general store
   general:
     _content:
+      - tag: general_store_shopkeeper
+      - tag: ghostly_orb
       - if: not town_market_general_store_visited
         then:
           - flag: town_market_general_store_visited
@@ -31,7 +63,7 @@ market:
               - goto: ghostly_orb_bought
             else:
               - '"I''m actually glad I lugged this orb all the way back with me. I found out it''s kind of priceless. Isn''t that funny?"'
-      - The shopkeeper asks, "So what can I do you for today?"
+      - The shopkeeper asks, "So what can I do for you today?"
       - choice: leave
         text: Return to the main market area
         effects: ..
@@ -40,6 +72,7 @@ market:
         text: Ask why the orb is so valuable
         effects:
           - He says, "Unfortunately, I can't reveal that information to you."
+          - separator:
           - goto: .
       # TODO: Make some way to track that the shopkeeper has the orb now and tie that to this if statement
       - if: not tunnel_training_third_merchant_bought_glass_sphere
@@ -50,14 +83,41 @@ market:
             cost: 2 coin
             shown: 1 artifact_ghostly_orb_purple
             effects:
-              - He bellows and then tells you, "Nice try! I'm not parting with this thing if I can help it, though, now that I've learned its value."
-              - (You get your items back)
+              - He bellows in laughter and then tells you, "Nice try! I'm not parting with this thing if I can help it, though, now that I've learned its value."
               - set: coin += 2
-                show:
               - set: artifact_ghostly_orb_purple -= 1
-                show:
+              - separator:
               - goto: .
-      # Option to ask why the ghostly orb is so important
+      - tag: torch
+      - choice: torch
+        text: Buy a one-use torch
+        cost: 5 coin
+        shown: 1 inv_torch
+        effects:
+          - You buy a torch
+          - separator:
+          - goto: .
+      - if: not town_market_general_store_bought_abandoned_key
+        then:
+          - choice: abandoned
+            text: Buy the key to the abandoned building # TODO: Some way to have flags shown, like still "unlock key to abandoned building"
+            cost: 20 coin
+            effects:
+              - The shopkeeper grunts and says, "I found this random key in the City and it just happened to open the abandoned building. I was too spooked to go inside so you can have it."
+              - flag: town_market_general_store_bought_abandoned_key
+              - separator:
+              - goto: .
+      - tag: rosalia
+      - choice: rosalia
+        text: Sell 2 Rosalia
+        cost: 2 inv_rosalia
+        shown: 3 coin
+        effects:
+          - You sell the rosalia.
+          - separator:
+          - goto: .
+      # TODO: Option for shopkeeper's hat
+      #   Put this after more items in the store are unlocked
     ghostly_orb_bought:
       - On a sidenote I sort of regret selling the ball to you actually. I learned that it was actually really valuable.
       - choice: sell
@@ -66,11 +126,9 @@ market:
         shown: 2 coin
         effects:
           - He says, "No, no I couldn't take it off you, you got it fair and square. And I don't have the money to pay you properly for it either."
-          - (You get your items back)
           - set: artifact_ghostly_orb_purple += 1
-            show:
           - set: coin -= 2
-            show:
+          - separator:
           - goto: ..
       - choice: money
         text: Offer to sell it back for a ton of money
@@ -78,12 +136,16 @@ market:
         shown: 345 coin
         effects:
           - He laughs and tells you, "Tricky little girl aren't you? Even if I had that amount of money it wouldn't be enough to buy the orb back. I'd recommend you just hold onto it."
-          - (You get your items back)
+          # Don't show the change back since they probably aren't aware of the initial change anyways
           - set: artifact_ghostly_orb_purple += 1
-            show:
-          - set: coin += 345
-            show:
+          - set: coin -= 345
+          - separator:
           - goto: ..
       - choice: okay
         text: Nod, but don't offer it back
-        effects: ..
+        effects:
+          - separator:
+          - goto: ..
+square:
+  _content:
+    - There isn't anything here yet.
