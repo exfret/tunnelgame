@@ -1,7 +1,21 @@
 Next steps:
-  - Change clothes from old story to wristbands
+  - Study new books (observation 1)
+  - Tunnel blue coin encounter
+  - Squirrel wars unlock
+  - Blue coin mini-artifacts store
 
-13. Caroline
+Need to think of how to modularize/parametrize, so that one writing thing can be adapted to multiple places.
+Like a template for a character.
+
+21. Flesh out first training encounter
+20. More to pass the time
+19. Seventh orphan at sixth exploration
+18. Make time flow consistent in trainings
+17. Mention tunnel glow
+16. More petunal blossoms, some easier flower, lemens but not spoiling
+15. Make experience unlocked from start?
+14. Sewing machine stuff
+13. Caroline more gifts (petunal, lemen, ...)
 12. Relatively early exploration research
 11. More to do with petunal blossoms? Rosalia primarily for sell, no buy. Special dirt next currency? Also have building materials
 10. Character trait modifier based on what you answer you like about the Tunnel
@@ -9,7 +23,6 @@ Next steps:
 8. Something bad happens for lying to George about going after rosalia?
 7. Regenerate energy if unlocked_energy
 6. A tunnel encounter that is forced to show dangers
-4. An "upgrade" to get more free days at the orphanage
 3. George gives stone to you on second expedition that you can give to Chloe or someone else?
 2. Ability to ask about the next training journey's plans
 1. If you study too much, you get back pain or smth

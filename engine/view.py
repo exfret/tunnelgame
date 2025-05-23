@@ -59,6 +59,7 @@ feedback_msg = {
     "command_not_supported": "This command is not supported by the current view.",
     "choice_missing_requirements": "Missing requirements.",
     "choice_enforce_false": "You can't make this choice.",
+    "runtime_error_invalid_seed": "\033[33mWarning:\033[0m Seeded value doesn't correspond to valid choice in random block, stopping execution.",
     "unrecognized_command": "Unrecognized command/choice. Type 'help' for commands or 'choices' for a list of choices.",
     "default": "Error: Invalid feedback message key.",
 }
@@ -67,16 +68,17 @@ old_print = print
 
 # Valid views are game and console
 # Only game is currently implemented (everything else is just "console")
-def print(text="", view=None):
+def print(text="", view=None, dont_save_print=False):
     # Having __null__ in the string indicates it should not be printed
     # TODO: Some way to escape __null__ like with a backslash?
     if isinstance(text, str) and "__null__" in text:
         return
     
-    if view is not None and view in state["view_displayed_text"]:
-        # TODO: Some sort of warning if view is not in state["view_displayed_text"]
-        state["view_displayed_text"][view] += str(text) + "\n"
-    state["displayed_text"] += str(text) + "\n"
+    if not dont_save_print:
+        if view is not None and view in state["view_displayed_text"]:
+            # TODO: Some sort of warning if view is not in state["view_displayed_text"]
+            state["view_displayed_text"][view] += str(text) + "\n"
+        state["displayed_text"] += str(text) + "\n"
 
     old_print(text)
 
@@ -143,31 +145,31 @@ class CLIView:
     ######################################################################
 
 
-    def print_flavor_text(self, text):
-        self.print_text(text, view="game")
+    def print_flavor_text(self, text, dont_save_print=False):
+        self.print_text(text, view="game", dont_save_print=dont_save_print)
 
 
-    def print_separator(self):
-        print("-" * 90 + "\n", view="game")
+    def print_separator(self, dont_save_print=False):
+        print("-" * 90 + "\n", view="game", dont_save_print=dont_save_print)
 
 
-    def print_table(self, tbl_to_display):
+    def print_table(self, tbl_to_display, dont_save_print=False):
         border = f"+-{'-' * len(tbl_to_display[0])}-+"
-        print(border, view="game")
+        print(border, view="game", dont_save_print=dont_save_print)
         for row in tbl_to_display:
             row = map(str, row)
             print(f"| {''.join(row)} |", view="game")
-        print(border, view="game")
+        print(border, view="game", dont_save_print=dont_save_print)
 
 
-    def print_text(self, text, style="", view="game"):
+    def print_text(self, text, style="", view="game", dont_save_print=False):
         ansi_code = "\033[0m"
         if style == "bold":
             ansi_code = "\033[1m"
 
         string_to_print = utility.format.vformat(text, (), utility.collect_vars(state))  # TODO: Exceptions in case of syntax errors
         string_to_print = parse_text(string_to_print)
-        print(ansi_code + textwrap.fill(string_to_print, 100) + "\033[0m\n", view=view)
+        print(ansi_code + textwrap.fill(string_to_print, 100) + "\033[0m\n", view=view, dont_save_print=dont_save_print)
 
 
     ######################################################################
@@ -175,15 +177,15 @@ class CLIView:
     ######################################################################
 
 
-    def print_var_modification(self, text_to_show_spec):
+    def print_var_modification(self, text_to_show_spec, dont_save_print=False):
         operation_text = None
         new_text = ""
         if text_to_show_spec["op"] == "add":
-            print(f"[+{text_to_show_spec['amount']} {text_to_show_spec['var']['locale']}]\n")
+            print(f"[+{text_to_show_spec['amount']} {text_to_show_spec['var']['locale']}]\n", dont_save_print=dont_save_print)
         elif text_to_show_spec["op"] == "subtract":
-            print(f"[-{text_to_show_spec['amount']} {text_to_show_spec['var']['locale']}]\n")
+            print(f"[-{text_to_show_spec['amount']} {text_to_show_spec['var']['locale']}]\n", dont_save_print=dont_save_print)
         elif text_to_show_spec["op"] == "set":
-            print(f"[Set {text_to_show_spec['var']['locale']} to {text_to_show_spec['amount']}]\n")
+            print(f"[Set {text_to_show_spec['var']['locale']} to {text_to_show_spec['amount']}]\n", dont_save_print=dont_save_print)
 
 
     ######################################################################
@@ -272,8 +274,10 @@ class CLIView:
         print(f"Completed {(100 * percentage):.1f}% of the story!")
 
 
-    def print_feedback_message(self, msg_type, dont_save = False):
+    # Made feedback messages not save by default
+    def print_feedback_message(self, msg_type, dont_save=True):
         if dont_save:
+            # TODO: Switch to just using dont_save_print in new print function
             if not (msg_type in feedback_msg):
                 old_print(feedback_msg["default"])
             else:
@@ -390,7 +394,7 @@ class ViewForTesting:
     def print_feedback_message(self, msg_type):
         self.commands_called.append({"id": "print_feedback_message", "msg": msg_type})
 
-    def print_flavor_text(self, text):
+    def print_flavor_text(self, text, dont_save_print=False):
         self.commands_called.append({"id": "print_flavor_text", "text": text})
 
     def print_settings(self):
@@ -405,13 +409,13 @@ class ViewForTesting:
     def print_stat_change(self, text):
         self.commands_called.append({"id": "print_stat_change", "text": text})
 
-    def print_table(self, tbl_to_display):
+    def print_table(self, tbl_to_display, dont_save_print=False):
         self.commands_called.append({"id": "print_table", "tbl": tbl_to_display})
 
-    def print_text(self, text, style):
+    def print_text(self, text, style, dont_save_print=False):
         self.commands_called.append({"id": "print_text", "text": utility.format.vformat(text, (), utility.collect_vars(state)), "style": style})
 
-    def print_var_modification(self, text_to_show_spec):
+    def print_var_modification(self, text_to_show_spec, dont_save_print=False):
         self.commands_called.append({"id": "print_var_modifications", "text": text_to_show_spec})
 
     def print_var_value(self, var_value):
@@ -436,10 +440,10 @@ class WebView:
         @self.app.route('/')
         def index():
             return render_template("index.html")
-
-        @self.app.route("/update", methods=["POST"])
-        def update_page():
-            return jsonify(message="HI")
+        
+        @self.socketio.on("make_choice")
+        def handle_choice(data):
+            state["command_buffer"].append([data["choice_id"]])
 
 
     ######################################################################
@@ -449,7 +453,8 @@ class WebView:
 
     # Clears console and story view
     def clear(self, dont_reset_displayed_text = False):
-        pass # TODO
+        # TODO: Saving displayed text
+        self.socketio.emit("clear", {})
 
 
     # Reprints displayed text for save/loads
@@ -462,19 +467,19 @@ class WebView:
     ######################################################################
 
 
-    def print_flavor_text(self, text):
+    def print_flavor_text(self, text, dont_save_print=False):
         pass # TODO
 
 
-    def print_separator(self):
+    def print_separator(self, dont_save_print=False):
+        self.socketio.emit("separator", {})
+
+
+    def print_table(self, tbl_to_display, dont_save_print=False):
         pass # TODO
 
 
-    def print_table(self, tbl_to_display):
-        pass # TODO
-
-
-    def print_text(self, text, style=""):
+    def print_text(self, text, style="", dont_save_print=False):
         self.socketio.emit("print", {"text": text})
 
 
@@ -483,10 +488,7 @@ class WebView:
     ######################################################################
 
 
-    def print_stat_change(self, text):
-        pass # TODO
-
-    def print_var_modification(self, text_to_show_spec):
+    def print_var_modification(self, text_to_show_spec, dont_save_print=False):
         pass # TODO
 
 
@@ -496,11 +498,48 @@ class WebView:
 
 
     def print_choices(self, display_actions=False):
-        pass # TODO
+        effects_texts = {}
+
+        # Fill effects texts (can't eval the python in the javascript)
+        # TODO: Un-duplicate this text
+        for choice_id, choice in state["choices"].items():
+            var_dict_vals = utility.collect_vars(state, choice["choice_address"])
+
+            def parse_modification_spec(choice, spec, spec_type):
+                effects_text = ""
+                if spec_type == "cost_spec":
+                    effects_text = " [Cost: "
+                if spec_type == "req_spec":
+                    effects_text = " [Required: "
+                if spec_type == "shown_spec":
+                    effects_text = " [Effects: "
+                for modification in spec:
+                    expr_val = eval(modification["amount"], {}, var_dict_vals)
+                    sign = ""
+                    if expr_val >= 0:
+                        sign = "+"
+                    if spec_type == "req_spec" or spec_type == "cost_spec":
+                        sign = ""
+                    effects_text += f"{sign}{expr_val} {utility.localize(modification["var"], choice["choice_address"])}, "
+                effects_text = effects_text[:-2]
+                effects_text += "]"
+                return effects_text
+            
+            effects_text = ""
+            if "cost_spec" in choice and len(choice["cost_spec"]) > 0:
+                effects_text += parse_modification_spec(choice, choice["cost_spec"], "cost_spec")
+            if "req_spec" in choice and len(choice["req_spec"]) > 0:
+                effects_text += parse_modification_spec(choice, choice["req_spec"], "req_spec")
+            if "shown_spec" in choice and len(choice["shown_spec"]) > 0:
+                effects_text += parse_modification_spec(choice, choice["shown_spec"], "shown_spec")
+
+            effects_texts[choice_id] = effects_text
+
+        self.socketio.emit("print_choices", {"choices": state["choices"], "effects_texts": effects_texts})
 
 
-    def print_feedback_message(self, msg_type, dont_save = False):
-        pass # TODO
+    def print_feedback_message(self, msg_type, dont_save=True):
+        self.socketio.emit("print_feedback_message", {"text": feedback_msg[msg_type]})
 
 
     def print_settings(self):

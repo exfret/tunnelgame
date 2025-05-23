@@ -1,4 +1,41 @@
-2024/11/09 (4k words - ?)
+2025/05/23 (8k words - ?)
+
+2024/11/25 (8k words - 8k words)
+- Wrote more of gpt factory story
+
+2024/11/22 (8k words - 8k words)
+- Wrote gptfactory story
+
+2024/11/19 (8k words - 8k words)
+- Added general injections to replace headers
+
+2024/11/16 (7k words - 8k words)
+- Worked on story
+
+2024/11/15 (7k words - 7k words)
+- Added header and action sections of documentation
+
+2024/11/14 (6k words - 7k words)
+- Fixed missing references not being tested on text types
+
+2024/11/12 (6k words - 6k words)
+- Revised user manual and rewrote section on subroutines, added section on choice args/enforce
+- Tried adding object system but wasn't sure what to to
+
+2024/11/11 (4k words - 6k words)
+- Note: word count rounded down from now on, rather than to nearest thousand
+- Added more helpful error message on missing references
+- Added ability to not save text to view in a certain story block (useful for actions)
+- Planned out story
+
+2024/11/10 (4k words - 4k words)
+- Added "except" ability in into_choices injections
+- Added ability to seed random choices
+- Finally got web view working
+- Fixed bug where headers were being put first (also fixed "goto ." as a result)
+
+2024/11/09 (4k words - 4k words)
+- Worked on story
 
 2024/11/08 (4k words - 4k words)
 - Worked on story

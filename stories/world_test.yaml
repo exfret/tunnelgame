@@ -1,0 +1,22 @@
+# This can be anywhere, but has the same effect
+_world:
+  - object: george
+    _notes:
+      - The main character's mentor.
+    _descriptors:
+      - brown_hair
+      - human
+    _relationships:
+      - by: mentor
+        to: lily
+  - object: lily
+    _notes:
+      - The main character.
+    _descriptors:
+      - human
+  - relationship: mentor
+  - descriptor: brown_hair
+  - descriptor: human
+_content:
+  - describe: george
+    as: brown_hair

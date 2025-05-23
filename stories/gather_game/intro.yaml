@@ -1,0 +1,45 @@
+_vars:
+  # Buildings
+  - furnace: 0
+  # Rocks
+  - claystone: 0
+  - halite: 0
+  - lignite: 0
+  - limestone: 0
+  - sandstone: 0
+  - shale: 0
+  - furnace: 0
+  # Sediments
+  - clay: 0
+  # Minerals
+_content:
+  - choice: gather
+  - choice: clay
+    cost: 1 claystone
+    shown: 2 clay
+    effects: .
+  - choice: furnace
+    cost: 10 clay
+    shown: 1 furnace
+    effects: .
+gather:
+  - random:
+      6 claystone: # Used for tools/furnace
+        - set: claystone += 1
+          show:
+      1 halite: # Electrolyzed later
+        - set: halite += 1
+          show:
+      1 lignite: # Fuel
+        - set: lignite += 1
+          show:
+      2 limestone: # Electrolyzed later
+        - set: limestone += 1
+          show:
+      4 sandstone: # Used for buildings
+        - set: sandstone += 1
+          show:
+      2 shale: # Used for??
+        - set: shale += 1
+          show:
+  - goto: ..

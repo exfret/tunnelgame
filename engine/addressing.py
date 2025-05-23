@@ -112,7 +112,7 @@ def get_next_bookmark(bookmark):
     
     # Check if we reached the end of execution for this queue entry
     if next_addr == False:
-        # If this is the last part of the call stack, check for footers to execute
+        # If this is the last part of the address queue, check for footers to execute
         if len(bookmark) == 1:
             # Ignore any footers that we currently are in
             trimmed = trim_footer(curr_addr)
@@ -132,23 +132,46 @@ def get_next_bookmark(bookmark):
         return (next_addr,) + bookmark[1:]
 
 
-def add_header(addr):
+def add_header(addr, bookmark):
     curr_node = get_node(addr)
 
     if isinstance(curr_node, dict) and "_header" in curr_node:
         # TODO: Check during parse-time that headers are lists with at least one instruction
-        state["bookmark"] = state["bookmark"] + (addr + ("_header", 0),)
+        bookmark = bookmark + (addr + ("_header", 0),)
+    
+    return bookmark
+
+
+def add_injections(addr, position="before", bookmark=None):
+    if bookmark is None:
+        bookmark = get_curr_addr()
+    
+    curr_node = get_node(addr)
+
+    if "_injections" in curr_node:
+        for inj in curr_node["_injections"]:
+            if position in inj:
+                bookmark = bookmark + (parse_addr(addr, inj[position]),)
+    
+    return bookmark
 
 
 def make_bookmark(bookmark, addr, injections = []):
+    # Classic headers (backwards compatibility)
     partial_addr = ()
-
-    add_header(partial_addr)
+    bookmark = add_header(partial_addr, bookmark)
     for tag in addr:
         partial_addr = partial_addr + (tag,)
-        add_header(partial_addr)
+        bookmark = add_header(partial_addr, bookmark)
+    
+    # Block based injections
+    partial_addr_inj = ()
+    bookmark = add_injections(partial_addr_inj, position="before", bookmark=bookmark)
+    for tag in addr:
+        partial_addr_inj = partial_addr_inj + (tag,)
+        bookmark = add_injections(partial_addr_inj, position="before", bookmark=bookmark)
 
-    # Before injections
+    # Choice-based "before" injections
     for inj in injections:
         if inj["position"] == "before":
             bookmark = bookmark + (inj["address"],)

@@ -1,0 +1,20 @@
+_content:
+  - sub: block
+  - Code
+block:
+  - if: _num_choices == 1
+    then:
+      - Hi
+  - choice: hi
+    effects:
+      - pass:
+  - if: not something
+    then:
+      - stop:
+      - separator:
+  - choice: bye
+    effects:
+      - pass:
+  - if: _num_choices == 1
+    then:
+      - Hi

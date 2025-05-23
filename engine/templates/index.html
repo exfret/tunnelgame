@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <title>Page Title</title>
+    <title>Tunnel</title>
     <style>
         * {
             box-sizing: border-box;
@@ -163,7 +163,6 @@
 
         <div class="right-section">
             <div class="image-area">
-                <img id="flavor-img" src="img/main.png" alt="Image">
             </div>
         </div>
     </div>
@@ -174,14 +173,45 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
     <script>
+        function addToStoryBoard(html) {
+            const new_element = document.createElement("div");
+            new_element.innerHTML = "<div style=\"padding-bottom: 10px\">" + html + "</div>";
+            document.getElementById("story-board").appendChild(new_element);
+        }
+
         let socket = io();
 
-        socket.on("print", function (msg) {
-            const new_element = document.createElement("div");
-            new_element.innerHTML = msg.text
-            document.getElementById("story-board").appendChild(new_element);
+        socket.on("clear", function (msg) {
+            document.getElementById("story-board").innerHTML = "";
         });
 
+        socket.on("separator", function (msg) {
+            addToStoryBoard("".repeat(90));
+        });
+
+        socket.on("print", function (msg) {
+            addToStoryBoard(msg.text);
+        });
+
+        socket.on("print_choices", function (msg) {
+            for (let choice_id in msg["choices"]) {
+                let choice = msg["choices"][choice_id];
+
+                if (!choice["action"]) {
+                    addToStoryBoard("<button class=\"button\" onclick=\"socket.emit(&quot;make_choice&quot;, {choice_id: &quot;" + choice_id + "&quot;})\">" + choice_id + "</button>\t" + choice["text"] + msg["effects_texts"][choice_id]);
+                }
+            }
+        });
+
+        socket.on("print_feedback_message", function (msg) {
+            addToStoryBoard(msg.text);
+        });
+
+        document.getElementById("startButton").addEventListener("click", function () {
+            socket.emit("make_choice", { choice_id: "start" });
+        });
+
+        /*
         document.addEventListener("DOMContentLoaded", (event) => {
             var socket = io.connect("http://" + document.domain + ":" + location.port);
 
@@ -206,7 +236,7 @@
                     document.getElementById("story-board").innerHTML.appendChild("<div>" + data.story_text + "</div>")
                     document.getElementById("story-board").innerHTML.appendChild("<div>" + choices + "</div>")
                 });
-        }
+        }*/
     </script>
 </body>
 

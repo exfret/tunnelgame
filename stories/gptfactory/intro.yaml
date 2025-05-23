@@ -1,0 +1,232 @@
+_content:
+  - "Disclaimer: This story was written with the use of AI in order to show off the capabilities of this interactive fiction game engine."
+  - Therefore, much of the writing included here is not the original work of the author. This is for prototyping purposes only.
+  #- Somehow, you survived the crash landing. But as you look around at the rubble surrounding you, your hope of survival fades.
+  #- In the far distance, you spot bug-like aliens congregating for another attack. They must have seen your ship's descent into the atmosphere. You need to get back off this planet fast.
+  - choice: start
+    text: Start the game
+    effects: LandingPad
+_vars:
+  # Constants
+  - wrench_damage: 2
+  # Logic
+  - temp: 0
+  # Character Stats
+  - health: 15
+    _locale: Health
+  - defense: 0
+    _locale: Defense
+  # Progression
+  - power: false
+  # Items
+  - iron_plate: 0
+    _locale: Iron Plates
+  # Place Vars
+  - biter_health_control_room: 5
+  - biter_attack_control_room: 2
+_header:
+  - choice: stats
+    action:
+    effects:
+      - "Health: {health}"
+  - choice: inventory
+    action:
+    effects:
+      - "Iron Plates: {iron_plate}"
+AssemblyLine:
+  - "You're in an expansive room filled with silent conveyor belts and non-functional assemblers. It feels eerily empty."
+ControlRoom:
+  - if: not defeated_control_room_enemies
+    then:
+      - goto: ControlRoomFight
+  - if: not power
+    then:
+      - "You're in a command center with monitors. They're all dark."
+    else:
+      - "You're in a command center with flickering monitors. Some display maps, while others show warnings in red text."
+  - choice: north
+    text: Go north to the landing pad
+    effects: LandingPad
+ControlRoomFight:
+  - "A small, fast-moving alien with razor-sharp claws blocks your path."
+  - choice: _back
+  - if: has_wrench
+    then:
+      - choice: wrench
+        text: Attack with wrench
+        effects:
+          - set: biter_health_control_room -= wrench_damage
+          - if: biter_health_control_room <= 0
+            then:
+              - You defeated the small alien!
+              - flag: defeated_control_room_enemies
+            else:
+              - set: temp = biter_attack_control_room - defense
+              - set: health -= temp
+              - The alien swipes at you with its claws. You take {temp} damage. You now have {health} health.
+          - separator:
+          - goto: .
+EnergyBay:
+  - if: not power
+    then:
+      - "A pristine area with battery storage and utter silence. The air is stagnant."
+    else:
+      - "A pristine area with battery storage and a faint humming sound. The air feels charged with electricity."
+  - if: not energy_bay_searched
+    then:
+      - choice: search
+        text: Search the energy bay
+        effects:
+          - flag: energy_bay_searched
+          - A rusty blueprint book lies in the corner. This could come in handy.
+          - "[Got Blueprint Book]"
+          - flag: has_blueprint_book
+          - separator:
+          - goto: .
+  - choice: north
+    text: Go north to the workshop
+    effects: Workshop
+GeneratorRoom:
+  - if: not power
+    then:
+      - "You're in a cavernous space dominated by a massive, inactive generator. The air is damp, and rust covers the walls."
+    else:
+      - "You're in a cavernous space dominated by a massive generator. The air is filled with its reverberations."
+  - if: generator_room_searched
+    then:
+      - if: not power
+        then:
+          - choice: power
+            text: Toggle the power on
+            effects:
+              - set: power = True
+              - separator:
+              - goto: .
+        else:
+          - choice: power
+            text: Toggle the power off
+            effects:
+              - set: power = False
+              - separator:
+              - goto: .
+  - if: not generator_room_searched
+    then:
+      - choice: search
+        text: Search the room
+        effects:
+          - flag: generator_room_searched
+          - You find a power switch in a dark corner.
+          - separator:
+          - goto: .
+  - choice: leave
+    text: Leave the generator room
+    effects: PowerStation
+LandingPad:
+  - "You stand on a scorched metallic platform surrounded by alien vegetation. The air smells of burnt fuel and oil."
+  - if: not landing_pad_searched
+    then:
+      - choice: search
+        text: Search the area
+        effects:
+          - flag: landing_pad_searched
+          - You find an iron plate jutting out from beneath the pad, still intact.
+          - set: iron_plate += 1
+            show:
+          - separator:
+          - goto: .
+  - choice: east
+    text: Go east to the lakeside power station
+    effects: PowerStation
+  - choice: south
+    text: Go south to the control room
+    effects: ControlRoom
+PowerStation:
+  - if: not power
+    then:
+      - "Loose wires suggest this lakeside station is barely functional."
+    else:
+      - "The lakeside station hums with the faint buzz of machinery."
+  - choice: west
+    text: Go west to the landing pad
+    effects: LandingPad
+  - choice: southwest
+    text: Go southwest to the supply depot
+    effects: SupplyDepot
+  - choice: south
+    text: Go south to the workshop
+    effects: Workshop
+  - choice: southeast
+    text: "[Needs key] Go southeast to the assembly line"
+    enforce: unlocked_power_station_to_assembly_line
+    alt_effects:
+      - The door is locked.
+    effects: AssemblyLine
+  - choice: enter
+    text: "[Needs key] Enter the generator room"
+    enforce: unlocked_generator_room
+    alt_effects:
+      - The door is locked.
+    effects: GeneratorRoom
+SupplyDepot:
+  - "Rows of shelves stacked with industrial supplies. Most are empty, but a few crates remain intact."
+  - if: not supply_depot_searched
+    then:
+      - choice: search
+        text: Search the depot
+        effects:
+          - flag: supply_depot_searched
+          - You find an iron plate in a crate. (A crate plate?)
+          - set: iron_plate += 1
+            show:
+          - separator:
+          - goto: .
+  - choice: north
+    text: Go north to the power station
+    effects: PowerStation
+Workshop:
+  # Syntax for locations
+  #- door: north
+  #  to: PowerStation
+  - "You stand in a cluttered room filled with half-assembled machinery. Tools and scraps are strewn across the workbenches."
+  - if: workshop_searched
+    then:
+      - choice: craft
+        text: Craft a thing
+        effects: WorkshopCrafting
+  - if: not workshop_searched
+    then:
+      - choice: search
+        text: Search the workshop
+        effects:
+          - flag: workshop_searched
+          - Nestled in a corner is a usable crafting table. You find a wrench on it.
+          - "[Got Wrench]"
+          - flag: has_wrench
+          - separator:
+          - goto: .
+  - choice: north
+    text: Go north to the power station
+    effects: PowerStation
+  - choice: south
+    text: Go south to the energy bay
+    effects: EnergyBay
+WorkshopCrafting:
+  - What would you like to craft?
+  - choice: back
+    text: Back to Workshop
+    effects: Workshop
+  - if: not has_iron_armor
+    then:
+      - choice: armor
+        text: Craft a set of iron plate armor
+        cost: 2 iron_plate
+        effects:
+          - flag: has_iron_armor
+          - You slide on the two sheets of metal, now safer from the outside world.
+          - set: defense += 1
+            show:
+          - separator:
+          - goto: .
+Misc:
+  - flag: unlocked_generator_room
+  - flag: unlocked_power_station_to_assembly_line

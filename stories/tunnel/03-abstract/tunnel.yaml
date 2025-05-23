@@ -1,4 +1,8 @@
----
+_content:
+  - Which layer would you like to go to?
+  - choice: one
+    text: The first layer
+    effects: layer_1
 training:
   _content:
     - tag: george
@@ -7,6 +11,9 @@ training:
       "2": second/depart
       "3": third/depart
       "4": fourth/depart
+      "5": fifth/depart
+      "6": sixth/depart
+      "7": seventh/depart
   first:
     depart:
       - storypoint:
@@ -117,9 +124,9 @@ training:
       - sub: /logic/time
       - tag: general_store_shopkeeper
       - tag: ghostly_orb
-      - On the way to the Tunnel, you and George pass a scruffy merchant with a long, black beard moving wares from the City to the town in which the orphanage is located, Lokton. He's lugging a ton of stuff.
+      - On the way to the Tunnel, you and George pass a scruffy merchant with a long, black beard moving wares from the City to the town in which the orphanage is located, Lokton. He's lugging a ton of stuff, including a large galss sphere.
       - choice: offer
-        text: Offer some pennies for the large glass sphere that the merchant is holding
+        text: Offer some pennies for the sphere
         cost: 2 coin
         shown: 1 artifact_ghostly_orb_purple
         effects:
@@ -136,13 +143,6 @@ training:
           - if: curr_clothes != "dark_gray_plain"
             then:
               - (Not that you're still wearing your dark gray outfit anymore anyways).
-      - tag: starblossom
-      - if: knowledge_starblossom
-        then:
-          - As you venture into the Tunnel, you see a starblossom. Its leaves see to be shimmering. Maybe it's special?
-          - flag: layer_1_found_starblossom
-        else:
-          - You pass a shimmering plant but don't know what to make of it.
       - This time, George lets you decide what to gather.
       - choice: rosalia
         text: Gather rosalia
@@ -178,7 +178,6 @@ training:
       - You and george depart on your fourth expedition. He says you'll be going on an exploration trip this time. On these trips, you'll travel somewhere random and have to make some choices based on where you end up. This is what you'll be doing once your training is over.
       - sub: /logic/time
       - After walking to the Tunnel, you wander somewhere.
-      # TODO: Only the first 5 explorations support training
       - choice: next
         effects:
           - sub: /tunnel/layer_1/explore
@@ -215,23 +214,109 @@ training:
         position: after
     return:
       - You will get experience for certain tasks now, which will unlock more actions!
+      - tag: caroline
       - (Unlocked Experience)
       - (Unlocked Caroline's Room)
       - flag: unlock_experience
       - flag: unlock_orphanage_caroline_room
       - separator:
       - goto: /orphanage
+  fifth:
+    depart:
+      - storypoint:
+      - You are going on another exploration trip.
+      - sub: /logic/time
+      - tag: starblossom
+      - if: knowledge_starblossom
+        then:
+          - On the way, you see a starblossom. Its leaves seem to be shimmering. Maybe it's special?
+          - flag: layer_1_found_shimmering_starblossom
+        else:
+          - On the way, you pass a shimmering plant but don't know what to make of it.
+      - choice: next
+        effects:
+          - sub: /tunnel/layer_1/explore
+          - goto: walk_back
+    walk_back:
+      - George says he's really happy with how training has been going!
+      - tag: market
+      - tag: rose
+      - tag: benedict
+      # TODO: Maybe too many unlocks here?
+      - (Unlocked store "Explorer's Alley" in the Town Market)
+      - (Unlocked Rose's Room)
+      - (Unlocked Benedict's Room)
+      - flag: unlock_town_market_explorer_alley
+      - flag: unlock_orphanage_rose_room
+      - flag: unlock_orphanage_benedict_room
+      - separator:
+      - goto: /orphanage
+  sixth:
+    depart:
+      - storypoint:
+      - George says you're nearing the end of your training. He's so excited!
+      - sub: /logic/time
+      - sub: /tunnel/layer_1/explore
+      - goto: walk_back
+    walk_back:
+      - tag: study
+      - (Unlocked Energy)
+      - (Unlocked more books at the study)
+      - flag: unlock_energy
+      - flag: unlock_orphanage_study_new_books
+      - separator:
+      - goto: /orphanage
+  seventh:
+    depart:
+      - storypoint:
+      - sub: /logic/time
+      - Instead of doing a general exploration, George says there's a specific spot he wants to head out to. You both head into a forest, then into a little clearing lit by the Tunnel's soft glow.
+      - George speaks to you through varying birds' chirps. "My father was great at catching clackadoo birds. He left me quite a few feathers when he went on his last trip into the Tunnel. I decided I'd give one to each mentee I had when they'd gotten their green pass."
+      - He goes on, "Well, here's your green pass, and your feather." George wears an enormous grin on his face. "Congratulations," He says, "you're done with training." Then he pulls you in for a big hug.
+      - (Unlocked Green Pass)
+      - You can now go on explorations on your own!
+      - set: tunnel_pass = "green"
+      - choice: accept
+        text: Accept the clackadoo feather
+        effects:
+          - You take the clackadoo feather and return to the orphanage.
+          - set: inv_clackadoo += 1
+            show:
+          - separator:
+          - goto: /orphanage
 layer_1:
+  _vars:
+    - button_blue_coins: 0
+  _content:
+    - What would you like to do in layer 1?
+    - choice: explore
+      text: Do some general exploration
   explore:
     - sub: /logic/time
-    - set: exp += 2
-    - random: cave, rosalia_encounter, henry, gift, dagger
+    - set: logic_arg_1 = 2
+    - sub: /logic/inc_exp
+    # Only first 10 training expeditions support training
+    # TODO: Ghost encounter to go with grave, gravestone itself again, kiwi, backpack, starblossom, hint garden, tso note
+    - if: tunnel_pass == "training"
+      then:
+        - random: cave, rosalia_encounter, henry, gift, dagger, blue_coin, scrolls, keys, button, materials
+      else:
+        - random: cave, rosalia_encounter, henry, gift, dagger, blue_coin, scrolls, keys, button, materials, base
+  return:
+    - sub: /logic/time
+    - if: tunnel_pass == "training"
+      then:
+        - subreturn:
+    - goto: /orphanage
   cave:
     _content:
+      - storypoint:
       # TODO: Turn into union string check
       - if: tunnel_pass == "training"
         then:
           - goto: cave
+      # TODO: Other stuff here
+      - goto: cave
     cave:
       _content:
         - flag: tunnel_layer_1_cave_cave_visited
@@ -255,9 +340,8 @@ layer_1:
             - tag: petunal
             - set: inv_petunal += 3
               show:
-            - if: tunnel_pass == "training"
-              then:
-                - subreturn:
+            - goto: /tunnel/layer_1/return
+        # TODO
       inside:
         - The inside is really dark and drops suddenly downward into the earth.
         - if: not tunnel_layer_1_cave_cave_inside_sewing_machine_taken
@@ -272,57 +356,97 @@ layer_1:
           text: Go further into the cave
           cost: 1 inv_torch
           effects:
-            - pass:
+            # TODO: Stolen blue pass here
+            - The cave continues into a small chamber. There's not any further passages, but a giant red gemstone is embedded on the far wall.
+            # TODO: Ability to extract it
+            - if: tunnel_pass == "training"
+              then:
+                - George says, "These red gemstones signify ghostly entrances. If we had a shovel we could see what was on the other side."
+              else:
+                - You recall George talking about how these red gemstones signify entrances for ghosts.
+            - tag: ghost
+            - tag: shovel
+            - tag: pickaxe
+            # TODO: Some reward if you don't have a shovel or pickaxe here
+            - choice: extract
+              text: Extract the gemstone
+              require: 1 inv_pickaxe
+              effects:
+                - pass:
+                # TODO
+            - choice: dig
+              text: Dig through the wall by the gemstone to the other side
+              require: 1 inv_shovel
+              effects:
+                - pass:
+            - choice: return
+              text: Go back home
+              effects:
+                - goto: /tunnel/layer_1/return
         # TODO: Maybe some explanation of why your adventure stops here (i.e.- why you can't explore around after this)
         - choice: return
           text: Go back outside
           effects:
-            - if: tunnel_pass == "training"
-              then:
-                - subreturn:
+            - goto: /tunnel/layer_1/return
       top:
         - You are able to climb up a layer of the cave, but need high athletic skill to get higher.
         - if: not tunnel_layer_1_cave_cave_top_found_building_materials
           then:
             - flag: tunnel_layer_1_cave_cave_top_found_building_materials
             - However, you do find some building materials!
-            - set: inv_building_materials += 2
+            - set: inv_building_materials += 4
               show:
         - choice: higher
           text: Go higher
           require: 10 skill_athleticism
           effects:
-            - pass:
+            # Assume they aren't still training here
+            - if: _visits == 1
+              then:
+                - tag: city
+                - You get to the top of the cave. From here, you can make out some of the taller buildings in the city on the other side of the Dome. You've always dreamed of visiting the City.
+                - A female voice behind you says "Hiya!" You turn and see a vampire! "I'm Amy," she says.
+                - choice: run
+                  text: Go back down to the ground and run away
+                  effects:
+                    - You quickly make your escape.
+                    - goto: /tunnel/layer_1/return
+                # TODO: Ability to talk to vampire
+              else:
+                # TODO: Change this dialogue based off what player did with Amy
+                - Amy the vampire isn't here anymore.
         - choice: return
           effects:
-            - if: tunnel_pass == "training"
-              then:
-                - subreturn:
+            - goto: /tunnel/layer_1/return
   rosalia_encounter:
     _content:
+      - storypoint:
       - goto: duke
     duke:
       _content:
-        - You pass a gray squirrel with the bushiest tail you've ever seen. It sees you and runs away.
+        - if: _visits == 1
+          then:
+            - You pass a gray squirrel with the bushiest tail you've ever seen. It sees you and runs away.
+          else:
+            - You see the bushy squirrel scutter off again.
         - goto: patch
     patch:
       _content:
         - You come across a large rosalia patch, one much fresher than others you've picked from. This will help with your rosalia gathering!
-        - set: inv_rosalia += 1
+        - set: skill_gather_rosalia += 1
           show:
         - goto: return
     return:
       _content:
         - choice: return
           effects:
-            - if: tunnel_pass == "training"
-              then:
-                - subreturn:
+            - goto: /tunnel/layer_1/return
   henry:
     _vars:
       # -1 Signals not having inserted coins yet
       - coins_last_left_in_machine: -1
     _content:
+      - storypoint:
       - goto: machine
     machine:
       _content:
@@ -336,9 +460,15 @@ layer_1:
         _content:
           - So how many coins would you like to leave?
           - choice: invest
-            enforce: _args[0] is not None and isinstance(_args[0], str) and _args[0].isdigit()
+            enforce: _args[0] is not None and isinstance(_args[0], str) and _args[0].isdigit() and int(_args[0]) <= coin
             alt_effects:
-              - You have to choose a nonnegative integer amount to invest! (For example, "invest 2").
+              - if: not _args[0] is not None and isinstance(_args[0], str) and _args[0].isdigit()
+                then:
+                  - You have to choose a nonnegative integer amount to invest! (For example, "invest 2").
+                else:
+                  - if: not int(_args[0]) <= coin
+                    then:
+                      - You only have {coin} coins.
               - goto: .
             effects:
               - set: coins_last_left_in_machine = int(_args[0])
@@ -355,23 +485,25 @@ layer_1:
     henry:
       _content:
         # TODO: Second time visit
-        - tag: henry
-        - You find a middle-aged traveler coming from the opposite direction. He waves and says in a friendly manner, "I'm Henry. How are you doing little lass?"
-        - if: tunnel_pass == "training"
+        - if: _visits == 1
           then:
-            - George waves back, "Hey, Henry!" Henry's eyes brighten when he sees George.
-        - tag: language_cube
-        - He hands you a cube about the size of your fist on the way by. "I have so many artifacts," he says in a cheery tone, "You can have one!"
-        - choice: return
-          effects:
+            - tag: henry
+            - You find a middle-aged traveler coming from the opposite direction. He waves and says in a friendly manner, "I'm Henry. How are you doing little lass?"
             - if: tunnel_pass == "training"
               then:
-                - subreturn:
+                - George waves back, "Hey, Henry!" Henry's eyes brighten when he sees George.
+            - tag: language_cube
+            - He hands you a cube about the size of your fist on the way by. "I have so many artifacts," he says in a cheery tone, "You can have one!"
+            - choice: return
+              effects:
+                - goto: /tunnel/layer_1/return
   gift:
     _content:
+      - storypoint:
       - if: not layer_1_gift_gift_found
         then:
           - goto: gift
+      - goto: dirt
     gift:
       _content:
         - flag: layer_1_gift_gift_found
@@ -384,11 +516,21 @@ layer_1:
           show:
         - choice: return
           effects:
-            - if: tunnel_pass == "training"
-              then:
-                - subreturn:
+            - goto: /tunnel/layer_1/return
+    dirt:
+      _content:
+        - You happen across the place where the flowers and note were before. You find some special dirt nearby instead.
+        - set: inv_special_dirt += 2
+          show:
+        - if: tunnel_pass == "training"
+          then:
+            - George says special dirt could be useful for that special dirt store he found a while ago, though he doesn't remember where it is anymore.
+        - choice: return
+          effects:
+            - goto: /tunnel/layer_1/return
   dagger:
     _content:
+      - storypoint:
       - goto: flying_key
     flying_key:
       _content:
@@ -405,14 +547,353 @@ layer_1:
           effects: dagger
     dagger:
       _content:
+        # TODO: Make it so that the dagger can still be gotten if it's encountered during training?
+        - if: _visits == 2
+          then:
+            - The dagger isn't there anymore.
+        - if: _visits > 1
+          then:
+            # TODO: Something after knife is gone
+            - goto: /tunnel/layer_1/return
         - tag: weapon
         - You find a dagger on the ground.
         - if: tunnel_pass == "training"
           then:
             - George says to leave it on the ground. "You're not old enough to have weapons," he says.
             - If you come back here later you could probably take it. Not that you'd want to defy George, right?
+          else:
+            - sub: /logic/get_age
+            - if: logic_var < 18
+              then:
+                - You're still not old enough to have weapons. Do you take the knife anyways?
+                - choice: sure
+                  text: Take the knife
+                  shown: 1 inv_knife
+                  effects:
+                    - You take it and return home, keeping it hidden in your bag as you walk back.
+                    - goto: /tunnel/layer_1/return
+                - choice: nah
+                  text: Leave it there
+                  effects:
+                    - You smile, knowing you did the right thing.
+                    - You goody-two-shoes...
+                    - goto: /tunnel/layer_1/return
+              else:
+                - You pick it up.
+                - set: inv_knife += 1
+                  show:
         - choice: return
           effects:
+            - goto: /tunnel/layer_1/return
+  blue_coin:
+    _content:
+      - storypoint:
+      - if: knowledge_artifacts
+        then:
+          - A bald guy is yelling at you about selling mini artifacts for blue coins. You stop by his store.
+          # TODO
+          - goto: mini_artifacts
+        else:
+          - You hear a bald guy yelling at you about selling some sort of artifacts but don't know what they are so you move on.
+          - goto: nut
+    mini_artifacts:
+      _content:
+        - pass:
+    nut:
+      _content:
+        - if: not knowledge_squirrel_wars and not layer_1_blue_coin_nut_found
+          then:
+            - You pass by a nut on the ground, but those probably aren't used for anything, so you leave it there.
+          else:
+            - flag: layer_1_blue_coin_nut_found
+            - You find a nut!
+            - set: inv_nut += 1
+        - if: not layer_1_blue_coin_stash_found
+          then:
+            - if: knowledge_blue_coins
+              then:
+                - flag: layer_1_blue_coin_stash_found
+                - if: tunnel_pass == "training"
+                  then:
+                    - You and George find a stash of blue coins!
+                  else:
+                    - You find a stash of blue coins!
+                - goto: stash
+              else:
+                - You stumble over some blue looking coins but don't know what to make of them.
+                - if: tunnel_pass == "training"
+                  then:
+                    - flag: layer_1_blue_coin_stash_found
+                    - George exclaims, "Those are blue coins! Good currency for tunnel adventurers! We should take some."
+                    - flag: knowledge_blue_coins
+                    - goto: stash
+                  else:
+                    - goto: return
+          else:
+            - You come across the stash of blue coins again!
+            - goto: stash
+    stash:
+      _vars:
+        - blue_coins_left: 5
+      _content:
+        - if: tunnel_pass == "training"
+          then:
+            - if: blue_coins_left >= 2
+              then:
+                - set: blue_coins_left -= 2
+                - set: inv_blue_coin += 1
+                - You and George both take a blue coin.
+            - if: blue_coins_left == 1
+              then:
+                - set: blue_coins_left -= 1
+                - set: inv_blue_coin += 1
+                - There's only one blue coin left, so George lets you keep it.
+            - if: blue_coins_left == 0
+              then:
+                - Unfortunately, there are no blue coins left. "Oh well," George says, "we really depleted that patch of coins!"
+          else:
+            - if: blue_coins_left >= 2
+              then:
+                - You take two blue coins from the stash.
+                - set: blue_coins_left -= 2
+                - set: inv_blue_coin += 2
+            - if: blue_coins_left == 1
+              then:
+                - There is one blue coin left in the stash, so you take it.
+                - set: blue_coins_left -= 2
+                - set: inv_blue_coin += 1
+            - if: blue_coins_left == 0
+              then:
+                - Unfortunately, there are no blue coins left.
+        - goto: return
+    return:
+      - goto: /tunnel/layer_1/return
+  scrolls:
+    _content:
+      - if: not layer_1_scrolls_found_first_scroll
+        then:
+          - flag: layer_1_scrolls_found_first_scroll
+          - Ahead of you are some woods, dark and gloomy like my soul. No, not your soul, mine. The narrator's. Anyways...
+          - An ancient scroll crunches under your feet as you approach the woods.
+          - if: tunnel_pass == "training"
+            then:
+              - George says you shouldn't go further toward the woods but says he can't explain why. His voice is hurried and doesn't carry its usually nonchalantness.
+              - goto: lake
+        else:
+          - You're back at the dark-and-gloomy-like-my-soul woods.
+          - The scroll that crunched under your feet isn't there anymore. In its place, there are scroll-shaped footsteps leading to the woods.
+          - if: tunnel_pass == "training"
+            then:
+              - George stomps his foot on the ground. "Ugh, we need to head toward the lake again." Then, he takes off in the other direction, almost leaving you behind.
+              - choice: follow
+                text: Catch up to George
+                effects:
+                  - You quickly catch up to George and head back toward the lake.
+                  - goto: lake
+              - choice: sneak
+                text: Sneak off toward the woods while George isn't looking
+                effects:
+                  # If the character somehow has nonzero sneak at this stage, they can get away from George
+                  - if: skill_sneak > 0
+                    then:
+                      - goto: woods
+                  - You get a decent ways away before slowing down, sure that you've lost George. You look back one more time just to make sure and can't see him at all.
+                  - But when you look back George is right there at the top of the hill. He doesn't even seem out of breath from trying to catch up with you, just really, really angry.
+                  # TODO: Defiance causes more training sessions?
+                  - choice: oops
+                    effects:
+                      - George drags you back home. "Never do that again!" He says. "The tunnel is dangerous, you could have died." Although his expression is one of anger, his words sound more hurt than anything.
+              - stop:
+      - choice: woods
+        text: Head to the woods
+        effects:
+          - goto: woods
+      - choice: lake
+        text: Head to the lake
+        effects:
+          - goto: lake
+    woods:
+      # TODO
+      - pass:
+    lake:
+      _content:
+        - if: not layer_1_scrolls_lake_found
+          then:
+            - flag: layer_1_scrolls_lake_found
+            - When you get closer to the lake, you can see an island in the center with a big "X" on it.
+          else:
+            # TODO: Ability to dig up the X
+            - if: layer_1_scrolls_lake_island_dug_hands
+              then:
+                # TODO: Way to reconcile the similarness of these strings to lower amount of code duplication
+                - You get to the lake again. There's still the big "X" on it, though it's not as stark against the landscape with all your digging around it.
+              else:
+                - You get to the lake again. There's still the big "X" on it.
+        - sub: /logic/get_season
+        - if: logic_var == "Winter"
+          then:
+            - if: not layer_1_scrolls_lake_winter_found
+              then:
+                - flag: layer_1_scrolls_lake_winter_found
+                - The lake is frozen over due to it being winter. The ice is hard enough you could probably cross.
+              else:
+                - The lake is frozen solid over.
             - if: tunnel_pass == "training"
               then:
-                - subreturn:
+                - George looks across at the island, his interest piqued. He tests the ice. "Seems fine," He says, then points at a moose on the ice midway between you and the island, "Yeah it definitely seems like the ice could support us."
+                - choice: return
+                  text: Urge George to go back
+                  effects:
+                    - George nods, "Yeah, it probably wouldn't be wise to get on the ice. My desire for interest got the best of me."
+                    - goto: /tunnel/layer_1/return
+                - choice: cross
+                  text: Cross the lake
+                  effects:
+                    - goto: cross
+              # TODO: Something they can do other than crossing the lake
+              else:
+                - choice: return
+                  text: Go back home
+                  effects:
+                    - goto: /tunnel/layer_1/return
+                - choice: cross
+                  text: Cross the lake
+                  effects:
+                    - goto: cross
+          else:
+            # TODO: More to do along coastline
+            - The lake is a large mass of turbulent water, impassible without being frozen over, so you return home.
+            - goto: /tunnel/layer_1/return
+      cross:
+        _content:
+          - if: tunnel_pass == "training"
+            then:
+              - You and George make it across safely. The ice is pretty thick, almost unnaturally so.
+            else:
+              - You make it across the lake safely. The ice is pretty thick, almost unnaturally so.
+          - You examine the "X" in the ground. It's outlined with small pebbles found across the beach.
+          - choice: hands
+            text: Use my hands to dig into the sand
+            effects:
+              - flag: layer_1_scrolls_lake_island_dug_hands
+              - if: tunnel_pass == "training"
+                then:
+                  - George laughs. "That's not gonna work." And he's right, just as you reach around a foot or two deep, the sand comes tumbling back down just as quickly as you're able to shovel it back out.
+                else:
+                  - You don't get very far until your progress halts, with the sand tumbling back down just as quickly as you're able to scoop it out.
+              - You return home defeated, if only you had a shovel.
+              - goto: /tunnel/layer_1/return
+          - choice: shovel
+            text: Use a shovel to dig into the sand
+            require: 1 inv_shovel
+            effects:
+              # TODO
+              - pass:
+          - choice: return
+            text: Just go back home
+            effects:
+              - goto: /tunnel/layer_1/return
+  keys:
+    _content:
+      - storypoint:
+      - tag: squirrel
+      - You catch a squirrel scuttering off in the corner of your view. Not very important.
+      - goto: shop
+    shop:
+      - You come across a little shop with keys. Sitting on a rocking chair outside is a frail old man with green hair. He says he sells keys to buildings in the outskirts, which unlock at enough experience.
+      - if: tunnel_pass == "training"
+        then:
+          - George says the outskirts have a lot of useful abilities.
+      - choice: gym
+        text: Key to the gym
+        cost: 5 inv_special_dirt
+        effects:
+          - flag: town_outskirts_gym_key
+      - choice: scavenge
+        text: Scavenge for special dirt to have some for next time
+        shown: 3 inv_special_dirt
+        effects:
+          - pass:
+      - inject: /tunnel/layer_1/return
+        into_choices: _all
+        position: after
+  button:
+    _content:
+      - storypoint:
+      - You find a wall with some buttons on it. Pressing a given button will give you a bonus that can only be collected elsewhere. You can also leave an offering of rosalia to increase the reward.
+      - goto: button
+    button:
+      - if: knowledge_blue_coins
+        then:
+          - choice: blue_coins
+            text: Leave blue coins in a place with a backpack
+            effects:
+              - set: button_blue_coins += 2
+      - inject: /tunnel/layer_1/return
+        into_choices: _all
+        position: after
+  materials:
+    _content:
+      - storypoint:
+      - You find a lot of building materials lying on the ground.
+      - set: inv_building_materials += 5
+        show:
+      - if: tunnel_pass == "training"
+        then:
+          - George jokes that these materials would be good for a treehouse.
+      - goto: /tunnel/layer_1/return
+  # Non-training encounters
+  base:
+    _content:
+      - storypoint:
+      - goto: enter
+    enter:
+      - if: not layer_1_base_base_found
+        then:
+          - flag: layer_1_base_base_found
+          - You arrive at a clearing with a very tall, sturdy tree in the center, a perfect spot to satisfy your deep-seated desire for a treehouse! Each time you visit, you can build one step of it, though you'll also need building materials.
+        else:
+          - You arrive back in that perfect spot for a treehouse.
+      - if: layer_1_base_built_garden
+        then:
+          - You pluck a rosalia from your garden on the way in.
+          - set: inv_rosalia += 1
+            show:
+      - goto: build
+    build:
+      # TODO: Affirmation station later?
+      # TODO: Squirrel stuff
+      - choice: garden
+        selectable_once:
+        text: Build a rosalia garden at the bottom, which will give you rosalia each time you visit
+        cost: 5 inv_building_materials
+        effects:
+          - flag: layer_1_base_built_garden
+          - This garden will give a plentiful supply of rosalia. Building it also increases your gather skill.
+          - set: skill_gather_rosalia += 1
+            show:
+      # Make this increase nimbleness over time or in some other more interesting way
+      - choice: swing
+        selectable_once:
+        text: Build a swing, which will increase your nimbleness skill
+        cost: 5 inv_building_materials
+        shown: 10 skill_nimbleness
+        effects:
+          - flag: layer_1_base_built_swing
+          - Wheeeeee!
+      - choice: ladder
+        selectable_once:
+        text: Build a ladder, which will allow you to build at higher levels
+        cost: 5 inv_building_materials
+        effects:
+          - flag: layer_1_base_built_ladder
+          - The ladder will be a great investment into further expansion of your cool base!
+      - choice: scavenge
+        selectable_once:
+        text: Scavenge for building materials for the next time you're here
+        shown: 3 inv_building_materials
+        effects:
+          - It's not much, but it'll help.
+      - inject: /tunnel/layer_1/return
+        into_choices: _all
+        position: after

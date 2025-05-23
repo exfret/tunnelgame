@@ -48,16 +48,21 @@ class WrongFormattingError(Exception):
 
 
 class UndefinedVariableChecker(ast.NodeVisitor):
+    def __init__(self):
+        self.curr_address = ()
+
     def visit_Name(self, node):
         if node.id not in self.var_dict and node.id not in __builtins__:
-            raise MissingReferenceError(f"{node.id} not in var_dict: {self.var_dict}")
+            print(f"\033[31mError:\033[0m Missing reference for var \"{node.id}\" at address {self.curr_address}")
+            raise MissingReferenceError()
         self.generic_visit(node)
 
-    def check(self, expression, var_dict):
+    def check(self, expression, var_dict, address):
+        self.curr_address = address
         try:
             tree = ast.parse(expression, mode="eval")
         except Exception:
-            print(f"\033[31mError:\033[0m Parsing error for expression {expression}")
+            print(f"\033[31mError:\033[0m Parsing error for expression at address {address} with value {expression}")
             raise WrongFormattingError()
         self.var_dict = var_dict
         self.visit(tree)
@@ -77,6 +82,7 @@ def open_game(story_path):
         "attached_blocks": [], # Attached blocks
         "bookmark": (),  # bookmark is a tuple of addresses, which are themselves tuples
         "call_stack": [],  # List of dicts with bookmarks and vars (TODO: Maybe do last_address_list and choices here too?)
+        "choice_num": 0,
         "command_buffer": [],
         "command_macros": {},
         "choices": {
@@ -100,6 +106,7 @@ def open_game(story_path):
             "node_types": {}
         },
         "msg": {},  # Hacky way for things to communicate to gameloop
+        "seed": [], # TODO: Update exec?
         "settings": {
             "autocomplete": "on",
             "descriptiveness": "descriptive",
@@ -110,7 +117,8 @@ def open_game(story_path):
         "vars": {},
         "view_displayed_text": {"console": "", "game": ""}, # TODO: Rename to subview displayed text or something along those lines?
         "visits": {},
-        "visits_choices": {}
+        "visits_choices": {},
+        "world": {"objects": {}, "descriptors": {}, "relationships": {}} # TODO: Update exec?
     }
     state.update(copy.deepcopy(starting_state))
     state["game"] = game
@@ -125,13 +133,79 @@ def construct_game(node, story_path, address=()):
     if not "_meta" in node:
         node["_meta"] = {}
 
+    # Need to do manual world checking since we populate state["world"] at parsetime
+    # TODO: Finish implementing object system... not sure where to go with this, currently just parses
+    if "_world" in node:
+        if not isinstance(node["_world"]):
+            print(f"\033[31mError:\033[0m _world is not instance of list at {address} node {node}")
+            raise IncorrectTypeError()
+        for detail in node["_world"]:
+            if not isinstance(detail, dict):
+                print(f"\033[31mError:\033[0m DETAIL is not instance of dict at {address} node {node}")
+                raise IncorrectTypeError()
+            if "object" in detail:
+                if not isinstance(detail["_object"], str):
+                    print(f"\033[31mError:\033[0m OBJECT_ID is not instance of str at {address} node {node}")
+                    raise IncorrectTypeError()
+                state["world"]["objects"][detail["object"]] = {"notes": [], "descriptors": [], "relationships": []}
+                curr = state["world"]["objects"][detail["object"]]
+
+                # Don't check for extraneous tags here when it's too much hassle, we can have the grammar do that
+                if "_notes" in detail:
+                    if not isinstance(detail["_notes"], list):
+                        print(f"\033[31mError:\033[0m OBJECT_NOTES is not instance of list at {address} node {node}")
+                        raise IncorrectTypeError()
+                    for note in detail["_notes"]:
+                        if not isinstance(note, str):
+                            print(f"\033[31mError:\033[0m OBJECT_NOTE is not instance of str at {address} node {node}")
+                            raise IncorrectTypeError()
+                        curr["notes"].append(note)
+                if "_descriptors" in detail:
+                    if not isinstance(detail["_descriptors"], list):
+                        print(f"\033[31mError:\033[0m OBJECT_DESCRIPTORS is not instance of list at {address} node {node}")
+                        raise IncorrectTypeError()
+                    for descriptor in detail["_descriptors"]:
+                        if not isinstance(descriptor, str):
+                            print(f"\033[31mError:\033[0m OBJECT_DESCRIPTOR is not instance of str at {address} node {node}")
+                            raise IncorrectTypeError()
+                        curr["descriptors"].append(descriptor)
+                if "_relationships" in detail:
+                    if not isinstance(detail["_relationships"], list):
+                        print(f"\033[31mError:\033[0m OBJECT_RELATIONSHIP is not instance of list at {address} node {node}")
+                        raise IncorrectTypeError()
+                    for relationship in detail["_relationships"]:
+                        if not isinstance(relationship, dict):
+                            print(f"\033[31mError:\033[0m OBJECT_RELATIONSHIP is not instance of dict at {address} node {node}")
+                            raise IncorrectTypeError()
+                        if not "by" in relationship or not "to" in relationship:
+                            print(f"\033[31mError:\033[0m OBJECT_RELATIONSHIP has missing tags {address} node {node}")
+                            raise MissingRequiredTagError()
+                        if len(relationship) > 2:
+                            print(f"\033[31mError:\033[0m OBJECT_RELATIONSHIP has invalid tags at {address} node {node}")
+                            raise InvalidTagError()
+                        if not isinstance(relationship["by"], str) or not isinstance(relationship["to"], str):
+                            print(f"\033[31mError:\033[0m Incorrect type for 'by' or 'to' tag in RELATIONSHIP at {address} node {node}")
+                            raise IncorrectTypeError()
+                        curr["relationships"].append({"by": relationship["by"], "to": relationship["to"]})
+            elif "descriptor" in detail:
+                if not isinstance(detail["descriptor"], str):
+                    print(f"\033[31mError:\033[0m DESCRIPTOR is not instance of str at {address} node {node}")
+                    raise IncorrectTypeError()
+                state["world"]["objects"][detail["descriptor"]] = {}
+            elif "relationship" in detail:
+                if not isinstance(detail["relationship"], str):
+                    print(f"\033[31mError:\033[0m RELATIONSHIP is not instance of str at {address} node {node}")
+                    raise IncorrectTypeError()
+                state["world"]["objects"][detail["relationship"]] = {}
+            else:
+                print(f"\033[31mError:\033[0m Invalid DETAIL disjunct at {address} node {node}")
+                raise InvalidDisjunctError()
+
     for key, subnode in node.items():
         if not key[0] == "_":  # Only recurse into sub-blocks
             # Turn this block into a dict block if it isn't already
             if isinstance(subnode, list):
-                node[key] = {
-                    "_content": subnode
-                }
+                node[key] = {"_content": subnode}
             else:
                 construct_game(subnode, story_path, address + (key,))  # Note: This can result in exponentially long games with the right setups...
                 # TODO: Smarter stitching that does not just duplicate everything
@@ -329,8 +403,8 @@ def parse_node(node, context, address):
         if isinstance(node, str):
             # Try to eval the node to make sure it works
             # TODO: Add variable sensing
-            if not "no_parse_eval" in game["_meta"]:  # TODO: Make local _meta tags repected
-                expr_checker.check(node, collect_vars(state, address))
+            if not "no_parse_eval" in game["_meta"]: # TODO: Make local _meta tags repected
+                expr_checker.check(node, collect_vars(state, address), address)
         elif isinstance(node, (int, float)):
             return  # Plain numerical expression
         else:
@@ -486,6 +560,11 @@ def parse_node(node, context, address):
         if not isinstance(node, str):
             print(f"\033[31mError:\033[0m String expected for _text value at {address} node {node}")
             raise IncorrectTypeError()
+        try:
+            string_to_print = format.vformat(node, (), collect_vars(state, address))
+        except:
+            print(f"\033[31mError:\033[0m Missing reference (or incorrect formatting) for text at {address} node {node}")
+            raise MissingReferenceError()
     elif context == "_value":
         if not isinstance(node, (str, int, bool, float)):
             print(f"\033[31mError:\033[0m Expected string/numerical/bool value at {address} node {node}")

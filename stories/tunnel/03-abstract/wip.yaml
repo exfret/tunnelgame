@@ -1,0 +1,53 @@
+orphanage:
+  rooms:
+    lily:
+      _vars:
+        -
+      _content:
+        # New starting point
+        - You stand in your room.
+        - choice: look
+          text: Look around
+          effects:
+            - flag: orphanage_rooms_lily_looked
+            - Opposite the door, there is your bed, with a window on the wall above bringing in light from the courtyard. To the right of the door is a dresser, and then on the right far wall a table with a chair to study.
+            - There is barely enough room to sit down in the remaining space, and sometimes your feet dangle off the bed onto your desk, especially as you've grown older. But it's a place to live and that's enough.
+        - choice: change
+          text: Change clothes
+      change:
+        _content:
+          - What would you like to change into?
+          - You are currently in your {curr_clothes_locale}.
+          - choice: stay
+            text: Stay in the same clothes you're wearing now
+            effects:
+              - goto: ..
+          - if: curr_clothes != "light_gray_plain" and clothes_owned_light_gray_plain
+            then:
+              - choice: light_gray
+                text: Light Gray Plain Outfit
+                effects:
+                  - set: curr_clothes = "light_gray_plain"
+                  - set: curr_clothes_locale = "light gray plain outfit"
+          - if: curr_clothes != "dark_gray_plain" and clothes_owned_dark_gray_plain
+            then:
+              - choice: dark_gray
+                text: Dark Gray Plain Outfit
+                effects:
+                  - set: curr_clothes = "dark_gray_plain"
+                  - set: curr_clothes_locale = "dark gray plain outfit"
+          - inject: post_inject
+            position: after
+            into_choices:
+              except: stay
+        post_inject:
+          - You change into your {curr_clothes_locale}.
+          - separator:
+          - goto: ../..
+training:
+  first:
+    depart:
+      - storypoint:
+      - set: exp += 2
+        show:
+    return:

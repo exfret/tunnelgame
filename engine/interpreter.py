@@ -16,8 +16,8 @@ class UnrecognizedInstruction(Exception):
     pass
 
 
-def do_print(text, state, style={}):  # TODO: Move ansi code handling to view as well
-    config.view.print_text(text, style)
+def do_print(text, state, style={}, dont_save_print=False):  # TODO: Move ansi code handling to view as well
+    config.view.print_text(text, style, dont_save_print=dont_save_print)
 
 
 def step():
@@ -39,8 +39,15 @@ def step():
         state["visits"][curr_addr] = 0
     state["visits"][curr_addr] += 1
 
+    # Figure out if we are in a dont_save_print block
+    dont_save_print = False
+    for ind in range(len(parent_block)):
+        parent_block_node = addressing.get_node(parent_block[:ind+1])
+        if "_meta" in parent_block_node and "dont_save_print" in parent_block_node["_meta"]:
+            dont_save_print = True
+
     if isinstance(curr_node, str):
-        do_print(curr_node, state)
+        do_print(curr_node, state, dont_save_print=dont_save_print)
 
         state["bookmark"] = addressing.get_next_bookmark(state["bookmark"])
 
@@ -156,24 +163,24 @@ def step():
         # Default to setting that's at least as descriptive
         if state["settings"]["descriptiveness"] == "descriptive":
             if not curr_node["descriptive"] is None:
-                do_print(curr_node["descriptive"], state)
+                do_print(curr_node["descriptive"], state, dont_save_print=dont_save_print)
         elif state["settings"]["descriptiveness"] == "moderate":
             if "moderate" in curr_node:
                 if not curr_node["moderate"] is None:
-                    do_print(curr_node["moderate"], state)
+                    do_print(curr_node["moderate"], state, dont_save_print=dont_save_print)
             else:
                 if not curr_node["descriptive"] is None:
-                    do_print(curr_node["descriptive"], state)
+                    do_print(curr_node["descriptive"], state, dont_save_print=dont_save_print)
         elif state["settings"]["descriptiveness"] == "minimal":
             if "minimal" in curr_node:
                 if not curr_node["minimal"] is None:
-                    do_print(curr_node["minimal"], state)
+                    do_print(curr_node["minimal"], state, dont_save_print=dont_save_print)
             elif "moderate" in curr_node:
                 if not curr_node["moderate"] is None:
-                    do_print(curr_node["moderate"], state)
+                    do_print(curr_node["moderate"], state, dont_save_print=dont_save_print)
             else:
                 if not curr_node["descriptive"] is None:
-                    do_print(curr_node["descriptive"], state)
+                    do_print(curr_node["descriptive"], state, dont_save_print=dont_save_print)
     elif "error" in curr_node:
         raise ErrorNode("Error raised.")
     elif "flag" in curr_node:
@@ -181,7 +188,7 @@ def step():
     elif "flavor" in curr_node:
         if state["settings"]["show_flavor_text"] != "never" and (state["visits"][curr_addr] <= 1 or state["settings"]["show_flavor_text"] == "always"):
             if isinstance(curr_node["flavor"], str):  # TODO: Allow style spec tag with flavor text
-                curr_view.print_flavor_text(curr_node["flavor"])
+                curr_view.print_flavor_text(curr_node["flavor"], dont_save_print=dont_save_print)
             else:
                 addressing.set_curr_addr(curr_addr + ("flavor", 0))
 
@@ -219,11 +226,22 @@ def step():
                 return True
     elif "inject" in curr_node:
         if "into_choices" in curr_node:
+            # Check for dict version of into_choices specification first
             choices_to_inject_into = None
-            if curr_node["into_choices"] == "_all":
-                choices_to_inject_into = list(state["choices"].keys())
-            else:
-                choices_to_inject_into = curr_node["into_choices"].split()
+            if isinstance(curr_node["into_choices"], dict):
+                # Right now, just except is valid, which put it into all choices except the given ones
+                if "except" in curr_node["into_choices"]:
+                    choices_to_inject_into = list(state["choices"].keys())
+
+                    choices_not_to_inject_into = curr_node["into_choices"]["except"].split()
+                    for choice_id in choices_not_to_inject_into:
+                        if choice_id in choices_to_inject_into:
+                            choices_to_inject_into.remove(choice_id)
+            elif isinstance(curr_node["into_choices"], str):
+                if curr_node["into_choices"] == "_all":
+                    choices_to_inject_into = list(state["choices"].keys())
+                else:
+                    choices_to_inject_into = curr_node["into_choices"].split()
 
             position = "before"
             if "position" in curr_node:
@@ -301,7 +319,7 @@ def step():
     elif "once" in curr_node:
         if state["visits"][curr_addr] <= 1:
             if isinstance(curr_node["once"], str):
-                do_print(curr_node["once"], state)
+                do_print(curr_node["once"], state, dont_save_print=dont_save_print)
             else:
                 addressing.set_curr_addr(curr_addr + ("once", 0))
 
@@ -322,13 +340,13 @@ def step():
         if "style" in curr_node:
             style = curr_node["style"]
 
-        do_print(curr_node["print"], state, style)
+        do_print(curr_node["print"], state, style, dont_save_print=dont_save_print)
     elif "print_table" in curr_node:
         vars_by_name = utility.collect_vars_with_dicts(state)
 
         tbl_to_display = vars_by_name[curr_node["print_table"]]["value"]
 
-        curr_view.print_table(tbl_to_display)
+        curr_view.print_table(tbl_to_display, dont_save_print=dont_save_print)
     elif "random" in curr_node:
         possibilities_list = []
 
@@ -336,7 +354,18 @@ def step():
             for id in curr_node["random"].split(","):
                 possibilities_list.append(id.strip())
 
-            addressing.set_curr_addr(addressing.parse_addr(curr_addr, possibilities_list[random.randint(0, len(possibilities_list) - 1)]))
+            if len(state["seed"]) > 0:
+                # Check if the seed is in the possibilities list
+                seed = state["seed"].pop(0)
+                if seed in possibilities_list:
+                    addressing.set_curr_addr(addressing.parse_addr(curr_addr, seed))
+                else:
+                    # Feedback messages should already not save
+                    curr_view.print_feedback_message("runtime_error_invalid_seed")
+
+                    return False
+            else:
+                addressing.set_curr_addr(addressing.parse_addr(curr_addr, possibilities_list[random.randint(0, len(possibilities_list) - 1)]))
 
             return True
 
@@ -349,6 +378,29 @@ def step():
             total_weight += weight
 
             possibilities_list.append((weight, key))
+        
+        # Check if the seed exists and is in the possibilities list
+        if len(state["seed"]) > 0:
+            seed = state["seed"].pop(0)
+
+            # Can't just use "in" here since possibilities_list is more complex
+            is_possible = False
+            for possibility in possibilities_list:
+                if seed == possibility[1]:
+                    is_possible = True
+            
+            if is_possible:
+                if curr_node["random"][seed] is None:
+                    addressing.set_curr_addr(addressing.parse_addr(curr_addr, seed))
+                else:
+                    addressing.set_curr_addr(curr_addr + ("random", seed, 0))
+
+                return True
+            else:
+                # Feedback messages should already not save
+                curr_view.print_feedback_message("runtime_error_invalid_seed")
+
+                return False
 
         curr_weight = 0
         target_weight = random.uniform(0, total_weight)
@@ -380,6 +432,8 @@ def step():
         state["bookmark"] = addressing.get_next_bookmark(state["bookmark"])
 
         return False
+    elif "seed" in curr_node:
+        state["seed"].append(curr_node["seed"])
     elif "send" in curr_node:
         # Just trigger child blocks and current block for now by default
         parent_block_addr = addressing.get_block_part(curr_addr)
@@ -394,7 +448,7 @@ def step():
                             child_block_addr_name = ()
                         state["bookmark"] = state["bookmark"] + (parent_block_addr + child_block_addr_name + ("_listeners", index, "handler", 0),)
     elif "separator" in curr_node:
-        curr_view.print_separator()
+        curr_view.print_separator(dont_save_print=dont_save_print)
     elif "set" in curr_node:
         text_to_show_spec = {}
         vars_by_name = utility.collect_vars_with_dicts(state)
@@ -443,7 +497,7 @@ def step():
                 vars_by_name[curr_node["set"]]["value"] = eval(curr_node["to"], {}, utility.collect_vars(state))  # TODO: Catch exceptions in case of syntax errors
 
         if "show" in curr_node:
-            curr_view.print_var_modification(text_to_show_spec)
+            curr_view.print_var_modification(text_to_show_spec, dont_save_print=dont_save_print)
     elif "stop" in curr_node:
         # Need to remove this address now from the queue
         state["bookmark"] = state["bookmark"][1:]

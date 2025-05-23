@@ -1,4 +1,3 @@
----
 _content:
   - choice: skip
     action:
@@ -7,18 +6,37 @@ _content:
       - if: int(_args[0]) >= 0
         then:
           - command: input begin, george, train
-      # Skip to second training
+      # Skip to return from first training
       - if: int(_args[0]) >= 1
         then:
-          - command: input well, next, george, train
-      # Skip to third training
+          - command: input well, next
+      # Skip to return from second training
       - if: int(_args[0]) >= 2
         then:
-          - command: input camp, leave, george, train
-      # Skip to fourth training
+          - command: input george, train, camp, leave
+      # Skip to return from third training
       - if: int(_args[0]) >= 3
         then:
-          - command: input offer, rosalia, george, train
+          - command: input george, train, offer, rosalia
+      # Skip to return from fourth training
+      - if: int(_args[0]) >= 4
+        then:
+          - seed: rosalia_encounter
+          - command: input george, train, next, return, yes
+      # Skip to return from fifth training
+      - if: int(_args[0]) >= 5
+        then:
+          - seed: cave
+          - command: input george, train, next, around
+      # Skip to return from sixth training
+      - if: int(_args[0]) >= 6
+        then:
+          - seed: blue_coin
+          - command: input george, train
+      # Skip to return from seventh training (last training)
+      - if: int(_args[0]) >= 7
+        then:
+          - command: input george, train, accept
   - You are Lily.
   - Right now, you are only known as an orphan.
   - However, you are sure that one day, you will be known as the greatest Tunnel adventurer that there ever was!
@@ -34,27 +52,57 @@ _include:
   tunnel: tunnel.yaml
   world: world.yaml
 _vars:
+  # Logic vars
+  - logic_var: 0
+  - logic_arg_1: 0
   # Important
   - tunnel_pass: training
     #_possible_values:
     #  - training
   - time: 0
   - coin: 0
-    _locale: Coin
+    _locale: Coins
   - exp: 0
     _locale: Experience
+  - energy: 0
+    _locale: Energy
+  - max_energy: 0
+    _locale: Max Energy
   # Currencies
   - inv_blue_coin: 0
-    _locale: Blue Coin
+    _locale: Blue Coins
   # Inventory
   - inv_petunal: 0
     _locale: Petunal Blossoms
   - inv_rosalia: 0
     _locale: Rosalia
+  - inv_lemen: 0
+    _locale: Lemen
+  - inv_starblossom: 0
+    _locale: Starblossoms
+  - inv_socks: 0
+    _locale: Socks
   - inv_torch: 0
-    _locale: Torch
+    _locale: Torches
+  - inv_shovel: 0
+    _locale: Shovel
   - inv_building_materials: 0
     _locale: Building Materials
+  - inv_special_dirt: 0
+    _locale: Special Dirt
+  # Tools
+  - inv_knife: 0
+    _locale: Knife
+  - inv_pickaxe: 0
+    _locale: Pickaxe
+  - inv_shovel: 0
+    _locale: Shovel
+  # Quest inventory items
+  - inv_nut: 0
+    _locale: Nuts
+  # Rare inventory items
+  - inv_clackadoo: 0
+    _locale: Clackadoo Feather
   # Keys/Other things that are flags but need to be shown
   - key_orphanage_courtyard: 0
     _locale: Orphanage Courtyard Key
@@ -79,7 +127,9 @@ _header:
         action:
         effects:
           - goto: /world/journal
-  - choice: wonder
+  - choice: show
     action:
     effects:
-      - goto: /world/wonder
+      - goto: /world/show
+unused_flags:
+  - flag: knowledge_squirrel_wars

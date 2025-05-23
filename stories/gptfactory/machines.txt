@@ -1,0 +1,43 @@
+AN - Alien Nest
+    "A pulsating mass of organic material teeming with hostile alien creatures."
+
+CP - Control Panel
+    "A complex array of switches, dials, and screens. Most of it looks inactive."
+    LOC: CR
+        Activates Security Turret
+        Requires Power Switch toggled
+
+CT - Crafting Table
+    "A large block of wood inscribed with a 3x3 grid."
+    LOC: WS
+        Can be used for crafting
+
+DC - Damaged Conveyor
+    "A broken segment of the conveyor belt lies in disarray, halting material flow."
+    LOC: AL
+
+EH - Emergency Hatch
+    "A small, reinforced door leading downward. It's sealed tightly."
+    LOC: JH
+
+OC - Ore Crusher
+    "A large, intimidating machine for breaking down raw ore into usable materials."
+    LOC: PP
+
+OL - Observatory Lens
+    "A large telescope lens cracked and misaligned. Dust covers its surface."
+    LOC: OD
+
+PS - Power Switch
+    "A manual switch used to toggle the emergency backup power systems."
+    LOC: GR
+        If left on, consumes backup coal for next time
+
+RP - Refinery Pump
+    "A bulky pump designed to process oil. It seems to be clogged with debris."
+    LOC: R
+
+ST - Security Turret
+    "A deactivated turret mounted to the wall, aimed at the corridor ahead."
+    LOC: DH
+        Activated by Control Panel

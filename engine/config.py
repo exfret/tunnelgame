@@ -18,6 +18,10 @@ saves_dir.mkdir(exist_ok=True)
 ###########################################################
 
 
+web_view = False
+story_name = "gather_game/intro.yaml"
+
+
 local_dir = Path(getattr(sys, '_MEIPASS', os.path.abspath('.')))
 stories = story_dir
 saves = saves_dir

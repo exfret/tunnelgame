@@ -1,0 +1,48 @@
+AC - Alien Chitin
+    "Tough armor-like material harvested from larger alien creatures."
+
+AG - Alien Goo
+    "A viscous substance left behind by alien creatures. It glows faintly."
+
+AS - Acid Sac
+    "A gland filled with corrosive acid, extracted from spitters."
+
+BB - Blueprint Book
+    "A collection of factory layout blueprints, vital for advanced building strategies."
+    LOC: EB
+
+BM - Beacon Module
+    "An upgrade module used to boost machine efficiency."
+    LOC: HC
+
+CB - Circuit Board
+    "A delicate electronic component used in machinery and automation."
+    LOC: AL
+
+EC - Energy Core
+    "A glowing orb that powers high-tech equipment."
+    LOC: R
+
+GR - Gear
+    "A basic mechanical part used in almost all machinery."
+    LOC: CR
+
+IP - Iron Plate
+    "A refined metal plate used in almost all forms of construction."
+    LOC: SD
+
+MA - Modular Armor
+    "A versatile suit of armor that can be upgraded with equipment."
+    LOC: DH
+
+RD - Radar Dish
+    "A portable radar unit for detecting distant signals."
+    LOC: OD
+
+SM - Scrap Metal
+    "Jagged remnants of destroyed machines."
+    LOC: SY
+
+WR - Wrench
+    "A sturdy tool designed for industrial repairs."
+    LOC: WS

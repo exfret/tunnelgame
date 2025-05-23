@@ -1,0 +1,19 @@
+BS - Big Spitter
+    "A massive alien capable of spewing corrosive acid over large areas."
+    LOC: FC
+    DROPS: AC, AS
+
+MB - Medium Biter
+    "A larger, more durable alien with powerful jaws."
+    LOC: CS, DH
+    DROPS: AG, AC
+
+SB - Small Biter
+    "A small, fast-moving alien with razor-sharp claws."
+    LOC: CR, SY
+    DROPS: AG
+
+SS - Small Spitter
+    "An alien that attacks from a distance by spitting acid."
+    LOC: GR, PP
+    DROPS: AS

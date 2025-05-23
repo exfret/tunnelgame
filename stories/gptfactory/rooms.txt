@@ -1,0 +1,53 @@
+AL - Assembly Line
+    "An expansive room filled with silent conveyor belts and non-functional assemblers. It feels eerily empty."
+
+CR - Control Room
+    "A command center with flickering monitors. Some display maps, while others show warnings in red text."
+
+CS - Core Shaft
+    "A dark vertical tunnel leading to the core. The sound of machinery and alien growls reverberates here."
+
+DH - Defense Hub
+    "A fortified room with mounted turrets and defense drones. Most systems are inactive, but signs of battle remain."
+
+EB - Energy Bay
+    "A pristine area with battery storage and a faint humming sound. The air feels charged with electricity."
+
+FC - Fusion Core
+    "The central power core of the facility. A massive, glowing reactor sits dormant, waiting for repairs."
+
+GR - Generator Room
+    "A cavernous space dominated by a massive, inactive generator. The air is damp, and rust covers the walls."
+
+HC - Holo-Chamber
+    "A holographic simulation room. Broken projectors display flickering images of the facility’s heyday."
+
+JH - Junk Heap
+    "A sprawling area filled with towering piles of waste. The air smells of rust and decay."
+
+LP - Landing Platform
+    "A scorched metallic platform surrounded by alien vegetation. The air smells of burnt fuel and oil."
+
+OD - Observation Deck
+    "A high vantage point with shattered glass windows overlooking the facility. Alien nests are visible in the distance."
+
+PP - Processing Plant
+    "A chemical processing area with vats of unknown substances. Leaking fluids create hazardous puddles."
+
+PS - Power Station
+    "The station hums with the faint buzz of machinery. Loose wires and sparks suggest it’s barely functional."
+
+RE - Refinery
+    "A high-tech refinery with precision equipment. Alien acid has corroded some machinery."
+
+SD - Supply Depot
+    "Rows of shelves stacked with industrial supplies. Most are empty, but a few crates remain intact."
+
+SY - Scrapyard
+    "A sprawling junkyard of ruined machines and scrap metal. A faint acidic smell lingers in the air."
+
+TL - Testing Lab
+    "A sterile, high-tech laboratory with shattered containment pods and a massive blue bug corpse in the center."
+
+WS - Workshop
+    "A cluttered room filled with half-assembled machinery. Tools and scraps are strewn across the workbenches."

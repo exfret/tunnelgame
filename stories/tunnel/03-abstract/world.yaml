@@ -1,4 +1,5 @@
----
+_meta:
+  dont_save_print:
 journal:
   - You open your journal to read about what you have learned.
   - tag: dome
@@ -7,9 +8,7 @@ journal:
     then:
       - tag: starblossom
       - Starblossoms - A flower with large, broad petals shaped like a 5-pointed star. It is perpetually in bloom and valued for its beauty. A special tool called a SHTG2 is required to harvest it due to its deep roots.
-wonder:
-  _vars:
-    - curr_age: 0
+show:
   _content:
     - if: not isinstance(_args[0], str)
       then:
@@ -17,5 +16,28 @@ wonder:
       else:
         - switch: _args[0]
           age:
-            - set: curr_age = 16 + floor(time / 365)
-            - You are {curr_age} years old.
+            - sub: /logic/get_age
+            - You are {logic_var} years old.
+          character:
+            - Your current character stats are as follows...
+            - "    Experience: {exp}"
+            - "    Rosalia Gather Skill: {skill_gather_rosalia}"
+            - "    Sneakiness: {skill_sneak}"
+            - "    Athleticism: {skill_athleticism}"
+            - "    Nimbleness: {skill_nimbleness}"
+          inventory:
+            - Your current inventory is as follows...
+            - "    Coin: {coin}"
+            - "    Blue Coin: {inv_blue_coin}"
+            - "    Rosalia: {inv_rosalia}"
+            - "    Petunal Blossoms: {inv_petunal}"
+            - "    Lemen: {inv_lemen}"
+            - "    Starblossoms: {inv_starblossom}"
+            - "    Torch: {inv_torch}"
+            - "    Building Materials: {inv_building_materials}"
+            - "    Special Dirt: {inv_special_dirt}"
+            - "    Nut: {inv_nut}"
+            - "    Clackadoo Feather: {inv_clackadoo}"
+          # Specific important inventory things
+          coin:
+            - "{coin} Coin"

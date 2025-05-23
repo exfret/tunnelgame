@@ -1,4 +1,3 @@
----
 _content:
   - goto: rooms
 rooms:
@@ -8,6 +7,11 @@ rooms:
       then:
         - (You'll get the ability to visit more as you go).
         - You should visit George to get some training in the Tunnel.
+    - if: tunnel_pass != "training"
+      then:
+        - choice: tunnel
+          text: Go on a trip to the Tunnel
+          effects: /tunnel
     - if: unlock_town
       then:
         - choice: town
@@ -31,6 +35,14 @@ rooms:
       then:
         - choice: caroline
           text: Visit Caroline's room
+    - if: unlock_orphanage_rose_room
+      then:
+        - choice: rose
+          text: Visit Rose's room
+    - if: unlock_orphanage_benedict_room
+      then:
+        - choice: benedict
+          text: Visit Benedict's room
   lily:
     # Your room will always be the "home base"
     _vars:
@@ -145,6 +157,7 @@ rooms:
       - choice: leave
         text: Leave Jaz's room
         effects: ..
+      - tag: petunal
       - choice: key
         text: Buy a key to the orphanage courtyard that Jaz stole
         selectable_once:
@@ -152,6 +165,14 @@ rooms:
         shown: 1 key_orphanage_courtyard
         effects:
           - The courtyard can be accessed from the commons hallway.
+          - separator:
+          - goto: .
+      - choice: sneak
+        text: Have Jaz teach you how to sneak around
+        cost: 5 inv_petunal
+        shown: 5 skill_sneak
+        effects:
+          - She teaches you to put your heel first to create less sound. She says she learned it while snooping around in the orphanage admin area.
           - separator:
           - goto: .
       - choice: compliment
@@ -189,9 +210,19 @@ rooms:
       - gift_num: 1
     _content:
       # Get the leave option out of the way now
+      - storypoint:
       - choice: leave
         text: Leave Caroline's room
         effects: ..
+      - if: not orphanage_rooms_caroline_tried_steal_sock
+        then:
+          - choice: steal
+            text: Steal one of Caroline's socks
+            effects:
+              # TODO: Another way to get one of her socks
+              - You can't bring yourself to do that.
+              - flag: orphanage_rooms_caroline_tried_steal_sock
+              - goto: .
       - if: _visits == 1
         then:
           - Caroline is a cheerful woman with long black hair. Her hair has strands that fall out a lot all over her room. She was cursed to forever have a child's mind. But she really likes playing with all the new stuff you get from the Tunnel, and watching that helps you learn/get experience.
@@ -201,19 +232,115 @@ rooms:
         else:
           - Caroline is still content with the last gift you gave her.
     gift:
-      - Caroline waits in anticipation to see if you'll give her something.
-      - switch: gift_num
-        "1":
-          - choice: give
-            text: Give her a rosalia
-            cost: 1 inv_rosalia
-            shown: 5 exp
+      _content:
+        - Caroline waits in anticipation to see if you'll give her something.
+        - switch: gift_num
+          "1":
+            - choice: give
+              text: Give her a rosalia
+              cost: 1 inv_rosalia
+              shown: 5 exp
+              effects:
+                - She crushes up part of the dried leaf and smells it, then puts it on her tongue and let's it sit there.
+          "2":
+            - choice: give
+              text: Give her a petunal blossom
+              cost: 1 inv_petunal
+              shown: 7 exp
+              effects:
+                - She puts the petals in her mouth and chews on them. You've heard petunal blossoms are good for seasoning food when dried, but wonder how they taste raw.
+          "3":
+            - choice: give
+              text: Give her a lemen
+              cost: 1 inv_lemen
+              shown: 11 exp
+              effects:
+                - She is fascinated by the lemen's glow.
+          _default:
+            - Wow, it seems there's nothing more she wants that you can give her actually!
+        - inject: gift_handler
+          into_choices:
+            except: leave steal
+      gift_handler:
+        - set: gift_num += 1
+        - set: time_last_gift = time
+        - separator:
+        - goto: ..
+  rose:
+    _content:
+      - tag: petunal
+      - if: inv_petunal < 7
+        then:
+          - Rose only talks to people who have enough of her favorite flower.
+          - separator:
+          - goto: ..
+        else:
+          - goto: door_open
+    door_open:
+      - Rose opens the door and immediately starts babbling about all the petunal blossoms you have and how they're her favorite type of flower and how this dude named Juan she knows is so hot and...
+      - goto: babble
+    babble:
+      - choice: leave
+        text: Leave Rose's room
+        effects: ../..
+      - if: not orphanage_rooms_rose_sock_stolen
+        then:
+          - choice: steal
+            text: Steal one of her sock's while she's babbling
             effects:
-              - She crushes up part of the dried leaf and smells it, then puts it on her tongue and let's it sit there.
+              - flag: orphanage_rooms_rose_sock_stolen
+              - She's so distracted by her babbling you manage to open her dresser and take a sock and sneak away without being noticed. It's embroidered with roses.
+              - set: inv_socks += 1
+                show:
               - separator:
+              - goto: ../..
+        else:
+          - Unfortunately, you already stole her sock, so there doesn't seem like much more to do.
+  benedict:
+    _vars:
+      - last_time_visited_benedict_one: -1
+      - last_time_visited_benedict_two: -1
+      - last_time_visited_benedict_three: -1
+      - last_time_visited_benedict_four: -1
+      - made_things_awkward: False
+    _content:
+      - storypoint:
+      - if: last_time_visited_benedict_one < time
+        then:
+          - set: last_time_visited_benedict_one = time
+          - if: made_things_awkward
+            then:
+              - You try to have a good laugh with Benedict, but things aren't the same.
               - goto: ..
-        _default:
-          - Wow, it seems there's nothing more she wants that you can give her actually!
+            else:
+              # If it's been only a couple days since a ignoring signals only a little
+              - if: last_time_visited_benedict_three >= time - 2
+                then:
+                  - Benedict is a little off-put but you're still able to have a good laugh with him.
+                  - goto: ..
+                else:
+                  - You don't know Benedict too well, but you have a good laugh with him whenever you chat. He's much less pretentious than his name implies.
+                  - goto: ..
+      - if: last_time_visited_benedict_one == time and last_time_visited_benedict_two < time
+        then:
+          - set: last_time_visited_benedict_two = time
+          - You knock on Benedict's door to talk to him again, but he tells you he's busy.
+          - goto: ..
+      - if: last_time_visited_benedict_two == time and last_time_visited_benedict_three < time
+        then:
+          - set: last_time_visited_benedict_three = time
+          - You knock again on the door to see if Benedict is free now. There's no answer, but you can hear some shuffling inside.
+          - goto: ..
+      - if: last_time_visited_benedict_three == time and last_time_visited_benedict_four < time
+        then:
+          - set: made_things_awkward = True
+          - set: last_time_visited_benedict_four = time
+          - '"Look, I''m not into you!" He yells this time. "Stop bothering me."'
+          - goto: ..
+      - if: last_time_visited_benedict_four == time
+        then:
+          - He doesn't answer.
+          - goto: ..
 common:
   _content:
     - You're in the long commons hallways, a dusty passage that will only grow longer as you unlock more rooms here!
@@ -230,68 +357,139 @@ common:
       then:
         - choice: study
           text: Visit the study
+    - choice: courtyard
+      text: Go to the courtyard
+      require: 1 key_orphanage_courtyard
   study:
-    - storypoint:
-    - tag: mabel
-    - if: not met_mabel
-      then:
-        - flag: met_mabel
-        - A young, thin woman looks up from a desk at the front of the orphanage's study. "I'm Mabel. Welcome to our dismal collection of knowledge and folklore surrounding the Tunnel. You'll have to get access to the main town library for more in-depth knowledge."
-        - She goes on, "Oh, and the knowledge doesn't come for free. You'll have to trade in some rosalia to study anything. It's how we keep the orphanage running."
-      else:
-        - Mabel stares at you briefly, as if suspicious of what you might do next. Then, she returns to her dusty book.
+    _content:
+      - storypoint:
+      - tag: mabel
+      - if: not met_mabel
+        then:
+          - flag: met_mabel
+          - A young, thin woman looks up from a desk at the front of the orphanage's study. "I'm Mabel. Welcome to our dismal collection of knowledge and folklore surrounding the Tunnel. You'll have to get access to the main town library for more in-depth knowledge."
+          - She goes on, "Oh, and the knowledge doesn't come for free. You'll have to trade in some rosalia to study anything. It's how we keep the orphanage running."
+        else:
+          - Mabel stares at you briefly, as if suspicious of what you might do next. Then, she returns to her dusty book.
+      - choice: common
+        text: Return to the commons hallway
+        effects: ..
+      - (You have {inv_rosalia} rosalia).
+      - tag: research
+      - if: not researched_botany_1
+        then:
+          - choice: botany
+            text: Study Botany I
+            cost: 4 inv_rosalia
+            effects:
+              - storypoint:
+              - flag: researched_botany_1
+              - tag: starblossom
+              - This book teaches about Starblossoms, a flower with large, broad petals shaped like a 5-pointed star. It is perpetually in bloom and valued for its beauty. A special tool called a SHTG2 is required to harvest it due to its deep roots.
+              - if: unlock_town_market_explorer_alley
+                then:
+                  - There might be one of those tools in explorer's alley!
+              - flag: knowledge_starblossom
+              - The book also teaches you better gathering methods for rosalia.
+              - tag: rosalia
+              - set: skill_gather_rosalia += 1
+                show:
+      - if: not researched_writing_1
+        then:
+          - choice: writing
+            text: Study Writing I
+            cost: 2 inv_rosalia
+            effects:
+              - storypoint:
+              - flag: researched_writing_1
+              - flag: unlock_journal
+              # Need to add journal action since the header that would add it is already executed
+              - choice: journal
+                action:
+                effects:
+                  - goto: /world/journal
+              - You unlocked the journal, which holds information about the world. Access it by typing 'journal'. You can see all hidden choices by typing 'info actions'.
+      - if: not researched_artifacts_1
+        then:
+          - choice: artifacts
+            text: Study Artifacts I
+            cost: 6 inv_rosalia
+            effects:
+              - storypoint:
+              - flag: researched_artifacts_1
+              - You read about different artifacts that the Tunnel holds. These are powerful unique objects found only within the Tunnel. Most of the ones in layer 1 have already been dug out, but the most powerful artifacts are usually in the later layers.
+              - The book also discusses blue coins, which come from the Tunnel, unlike the common currency of coins which are manufactured in the Dome's salt flats. Many people think of blue coins as the superior currency and therefore will only accept those.
+              - In fact, you even find a blue in the book!
+              - flag: knowledge_artifacts
+              - flag: knowledge_blue_coins
+              - set: inv_blue_coin += 1
+                show:
+      # TODO: Implement observation in some sort of interesting way
+      - if: "False"
+        then:
+          - if: not researched_observation_1
+            then:
+              - choice: observation
+                text: Study Observation I
+                cost: 8 inv_rosalia
+                effects:
+                  - storypoint:
+                  - flag: researched_observation_1
+                  - You read about the art of noticing the fine details around you.
+      - if: "False"
+        then:
+          - if: not researched_reading_1
+            then:
+              - choice: reading
+                text: Study Reading I
+                cost: 7 inv_rosalia
+                effects:
+                  - storypoint:
+                  - flag: researched_reading_1
+                  - You read about reading, and in the process you hone your skills so that more research is available!
+      - inject: research_inject
+        into_choices:
+          except: common
+      - inject: research_inject_after
+        into_choices:
+          except: common
+        position: after
+    research_inject:
+      # Researching takes a day
+      - sub: /logic/time
+      # Researches give 3 experience
+      - set: logic_arg_1 = 3
+      - sub: /logic/inc_exp
+    research_inject_after:
+      - separator:
+      - goto: ..
+courtyard:
+  _content:
+    - The courtyard holds a small graveyard and a pond surrounded by slimy stones. The water is stagnant full of algae. You've never seen fish in it.
     - choice: common
-      text: Return to the commons hallway
+      text: Go back to the commons hallway
       effects: ..
-    - tag: research
-    - if: not researched_botany_1
-      then:
-        - choice: botany
-          text: Study Botany I
-          cost: 4 inv_rosalia
-          effects:
-            - flag: researched_botany_1
-            - sub: /logic/time
-            - This book teaches about Starblossoms, a flower with large, broad petals shaped like a 5-pointed star. It is perpetually in bloom and valued for its beauty. A special tool called a SHTG2 is required to harvest it due to its deep roots.
-            - flag: knowledge_starblossom
-            - The book also teaches you better gathering methods for rosalia.
-            - set: skill_gather_rosalia += 1
-            - separator:
-            - goto: .
-    - if: not researched_writing_1
-      then:
-        - choice: writing
-          text: Study Writing I
-          cost: 2 inv_rosalia
-          effects:
-            - flag: researched_writing_1
-            - flag: unlock_journal
-            - You unlocked the journal, which holds information about the world. Access it by typing 'journal'. You can see all hidden choices by typing 'info actions'.
-            - separator:
-            - goto: .
-    - if: not researched_artifacts_1
-      then:
-        - choice: artifacts
-          text: Study Artifacts I
-          cost: 6 inv_rosalia
-          effects:
-            - flag: researched_artifacts_1
-            - You read about different artifacts that the Tunnel holds. These are powerful unique objects found only within the Tunnel. Most of the ones in layer 1 have already been dug out, but the most powerful artifacts are usually in the later layers.
-            - The book also discusses blue coins, which come from the Tunnel, unlike the common currency of coins which are manufactured in the Dome's salt flats. Many people think of blue coins as the superior currency and therefore will only accept those.
-            - In fact, you even find a blue in the book!
-            - set: inv_blue_coin += 1
-              show:
-            - separator:
-            - goto: .
-    - if: "False"
-      then:
-        - if: not researched_reading_1
+    - choice: read
+      text: Read the graves
+      effects:
+        - The older gravestones from back when the orphanage was prosperous have very ornate carvings, but recent ones don't even have the name of the deceased.
+        - separator:
+        - goto: .
+    - choice: pond
+      text: Look into the pond
+      effects:
+        - You check if a fish has magically appeared in the pond today, but there still aren't any there.
+        - separator:
+        - goto: .
+    - choice: corner
+      text: Examing the corners of the courtyard
+      effects:
+        - if: not orphanage_courtyard_found_sewing_needle
           then:
-            - choice: reading
-              text: Study Reading I
-              cost: 7 inv_rosalia
-              effects:
-                - flag: researched_reading_1
-                - You read about reading, and in the process you hone your skills so that more research is available!
-                - separator:
-                - goto: .
+            - tag: sewing_machine
+            - flag: orphanage_courtyard_found_sewing_needle
+            - You find a sewing needle!
+            - flag: own_sewing_machine_needle
+          else:
+            # TODO: Find something new on second look
+            - There appears to be nothing else here.

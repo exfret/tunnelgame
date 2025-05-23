@@ -1,4 +1,3 @@
----
 _header:
   - choice: home
     text: Return to the orphanage
@@ -20,6 +19,7 @@ _content:
       - It seems to be locked.
     effects: abandoned
 abandoned:
+  - storypoint:
   - The door creaks open, it's really dark inside.
   - if: not town_abandoned_found_street_attire
     then:
@@ -44,13 +44,52 @@ market:
     - choice: town
       text: Go somewhere else in town
       effects: ..
+    - if: unlock_town_market_explorer_alley
+      then:
+        - choice: explorer
+          text: Go to explorer alley
     - if: unlock_town_market_general_store
       then:
         # TODO: Remove "newly opened" text after some time
         - choice: general
           text: Go to the newly opened general store
+  explorer:
+    _content:
+      - There is a slim woman flipping a blue coin in the corner, and a burly man behind a counter with crossed arms. The place only accepts blue coins, the true tunnel currency.
+      # TODO: Something less harsh if they don't know about blue coins?
+      - if: not knowledge_blue_coins
+        then:
+          - Of course, since you don't know what blue coins are, this place won't be of much use to you, so you go back to where you were before.
+          - separator:
+          - back:
+      - choice: leave
+        text: Return to the main market area
+        effects: ..
+      - choice: training
+        text: Pay for a training session with the woman
+        cost: 6 inv_blue_coin
+        effects:
+          - pass:
+      - sub: /logic/get_age
+      - choice: dagger
+        text: Buy the wicked dagger on display by the burly man
+        cost: 3 inv_blue_coin
+        enforce: logic_var >= 18
+        alt_effects:
+          - Sorry, you need to be at least 18 years old to buy that.
+        effects:
+          - pass:
+      - if: knowledge_starblossom
+        then:
+          - choice: shtg2
+            text: Buy an SHTG2 for harvesting starblossoms
+            cost: 12 inv_blue_coin
+            effects:
+              - pass:
+      # TODO: More stuff here
   general:
     _content:
+      - storypoint:
       - tag: general_store_shopkeeper
       - tag: ghostly_orb
       - if: not town_market_general_store_visited
@@ -64,6 +103,7 @@ market:
             else:
               - '"I''m actually glad I lugged this orb all the way back with me. I found out it''s kind of priceless. Isn''t that funny?"'
       - The shopkeeper asks, "So what can I do for you today?"
+      - (You have {coin} coins).
       - choice: leave
         text: Return to the main market area
         effects: ..

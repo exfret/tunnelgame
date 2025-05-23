@@ -188,7 +188,23 @@ def run(game_name, packaged=True, parent_game=None, parent_state=None, exec_bloc
         
         make_choice(state["choices"]["start"]["address"])
 
+
+    # Load game if this is web view and we were refreshed
+    #if config.web_view:
+    #    try:
+    #        contents = pickle.loads((config.saves / "_web_info").with_suffix(".pkl").read_bytes())
+    #
+    #        if contents["running"]:
+    #            load_game("_autosave_short_" + str(contents["choice_num"] % 3))
+    #    except:
+    #        pass
+
+
+    # Main game loop
     while True:
+        if config.web_view:
+            config.view.socketio.sleep(0)
+
         if len(state["command_buffer"]) == 0:
             command = curr_view.get_input()
         else:
@@ -317,9 +333,8 @@ def run(game_name, packaged=True, parent_game=None, parent_state=None, exec_bloc
             else:
                 address_to_goto = None
                 try:
-                    address_to_goto = addressing.parse_addr(
-                        state["last_address_list"][-1], command[1]
-                    )  # last_address_list should always be nonempty here since we just made a choice
+                    # last_address_list should always be nonempty here since we just made a choice
+                    address_to_goto = addressing.parse_addr(state["last_address_list"][-1], command[1])
                 except Exception as e:  # TODO: Catch only relevant exceptions
                     curr_view.print_feedback_message("goto_invalid_address_given")
                 if not (address_to_goto is None):
@@ -515,11 +530,18 @@ def run(game_name, packaged=True, parent_game=None, parent_state=None, exec_bloc
                 else:
                     curr_view.print_feedback_message("choice_enforce_false")
             else:
-                # First, save the state in an autosave after every 20 choices
+                # Autosave after every choice, for last 3 choices
+                save_game("_autosave_short_" + str(state["choice_num"] % 3))
+                # If this is the web view, save some web info
+                if config.web_view:
+                    (config.saves / "_web_info").with_suffix(".pkl").write_bytes(pickle.dumps({"running": True, "choice_num": state["choice_num"]}))
+                state["choice_num"] += 1
+
+                # Second, do a less frequent autosave every 20 choices
                 state["last_autosave"] += 1
                 if state["last_autosave"] >= config.choices_between_autosaves:
                     state["last_autosave"] = 0
-                    save_game("_autosave")
+                    save_game("_autosave_long")
 
                 gameparser.remove_module_vars()
                 state_to_save = copy.deepcopy(state)

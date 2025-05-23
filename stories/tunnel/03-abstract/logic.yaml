@@ -1,4 +1,106 @@
----
 time:
   - set: time += 1
   - subreturn:
+inc_exp:
+  - set: exp += logic_arg_1
+    show:
+  # Calculate unlocks
+  - if: not unlock_town_outskirts and exp >= 50
+    then:
+      - flag: unlock_town_outskirts
+      - You've gained enough experience to unlock the town outskirts.
+  - subreturn:
+get_age:
+  _content:
+    # Character starts at 16 years old
+    # Need 395 to account for octember, story starts 4 days after her 16th birthday
+    - set: logic_var = 16 + floor((time + 4) / 395)
+    - subreturn:
+get_month:
+  _vars:
+    - day_of_year: 0
+    - january_days: 31
+    - february_days: 28
+    - march_days: 31
+    - april_days: 30
+    - may_days: 31
+    - june_days: 30
+    - july_days: 31
+    - august_days: 31
+    - september_days: 30
+    - october_days: 31
+    - octember_days: 30
+    - november_days: 30
+    - december_days: 31
+  _content:
+    # Lily's birthday is February 2nd, so 33rd day of the year, and story starts 4 days after that
+    - set: day_of_year = (time + 4 + 33) % 395
+    # No leap years (yet)
+    - if: 0 <= day_of_year and day_of_year < january_days
+      then:
+        - set: logic_var = "January"
+    - set: day_of_year -= january_days
+    - if: 0 <= day_of_year and day_of_year < february_days
+      then:
+        - set: logic_var = "February"
+    - set: day_of_year -= february_days
+    - if: 0 <= day_of_year and day_of_year < march_days
+      then:
+        - set: logic_var = "March"
+    - set: day_of_year -= march_days
+    - if: 0 <= day_of_year and day_of_year < april_days
+      then:
+        - set: logic_var = "April"
+    - set: day_of_year -= april_days
+    - if: 0 <= day_of_year and day_of_year < may_days
+      then:
+        - set: logic_var = "May"
+    - set: day_of_year -= may_days
+    - if: 0 <= day_of_year and day_of_year < june_days
+      then:
+        - set: logic_var = "June"
+    - set: day_of_year -= june_days
+    - if: 0 <= day_of_year and day_of_year < july_days
+      then:
+        - set: logic_var = "July"
+    - set: day_of_year -= july_days
+    - if: 0 <= day_of_year and day_of_year < august_days
+      then:
+        - set: logic_var = "August"
+    - set: day_of_year -= august_days
+    - if: 0 <= day_of_year and day_of_year < september_days
+      then:
+        - set: logic_var = "September"
+    - set: day_of_year -= september_days
+    - if: 0 <= day_of_year and day_of_year < october_days
+      then:
+        - set: logic_var = "October"
+    - set: day_of_year -= october_days
+    - if: 0 <= day_of_year and day_of_year < octember_days
+      then:
+        - set: logic_var = "Octember"
+    - set: day_of_year -= octember_days
+    - if: 0 <= day_of_year and day_of_year < november_days
+      then:
+        - set: logic_var = "November"
+    - set: day_of_year -= november_days
+    - if: 0 <= day_of_year and day_of_year < december_days
+      then:
+        - set: logic_var = "December"
+    - subreturn:
+get_season:
+  _content:
+    - sub: get_month
+    - if: logic_var == "December" or logic_var == "January" or logic_var == "February"
+      then:
+        - set: logic_var = "Winter"
+    - if: logic_var == "March" or logic_var == "April"
+      then:
+        - set: logic_var = "Spring"
+    - if: logic_var == "May" or logic_var == "June" or logic_var == "July" or logic_var == "August"
+      then:
+        - set: logic_var = "Summer"
+    - if: logic_var == "September" or logic_var == "October" or logic_var == "Octember" or logic_var == "November"
+      then:
+        - set: logic_var = "Fall"
+    - subreturn:
