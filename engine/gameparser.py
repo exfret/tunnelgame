@@ -115,6 +115,7 @@ def open_game(story_path):
         "story_points": {},
         "sub_stack": (), # A "stack" of bookmarks
         "vars": {},
+        "view": {"stats_dropdowns_open": {}},
         "view_displayed_text": {"console": "", "game": ""}, # TODO: Rename to subview displayed text or something along those lines?
         "visits": {},
         "visits_choices": {},

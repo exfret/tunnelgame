@@ -3,7 +3,13 @@
 
 <head>
     <title>Tunnel</title>
+
+    <!-- ①  —––  FONTS  –––----------------------------------------------- -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+
     <style>
+        /* …………… existing rules (unchanged) …………… */
         * {
             box-sizing: border-box;
             margin: 0;
@@ -29,14 +35,13 @@
         .settings {
             width: 40px;
             height: 40px;
-            background: url("/settings.png") no-repeat center center;
-            background-size: contain;
+            background: url("/settings.png") no-repeat center/contain;
             margin: 15px;
         }
 
         .title {
             font-size: 50px;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, .5);
         }
 
         .container {
@@ -76,7 +81,7 @@
 
         .middle-section {
             flex: 1;
-            background: #ffffff;
+            background: #fff;
         }
 
         .text-area {
@@ -111,7 +116,7 @@
         }
 
         footer {
-            background: #000000;
+            background: #000;
             color: white;
             padding: 20px;
             text-align: center;
@@ -121,38 +126,139 @@
             display: flex;
             flex-direction: column;
             height: 100%;
-            margin: 0;
-            padding: 0;
             font-family: 'Roboto', sans-serif;
         }
 
         p {
             margin: 0;
-            padding: 0;
-            margin-top: 0;
-            margin-bottom: 0;
             line-height: 1.2;
             font-size: 1rem;
             font-family: "Georgia";
+        }
+
+        /* ②  —––  COLUMN BEHAVIOUR  –––---------------------------------- */
+        .right-section {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .image-area {
+            flex: 0 0 auto;
+        }
+
+        /* ③  —––  STATS‑BOARD TREE STYLING  –––--------------------------- */
+        #stats-board {
+            flex: 1 1 auto;
+            /* fill remaining height                */
+            overflow-y: auto;
+            /* scrollbar when overflowing            */
+            padding: 10px;
+            font-family: "Roboto Mono", "Courier New", Courier, monospace;
+            font-size: 0.8rem;
+            line-height: 1.1;
+        }
+
+        /* tree look (indentation + bullet‑style arrows) */
+        #stats-board details {
+            margin-left: 0.7em;
+            padding-left: 0.3em;
+            border-left: 1px solid #bbb;
+            padding-bottom: 0.3em;
+        }
+
+        #stats-board summary {
+            cursor: pointer;
+            list-style: none;
+            position: relative;
+            font-weight: 700;
+        }
+
+        #stats-board summary::before {
+            content: "▸";
+            /* triangle bullet                     */
+            position: absolute;
+            left: -0.8em;
+            transition: transform .15s ease;
+        }
+
+        #stats-board details[open]>summary::before {
+            transform: rotate(90deg);
+            /* arrow points down when open */
+        }
+
+        /* nice hover */
+        #stats-board summary:hover {
+            background: #e7e7e7;
+        }
+
+        /*  ╭──────────────────────────────────────────────╮
+            │  STATS‑BOARD TWEAKS  (overrides / additions) │
+            ╰──────────────────────────────────────────────╯ */
+
+        /* ✧‑‑ Every individual stat line (plain or inside a folder) */
+        #stats-board .stats-line {
+            line-height: 1.1;
+            /* tight, like the folder items          */
+            margin-bottom: 2px;
+            /* small, so spacing equals dropdown     */
+        }
+
+        /* ✧‑‑ The whole <details> block gets a little breathing room */
+        #stats-board details {
+            margin-top: 4px;
+            /* space *after* the dropdown            */
+        }
+
+        /* ✧‑‑ Prettier summary bar */
+        #stats-board summary {
+            cursor: pointer;
+            list-style: none;
+            position: relative;
+            font-weight: 700;
+            padding: 2px 4px;
+            /* subtle interior padding      */
+            border-radius: 4px;
+            background: #f5f5f5;
+        }
+
+        #stats-board summary:hover {
+            background: #e9e9e9;
+            /* a little darker on hover     */
+        }
+
+        #stats-board details[open]>summary {
+            background: #e2ecff;
+            /* blue‑tint when expanded      */
+        }
+
+        /* ✧‑‑ Arrow bullet, slightly refined */
+        #stats-board summary::before {
+            content: "▸";
+            left: -0.8em;
+            transition: transform .2s cubic-bezier(.4, 0, .2, 1);
+        }
+
+        #stats-board details[open]>summary::before {
+            transform: rotate(90deg);
         }
     </style>
 </head>
 
 <body>
     <header>
-        <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-
         <div class="settings"></div>
         <h1 class="title">Tunnel</h1>
     </header>
 
     <div class="container">
+        <!-- ④  —––  COLUMN: NAV  –––------------------------------------ -->
         <div class="left-section">
             <div class="buttons">
                 <button class="button nav-button">Stats</button>
             </div>
         </div>
 
+        <!-- ⑤  —––  COLUMN: STORY  –––---------------------------------- -->
         <div class="middle-section">
             <div class="text-area">
                 <p id="story-board">
@@ -161,82 +267,122 @@
             </div>
         </div>
 
+        <!-- ⑥  —––  COLUMN: IMAGE + STATS  –––--------------------------- -->
         <div class="right-section">
-            <div class="image-area">
-            </div>
+            <div class="image-area"></div>
+            <div id="stats-board" class="tree"></div>
         </div>
     </div>
 
-    <footer>
-        &copy; 2024 Kyle Hess | Contact: hess.kyler@gmail.com
-    </footer>
+    <footer>&copy; 2025 Kyle Hess</footer>
 
+    <!-- ⑦  —––  SCRIPTS  –––------------------------------------------- -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
     <script>
+        /* ---------------- story helpers (unchanged) ------------------ */
+        const story_board = document.getElementById("story-board");
         function addToStoryBoard(html) {
-            const new_element = document.createElement("div");
-            new_element.innerHTML = "<div style=\"padding-bottom: 10px\">" + html + "</div>";
-            document.getElementById("story-board").appendChild(new_element);
+            const d = document.createElement("div");
+            d.innerHTML = `<div style="padding-bottom:10px">${html}</div>`;
+            story_board.appendChild(d);
         }
+        /* -------------------------------------------------------------- */
 
-        let socket = io();
+        /* ---------------- stats‑board: tree helpers ------------------- */
+        /**
+         * Inserts or updates a variable inside a collapsible group.
+         * @param {string} groupName –– e.g. "Player Stats"
+         * @param {string} varName   –– e.g. "Health"
+         * @param {string} value     –– e.g. "83 / 100"
+         */
+        const dropdownState = {};
 
-        socket.on("clear", function (msg) {
-            document.getElementById("story-board").innerHTML = "";
+        function upsertStat(groupName, varName, value) {
+            const board = document.getElementById("stats-board");
+
+            /* create <details> for the group if it doesn’t exist */
+            let group = board.querySelector(`details[data-group="${groupName}"]`);
+            if (!group) {
+                group = document.createElement("details");
+                group.dataset.group = groupName;
+                group.open = dropdownState.hasOwnProperty(groupName)
+                    ? dropdownState[groupName]   // server preference
+                    : true;
+
+                const summary = document.createElement("summary");
+                summary.textContent = groupName;
+                group.appendChild(summary);
+                board.appendChild(group);
+            }
+
+            if (!group.dataset.toggleWatcher) {          // guard so we attach only once
+                group.addEventListener("toggle", e => {
+                    const g = e.currentTarget;          // the <details>
+                    dropdownState[g.dataset.group] = g.open;
+                    /* (optional) send back to server if you like:
+                    socket.emit("dropdown_state_changed",{group:g.dataset.group,open:g.open});
+                    */
+                });
+                group.dataset.toggleWatcher = "yes";
+            }
+
+            /* create or update the individual variable line */
+            let line = group.querySelector(`div[data-var="${varName}"]`);
+            if (!line) {
+                line = document.createElement("div");
+                line.dataset.var = varName;
+                line.className = "stats-line";
+                group.appendChild(line);
+            }
+            line.textContent = `${varName}: ${value}`;
+        }
+        /* -------------------------------------------------------------- */
+
+        const socket = io();
+
+        /* ---------- STORY EVENTS (unchanged) ------------------------- */
+        socket.on("clear", () => story_board.innerHTML = "");
+        socket.on("separator", () => addToStoryBoard("&mdash;".repeat(40)));
+        socket.on("print", msg => addToStoryBoard(msg.text));
+        socket.on("print_feedback_message", msg => addToStoryBoard(msg.text));
+
+        /* ---------- STATS EVENTS (new format) ------------------------ */
+        /**
+         * Expect messages shaped:
+         *   { group: "Player", name: "Health", value: "92" }
+         * If your server already sends {text: "..."} you can
+         * keep the old listener too until you migrate.
+         */
+        socket.on("print_var", msg => {
+            /* migrate gradually: if it’s plain text fall back */
+            if (typeof msg.text === "string") {
+                /* legacy one‑liner fallback */
+                const d = document.createElement("div");
+                d.innerHTML = `<div>${msg.text}</div>`;
+                document.getElementById("stats-board").appendChild(d);
+            } else {
+                /* new structured entry */
+                upsertStat(msg.group ?? "Misc", msg.name, msg.value);
+            }
         });
 
-        socket.on("separator", function (msg) {
-            addToStoryBoard("".repeat(90));
-        });
+        socket.on("clear_var_view", () => document.getElementById("stats-board").innerHTML = "");
 
-        socket.on("print", function (msg) {
-            addToStoryBoard(msg.text);
-        });
-
-        socket.on("print_choices", function (msg) {
-            for (let choice_id in msg["choices"]) {
-                let choice = msg["choices"][choice_id];
-
-                if (!choice["action"]) {
-                    addToStoryBoard("<button class=\"button\" onclick=\"socket.emit(&quot;make_choice&quot;, {choice_id: &quot;" + choice_id + "&quot;})\">" + choice_id + "</button>\t" + choice["text"] + msg["effects_texts"][choice_id]);
+        /* ---------- CHOICE BUTTONS (unchanged) ----------------------- */
+        socket.on("print_choices", msg => {
+            for (const choice_id in msg.choices) {
+                const choice = msg.choices[choice_id];
+                if (!choice.action) {
+                    addToStoryBoard(
+                        `<button class="button" onclick='socket.emit("make_choice",{choice_id:"${choice_id}"})'>${choice_id}</button> ${choice.text}${msg.effects_texts[choice_id] ?? ""}`
+                    );
                 }
             }
         });
 
-        socket.on("print_feedback_message", function (msg) {
-            addToStoryBoard(msg.text);
-        });
-
-        document.getElementById("startButton").addEventListener("click", function () {
-            socket.emit("make_choice", { choice_id: "start" });
-        });
-
-        /*
-        document.addEventListener("DOMContentLoaded", (event) => {
-            var socket = io.connect("http://" + document.domain + ":" + location.port);
-
-            socket.on("connect", () => {
-                console.log("Connected to server");
-            });
-
-            socket.on("print", (data) => {
-                const newElement = document.createElement("div");
-                newElement.innerHTML = data.text
-                document.getElementById("story-board").appendChild(newElement);
-            });
-        });
-
-        function displayMessage() {
-            fetch("/update", {
-                method: "POST"
-            })
-                .then(response => response.json())
-                .then(data => {
-                    document.getElementById("story-board").innerHTML = ""
-                    document.getElementById("story-board").innerHTML.appendChild("<div>" + data.story_text + "</div>")
-                    document.getElementById("story-board").innerHTML.appendChild("<div>" + choices + "</div>")
-                });
-        }*/
+        /* ---------- START BUTTON (unchanged) ------------------------- */
+        document.getElementById("startButton")
+            .addEventListener("click", () => socket.emit("make_choice", { choice_id: "start" }));
     </script>
 </body>
 

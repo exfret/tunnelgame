@@ -167,11 +167,29 @@ def run(game_name, packaged=True, parent_game=None, parent_state=None, exec_bloc
                         parse_modification_spec(choice, spec_type)
         update_choice_reqs()
 
+
         # Only change where we were in the story for "proper" choices
         if not is_action:
             state["last_address_list"].append(state["last_address"])
 
             curr_view.print_choices()
+        
+        
+        # Update shown vars based off where the address for our last "proper" choice
+        curr_view.clear_var_view()
+        # Get shown vars
+        def add_shown_vars(curr_shown_vars, addr):
+            curr_node = addressing.get_node(addr)
+            if "_shown" in curr_node:
+                for shown_var in curr_node["_shown"]:
+                    curr_shown_vars.append(shown_var)
+        shown_vars = []
+        partial_addr = ()
+        add_shown_vars(shown_vars, partial_addr)
+        for tag in state["last_address_list"][-1]:
+            partial_addr = partial_addr + (tag,)
+            add_shown_vars(shown_vars, partial_addr)
+        curr_view.print_shown_vars(shown_vars, state["last_address_list"][-1])
 
 
     # If this is an exec command, only run the block and then return
@@ -525,6 +543,7 @@ def run(game_name, packaged=True, parent_game=None, parent_state=None, exec_bloc
             if len(choice["missing"]) > 0:
                 curr_view.print_feedback_message("choice_missing_requirements")
             elif not utility.eval_conditional(choice["enforce"], choice["choice_address"]):
+                # TODO: Should autosaves/etc. happen after alt effects
                 if choice["alt_address"]:
                     make_choice(choice["alt_address"], command, choice, is_action_override=True)
                 else:

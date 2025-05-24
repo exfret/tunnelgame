@@ -177,6 +177,21 @@ class CLIView:
     ######################################################################
 
 
+    def clear_var_view(self):
+        pass
+
+
+    def print_shown_vars(self, shown_vars, vars_address):
+        print("\nRelevant values:")
+        var_dict_vals = utility.collect_vars(state, vars_address)
+        for var in shown_vars:
+            print(utility.localize(var, vars_address) + ":\t" + str(var_dict_vals[var]))
+
+
+    def print_var(self, text):
+        print(text)
+
+
     def print_var_modification(self, text_to_show_spec, dont_save_print=False):
         operation_text = None
         new_text = ""
@@ -262,7 +277,8 @@ class CLIView:
                     if isinstance(missing, dict):
                         if missing["type_missing"] == "bag":
                             missing_text += f"{missing['item']} in {missing['bag_name']}, "
-                        else:  # The only special missing type right now is a bag
+                        else:
+                            # The only special missing type right now is a bag
                             raise Exception()
                     else:
                         missing_text += missing + ", "
@@ -350,7 +366,7 @@ class CLIView:
             print(name)
 
 
-    def get_input(self) -> str:
+    def get_input(self):
         old_print() # Add a new line
         command_string = input("> ")
         old_print()
@@ -388,6 +404,9 @@ class ViewForTesting:
     def clear(self):
         self.commands_called.append({"id": "clear"})
 
+    def clear_var_view(self):
+        self.commands_called.append({"id": "clear_var_view"})
+
     def print_choices(self, display_actions = False):
         self.commands_called.append({"id": "print_choices"})
 
@@ -406,6 +425,9 @@ class ViewForTesting:
     def print_settings_flavor_text_set(self, new_value):
         self.commands_called.append({"id": "print_settings_flavor_text_set", "new_value": new_value})
 
+    def print_shown_vars(self, shown_vars, vars_address):
+        self.commands_called.append({"id": "print_shown_vars", "shown_vars": shown_vars, "vars_address": vars_address})
+
     def print_stat_change(self, text):
         self.commands_called.append({"id": "print_stat_change", "text": text})
 
@@ -421,7 +443,7 @@ class ViewForTesting:
     def print_var_value(self, var_value):
         self.commands_called.append({"id": "print_var_value", "var_value": var_value})
 
-    def get_input(self) -> str:
+    def get_input(self):
         if self.num_choices_made >= len(self.choice_list):
             return "exit".split()
 
@@ -486,6 +508,30 @@ class WebView:
     ######################################################################
     # Stats board
     ######################################################################
+
+
+    def clear_var_view(self):
+        self.socketio.emit("clear_var_view", {})
+
+
+    def print_shown_vars(self, shown_vars, vars_address):
+        var_dict_vals = utility.collect_vars(state, vars_address)
+        for var_group in shown_vars:
+            if isinstance(var_group, str):
+                self.socketio.emit("print_var", {"text": utility.localize(var_group, vars_address) + ":\t" + str(var_dict_vals[var_group])})
+            elif isinstance(var_group, dict):
+                label = next(iter(var_group))
+                for var in var_group[label]:
+                    self.socketio.emit("print_var", {"group": label, "name": utility.localize(var, vars_address), "value": str(var_dict_vals[var])})
+                # Close the group if needed, or by default
+                #is_open = False
+                #if label in state["view"]["stats_dropdowns_open"] and state["view"]["stats_dropdowns_open"][label]:
+                #    is_open = True
+                #self.socketio.emit("set_dropdown_state", {"group": label, "open": is_open})
+
+
+    def print_var(self, text):
+        self.socketio.emit("print_var", {"text": text})
 
 
     def print_var_modification(self, text_to_show_spec, dont_save_print=False):
@@ -558,6 +604,6 @@ class WebView:
         pass # TODO
 
 
-    def get_input(self) -> str:
+    def get_input(self):
         return []
         pass # TODO

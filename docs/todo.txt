@@ -1,4 +1,9 @@
 Currently:
+  - Tests, which should help get up to speed with current code
+    - Check that ViewForTesting actually works
+  - Organize and go through "Old Currently"
+
+Old Currently:
   - Connection instruction
   - Block location/locales
   - Check tag for choices that activates at the same time as require and has custom message for what was missing
@@ -29,6 +34,7 @@ Currently:
 Big Todo:
   - UI
 
+196. Make vars display for WebView with dropdown lists recursive
 194. Block-based visits var
 193. Mapping tool to compile to yaml
 192. Maybe keep track of a primary block/location which doesn't include the headers?
@@ -139,6 +145,7 @@ Big Todo:
 58. SPILL instruction for when we do want to "spill" from an effects section to the parent area
 
 DONE
+195. Vars display for WebView with dropdown lists
 167. Investigate that headers seem to be running after everything else
 173. An "all" tag for injecting into choices
 174. "seed" command that forces the next few "random" values to prechosen values (doesn't actually seed generator)

@@ -8,10 +8,20 @@ _vars:
   - limestone: 0
   - sandstone: 0
   - shale: 0
-  - furnace: 0
   # Sediments
   - clay: 0
   # Minerals
+_shown:
+  - clay
+  - rocks:
+      - claystone
+      - halite
+      - lignite
+      - limestone
+      - sandstone
+      - shale
+  - furnace
+  - furnace
 _content:
   - choice: gather
   - choice: clay

@@ -347,6 +347,8 @@ def step():
         tbl_to_display = vars_by_name[curr_node["print_table"]]["value"]
 
         curr_view.print_table(tbl_to_display, dont_save_print=dont_save_print)
+    elif "print_var" in curr_node:
+        curr_view.print_var(curr_node["print_var"])
     elif "random" in curr_node:
         possibilities_list = []
 

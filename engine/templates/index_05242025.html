@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Tunnel</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            position: relative;
+            height: 0.143;
+            background: linear-gradient(to right, #6495ED 20%, #4169E1 80%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 20px;
+            color: white;
+        }
+
+        html,
+        body {
+            height: 100%;
+        }
+
+        .settings {
+            width: 40px;
+            height: 40px;
+            background: url("/settings.png") no-repeat center center;
+            background-size: contain;
+            margin: 15px;
+        }
+
+        .title {
+            font-size: 50px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .container {
+            flex: 1;
+            width: 100vw;
+            display: flex;
+        }
+
+        .left-section,
+        .middle-section,
+        .right-section {
+            padding: 10px;
+            overflow: auto;
+        }
+
+        .left-section {
+            flex: 0 0 100px;
+            background: #f0f0f0;
+        }
+
+        .buttons {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .button {
+            margin-bottom: 10px;
+            padding: 5px 10px;
+            background: lightgray;
+            border-radius: 5px;
+        }
+
+        .nav-button {
+            width: 100%;
+        }
+
+        .middle-section {
+            flex: 1;
+            background: #ffffff;
+        }
+
+        .text-area {
+            padding: 10px;
+        }
+
+        .alert {
+            background: #ffe3e3;
+            border: 1px solid #ff9999;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+
+        .middle-section hr {
+            border: none;
+            border-top: 1px solid #ccc;
+            margin: 20px 0;
+        }
+
+        .right-section {
+            flex: 0 0 350px;
+            background: #f0f0f0;
+        }
+
+        .image-area {
+            padding: 10px;
+        }
+
+        img {
+            width: 100%;
+        }
+
+        footer {
+            background: #000000;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        p {
+            margin: 0;
+            padding: 0;
+            margin-top: 0;
+            margin-bottom: 0;
+            line-height: 1.2;
+            font-size: 1rem;
+            font-family: "Georgia";
+        }
+
+        /* 1 ▸ Let the right column stack its children vertically                */
+        .right-section {
+            display: flex;
+            /* column‑layout */
+            flex-direction: column;
+        }
+
+        /* 2 ▸ Image area keeps its natural height                               */
+        .image-area {
+            flex: 0 0 auto;
+        }
+
+        /* 3 ▸ Stats board scrolls and uses type‑writer styling                   */
+        #stats-board {
+            flex: 1 1 auto;
+            /* fill the remaining column height       */
+            overflow-y: auto;
+            /* <- scrollbar appears when overflow     */
+            padding: 10px;
+
+            /* typography tweaks */
+            font-family: "Roboto Mono", "Courier New", Courier, monospace;
+            /* typewriter look */
+            font-size: 0.8rem;
+            /* a bit smaller than normal body text    */
+            line-height: 0.7;
+            /* tighter vertical rhythm                */
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+        <div class="settings"></div>
+        <h1 class="title">Tunnel</h1>
+    </header>
+
+    <div class="container">
+        <div class="left-section">
+            <div class="buttons">
+                <button class="button nav-button">Stats</button>
+            </div>
+        </div>
+
+        <div class="middle-section">
+            <div class="text-area">
+                <p id="story-board">
+                    <button class="button" id="startButton">Start</button>
+                </p>
+            </div>
+        </div>
+
+        <div class="right-section">
+            <div class="image-area">
+            </div>
+            <div id="stats-board">
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        &copy; 2025 Kyle Hess
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <script>
+        function addToStoryBoard(html) {
+            const new_element = document.createElement("div");
+            new_element.innerHTML = "<div style=\"padding-bottom: 10px\">" + html + "</div>";
+            document.getElementById("story-board").appendChild(new_element);
+        }
+
+        // TODO: Maybe make the text here a little different or something? Or should it be the exact same as story board?
+        function addToStatsBoard(html) {
+            const new_element = document.createElement("div");
+            new_element.innerHTML = "<div style=\"padding-bottom: 10px\">" + html + "</div>";
+            document.getElementById("stats-board").appendChild(new_element);
+        }
+
+        let socket = io();
+
+        socket.on("clear", function (msg) {
+            document.getElementById("story-board").innerHTML = "";
+        });
+
+        socket.on("clear_var_view", function (msg) {
+            document.getElementById("stats-board").innerHTML = "";
+        });
+
+        socket.on("separator", function (msg) {
+            addToStoryBoard("".repeat(90));
+        });
+
+        socket.on("print", function (msg) {
+            addToStoryBoard(msg.text);
+        });
+
+        socket.on("print_var", function (msg) {
+            addToStatsBoard(msg.text)
+        });
+
+        socket.on("print_choices", function (msg) {
+            for (let choice_id in msg["choices"]) {
+                let choice = msg["choices"][choice_id];
+
+                if (!choice["action"]) {
+                    addToStoryBoard("<button class=\"button\" onclick=\"socket.emit(&quot;make_choice&quot;, {choice_id: &quot;" + choice_id + "&quot;})\">" + choice_id + "</button>\t" + choice["text"] + msg["effects_texts"][choice_id]);
+                }
+            }
+        });
+
+        socket.on("print_feedback_message", function (msg) {
+            addToStoryBoard(msg.text);
+        });
+
+        document.getElementById("startButton").addEventListener("click", function () {
+            socket.emit("make_choice", { choice_id: "start" });
+        });
+    </script>
+</body>
+
+</html>

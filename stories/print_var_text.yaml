@@ -1,0 +1,16 @@
+_vars:
+  - test1: 0
+  - test2: 1
+# Shown variables should be based off current address
+# They are printed after choices? Could be printed after actions too... which I guess are also choices
+_shown:
+  - test2
+_content:
+  - print_var: Hi
+  - print: Hello
+  - choice: child
+child:
+  _shown:
+    - test1
+  _content:
+    - Bye
