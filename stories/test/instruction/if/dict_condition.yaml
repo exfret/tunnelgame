@@ -1,0 +1,23 @@
+_vars:
+  - true_var: True
+  - false_var: False
+_content:
+  - if:
+      - or:
+          - true_var
+          - false_var
+      - false_var
+    then:
+      - yay
+    else:
+      - nay
+  - if:
+      or:
+        - - true_var
+          - false_var
+        - false_var
+        - true_var
+    then:
+      - yay
+    else:
+      - nay

@@ -1,0 +1,10 @@
+_vars:
+  - false_var: False
+_content:
+  - start
+  - choice: false_choice
+    enforce: false_var
+    alt_effects:
+      - Not true
+    effects:
+      - This should not print

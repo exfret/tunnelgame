@@ -1,0 +1,10 @@
+_content:
+  - beginning
+  - choice: first
+first:
+  - first
+  - choice: second
+  - choice: _back
+second:
+  - second
+  - choice: _back

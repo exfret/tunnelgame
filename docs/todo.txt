@@ -1,12 +1,10 @@
 Currently:
-  - Tests, which should help get up to speed with current code
-    - Check that ViewForTesting actually works
   - Organize and go through "Old Currently"
 
 Old Currently:
   - Connection instruction
   - Block location/locales
-  - Check tag for choices that activates at the same time as require and has custom message for what was missing
+  - "check" tag for choices that activates at the same time as require and has custom message for what was missing
 
   - Game objects
     - Test for duplicate objects
@@ -34,6 +32,12 @@ Old Currently:
 Big Todo:
   - UI
 
+202. Tests for each instruction
+201. Save clientside info, like dropdown state, on refreshes
+200. Print displayed text in web view on reload
+199. Fix that choices can't have "flag" as an ID (maybe other restrictions are there too)
+198. Actually implement selection options for choice args
+197. A reprint command for printing the relevant stats again
 196. Make vars display for WebView with dropdown lists recursive
 194. Block-based visits var
 193. Mapping tool to compile to yaml

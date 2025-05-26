@@ -117,6 +117,7 @@ def open_game(story_path):
         "vars": {},
         "view": {"stats_dropdowns_open": {}},
         "view_displayed_text": {"console": "", "game": ""}, # TODO: Rename to subview displayed text or something along those lines?
+        "view_text_info": {"shown_vars": []},
         "visits": {},
         "visits_choices": {},
         "world": {"objects": {}, "descriptors": {}, "relationships": {}} # TODO: Update exec?

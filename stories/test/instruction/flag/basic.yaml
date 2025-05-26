@@ -1,0 +1,10 @@
+_content:
+  - start
+  - choice: flagit
+    effects:
+      - flagging
+      - flag: flagged
+      - goto: .
+  - if: flagged
+    then:
+      - flagged

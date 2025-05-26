@@ -1,0 +1,5 @@
+_content:
+  - start
+  - choice: select
+    selectable_once:
+    effects: .

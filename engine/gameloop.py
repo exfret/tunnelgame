@@ -6,34 +6,44 @@ import time
 from engine import addressing, config, gameparser, interpreter, utility
 
 
-def run(game_name, packaged=True, parent_game=None, parent_state=None, exec_block=None):
-    game = config.game
-    state = config.state
+def run(game_name, packaged=True, parent_game=None, parent_state=None, exec_block=None, loaded_game_state=None, uid=None):
+    game = None
+    state = None
     curr_view = config.view
+    
+    if loaded_game_state is None:
+        game = config.game
+        state = config.state
 
-    story_path = None
-    if packaged:
-        story_path = config.local_dir / "stories" / game_name
+        story_path = None
+        if packaged:
+            story_path = config.local_dir / "stories" / game_name
+        else:
+            story_path = config.stories / game_name
+        gameparser.open_game(story_path)
+
+
+        def setup_game():
+            gameparser.construct_game(game, story_path)
+            gameparser.expand_macros(game)
+
+            # We need to do this after construct game and expand macros or else includes and such will be attempted again
+            if exec_block is not None:
+                addressing.get_node(exec_block, parent_game)["_exec"] = copy.deepcopy(game)
+                game.clear()
+                game.update(parent_game)
+
+            gameparser.add_flags(game)
+            gameparser.add_vars_with_address(game, ())
+            gameparser.add_module_vars()
+            gameparser.parse_game()
+        setup_game()
     else:
-        story_path = config.stories / game_name
-    gameparser.open_game(story_path)
-
-
-    def setup_game():
-        gameparser.construct_game(game, story_path)
-        gameparser.expand_macros(game)
-
-        # We need to do this after construct game and expand macros or else includes and such will be attempted again
-        if exec_block is not None:
-            addressing.get_node(exec_block, parent_game)["_exec"] = copy.deepcopy(game)
-            game.clear()
-            game.update(parent_game)
-
-        gameparser.add_flags(game)
-        gameparser.add_vars_with_address(game, ())
-        gameparser.add_module_vars()
-        gameparser.parse_game()
-    setup_game()
+        #config.view = loaded_game_state["view"]
+        # TODO: print_displayed_text
+        # TODO: Do I need to set view?
+        game = config.game
+        state = config.state
 
 
     # Sync state vars so that upstream state can be modified
@@ -189,7 +199,16 @@ def run(game_name, packaged=True, parent_game=None, parent_state=None, exec_bloc
         for tag in state["last_address_list"][-1]:
             partial_addr = partial_addr + (tag,)
             add_shown_vars(shown_vars, partial_addr)
-        curr_view.print_shown_vars(shown_vars, state["last_address_list"][-1])
+        state["view_text_info"]["shown_vars"] = shown_vars
+        if len(shown_vars) > 0:
+            curr_view.print_shown_vars(shown_vars, state["last_address_list"][-1])
+        
+
+        # Save to view if this is a web state
+        if config.web_view:
+            gameparser.remove_module_vars()
+            config.view.save_game_state(uid, game, state)
+            gameparser.add_module_vars()
 
 
     # If this is an exec command, only run the block and then return
@@ -197,14 +216,16 @@ def run(game_name, packaged=True, parent_game=None, parent_state=None, exec_bloc
         make_choice(exec_block + ("_exec", "_content", 0))
         return
 
-    curr_view.print_choices()
 
-    autostart = True
+    if loaded_game_state is None:
+        curr_view.print_choices()
 
-    if autostart:
-        save_game("_autosave")
-        
-        make_choice(state["choices"]["start"]["address"])
+        autostart = True
+
+        if autostart:
+            save_game("_autosave")
+            
+            make_choice(state["choices"]["start"]["address"])
 
 
     # Load game if this is web view and we were refreshed
@@ -553,6 +574,7 @@ def run(game_name, packaged=True, parent_game=None, parent_state=None, exec_bloc
                 save_game("_autosave_short_" + str(state["choice_num"] % 3))
                 # If this is the web view, save some web info
                 if config.web_view:
+                    # TODO: What is this for?..
                     (config.saves / "_web_info").with_suffix(".pkl").write_bytes(pickle.dumps({"running": True, "choice_num": state["choice_num"]}))
                 state["choice_num"] += 1
 

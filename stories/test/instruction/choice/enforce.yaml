@@ -1,0 +1,13 @@
+_vars:
+  - false_var: False
+  - true_var: True
+_content:
+  - start
+  - choice: impossible
+    enforce: false_var
+    effects:
+      - This should not print
+  - choice: possible
+    enforce: true_var
+    effects:
+      - This should print

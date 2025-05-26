@@ -346,6 +346,11 @@
         socket.on("print", msg => addToStoryBoard(msg.text));
         socket.on("print_feedback_message", msg => addToStoryBoard(msg.text));
 
+        /* ---------- Restoration after reload ------------------------- */
+        socket.on("restore_state", msg => {
+            // TODO: What should go here?
+        });
+
         /* ---------- STATS EVENTS (new format) ------------------------ */
         /**
          * Expect messages shaped:

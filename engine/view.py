@@ -1,8 +1,11 @@
-from flask import Flask, render_template, jsonify
-from flask_socketio import SocketIO
-import os
+# Web imports
+from flask import Flask, render_template, jsonify, session
+from flask_socketio import SocketIO, emit, join_room
+from uuid import uuid4
+
+import copy
+import pickle
 import textwrap
-import time
 
 # Module imports
 from engine import addressing, config, utility
@@ -63,6 +66,7 @@ feedback_msg = {
     "unrecognized_command": "Unrecognized command/choice. Type 'help' for commands or 'choices' for a list of choices.",
     "default": "Error: Invalid feedback message key.",
 }
+
 
 old_print = print
 
@@ -184,8 +188,14 @@ class CLIView:
     def print_shown_vars(self, shown_vars, vars_address):
         print("\nRelevant values:")
         var_dict_vals = utility.collect_vars(state, vars_address)
-        for var in shown_vars:
-            print(utility.localize(var, vars_address) + ":\t" + str(var_dict_vals[var]))
+        for var_group in shown_vars:
+            if isinstance(var_group, str):
+                print(utility.localize(var_group, vars_address) + ":\t" + str(var_dict_vals[var_group]))
+            elif isinstance(var_group, dict):
+                label = next(iter(var_group))
+                print(label + "...")
+                for var in var_group[label]:
+                    print("\t" + utility.localize(var, vars_address) + ":\t" + str(var_dict_vals[var]))
 
 
     def print_var(self, text):
@@ -382,10 +392,12 @@ class ViewForTesting:
         self.choice_list = choice_list
         self.commands_called = []
 
+
     def update_choice_list(self, choice_list):
         self.num_choices_made = 0
         self.choice_list = choice_list
         self.commands_called = []
+
 
     def get_sub_commands_called(self, id):
         sub_commands_called = []
@@ -394,6 +406,7 @@ class ViewForTesting:
                 sub_commands_called.append(command)
         return sub_commands_called
 
+
     def get_text_commands_called(self):
         text_commands_called = []
         for command in self.commands_called:
@@ -401,47 +414,62 @@ class ViewForTesting:
                 text_commands_called.append(command["text"])
         return text_commands_called
 
+
     def clear(self):
         self.commands_called.append({"id": "clear"})
+
 
     def clear_var_view(self):
         self.commands_called.append({"id": "clear_var_view"})
 
+
     def print_choices(self, display_actions = False):
         self.commands_called.append({"id": "print_choices"})
+
 
     def print_feedback_message(self, msg_type):
         self.commands_called.append({"id": "print_feedback_message", "msg": msg_type})
 
+
     def print_flavor_text(self, text, dont_save_print=False):
         self.commands_called.append({"id": "print_flavor_text", "text": text})
+
 
     def print_settings(self):
         self.commands_called.append({"id": "print_settings"})
 
+
     def print_settings_flavor_text_get(self):
         self.commands_called.append({"id": "print_settings_flavor_text_get"})
+
 
     def print_settings_flavor_text_set(self, new_value):
         self.commands_called.append({"id": "print_settings_flavor_text_set", "new_value": new_value})
 
+
     def print_shown_vars(self, shown_vars, vars_address):
         self.commands_called.append({"id": "print_shown_vars", "shown_vars": shown_vars, "vars_address": vars_address})
+
 
     def print_stat_change(self, text):
         self.commands_called.append({"id": "print_stat_change", "text": text})
 
+
     def print_table(self, tbl_to_display, dont_save_print=False):
         self.commands_called.append({"id": "print_table", "tbl": tbl_to_display})
+
 
     def print_text(self, text, style, dont_save_print=False):
         self.commands_called.append({"id": "print_text", "text": utility.format.vformat(text, (), utility.collect_vars(state)), "style": style})
 
+
     def print_var_modification(self, text_to_show_spec, dont_save_print=False):
         self.commands_called.append({"id": "print_var_modifications", "text": text_to_show_spec})
 
+
     def print_var_value(self, var_value):
         self.commands_called.append({"id": "print_var_value", "var_value": var_value})
+
 
     def get_input(self):
         if self.num_choices_made >= len(self.choice_list):
@@ -450,22 +478,44 @@ class ViewForTesting:
         self.num_choices_made += 1
         return self.choice_list[self.num_choices_made - 1].split()
 
-# TODO: Storing text for save/load
+
+# TODO: Storing text for save/load for WebView
 class WebView:
     def __init__(self):
         self.app = Flask(__name__)
-        self.socketio = SocketIO(self.app, async_mode="eventlet")
+        # TODO: Figure out what the secret key is needed for
+        # Having this was suggested by ChatGPT
+        self.app.config["SECRET_KEY"] = "password"
+        self.socketio = SocketIO(self.app, async_mode="eventlet", manage_session=True)
         self.setup_routes()
+        self.sid_to_uid = {}
+
+        try:
+            self.web_state = pickle.loads((config.saves / "_web_state").with_suffix(".pkl").read_bytes())
+        except FileNotFoundError:
+            self.web_state = {}
     
 
     def setup_routes(self):
         @self.app.route('/')
         def index():
+            session.setdefault("uid", str(uuid4()))
             return render_template("index.html")
         
+
         @self.socketio.on("make_choice")
         def handle_choice(data):
             state["command_buffer"].append([data["choice_id"]])
+
+
+    def save_game_state(self, uid, game_obj, state_obj):
+        entry = self.web_state.setdefault(uid, {})
+        entry["game"] = copy.deepcopy(game_obj)
+        entry["state"] = copy.deepcopy(state_obj)
+        entry["client_side"] = {} # TODO
+
+        # Save across server restarts
+        (config.saves / "_web_state").with_suffix(".pkl").write_bytes(pickle.dumps(self.web_state))
 
 
     ######################################################################
@@ -605,5 +655,5 @@ class WebView:
 
 
     def get_input(self):
+        # TODO?
         return []
-        pass # TODO

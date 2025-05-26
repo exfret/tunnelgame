@@ -1,0 +1,6 @@
+_content:
+  - beginning
+  - choice: forward
+forward:
+  - forward
+  - choice: _back

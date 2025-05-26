@@ -119,6 +119,59 @@ def test_game_objects():
 
 
 ######################################################################
+# instruction
+######################################################################
+
+
+def test_instruction_back_basic():
+    curr_view.update_choice_list(["forward", "return"])
+    run("test/instruction/back/basic.yaml")
+    assert curr_view.get_text_commands_called() == ["beginning", "forward", "beginning"]
+
+
+def test_instruction_back_syntactic_sugar():
+    curr_view.update_choice_list(["forward", "back"])
+    run("test/instruction/back/syntactic_sugar.yaml")
+    assert curr_view.get_text_commands_called() == ["beginning", "forward", "beginning"]
+
+
+def test_instruction_back_twice():
+    curr_view.update_choice_list(["first", "second", "back", "back"])
+    run("test/instruction/back/twice.yaml")
+    assert curr_view.get_text_commands_called() == ["beginning", "first", "second", "first", "beginning"]
+
+
+def test_instruction_choice_alt_effects():
+    curr_view.update_choice_list(["false_choice"])
+    run("test/instruction/choice/alt_effects.yaml")
+    assert curr_view.get_text_commands_called() == ["start", "Not true"]
+
+
+def test_instruction_choice_enforce():
+    curr_view.update_choice_list(["impossible", "possible"])
+    run("test/instruction/choice/enforce.yaml")
+    assert curr_view.get_text_commands_called() == ["start", "This should print"]
+
+
+def test_instruction_choice_selectable_once():
+    curr_view.update_choice_list(["select", "select"])
+    run("test/instruction/choice/selectable_once.yaml")
+    assert curr_view.get_text_commands_called() == ["start", "start"]
+
+
+def test_instruction_flag_basic():
+    curr_view.update_choice_list(["flagit"])
+    run("test/instruction/flag/basic.yaml")
+    assert curr_view.get_text_commands_called() == ["start", "flagging", "start", "flagged"]
+
+
+def test_instruction_if_dict_condition():
+    curr_view.update_choice_list([])
+    run("test/instruction/if/dict_condition.yaml")
+    assert curr_view.get_text_commands_called() == ["nay", "yay"]
+
+
+######################################################################
 # vars
 ######################################################################
 
