@@ -1,3 +1,13 @@
+2025/05/26 (0k words - ?)
+- Console in web view
+- Support for images in web view, also drew some new images
+- Loading in web view now keeps displayed text
+- Added spill command (just works for choices now)
+- Ability to print locales directly
+- Locales can now be differentiated between singular and plural
+- Proper handling for out of bounds args (finally)
+- Started version 4 of story (descriptive)
+
 2025/05/25 (8k words - 8k words)
 - Persistence between reloads
 

@@ -1,3 +1,5 @@
+_game_id: tunnel-03-abstract
+_image: lily.png
 _content:
   - choice: skip
     action:

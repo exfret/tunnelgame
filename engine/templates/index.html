@@ -241,6 +241,29 @@
         #stats-board details[open]>summary::before {
             transform: rotate(90deg);
         }
+
+        .command-bar {
+            width: 100%;
+            padding: 10px 12px;
+            background: #222;
+            border-top: 1px solid #444;
+            display: flex;
+            align-items: center;
+        }
+
+        #commandInput {
+            flex: 1;
+            font: 1rem/1.4 "Courier New", monospace;
+            color: #eee;
+            background: #333;
+            border: none;
+            border-radius: 6px;
+            padding: 8px 10px;
+        }
+
+        #commandInput:focus {
+            outline: 2px solid #6495ED;
+        }
     </style>
 </head>
 
@@ -254,7 +277,7 @@
         <!-- ④  —––  COLUMN: NAV  –––------------------------------------ -->
         <div class="left-section">
             <div class="buttons">
-                <button class="button nav-button">Stats</button>
+                <button class="button nav-button" id="restartButton">Restart</button>
             </div>
         </div>
 
@@ -265,11 +288,15 @@
                     <button class="button" id="startButton">Start</button>
                 </p>
             </div>
+            <div class="command-bar">
+                <input id="commandInput" type="text" placeholder="Type a command…" autocomplete="off"
+                    spellcheck="false" />
+            </div>
         </div>
 
         <!-- ⑥  —––  COLUMN: IMAGE + STATS  –––--------------------------- -->
         <div class="right-section">
-            <div class="image-area"></div>
+            <div id="image-area"></div>
             <div id="stats-board" class="tree"></div>
         </div>
     </div>
@@ -339,6 +366,17 @@
         /* -------------------------------------------------------------- */
 
         const socket = io();
+        const cmdIn = document.getElementById('commandInput');
+
+        window.addEventListener('load', () => cmdIn.focus());
+        document.body.addEventListener('click', () => cmdIn.focus());
+
+        cmdIn.addEventListener('keydown', evt => {
+            if (evt.key === 'Enter' && cmdIn.value.trim() !== '') {
+                socket.emit('command', { command: cmdIn.value.trim() });
+                cmdIn.value = '';
+            }
+        });
 
         /* ---------- STORY EVENTS (unchanged) ------------------------- */
         socket.on("clear", () => story_board.innerHTML = "");
@@ -371,7 +409,21 @@
             }
         });
 
-        socket.on("clear_var_view", () => document.getElementById("stats-board").innerHTML = "");
+        socket.on("set_image", msg => {
+            if (msg.none) {
+                document.getElementById("image-area").innerHTML = ""
+            } else {
+                const d = document.createElement("div")
+                d.innerHTML = `<div><img src="` + msg.path + `"></div>`
+                document.getElementById("image-area").appendChild(d)
+            }
+        });
+
+        // Also clears image
+        socket.on("clear_var_view", () => {
+            document.getElementById("image-area").innerHTML = ""
+            document.getElementById("stats-board").innerHTML = ""
+        });
 
         /* ---------- CHOICE BUTTONS (unchanged) ----------------------- */
         socket.on("print_choices", msg => {
@@ -383,6 +435,12 @@
                     );
                 }
             }
+        });
+
+        /* ---------- NAV BUTTONS -------------------------------------- */
+        document.getElementById("restartButton").addEventListener("click", () => {
+            socket.emit("restart", {});
+            window.location.reload();
         });
 
         /* ---------- START BUTTON (unchanged) ------------------------- */

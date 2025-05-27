@@ -1,0 +1,7 @@
+_vars:
+  - has_no_locale:
+  - has_locale:
+    _locale: This has a locale
+_content:
+  - "{__has_no_locale}"
+  - "{__has_locale}"

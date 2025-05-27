@@ -4,6 +4,8 @@ START:
   mandatory:
     _content: CONTENT
   optional:
+    _game_id: _id
+    _image: _text # Actually is a filename, but we don't have to pay attention to that for now
     _include: INCLUDE_DICT
     _injections: BLOCK_INJECTIONS_LIST
     _listeners: LISTENERS
@@ -60,9 +62,20 @@ VAR: # Has special built-in checking
   type: dict
   optional:
     _global: _null
-    _locale: _text
+    _locale: VAR_LOCALE
     _type: _var_type
   other: _complex_value
+VAR_LOCALE:
+  type: union_with_types
+  str: _text
+  dict: VAR_LOCALE_DICT
+VAR_LOCALE_DICT:
+  type: dict
+  mandatory:
+    default: _text
+  optional:
+    singular: _text
+    plural: _text
 BLOCK:
   type: union_with_types
   dict: DICT_BLOCK
@@ -71,8 +84,9 @@ DICT_BLOCK: # Has special built-in checking
   type: dict
   optional:
     _content: CONTENT
-    _listeners: LISTENERS
+    _image: _text # Actually is a filename, but we don't have to pay attention to that for now
     _include: INCLUDE_DICT
+    _listeners: LISTENERS
     _meta: META_DICT
     _vars: VARS
   other: BLOCK
@@ -117,6 +131,7 @@ DICT_INSTR:
     send: SEND
     separator: SEPARATOR
     set: SET
+    spill: SPILL
     stop: STOP
     storypoint: STORYPOINT
     sub: SUB
@@ -341,6 +356,11 @@ SET:
   optional:
     show: _null
     to: _expr
+# Special handling (to make sure it is within an effects section)
+SPILL:
+  type: dict
+  mandatory:
+    spill: _null
 STOP:
   type: dict
   mandatory:

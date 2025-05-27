@@ -1,3 +1,4 @@
+_image: orphanage.png
 _content:
   - goto: rooms
 rooms:

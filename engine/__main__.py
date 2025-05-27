@@ -3,6 +3,7 @@ from flask_socketio import join_room, emit
 import sys
 
 import copy
+import yaml
 
 from engine import config, view, gameparser
 from engine.gameloop import run
@@ -16,14 +17,30 @@ else:
 
 if config.web_view:
     @config.view.socketio.on("connect")
-    def handle_connect():
+    def handle_connect(auth):
         uid = session["uid"]
         sid = request.sid
         config.view.sid_to_uid[sid] = uid
         join_room(uid)
 
         game_state = config.view.web_state.get(uid)
-        if game_state is None:
+
+        # See whether to reset game state
+        # Load the game once just to see if its _game_id is different from before
+        reset_game_state = False
+        if game_state is None or game_state["game"] is None or game_state["state"] is None:
+            reset_game_state = True
+        else:
+            game_to_load = yaml.safe_load((config.local_dir / "stories" / config.story_name).read_text())
+            new_game_id = ""
+            if "_game_id" in game_to_load:
+                new_game_id = game_to_load["_game_id"]
+            old_game_id = ""
+            if "_game_id" in game_state["game"]:
+                old_game_id = game_state["game"]["_game_id"]
+            if new_game_id != old_game_id:
+                reset_game_state = True
+        if reset_game_state:
             game_state = {"game": None, "state": None, "client_side": {}}
             config.view.web_state[uid] = game_state
         
@@ -41,6 +58,7 @@ if config.web_view:
                 config.view.clear()
                 config.view.print_choices()
                 config.view.print_shown_vars(config.state["view_text_info"]["shown_vars"], config.state["last_address_list"][-1])
+                config.view.show_curr_image()
 
                 run(config.story_name, packaged=True, loaded_game_state=game_state, uid=uid)
             else:

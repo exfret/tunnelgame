@@ -65,6 +65,11 @@ class VarDict(dict):
 
 class VarDictValues(VarDict):
     def __getitem__(self, key):
+        # First, check if this is a localization variable
+        if len(key) > 2 and key[:2] == "__":
+            var = super().__getitem__(key[2:])
+            return localize(key[2:], var_to_use=var)
+
         var = super().__getitem__(key)
 
         if isinstance(var, dict) and "value" in var:
@@ -74,6 +79,19 @@ class VarDictValues(VarDict):
     
     def __setitem__(self, key, value):
         super().__setitem__(key, value)
+
+
+# Was going to be used for args but then I realized I needed something else, so currently unused
+def create_default_var(value=None, locale=None):
+    return {"address": (), "locale": locale, "possible_values": None, "value": value, "global": False}
+
+
+class ArgsList(list):
+    def __getitem__(self, index):
+        try:
+            return super().__getitem__(index)
+        except IndexError:
+            return None
 
 
 def get_var(var_dict, var_name, curr_address):
@@ -117,6 +135,7 @@ def collect_vars_with_dicts(state, address=None):
         var_dict["_previous_address"] = addressing.get_block_part(state["last_address_list"][-1])
     else:
         var_dict["_previous_address"] = ()
+
     return var_dict
 
 
@@ -180,14 +199,29 @@ def set_value(var, new_val):
         var["value"] = new_val
 
 
-def localize(var_name, address=None):
-    if address is None:
-        address = addressing.get_curr_addr()
-    var_dict = collect_vars_with_dicts(state, address)
-    var = var_dict[var_name]
+def localize(var_name, address=None, var_to_use=None):
+    var = None
+    if var_to_use is not None:
+        var = var_to_use
+    else:
+        if address is None:
+            address = addressing.get_curr_addr()
+        var_dict = collect_vars_with_dicts(state, address)
+        var = var_dict[var_name]
 
     if "locale" in var:
-        return var["locale"]
+        if isinstance(var["locale"], str):
+            return var["locale"]
+        
+        if "value" not in var:
+            return var["locale"]["default"]
+
+        if "singular" in var["locale"] and var["value"] == 1:
+            return var["locale"]["singular"]
+        elif "plural" in var["locale"] and isinstance(var["value"], float | int):
+            return var["locale"]["plural"]
+        
+        return var["locale"]["default"]
     else:
         return var_name
 

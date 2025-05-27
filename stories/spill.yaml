@@ -1,0 +1,6 @@
+_content:
+  - choice: hi
+    effects:
+      - okay
+      - spill:
+  - blop

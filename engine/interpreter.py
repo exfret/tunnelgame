@@ -500,6 +500,18 @@ def step():
 
         if "show" in curr_node:
             curr_view.print_var_modification(text_to_show_spec, dont_save_print=dont_save_print)
+    # Currently only spills out of choices
+    elif "spill" in curr_node:
+        partial_addr = curr_addr
+
+        while partial_addr != ():
+            partial_node = addressing.get_node(partial_addr)
+            if "choice" in partial_node:
+                break
+            else:
+                partial_addr = partial_addr[:-1]
+        
+        addressing.set_curr_addr(partial_addr)
     elif "stop" in curr_node:
         # Need to remove this address now from the queue
         state["bookmark"] = state["bookmark"][1:]

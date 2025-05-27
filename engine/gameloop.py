@@ -75,16 +75,35 @@ def run(game_name, packaged=True, parent_game=None, parent_state=None, exec_bloc
 
     def load_game(load_slot, add_save_text=False):
         contents = pickle.loads((config.saves / load_slot).with_suffix(".pkl").read_bytes())
+        gameparser.remove_module_vars()
+        old_state = copy.deepcopy(state)
         # Update state
         state.clear()
         state.update(contents)
         gameparser.add_module_vars()
+        # Backwards compatibility: simply don't crash when we come across an old save that doesn't have "game"
+        if "game" not in state:
+            state.clear()
+            state.update(old_state)
+            gameparser.add_module_vars()
+            return
         # Update game with state's game
         game.clear()
         game.update(state["game"])
         # Update view
         curr_view.clear(True) # True doesn't reset saved text
-        curr_view.print_displayed_text(add_save_text=add_save_text)
+        if not config.web_view:
+            curr_view.print_displayed_text(add_save_text=add_save_text)
+        else:
+            curr_view.clear_var_view()
+            config.view.print_shown_vars(config.state["view_text_info"]["shown_vars"], config.state["last_address_list"][-1])
+            config.view.show_curr_image()
+            config.view.print_displayed_prints()
+            config.view.print_choices()
+
+            gameparser.remove_module_vars()
+            config.view.save_game_state(uid, game, state)
+            gameparser.add_module_vars()
 
 
     def make_choice(new_addr, command=["start"], choice={}, is_action_override=False):
@@ -186,22 +205,34 @@ def run(game_name, packaged=True, parent_game=None, parent_state=None, exec_bloc
         
         
         # Update shown vars based off where the address for our last "proper" choice
+        # Also update the image
         curr_view.clear_var_view()
         # Get shown vars
-        def add_shown_vars(curr_shown_vars, addr):
+        def add_shown_vars_and_image(curr_shown_vars, curr_image_filenames, addr):
             curr_node = addressing.get_node(addr)
             if "_shown" in curr_node:
                 for shown_var in curr_node["_shown"]:
                     curr_shown_vars.append(shown_var)
+            if "_image" in curr_node:
+                curr_image_filenames.append(curr_node["_image"])
         shown_vars = []
         partial_addr = ()
-        add_shown_vars(shown_vars, partial_addr)
+        image_filenames = []
+        add_shown_vars_and_image(shown_vars, image_filenames, partial_addr)
         for tag in state["last_address_list"][-1]:
             partial_addr = partial_addr + (tag,)
-            add_shown_vars(shown_vars, partial_addr)
+            add_shown_vars_and_image(shown_vars, image_filenames, partial_addr)
         state["view_text_info"]["shown_vars"] = shown_vars
         if len(shown_vars) > 0:
             curr_view.print_shown_vars(shown_vars, state["last_address_list"][-1])
+        # Only show the last image, if it exists
+        if len(image_filenames) == 0:
+            state["curr_image"] = None
+        else:
+            state["curr_image"] = image_filenames[-1]
+        # Only show images in web view
+        if config.web_view:
+            curr_view.show_curr_image()
         
 
         # Save to view if this is a web state
@@ -321,9 +352,14 @@ def run(game_name, packaged=True, parent_game=None, parent_state=None, exec_bloc
 
         if command[0] == "clear":
             curr_view.clear(True)
-            curr_view.set_displayed_text("game")
-            curr_view.print_displayed_text()
+            # Not implemented in web view yet
+            if not config.web_view:
+                curr_view.set_displayed_text("game")
+                curr_view.print_displayed_text()
+            else:
+                curr_view.print_displayed_prints
             curr_view.print_choices()
+        # TODO: Fix for web view
         elif command[0] == "exec":
             # Note: Favor specific statements like "set" over doing an exec, this is more for show than anything
             # Enters a "ghost game" with added exec statements, then returns, keeping some modifications to state
@@ -461,6 +497,7 @@ def run(game_name, packaged=True, parent_game=None, parent_state=None, exec_bloc
                 else:
                     for i in range(num_repeats):
                         state["command_buffer"].insert(0, command[2:])
+        # TODO: Fix for web view
         elif command[0] == "revert":
             if len(state["history"]) == 0:
                 curr_view.print_feedback_message("revert_no_reversions")
@@ -546,9 +583,9 @@ def run(game_name, packaged=True, parent_game=None, parent_state=None, exec_bloc
                 choice["modifications"] = []
             
             # Populate the state vars with any given args
-            state["vars"]["_args"] = [0] * 10000
-            for i, arg in enumerate(command[1:]):
-                state["vars"]["_args"][i] = arg
+            state["vars"]["_args"] = utility.ArgsList()
+            for arg in command[1:]:
+                state["vars"]["_args"].append(arg)
             
             # Unfinished code, I should have committed before writing this since it started requiring large-scale changes that I wasn't ready to make
             #def find_modifications_and_missing(choice, spec_type):

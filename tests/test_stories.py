@@ -6,6 +6,7 @@ from engine import config, view
 from engine.config import stories
 from engine.gameloop import run
 from engine.interpreter import ErrorNode
+from engine.gameparser import IncorrectStructureError
 
 
 config.view = view.ViewForTesting()
@@ -112,7 +113,7 @@ def test_simple_goto():
 ######################################################################
 
 
-def test_game_objects():
+def test_game_objects_simple_bags():
     curr_view.update_choice_list([])
     run("test/game_objects/simple_bags.yaml")
     assert curr_view.get_text_commands_called() == ["0", "2", "2"]
@@ -171,12 +172,51 @@ def test_instruction_if_dict_condition():
     assert curr_view.get_text_commands_called() == ["nay", "yay"]
 
 
+def test_instruction_spill_basic():
+    curr_view.update_choice_list(["hi"])
+    run("test/instruction/spill/basic.yaml")
+    assert curr_view.get_text_commands_called() == ["blop", "okay", "blop"]
+
+
+def test_instruction_spill_parse_catch():
+    try:
+        run("test/instruction/spill/parse_catch.yaml")
+    except IncorrectStructureError:
+        pass
+    else:
+        assert False
+
+
 ######################################################################
 # vars
 ######################################################################
 
 
-def test_floats():
+def test_vars_args_print():
+    curr_view.update_choice_list(["print_arg hi"])
+    run("test/vars/args_print.yaml")
+    assert curr_view.get_text_commands_called() == ["start", "hi"]
+
+
+def test_vars_args_out_of_bounds():
+    curr_view.update_choice_list(["out_of_bounds"])
+    run("test/vars/args_out_of_bounds.yaml")
+    assert curr_view.get_text_commands_called() == ["start", "yes"]
+
+
+def test_vars_floats():
     curr_view.update_choice_list(["shop"])
     run("test/vars/floats.yaml")
     assert curr_view.get_text_commands_called() == ["3.5", "2.7"]
+
+
+def test_vars_locale_basic():
+    curr_view.update_choice_list([])
+    run("test/vars/locale_basic.yaml")
+    assert curr_view.get_text_commands_called() == ["has_no_locale", "This has a locale"]
+
+
+def test_vars_locale_plurals():
+    curr_view.update_choice_list([])
+    run("test/vars/locale_plurals.yaml")
+    assert curr_view.get_text_commands_called() == ["happy", "happy"]

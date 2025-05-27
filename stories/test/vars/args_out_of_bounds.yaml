@@ -1,0 +1,7 @@
+_content:
+  - start
+  - choice: out_of_bounds
+    effects:
+      - if: _args[0] is None
+        then:
+          - "yes"

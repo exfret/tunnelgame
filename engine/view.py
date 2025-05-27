@@ -1,5 +1,5 @@
 # Web imports
-from flask import Flask, render_template, jsonify, session
+from flask import Flask, render_template, jsonify, session, request
 from flask_socketio import SocketIO, emit, join_room
 from uuid import uuid4
 
@@ -506,6 +506,23 @@ class WebView:
         @self.socketio.on("make_choice")
         def handle_choice(data):
             state["command_buffer"].append([data["choice_id"]])
+        
+
+        @self.socketio.on("command")
+        def handle_command(data):
+            state["command_buffer"].append(data["command"].split())
+
+
+        @self.socketio.on("restart")
+        def handle_restart(data):
+            sid = request.sid
+            uid = self.sid_to_uid.get(sid)
+
+            self.web_state[uid] = {
+                "game": None,
+                "state": None,
+                "client_side": {}
+            }
 
 
     def save_game_state(self, uid, game_obj, state_obj):
@@ -528,10 +545,16 @@ class WebView:
         # TODO: Saving displayed text
         self.socketio.emit("clear", {})
 
+        if not dont_reset_displayed_text:
+            state["view_text_info"]["displayed_print_msgs"] = []
+
 
     # Reprints displayed text for save/loads
-    def print_displayed_text(self):
-        pass # TODO
+    def print_displayed_prints(self):
+        # Backwards compatibility with states that don't have proper keys
+        if "view_text_info" in state and "displayed_print_msgs" in state["view_text_info"]:
+            for displayed_print_msg in state["view_text_info"]["displayed_print_msgs"]:
+                self.socketio.emit(displayed_print_msg["msg_type"], displayed_print_msg["msg_data"])
     
 
     ######################################################################
@@ -545,6 +568,7 @@ class WebView:
 
     def print_separator(self, dont_save_print=False):
         self.socketio.emit("separator", {})
+        state["view_text_info"]["displayed_print_msgs"].append({"msg_type": "separator", "msg_data": {}})
 
 
     def print_table(self, tbl_to_display, dont_save_print=False):
@@ -553,6 +577,7 @@ class WebView:
 
     def print_text(self, text, style="", dont_save_print=False):
         self.socketio.emit("print", {"text": text})
+        state["view_text_info"]["displayed_print_msgs"].append({"msg_type": "print", "msg_data": {"text": text}})
 
 
     ######################################################################
@@ -578,6 +603,13 @@ class WebView:
                 #if label in state["view"]["stats_dropdowns_open"] and state["view"]["stats_dropdowns_open"][label]:
                 #    is_open = True
                 #self.socketio.emit("set_dropdown_state", {"group": label, "open": is_open})
+
+
+    def show_curr_image(self):
+        if state["curr_image"] is None:
+            self.socketio.emit("set_image", {"none": True})
+        else:
+            self.socketio.emit("set_image", {"path": "static/graphics/" + state["curr_image"]})
 
 
     def print_var(self, text):
@@ -638,6 +670,10 @@ class WebView:
         self.socketio.emit("print_feedback_message", {"text": feedback_msg[msg_type]})
 
 
+    def print_macros(self):
+        pass # TODO
+
+
     def print_settings(self):
         pass # TODO
 
@@ -651,6 +687,10 @@ class WebView:
 
 
     def print_var_value(self, var_value):
+        pass # TODO
+
+
+    def print_vars_defined(self):
         pass # TODO
 
 

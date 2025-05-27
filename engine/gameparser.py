@@ -27,6 +27,10 @@ class InvalidValueError(Exception):
     pass
 
 
+class IncorrectStructureError(Exception):
+    pass
+
+
 class IncorrectTypeError(Exception):
     pass
 
@@ -88,6 +92,7 @@ def open_game(story_path):
         "choices": {
             "start": create_choice("Start the game", ("_content", 0)),
         },  # Dict of choice ID's to new locations and descriptions
+        "curr_image": "",
         "displayed_text": "",
         "file_data": {
             "filename": "",
@@ -117,7 +122,7 @@ def open_game(story_path):
         "vars": {},
         "view": {"stats_dropdowns_open": {}},
         "view_displayed_text": {"console": "", "game": ""}, # TODO: Rename to subview displayed text or something along those lines?
-        "view_text_info": {"shown_vars": []},
+        "view_text_info": {"shown_vars": [], "displayed_print_msgs": []},
         "visits": {},
         "visits_choices": {},
         "world": {"objects": {}, "descriptors": {}, "relationships": {}} # TODO: Update exec?
@@ -257,8 +262,7 @@ def add_vars_with_address(node, address):  # TODO: Finish up so that it has the 
     # Run this once
     if address == ():
         # Initialize special vars
-        # TODO: _args overhaul, and make it NoneType by default
-        state["vars"]["_args"] = [0] * 10000  # TODO: Remove this hardcap on number arguments, and it's also a little silly
+        state["vars"]["_args"] = ArgsList()
     if not address in state["vars"]:
         state["vars"][address] = {}
 
@@ -286,8 +290,8 @@ def add_vars_with_address(node, address):  # TODO: Finish up so that it has the 
                         raise IncorrectTypeError()
                     global_value = True
                 elif key == "_locale":
-                    if not isinstance(var["_locale"], str):
-                        print(f"\033[31mError:\033[0m _locale is not of type string at {address} node {node}")
+                    if not isinstance(var["_locale"], str) and not isinstance(var["_locale"], dict):
+                        print(f"\033[31mError:\033[0m _locale is not of type string or dict at {address} node {node}")
                         raise IncorrectTypeError()
                     locale = var["_locale"]
                 elif key == "_possible_values":
@@ -348,8 +352,10 @@ def add_vars_with_address(node, address):  # TODO: Finish up so that it has the 
                     return curr_arr
 
                 curr_ind = () * len(dims)
+                # TODO: Figure out what's missing for grid type now
                 arr = get_arrs(curr_ind, dims)
 
+            # TODO: When adding properties to vars, need to also update the default var for ArgsList in utility.py
             state["vars"][address][var_name] = {"address": address, "locale": locale, "possible_values": possible_values, "value": var_value, "global": global_value}
 
     # Recurse into all sub-blocks
@@ -590,6 +596,20 @@ def parse_node(node, context, address):
     # Return if this is just a terminal node
     if context[0] == "_":
         return
+    
+    # Special handling for SPILL
+    if context == "SPILL":
+        partial_addr = address
+        while True:
+            partial_node = addressing.get_node(partial_addr)
+            if "choice" in partial_node:
+                break
+            
+            if partial_addr == ():
+                print(f"\033[31mError:\033[0m SPILL context not within a choice at {address} node {node}")
+                raise IncorrectStructureError()
+            else:
+                partial_addr = partial_addr[:-1]
 
     if not (context in grammar):
         print(f"\033[31mError:\033[0m Undefined context {context} at {address} node {node}")

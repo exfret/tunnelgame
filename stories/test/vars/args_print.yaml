@@ -1,0 +1,5 @@
+_content:
+  - start
+  - choice: print_arg
+    effects:
+      - "{_args[0]}"

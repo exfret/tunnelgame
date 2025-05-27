@@ -1,0 +1,14 @@
+_vars:
+  - singular_var: 1
+    _locale:
+      default: "sad"
+      singular: "happy"
+      plural: "sad"
+  - plural_var: 0.2
+    _locale:
+      default: "sad"
+      singular: "sad"
+      plural: "happy"
+_content:
+  - "{__singular_var}"
+  - "{__plural_var}"

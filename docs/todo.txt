@@ -32,6 +32,12 @@ Old Currently:
 Big Todo:
   - UI
 
+208. Search through any important TODO's throughout the code
+207. Clean up stories
+206. Consolidate load game code for web view stuff
+205. Make image paths work for packaged version
+204. Make image paths work for windows
+203. Proper clear command in gameloop for web view
 202. Tests for each instruction
 201. Save clientside info, like dropdown state, on refreshes
 200. Print displayed text in web view on reload
@@ -50,7 +56,7 @@ Big Todo:
 186. dont_save_print implemented for gameloop print statements, like settings
 185. Locations you can name and fast travel to
 184. Have up keys actually input last command
-183. Formatting blocks (with no line breaks)
+183. Formatted blocks of text with print statement (with no line breaks in between)
 182. Remove stupid fstrings
 181. Ability to just press enter to go to next part
 180. Require for booleans
@@ -140,19 +146,15 @@ Big Todo:
 87. Change "stop" to "wait" statement? Maybe "pause". Make wait keep execution stack and stop get rid of it. How to do headers?
 81. Error on choices in story that are more than one word
 80. Iteration loops (iterate through a list and do something for each thing in the list)
-77. _args overhaul to use list of variable dicts, not just numbers
-75. Should "stops" deconstruct the call stack like they do now? In general, how could we do choices within a gosub?
-74. Write a story that allows the reader to write their own story, just for the meta-ness nerd cred
-70. Plural/gender/etc. localizations
-68. World object that exists separately for each block (or even just a macro)
-63. Check that insert commands and such are only used with bags
-58. SPILL instruction for when we do want to "spill" from an effects section to the parent area
 
 DONE
+174. "seed" command that forces the next few "random" values to prechosen values (doesn't actually seed generator)
+77. _args overhaul to use list of variable dicts, not just numbers
+70. Plural/gender/etc. localizations for variables (just plural/singular though for now, but more can easily be added later)
+58. SPILL instruction for when we do want to "spill" from an effects section to the parent area
 195. Vars display for WebView with dropdown lists
 167. Investigate that headers seem to be running after everything else
 173. An "all" tag for injecting into choices
-174. "seed" command that forces the next few "random" values to prechosen values (doesn't actually seed generator)
 69. Override variable subscripting, turning variables into special dicts before being passed to eval
 159. Test speed of program (the printing is just slow in VSCode unfortunately)
 65. Special addressing for the "root" block of a *file* rather than of the whole story
@@ -208,6 +210,9 @@ DONE
 1. Checking that story is formatted correctly
 
 NOT DOING
+74. Write a story that allows the reader to write their own story, just for the meta-ness nerd cred (the call command is probably hopelessly broken now, not to mention basically useless, and fixing it scares me)
+68. World object that exists separately for each block (or even just a macro) (need to rethink world objects)
+63. Check that insert commands and such are only used with bags (starting to rethink bags)
 178. Don't save text from actions (already have a way to specify not to save text now with a certain _meta tag)
 56. Disallow random intervals in choice specs (maybe once I get warnings, then it can just be a warning)
 46. Temp variables that are temporary/only relevant within a block, then they're not set anymore/block variables
@@ -239,5 +244,6 @@ I FORGET WHAT THIS MEANS
 57. Automatic stopping outside of effects blocks!
 
 DEFUNCT
+75. Should "stops" deconstruct the call stack like they do now? In general, how could we do choices within a gosub? (I ended up using sub commands instead, so I think I ended up resolving this in a different way)
 37. Add special lib var that is a library accessible to expressions but doesn't get saved with the state
 8. Add back in variable sensing?
