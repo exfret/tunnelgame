@@ -1,4 +1,100 @@
 _game_id: tunnel-04-descriptive
+_meta:
+  hidden_by_default: True
 _image: title.png
 _content:
-  - Hi
+  - You are Lily.
+  - Right now, you are only known as an orphan.
+  - However, you are sure that one day, you will be known as the greatest Tunnel adventurer that there ever was!
+  - choice: start
+    effects:
+      - storypoint: start
+      - reveal: time
+      - reveal: num_training_expeditions
+      - goto: /orphanage/first_journey/george_waiting
+  - choice: skip
+    action:
+    effects:
+      # Skip to first return
+      - if: int(_args[0]) >= 1
+        then:
+          - command: input start, ready, walk, gather, return, next
+      - if: int(_args[0]) >= 2
+        then:
+          - command: input rooms, george, embark, next, wow, focus, reconvene, camp
+  # Initialization stuff
+  - flag: clothes_owned_light_gray_plain
+  - flag: clothes_owned_dark_gray_plain
+_vars:
+  # Important vars
+  - time: 0
+    _locale: Days Passed
+  - tunnel_pass: Training
+    _locale: Pass Level
+  - num_training_expeditions: 0
+    _locale:
+      default: Expeditions
+      singular: Expedition
+      plural: Expeditions
+  - experience: 0
+    _locale: Experience
+  - coin: 0
+    _locale:
+      default: Coins
+      singular: Coin
+      plural: Coin
+  # Inventory vars
+  # Flowers
+  - inv_lemens: 0
+    _locale:
+      default: Lemens
+      singular: Lemen
+      plural: Lemens
+  - inv_rosalia: 0
+    _locale: Rosalia
+  - inv_petunal: 0
+    _locale:
+      default: Petunal Blossoms
+      singular: Petunal Blossom
+      plural: Petunal Blossoms
+  # Keys
+  - key_basement: 0
+    _locale:
+      default: Basement Key
+      singular: Basement Key
+      plural: Basement Key
+  - key_courtyard: 0
+    _locale:
+      default: Courtyard Keys
+      singular: Courtyard Key
+      plural: Courtyard Keys
+  # Character
+  - curr_clothes: light_gray_plain
+  - curr_clothes_locale: light gray plain outfit
+  # Skills
+  - skill_sneak: 0
+    _locale: Sneakiness
+  - skill_gather_lemens: 4
+    _locale: Lemen Gathering Skill
+  - skill_gather_rosalia: 3
+    _locale: Rosalia Gathering Skill
+  # Logic vars
+  - param_1: 0
+_shown:
+  - time
+  - tunnel_pass
+  - num_training_expeditions
+  - experience
+  - coin
+  - inventory:
+      - inv_lemens
+      - inv_rosalia
+      - inv_petunal
+  - skills:
+      - skill_sneak
+      - skill_gather_lemens
+      - skill_gather_rosalia
+_include:
+  logic: logic.yaml
+  orphanage: orphanage.yaml
+  tunnel: tunnel.yaml

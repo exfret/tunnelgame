@@ -1,0 +1,9 @@
+_content:
+  - start
+  - choice: removed
+    effects:
+      - nope
+  - choice: not_removed
+    effects:
+      - yep
+  - remove_choice: removed

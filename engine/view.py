@@ -34,6 +34,7 @@ feedback_msg = {
     "help": "Valid commands are 'clear', 'define', 'exec', 'exit', 'flag', 'goto', 'help', 'info', 'input', 'inspect', 'load', 'repeat', revert', 'save', 'set', 'settings', 'undefine', 'unflag'.",
     "info_options": "Valid options for info are 'actions', 'choices', 'completion', 'macros', 'vars', 'word_count', and 'words_seen'.",
     "info_invalid_option": "Invalid option given for info. Type 'info' for valid options.",
+    "info_no_macros": "No macros defined",
     "inspect_no_variable_given": "Must give a variable to print the value of.",
     "inspect_invalid_variable_given": "That's not a valid variable.",
     "load_no_file_given": "Must supply file to load.",
@@ -188,14 +189,17 @@ class CLIView:
     def print_shown_vars(self, shown_vars, vars_address):
         print("\nRelevant values:")
         var_dict_vals = utility.collect_vars(state, vars_address)
+        var_dict = utility.collect_vars_with_dicts(state, vars_address)
         for var_group in shown_vars:
             if isinstance(var_group, str):
-                print(utility.localize(var_group, vars_address) + ":\t" + str(var_dict_vals[var_group]))
+                if not var_dict[var_group]["hidden"]:
+                    print(utility.localize(var_group, vars_address) + ":\t" + str(var_dict_vals[var_group]))
             elif isinstance(var_group, dict):
                 label = next(iter(var_group))
                 print(label + "...")
                 for var in var_group[label]:
-                    print("\t" + utility.localize(var, vars_address) + ":\t" + str(var_dict_vals[var]))
+                    if not var_dict[var]["hidden"]:
+                        print("\t" + utility.localize(var, vars_address) + ":\t" + str(var_dict_vals[var]))
 
 
     def print_var(self, text):
@@ -317,7 +321,7 @@ class CLIView:
 
     def print_macros(self):
         if len(state["command_macros"].items()) == 0:
-            print("No macros defined.")
+            print(feedback_msg["info_no_macros"])
             return
         
         for macro_name, macro_def in state["command_macros"].items():
@@ -576,8 +580,10 @@ class WebView:
 
 
     def print_text(self, text, style="", dont_save_print=False):
-        self.socketio.emit("print", {"text": text})
-        state["view_text_info"]["displayed_print_msgs"].append({"msg_type": "print", "msg_data": {"text": text}})
+        string_to_print = utility.format.vformat(text, (), utility.collect_vars(state))  # TODO: Exceptions in case of syntax errors
+        string_to_print = parse_text(string_to_print)
+        self.socketio.emit("print", {"text": string_to_print})
+        state["view_text_info"]["displayed_print_msgs"].append({"msg_type": "print", "msg_data": {"text": string_to_print}})
 
 
     ######################################################################
@@ -591,13 +597,16 @@ class WebView:
 
     def print_shown_vars(self, shown_vars, vars_address):
         var_dict_vals = utility.collect_vars(state, vars_address)
+        var_dict = utility.collect_vars_with_dicts(state, vars_address)
         for var_group in shown_vars:
             if isinstance(var_group, str):
-                self.socketio.emit("print_var", {"text": utility.localize(var_group, vars_address) + ":\t" + str(var_dict_vals[var_group])})
+                if not var_dict[var_group]["hidden"]:
+                    self.socketio.emit("print_var", {"text": utility.localize(var_group, vars_address) + ":\t" + str(var_dict_vals[var_group])})
             elif isinstance(var_group, dict):
                 label = next(iter(var_group))
                 for var in var_group[label]:
-                    self.socketio.emit("print_var", {"group": label, "name": utility.localize(var, vars_address), "value": str(var_dict_vals[var])})
+                    if not var_dict[var]["hidden"]:
+                        self.socketio.emit("print_var", {"group": label, "name": utility.localize(var, vars_address), "value": str(var_dict_vals[var])})
                 # Close the group if needed, or by default
                 #is_open = False
                 #if label in state["view"]["stats_dropdowns_open"] and state["view"]["stats_dropdowns_open"][label]:
@@ -614,10 +623,6 @@ class WebView:
 
     def print_var(self, text):
         self.socketio.emit("print_var", {"text": text})
-
-
-    def print_var_modification(self, text_to_show_spec, dont_save_print=False):
-        pass # TODO
 
 
     ######################################################################
@@ -666,11 +671,21 @@ class WebView:
         self.socketio.emit("print_choices", {"choices": state["choices"], "effects_texts": effects_texts})
 
 
+    def print_completion_percentage(self, percentage):
+        self.socketio.emit("print_feedback_message", {"text": f"Completed {(100 * percentage):.1f}% of the story!"})
+
+
     def print_feedback_message(self, msg_type, dont_save=True):
         self.socketio.emit("print_feedback_message", {"text": feedback_msg[msg_type]})
 
 
     def print_macros(self):
+        if len(state["command_macros"].items()) == 0:
+            self.socketio.emit("print_feedback_message", {"text": feedback_msg["info_no_macros"]})
+            return
+        
+        for macro_name, macro_def in state["command_macros"].items():
+            self.socketio.emit("print_feedback_message", {"text": macro_name + ": " + " ".join(macro_def)})
         pass # TODO
 
 
@@ -686,12 +701,24 @@ class WebView:
         pass # TODO
 
 
-    def print_var_value(self, var_value):
-        pass # TODO
-
-
     def print_vars_defined(self):
         pass # TODO
+
+
+    def print_var_modification(self, text_to_show_spec, dont_save_print=False):
+        text_to_print = None
+        if text_to_show_spec["op"] == "add":
+            text_to_print = f"[+{text_to_show_spec['amount']} {utility.localize(text_to_show_spec["var_name"], var_to_use=text_to_show_spec["var"])}]\n"
+        elif text_to_show_spec["op"] == "subtract":
+            text_to_print = f"[-{text_to_show_spec['amount']} {utility.localize(text_to_show_spec["var_name"], var_to_use=text_to_show_spec["var"])}]\n"
+        elif text_to_show_spec["op"] == "set":
+            text_to_print = f"[Set {utility.localize(text_to_show_spec["var_name"], var_to_use=text_to_show_spec["var"])} to {text_to_show_spec['amount']}]\n"
+        
+        self.socketio.emit("print", {"text": text_to_print})
+
+
+    def print_var_value(self, var_value):
+        self.socketio.emit("print", {"text": str(var_value)})
 
 
     def get_input(self):

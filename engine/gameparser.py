@@ -113,7 +113,7 @@ def open_game(story_path):
         "msg": {},  # Hacky way for things to communicate to gameloop
         "seed": [], # TODO: Update exec?
         "settings": {
-            "autocomplete": "on",
+            "autocomplete": "off",
             "descriptiveness": "descriptive",
             "show_flavor_text": "once"
         },
@@ -255,7 +255,7 @@ def add_flags(node):
             add_flags(subnode)
 
 
-def add_vars_with_address(node, address):  # TODO: Finish up so that it has the other extra features of vars too
+def add_vars_with_address(node, address, default_hide=False):  # TODO: Finish up so that it has the other extra features of vars too
     if isinstance(node, list):  # In this case, the inner part of the node is just content
         return
 
@@ -266,6 +266,13 @@ def add_vars_with_address(node, address):  # TODO: Finish up so that it has the 
     if not address in state["vars"]:
         state["vars"][address] = {}
 
+    # Change the value of default_hide if needed
+    if "_meta" in node and "hidden_by_default" in node["_meta"]:
+        if not isinstance(node["_meta"]["hidden_by_default"], bool):
+            print(f"\033[31mError:\033[0m hidden_by_default is not of type bool at {address} node {node}")
+            raise IncorrectTypeError()
+        default_hide = node["_meta"]["hidden_by_default"]
+
     if not isinstance(node, dict):
         print("\033[31mError:\033[0m Block is not of type dict at {address} node {node}")
         raise IncorrectTypeError()
@@ -275,6 +282,7 @@ def add_vars_with_address(node, address):  # TODO: Finish up so that it has the 
             var_name = None
             var_value = None
             global_value = False
+            hidden_value = default_hide
             locale = None
             possible_values = None
 
@@ -289,6 +297,11 @@ def add_vars_with_address(node, address):  # TODO: Finish up so that it has the 
                         print(f"\033[31mError:\033[0m _global is not of type null at {address} node {node}")
                         raise IncorrectTypeError()
                     global_value = True
+                elif key == "_hidden":
+                    if not var["_hidden"] is None:
+                        print(f"\033[31mError:\033[0m _hidden is not of type null at {address} node {node}")
+                        raise IncorrectTypeError()
+                    hidden_value = True
                 elif key == "_locale":
                     if not isinstance(var["_locale"], str) and not isinstance(var["_locale"], dict):
                         print(f"\033[31mError:\033[0m _locale is not of type string or dict at {address} node {node}")
@@ -356,7 +369,7 @@ def add_vars_with_address(node, address):  # TODO: Finish up so that it has the 
                 arr = get_arrs(curr_ind, dims)
 
             # TODO: When adding properties to vars, need to also update the default var for ArgsList in utility.py
-            state["vars"][address][var_name] = {"address": address, "locale": locale, "possible_values": possible_values, "value": var_value, "global": global_value}
+            state["vars"][address][var_name] = {"address": address, "locale": locale, "possible_values": possible_values, "value": var_value, "global": global_value, "hidden": hidden_value}
 
     # Recurse into all sub-blocks
     for tag, subnode in node.items():
@@ -404,6 +417,10 @@ def parse_node(node, context, address):
         else:
             for id in node.split(","):
                 parse_node(id.strip(), "_addr", address)
+    elif context == "_bool":
+        if not isinstance(node, bool):
+            print(f"\033[31mError:\033[0m _bool is not of type bool at {address} node {node}")
+            raise IncorrectTypeError()
     elif context == "_complex_value":
         # Any value is possible here, just don't need to recurse deeper
         pass

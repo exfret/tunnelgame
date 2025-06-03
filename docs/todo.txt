@@ -1,5 +1,7 @@
 Currently:
+  - Implementing view print messages
   - Organize and go through "Old Currently"
+  - Encyclopedia
 
 Old Currently:
   - Connection instruction
@@ -32,6 +34,15 @@ Old Currently:
 Big Todo:
   - UI
 
+217. A function for the whole process that web view needs to go through for print_displayed_text so that I don't have so much duplicate code
+216. Autofocus on command prompt upon pressing tab
+215. Add colors correctly for web view
+214. Force plural localization for showing var values on right, and also base singular/plural for var modifications correctly on increase/decrease/set not actual value
+213. Use variable name as default default locale
+212. Consider making _shown a dict rather than a list (the var names have to be unique anyways) (same with vars perhaps)
+211. Finish text printing methods for web view
+210. Make "show" compatible with "to" show statements
+209. Get rid of redundant code in view.py
 208. Search through any important TODO's throughout the code
 207. Clean up stories
 206. Consolidate load game code for web view stuff

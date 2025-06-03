@@ -43,6 +43,7 @@ META_DICT:
   type: dict
   optional:
     dont_save_print: _null
+    hidden_by_default: _bool
     no_addr_eval: _null
     no_parse_eval: _null
 SHOWN_LIST:
@@ -62,6 +63,7 @@ VAR: # Has special built-in checking
   type: dict
   optional:
     _global: _null
+    _hidden: _null
     _locale: VAR_LOCALE
     _type: _var_type
   other: _complex_value
@@ -125,7 +127,9 @@ DICT_INSTR:
     print_table: PRINT_TABLE
     print_var: PRINT_VAR
     random: RANDOM
+    remove_choice: REMOVE_CHOICE
     return: RETURN
+    reveal: REVEAL
     run: RUN
     seed: SEED
     send: SEND
@@ -329,10 +333,18 @@ RANDOM_EVENT:
   type: union_with_types
   none: _null
   list: CONTENT
+REMOVE_CHOICE:
+  type: dict
+  mandatory:
+    remove_choice: _id
 RETURN:
   type: dict
   mandatory:
     return: _null
+REVEAL:
+  type: dict
+  mandatory:
+    reveal: _var_id
 RUN:
   type: dict
   mandatory:

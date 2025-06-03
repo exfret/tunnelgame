@@ -415,6 +415,10 @@ def step():
                     addressing.set_curr_addr(curr_addr + ("random", possibility[1], 0))
 
                 return True
+    elif "remove_choice" in curr_node:
+        # TODO: Warning if this choice was not in the story?
+        if curr_node["remove_choice"] in state["choices"]:
+            del state["choices"][curr_node["remove_choice"]]
     elif "return" in curr_node:
         # TODO: Give warning if call stack is empty
         if len(state["call_stack"]) >= 1:
@@ -424,6 +428,10 @@ def step():
             state["bookmark"] = stack_state["bookmark"]
 
             # Don't return true since we need to increment past the call instruction
+    elif "reveal" in curr_node:
+        var_dict = utility.collect_vars_with_dicts(state, curr_addr)
+
+        var_dict[curr_node["reveal"]]["hidden"] = False
     elif "run" in curr_node:
         contents = utility.get_var(state["vars"], curr_node["run"], curr_addr)["value"]
         temp_yaml = config.stories / "_temp.yaml"
@@ -479,27 +487,28 @@ def step():
                     # TODO: Show some text (in this case it doesn't quite make sense how to refer to the variable
                 else:
                     vars_by_name[var_name_indices[0]]["value"] += eval(var_expr_pair[1], {}, utility.collect_vars(state))
-                    text_to_show_spec = {"op": "add", "amount": eval(var_expr_pair[1], {}, utility.collect_vars(state)), "var": vars_by_name[var_name_indices[0]]}
+                    text_to_show_spec = {"var_name": var_name_indices[0], "op": "add", "amount": eval(var_expr_pair[1], {}, utility.collect_vars(state)), "var": vars_by_name[var_name_indices[0]]}
             elif modifier == "-":
                 if not (last_index is None):
                     last_var_to_modify[last_index] -= eval(var_expr_pair[1], {}, utility.collect_vars(state))
                 else:
                     vars_by_name[var_name_indices[0]]["value"] -= eval(var_expr_pair[1], {}, utility.collect_vars(state))
-                    text_to_show_spec = {"op": "subtract", "amount": eval(var_expr_pair[1], {}, utility.collect_vars(state)), "var": vars_by_name[var_name_indices[0]]}
+                    text_to_show_spec = {"var_name": var_name_indices[0], "op": "subtract", "amount": eval(var_expr_pair[1], {}, utility.collect_vars(state)), "var": vars_by_name[var_name_indices[0]]}
             else:
                 if not (last_index is None):
                     last_var_to_modify[last_index] = eval(var_expr_pair[1], {}, utility.collect_vars(state))
                 else:
                     vars_by_name[var_name_indices[0]]["value"] = eval(var_expr_pair[1], {}, utility.collect_vars(state))
-                    text_to_show_spec = {"op": "set", "amount": eval(var_expr_pair[1], {}, utility.collect_vars(state)), "var": vars_by_name[var_name_indices[0]]}
+                    text_to_show_spec = {"var_name": var_name_indices[0], "op": "set", "amount": eval(var_expr_pair[1], {}, utility.collect_vars(state)), "var": vars_by_name[var_name_indices[0]]}
+
+            # TODO: Make show compatible with "to" set statements!
+            if "show" in curr_node:
+                curr_view.print_var_modification(text_to_show_spec, dont_save_print=dont_save_print)
         else:
             if isinstance(curr_node["to"], (int, float)):
                 vars_by_name[curr_node["set"]]["value"] = curr_node["to"]  # TODO: Allow setting to string literal values
             else:
                 vars_by_name[curr_node["set"]]["value"] = eval(curr_node["to"], {}, utility.collect_vars(state))  # TODO: Catch exceptions in case of syntax errors
-
-        if "show" in curr_node:
-            curr_view.print_var_modification(text_to_show_spec, dont_save_print=dont_save_print)
     # Currently only spills out of choices
     elif "spill" in curr_node:
         partial_addr = curr_addr

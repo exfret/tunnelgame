@@ -172,6 +172,12 @@ def test_instruction_if_dict_condition():
     assert curr_view.get_text_commands_called() == ["nay", "yay"]
 
 
+def test_instruction_remove_choice_basic():
+    curr_view.update_choice_list(["removed", "not_removed"])
+    run("test/instruction/remove_choice/basic.yaml")
+    assert curr_view.get_text_commands_called() == ["start", "yep"]
+
+
 def test_instruction_spill_basic():
     curr_view.update_choice_list(["hi"])
     run("test/instruction/spill/basic.yaml")

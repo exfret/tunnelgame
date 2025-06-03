@@ -83,7 +83,7 @@ class VarDictValues(VarDict):
 
 # Was going to be used for args but then I realized I needed something else, so currently unused
 def create_default_var(value=None, locale=None):
-    return {"address": (), "locale": locale, "possible_values": None, "value": value, "global": False}
+    return {"address": (), "locale": locale, "possible_values": None, "value": value, "global": False, "hidden": False}
 
 
 class ArgsList(list):

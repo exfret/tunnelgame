@@ -264,6 +264,12 @@
         #commandInput:focus {
             outline: 2px solid #6495ED;
         }
+
+        .third-centered {
+            width: 33.33%;
+            display: block;
+            margin: 0 auto;
+        }
     </style>
 </head>
 
@@ -283,6 +289,7 @@
 
         <!-- ⑤  —––  COLUMN: STORY  –––---------------------------------- -->
         <div class="middle-section">
+            <div id="image-area" class="third-centered"></div>
             <div class="text-area">
                 <p id="story-board">
                     <button class="button" id="startButton">Start</button>
@@ -296,7 +303,6 @@
 
         <!-- ⑥  —––  COLUMN: IMAGE + STATS  –––--------------------------- -->
         <div class="right-section">
-            <div id="image-area"></div>
             <div id="stats-board" class="tree"></div>
         </div>
     </div>
@@ -334,7 +340,7 @@
                 group.dataset.group = groupName;
                 group.open = dropdownState.hasOwnProperty(groupName)
                     ? dropdownState[groupName]   // server preference
-                    : true;
+                    : false;
 
                 const summary = document.createElement("summary");
                 summary.textContent = groupName;
@@ -364,12 +370,16 @@
             line.textContent = `${varName}: ${value}`;
         }
         /* -------------------------------------------------------------- */
+        // Command input / Console
 
         const socket = io();
         const cmdIn = document.getElementById('commandInput');
 
         window.addEventListener('load', () => cmdIn.focus());
-        document.body.addEventListener('click', () => cmdIn.focus());
+
+        window.addEventListener('keydown', evt => {
+            cmdIn.focus();
+        });
 
         cmdIn.addEventListener('keydown', evt => {
             if (evt.key === 'Enter' && cmdIn.value.trim() !== '') {
@@ -439,6 +449,12 @@
 
         /* ---------- NAV BUTTONS -------------------------------------- */
         document.getElementById("restartButton").addEventListener("click", () => {
+            socket.emit("restart", {});
+            window.location.reload();
+        });
+        // Messaged to restart
+        socket.on("restart_html", msg => {
+            // Send a message for view to also restart
             socket.emit("restart", {});
             window.location.reload();
         });

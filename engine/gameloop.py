@@ -283,33 +283,6 @@ def run(game_name, packaged=True, parent_game=None, parent_state=None, exec_bloc
         if len(command) == 0:
             continue
 
-        # Autocomplete
-        if state["settings"]["autocomplete"] == "on":
-            autocomplete_possibilities = set()
-            for built_in_command in {"clear", "define", "exec", "exit", "flag", "goto", "help", "info", "input", "inspect", "load", "repeat", "revert", "save", "set", "settings", "undefine", "unflag"}:
-                if command[0] == built_in_command:
-                    autocomplete_possibilities = False
-                    break
-                elif built_in_command.startswith(command[0]):
-                    autocomplete_possibilities.add(built_in_command)
-            if autocomplete_possibilities is not False:
-                for choice_command in state["choices"]:
-                    if command[0] == choice_command:
-                        autocomplete_possibilities = False
-                        break
-                    elif choice_command.startswith(command[0]):
-                        autocomplete_possibilities.add(choice_command)
-            if autocomplete_possibilities is False:
-                pass
-            elif len(autocomplete_possibilities) == 0:
-                curr_view.print_feedback_message("autocomplete_no_possibilities")
-                continue
-            elif len(autocomplete_possibilities) == 1:
-                command[0] = next(iter(autocomplete_possibilities))
-            elif len(autocomplete_possibilities) > 1:
-                curr_view.print_feedback_message("autocomplete_multiple_possibilities")
-                continue
-
         # Check for macros first so that they can be reversed if needed
         if command[0] == "define":
             if len(command) < 2:
@@ -346,9 +319,38 @@ def run(game_name, packaged=True, parent_game=None, parent_state=None, exec_bloc
             macro_depth += 1
             if macro_depth >= config.max_macro_depth:
                 curr_view.print_feedback_message("max_macro_depth_exceeded")
+                # TODO: Should it do a continue in this case too without checking the command
                 break
         if macro_depth >= config.max_macro_depth:
             continue
+
+        # "Autocomplete"
+        # This must be done after macro expansion, which means define/undefine isn't sensed, and neither are macros, but that's fine
+        if state["settings"]["autocomplete"] == "on":
+            autocomplete_possibilities = set()
+            for built_in_command in {"clear", "define", "exec", "exit", "flag", "goto", "help", "info", "input", "inspect", "load", "repeat", "restart", "revert", "save", "set", "settings", "undefine", "unflag"}:
+                if command[0] == built_in_command:
+                    autocomplete_possibilities = False
+                    break
+                elif built_in_command.startswith(command[0]):
+                    autocomplete_possibilities.add(built_in_command)
+            if autocomplete_possibilities is not False:
+                for choice_command in state["choices"]:
+                    if command[0] == choice_command:
+                        autocomplete_possibilities = False
+                        break
+                    elif choice_command.startswith(command[0]):
+                        autocomplete_possibilities.add(choice_command)
+            if autocomplete_possibilities is False:
+                pass
+            elif len(autocomplete_possibilities) == 0:
+                curr_view.print_feedback_message("autocomplete_no_possibilities")
+                continue
+            elif len(autocomplete_possibilities) == 1:
+                command[0] = next(iter(autocomplete_possibilities))
+            elif len(autocomplete_possibilities) > 1:
+                curr_view.print_feedback_message("autocomplete_multiple_possibilities")
+                continue
 
         if command[0] == "clear":
             curr_view.clear(True)
@@ -357,7 +359,7 @@ def run(game_name, packaged=True, parent_game=None, parent_state=None, exec_bloc
                 curr_view.set_displayed_text("game")
                 curr_view.print_displayed_text()
             else:
-                curr_view.print_displayed_prints
+                curr_view.print_displayed_prints()
             curr_view.print_choices()
         # TODO: Fix for web view
         elif command[0] == "exec":
@@ -497,7 +499,13 @@ def run(game_name, packaged=True, parent_game=None, parent_state=None, exec_bloc
                 else:
                     for i in range(num_repeats):
                         state["command_buffer"].insert(0, command[2:])
-        # TODO: Fix for web view
+        # TODO: Fix for console view
+        elif command[0] == "restart":
+            if not config.web_view:
+                curr_view.print_feedback_message("command_not_supported")
+                continue
+            
+            curr_view.socketio.emit("restart_html", {})
         elif command[0] == "revert":
             if len(state["history"]) == 0:
                 curr_view.print_feedback_message("revert_no_reversions")
@@ -510,7 +518,18 @@ def run(game_name, packaged=True, parent_game=None, parent_state=None, exec_bloc
             state["history"] = history
 
             curr_view.clear(True)
-            curr_view.print_displayed_text()
+            if not config.web_view:
+                curr_view.print_displayed_text()
+            else:
+                curr_view.clear_var_view()
+                config.view.print_shown_vars(config.state["view_text_info"]["shown_vars"], config.state["last_address_list"][-1])
+                config.view.show_curr_image()
+                config.view.print_displayed_prints()
+                config.view.print_choices()
+
+                gameparser.remove_module_vars()
+                config.view.save_game_state(uid, game, state)
+                gameparser.add_module_vars()
         elif command[0] == "save":
             try:
                 save_slot = command[1]

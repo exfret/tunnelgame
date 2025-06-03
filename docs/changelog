@@ -1,4 +1,28 @@
-2025/05/26 (0k words - ?)
+2025/06/03 (3k words - ?)
+
+2025/06/02 (2k words - 3k words)
+- Worked some on story
+- Made revert command compatible with web view
+- Made command prompt auto-focus when typing
+- Added restart command (web view only for now)
+
+2025/06/01 (2k words - 2k words)
+- Worked some on story
+
+2025/05/29 (1k words - 2k words)
+- Work on Tunnel story
+- Added remove_choice instruction in 90 seconds plus 4 minutes of writing tests
+
+2025/05/28 (0k words - 1k words)
+- Fixed some saving of text to view
+- Turned autocomplete off by default due to its issues with macros
+- Fixed that print_var_modification didn't use utility.localize
+- Added hidden vars and reveal command
+
+2025/05/27 (0k words - 0k words)
+- Worked on some images and also story version 4
+
+2025/05/26 (0k words - 0k words)
 - Console in web view
 - Support for images in web view, also drew some new images
 - Loading in web view now keeps displayed text
@@ -7,6 +31,7 @@
 - Locales can now be differentiated between singular and plural
 - Proper handling for out of bounds args (finally)
 - Started version 4 of story (descriptive)
+- Mom started testing this version again
 
 2025/05/25 (8k words - 8k words)
 - Persistence between reloads

@@ -1,0 +1,419 @@
+_image: orphanage.png
+_content:
+  # The foyer is the entry point for the orphanage
+  - goto: foyer
+first_journey:
+  george_waiting:
+    _image: george_coin.png
+    _content:
+      - reveal: tunnel_pass
+      - George is standing at the dusty entrance to the orphanage, his ruffled brown hair blending with the oak double round-top door that leads outside. He's flipping a coin to pass the time as he waits for you to finish packing for your trip to the Tunnel with him.
+      - choice: review
+        selectable_once:
+        text: Review your encyclopedia notes on rosalia
+        effects:
+          # TODO!
+          # Maybe make encyclopedia an extra button on the left?
+          - You realize that the encyclopedia is a work in progress.
+          - separator:
+          - goto: .
+      - choice: check
+        selectable_once:
+        text: Check that you have your training pass
+        effects:
+          - Your training pass is used for entering the Tunnel. You can easily see you can have it by checking the stats panel to your right.
+          - separator:
+          - goto: .
+      - choice: touch
+        selectable_once:
+        text: Touch the necklace my parents gave me for comfort
+        effects:
+          - The necklace is all you have left of your parents. You remember little of them.
+          - On the other hand, the hairs knotted to the necklace are tied to a vivid memory. An orphan girl wailing just outside the doorway for a room in winter. Usually, the temperature in the Dome wasn't too bad, but that year was brutal. Director Dicky, the owner of the orphanage, refused to let her in since the place was already so full, and she later became unresponsive and motionless. To his credit, Dicky did let her in at last... to a small graveyard in the orphanage.
+          - You vow to become a great Tunnel explorer, someone who brings back riches and glory. That way, you can provide the funds for anyone to be taken in. You snuck a lock of hair you cut from the poor girl's head as a symbol of your promise.
+          - separator:
+          - goto: .
+      - choice: ready
+        text: Tell George that I'm ready
+        effects:
+          - set: num_training_expeditions += 1
+          - goto: leave_orphanage
+  leave_orphanage:
+    _image: path_to_tunnel.png
+    _content:
+      - George opens the doors, allowing the light that permeates the outside of the Dome to flood in.
+      - You hunker along with your heavy packs, heading for the gaping miles-wide gap in the Dome's rocky walls. It's the Tunnel, which is the only way out, and today will be your first day exploring it.
+      - It's a day's walk from your small town to the Tunnel.
+      - choice: walk
+        text: Walk with George to the Tunnel
+        effects:
+          - goto: /tunnel/training/first/tunnel_entrance
+  return:
+    _content:
+      - Despite the short trip, you feel exhaustion kick in as soon as you get back to the orphanage. Both you and George go straight to bed.
+      - choice: next
+        effects:
+          - sub: /logic/time
+          - goto: /orphanage
+foyer:
+  _image: foyer.png
+  _content:
+    - reveal: experience
+    - reveal: coin
+    - You're in the foyer.
+    - choice: common
+      text: Go to the common hallways
+    - choice: rooms
+      text: Go to the bedrooms
+    - choice: town
+      text: Go to town
+      require: 50 experience
+      effects:
+        - pass:
+    - choice: admin
+      text: Snoop around the orphanage admin area
+      require: 50 skill_sneak
+common:
+  _content:
+    - choice: foyer
+      text: Go to the foyer
+    - choice: study
+      text: Visit the orphanage's study
+    - choice: courtyard
+      text: Go to the courtyard
+      require: 1 key_courtyard
+  study:
+    _content:
+      - storypoint: visited_orphanage_study
+      - tag: mabel
+      - if: not met_mabel
+        then:
+          - flag: met_mabel
+          - A young, thin woman looks up from a desk at the front of the orphanage's study. "I'm Mabel. I heard you have started exploring. It would only make sense to give you access to our dismal collection of knowledge and folklore surrounding the Tunnel. You'll have to get access to the main town library for more in-depth knowledge. Just choose a subject to study and you can make progress on that book."
+        else:
+          - Mabel stares at you briefly, as if suspicious of what you might do next, before returning to her dusty book.
+      - choice: common
+        text: Return to the common hallway
+        effects: ../common
+      - if: not researched_botany_1
+        then:
+          - choice: botany
+            text: Read the textbook on Botany I
+            cost: 2 inv_rosalia
+            effects: botany_1
+      # TODO: Second initial research option
+    botany_1:
+      _content:
+        # TODO: Time passing
+        - flag: researched_botany_1
+        - storypoint: researched_botany_1
+        - sub: /logic/time
+        - You spend the day reading about plants!
+        - The book goes over the author's love for the different flowers, which is why this first book in the botany series is devoted to them.
+        - The book is split into two parts, a piece about lemens, a glowing plant used for light inside buildings, and rosalia, which you already know about.
+        - if: not knowledge_lemens
+          then:
+            - flag: knowledge_lemens
+        - The last part helps you gain an appreciation for how different rosalia leaves taste different, with the smallest hardest-to-get ones actually being the most potent and tasteful. This will help you gather rosalia better!
+        - set: skill_gather_rosalia += 2
+          show:
+        - separator:
+        - goto: ..
+  courtyard:
+    _content:
+      - choice: common
+        text: Return to the common hallway
+        effects: ../common
+rooms:
+  _image: orphanage_rooms.png
+  _content:
+    - You stand in the hallway where the orphanage bedrooms are. There are 7 bedrooms, and as usual, they're all full. At the end of the hallway is a door to the basement.
+    - choice: foyer
+      text: Go to the foyer
+    - choice: lily
+      text: Visit my own room
+    - choice: george
+      text: Visit George's room
+      effects: george/knock
+    - choice: jaz
+      text: Visit Jaz's room
+      require: 2 num_training_expeditions
+      effects: jaz/knock
+    - choice: caroline
+      text: Visit Caroline's room
+      require: 2 num_training_expeditions
+      effects: caroline/knock
+    - choice: benedict
+      text: Visit Benedict's room
+      require: 6 num_training_expeditions
+      effects: benedict/knock
+    - choice: rose
+      text: Visit Rose's room
+      require: 8 num_training_expeditions
+      effects: rose/knock
+    - choice: chloe
+      text: Visit Chloe's room
+      require: 10 num_training_expeditions
+      effects: chloe/knock
+    - choice: basement
+      text: Sneak into the basement
+      require: 1 key_basement
+      effects: ../basement
+  lily:
+    _image: lily_bedroom.png
+    _vars:
+      - last_time_made_bed: 0
+      - looked_around: False
+    _content:
+      - You're in your room.
+      - if: (time - last_time_made_bed) == 0
+        then:
+          - Your bed is pristine and neatly tucked.
+      - if: (time - last_time_made_bed) >= 1 and (time - last_time_made_bed) < 7
+        then:
+          - Your bed is pretty neat. The covers are a little shifted but it looks pretty nice.
+      - if: (time - last_time_made_bed) >= 7 and (time - last_time_made_bed) < 30
+        then:
+          - Your bed is a little messy. There is a bit of the sheet poking out where it should be tucked in and there are some crinkles in the cover.
+      - if: (time - last_time_made_bed) >= 30
+        then:
+          - Your bed is pretty much completely untucked, the covers are thrown off, and the mattress sheet is no longer on one of the corners of the mattress.
+      - choice: leave
+        text: Leave your room
+        effects: ..
+      - choice: look
+        text: Look around the room
+        effects:
+          - set: looked_around = True
+          - Opposite the door, there is your bed, with a window on the far wall bringing in light from the courtyard. To the right of the door is a dresser, and then on the right far wall a table with a chair to study.
+          - There is barely enough room to sit down in the remaining space, and sometimes your feet dangle off the bed onto your desk, especially as you've grown older. But it's a place to live and that's enough.
+          - separator:
+          - goto: .
+      - if: time - last_time_made_bed > 0
+        then:
+          - choice: make_bed
+            text: Make your bed
+            effects:
+              - You make your bed.
+              - set: last_time_made_bed = time
+              - separator:
+              - goto: .
+      - choice: sleep
+        text: Sleep the day away
+        effects:
+          - if: slept_recently
+            then:
+              - You already slept recently, silly!
+              - separator:
+              - goto: .
+            else:
+              - sub: /logic/time
+              - flag: slept_recently
+              - You sleep the day away.
+              - separator:
+              - goto: .
+      - if: looked_around
+        then:
+          - choice: sit
+            text: Sit at the desk
+            effects:
+              # TODO: Change description with environment/age?
+              - You sit at the desk and stare out at the window. You can partially see your reflection in the dusty window. It's hard to distinguish between the freckles and specks of dirt on your face, and your flaming red hair is messy and knotted.
+              - separator:
+              - goto: .
+          - choice: change
+            text: Change clothes
+            effects:
+              - What would you like to change into?
+              - You are currently in your {curr_clothes_locale}.
+              - choice: stay
+                text: Stay in the same clothes you're wearing now
+                effects:
+                  - goto: .
+              - if: curr_clothes != "light_gray_plain" and clothes_owned_light_gray_plain
+                then:
+                  - choice: light_gray
+                    text: Light Gray Plain Outfit
+                    effects:
+                      - set: curr_clothes = "light_gray_plain"
+                      - set: curr_clothes_locale = "light gray plain outfit"
+                      - You change into your {curr_clothes_locale}.
+                      - separator:
+                      - goto: .
+              - if: curr_clothes != "dark_gray_plain" and clothes_owned_dark_gray_plain
+                then:
+                  - choice: dark_gray
+                    text: Dark Gray Plain Outfit
+                    effects:
+                      - set: curr_clothes = "dark_gray_plain"
+                      - set: curr_clothes_locale = "dark gray plain outfit"
+                      - You change into your {curr_clothes_locale}.
+                      - separator:
+                      - goto: .
+  george:
+    knock:
+      _content:
+        - reveal: skill_sneak
+        - George says, "What can I do for you, Lily?" and smiles back at you.
+        - choice: back
+          effects:
+            - You exit the room and George waves bye.
+            - separator:
+            - goto: ../..
+        - choice: embark
+          text: Embark on a training trip to the Tunnel
+          effects:
+            - set: num_training_expeditions += 1
+            - switch: num_training_expeditions
+              "2": /tunnel/training/second/depart
+              "3": /tunnel/training/third/depart
+        - choice: steal
+          text: Steal a sock from George when he isn't looking
+          require: 10 skill_sneak
+          effects:
+            - pass:
+  jaz:
+    knock:
+      _content:
+        - She welcomes you in.
+        - separator:
+        - goto: inside
+    inside:
+      _content:
+        - storypoint: visited_jaz
+        - Jaz is wearing her usual mischievous grin on a face freckled similarly to yours. "Whatcha want, miss?"
+        - choice: leave
+          text: Leave Jaz's room
+          effects: ../..
+        - choice: compliment
+          text: Pay for validation from Jaz
+          cost: 1 coin
+          effects:
+            - random:
+                compliment_1:
+                  - '"You''re cool. I guess."'
+                compliment_2:
+                  - '"You have an okay vibe."'
+                compliment_3:
+                  - '"Look in my mirror. In there is a beautiful, wonderful girl with a promising future. That''s me. Isn''t that neat?"'
+                compliment_4:
+                  - '"You''ll probably be forgotten. Hey, that''s a good thing for some people!"'
+                compliment_5:
+                  - '"I''m pretty great. Wait, you wanted me to validate you? Oh."'
+                compliment_6:
+                  - '"I''m lovin'' that grimy-face, hair-full-of-knots look you got going."'
+                compliment_7:
+                  - '"You''re nice."'
+                compliment_8:
+                  - '"Honestly, you really set a good standard. Like, when I compare where I am to where you are, I just feel so much better. About myself, that is."'
+            - separator:
+            - goto: .
+        - choice: sneak
+          text: Have Jaz teach you how to sneak around
+          cost: 5 coin
+          shown: 5 skill_sneak
+          effects:
+            - She teaches you to put your heel first to create less sound. She says she learned it while snooping around in the orphanage admin area.
+            - separator:
+            - goto: .
+        # Courtyard keep costs petunal blossoms
+        - if: (inv_petunal > 0 and not orphanage_rooms_jaz_introduced_courtyard_key)
+          then:
+            - flag: orphanage_rooms_jaz_introduced_courtyard_key
+            - Jaz sees that you have some petunal blossoms from the Tunnel. "Wow, I always wondered what those were like!" She says. "If you give me some I'll part with this key to the courtyard. I put a lot of effort into stealing it."
+        - if: orphanage_rooms_jaz_introduced_courtyard_key
+          then:
+            - choice: key
+              text: Buy a key to the orphanage courtyard
+              selectable_once:
+              cost: 8 inv_petunal
+              shown: 1 key_courtyard
+              effects:
+                - The courtyard can be accessed from the commons hallway.
+                - separator:
+                - goto: .
+  caroline:
+    _vars:
+      # Set to a negative number so that she'll be looking for a gift when she's unlocked
+      - time_last_gift: -100
+      - time_between_gifts: 10
+      - gift_num: 1
+    knock:
+      # Right now nothing special happens as you enter
+      - goto: enter
+    enter:
+      - storypoint: visited_caroline
+      - choice: leave
+        text: Leave Caroline's room
+        effects: ../..
+      - if: not orphanage_rooms_caroline_tried_steal_sock
+        then:
+          - choice: steal
+            text: Steal one of Caroline's socks
+            effects:
+              # TODO: Another way to get one of her socks
+              - You can't bring yourself to do that to poor Caroline.
+              - flag: orphanage_rooms_caroline_tried_steal_sock
+              - separator:
+              - goto: .
+      - if: _visits == 1
+        then:
+          - Caroline is a cheerful woman with long black hair. Her hair has strands that fall out a lot all over her room. She was cursed to forever have a child's mind. But she really likes playing with all the new stuff you get from the Tunnel, and watching that helps you learn/get experience.
+      - if: time - time_last_gift >= time_between_gifts
+        then:
+          - goto: gift
+        else:
+          - Caroline is still content with the last gift you gave her.
+    gift:
+      _content:
+        - Caroline waits in anticipation to see if you'll give her something.
+        - switch: gift_num
+          "1":
+            - choice: give
+              text: Give her a lemen
+              cost: 1 inv_lemens
+              shown: 5 experience
+              effects:
+                - She is fascinated by the lemen's glow.
+          "2":
+            - choice: give
+              text: Give her a rosalia
+              cost: 1 inv_rosalia
+              shown: 7 experience
+              effects:
+                - She crushes up part of the dried leaf and smells it, then puts it on her tongue and let's it sit there.
+          "3":
+            - choice: give
+              text: Give her a petunal blossom
+              cost: 1 inv_petunal
+              shown: 11 experience
+              effects:
+                - She puts the petals in her mouth and chews on them. You've heard petunal blossoms are good for seasoning food when dried, but this makes you wonder how they taste raw.
+          _default:
+            - Wow, it seems there's nothing more she wants that you can give her actually!
+        - inject: gift_handler
+          into_choices:
+            except: leave steal
+      gift_handler:
+        - set: gift_num += 1
+        - set: time_last_gift = time
+        - separator:
+        - goto: ../enter
+  benedict:
+    knock:
+      _content:
+        - pass:
+  rose:
+    knock:
+      _content:
+        - pass:
+  chloe:
+    knock:
+      _content:
+        - pass:
+basement:
+  _content:
+    - pass:
+admin:
+  _content:
+    - pass:

@@ -1,0 +1,135 @@
+_image: tunnel.png
+training:
+  first:
+    tunnel_entrance:
+      _content:
+        - storypoint: first_tunnel_exploration
+        - reveal: inv_rosalia
+        - reveal: skill_gather_rosalia
+        - You reach the entrance to the Tunnel, the only exit from the 100-mile or so Dome to which humanity is confined. From here, you finally get a sense of its true magnitude. It's about a quarter of a day's walk from one side to the other, but its width is still nothing compared to its depth. No one has gotten to the end, or at least, no one has gotten to the end and returned. Some even think it never ends. Maybe you'll be the first to prove them wrong.
+        - "A guard at the entrance booth checks George's Yellow Pass and your Training Pass. There are multiple reasons for the 10-foot stone wall that bars those without passes from getting through: safety, bureaucracy, tradition, preservation. All you care for, though, is to finally see the lush rolling landscape of the first layer."
+        - George is unusually adept at Tunnel exploration. Despite only being only a Yellow Pass holder (already a feat for a 19-year-old like him), he was allowed via special agreement to train you. Also due to his natural ability, it doesn't take long for you both to find a rosalia patch.
+        - choice: gather
+          text: Gather rosalia with George
+          effects: gather_rosalia
+    gather_rosalia:
+      _image: rosalia.png
+      _content:
+        - George teaches you how to pluck the small leaves from the red flower for use in teas. You already know some about the flower due to Mabel's love for it. The orphanage's study doesn't hold many books, but she often goes out of her way to find more for those who are able to fetch her some rosalia.
+        - set: inv_rosalia += skill_gather_rosalia
+          show:
+        - After a day's work of gathering rosalia, George tells you its time to head home. You're disappointed that your first journey was so short, but he explains he just wanted somethings simple the first time. Then he pats you on the back and says, "You did great".
+        - sub: /logic/time
+        - choice: return
+          text: Return to the orphanage
+          effects: /orphanage/first_journey/return
+  second:
+    depart:
+      _image: path_to_tunnel.png
+      _content:
+        - storypoint: second_tunnel_exploration
+        # TODO: Add freckles to George in pictures?
+        - You tighten your straps of your pack for your second ever journey into the tunnel. George grins freckled cheek to freckled cheek. "I'm so excited to show you the lemen fields!" He exclaims.
+        - sub: /logic/time
+        - choice: next
+          effects: enter_tunnel
+    enter_tunnel:
+      _content:
+        - George shows his Yellow Pass to the guard, and you hold up your white Training Pass. The guard examines the passes and lets you both through.
+        - After another half a day's walk to the place George is leading you to, he starts to hike up a steep hill. The Dome is comparatively flat, so you're not used to the steep elevation. George, on the other hand, is able to speed ahead. You're afraid to lose him, but he stops at the top. Then, he turns to look down at you and yells out, "Don't worry, when I was your age, my stamina wasn't so great either." Then he chuckles. "You'll do just fine."
+        - He makes it sound like he's had soooo much more time to progress, but really he's only three years older than you.
+        - Once you get to the top, you slouch your hands onto your knees and wheeze in and out. When you're done panting, you gaze out at an amazing sight.
+        - choice: wow
+          effects: lemen_patch
+    lemen_patch:
+      _content:
+        - reveal: inv_lemens
+        - reveal: skill_gather_lemens
+        - In front of you is the largest field of flowers that you've ever seen. And it's glowing! George announces proudly, "I just wanted to show you the lemen patch I always like to use. She's a beauty." He goes on, explaining what lemens are... a bulbous, yellow, luminous plant that dims over time. Also, they're used for lighting across the dome.
+        - You ask, "So those bright bulb-y things are what they put in the orphanage for lighting? But the ones down there are so much brighter." George explains, "Ah, but we usually use cheaper secondhand lemens. I sell the fresh ones I gather for a higher price." To be fair, the lighting is probably one of the smaller concerns at the orphanage anyways.
+        - George and you split up to gather lemens. However, while gathering them alone, you spot some rosalia in the distance.
+        - choice: focus
+          text: Focus on gathering lemens like George said
+          effects:
+            - You try your best to gather a good number of lemens.
+            - set: inv_lemens += skill_gather_lemens
+              show:
+            - set: skill_gather_lemens += 1
+              show:
+            - choice: reconvene
+              text: Meet back up with George
+        - choice: snatch
+          text: Snatch up the rosalia
+          effects:
+            - flag: tunnel_training_second_lemen_patch_snatched_rosalia
+            - It's a good patch of rosalia, but with your time split between it and the lemens, you still don't gather as many as you could normally.
+            - set: inv_rosalia += ceil(skill_gather_rosalia / 2)
+            - However, you're not able to gather as many lemens, and you don't learn much about lemen gathering as a result.
+            - set: inv_lemens += ceil(skill_gather_lemens / 2)
+              show:
+            - choice: reconvene
+              text: Meet back up with George
+    reconvene:
+      _content:
+        - if: tunnel_training_second_lemen_patch_snatched_rosalia
+          then:
+            - George notices that you weren't able to gather many lemens, and offers to share some of his as consolation.
+            - choice: sure
+              text: Accept the offer without saying anything
+              effects:
+                - George hands you a tenth of his lemens (he got a lot of lemens).
+                - set: inv_lemens += 3
+                  show:
+                - choice: camp
+                  text: Camp out the night
+            - choice: tell
+              text: Tell him that I actually got distracted
+              effects:
+                - George frowns but says he'll remember the honesty. He says, "You should follow my lead out here, things can be dangerous if you wander off just because you see something shiny."
+                - choice: camp
+                  text: Camp out the night
+          else:
+            - George notices all the lemens you got and flips you a coin as a reward!
+            - set: coin += 1
+              show:
+            - choice: camp
+              text: Camp out the night
+    camp:
+      _content:
+        - sub: /logic/time
+        # TODO: Maybe more description here?
+        - After staying the night under a tarp in the rolling hills of the Tunnel's first layer, you head back to the orphanage.
+        - set: param_1 = 2
+        - sub: /logic/inc_exp
+        - separator:
+        - goto: /orphanage
+  third:
+    depart:
+      _image: path_to_tunnel.png
+      _content:
+        - While trekking to the entrance of the first layer yet again, you daydream about the world beyond a Tunnel exploring trainee. Although you're only 15, George started when he was 13 and already had a green pass by your age. Of course, it helped that his parents were famous Tunnel explorers before they mysteriously disappeared. Still, you're anxious to see how you will compare to your mentor.
+        - goto: talk
+      talk:
+        - choice: passes
+          selectable_once:
+          text: Ask George to elaborate on the different pass levels
+          effects:
+            - He explains, "Well, right now you're working toward your Green Pass. That's how you can go into the first layer all on your own. It's relatively safe there, but mostly scoured when it comes to artifacts and other special finds."
+            - '"Then, you can go after your Blue Pass to access the second layer. The process for that is a bit more involved, but most get there after some time. It''s not super bad because the second layer is usually not too dangerous as long as you know what to watch out for, just farther away."'
+            - '"The Yellow Pass, which is for the third layer, is the first one that''s a real pain." George grimaces. "The others were a breeze for me, but that one I just got last year. Technically, that''s not even enough for me to train you: I need a Pioneer Pass, which is for the fourth layer. But the legacy of my parents helped those at the orphanage pull a few strings."'
+            - '"I can talk about the others another time, but that''s most of them, and it''ll keep you occupied for quite a while." Then he winks at you. "You''ll get them all in due time, I''m sure."'
+            - separator:
+            - goto: .
+        - choice: dome
+          selectable_once:
+          text: Ask George about the Dome
+          effects:
+            - He says, "Well, all I've known we've been in the Dome. Some people are content here, but I've always just wanted somewhere else. It feels a little cramped in here, even if it is a few dozen miles across."
+            - '"I think we just need to get through the Tunnel, honestly. I know it''s dangerous but I believe if we just put more effort into it, we could do it. And getting to the other side and returning is the first step in inspiring people into exploring more."'
+            - separator:
+            - goto: .
+        - choice: father
+          selectable_once:
+          text: Ask George about his father
+          effects:
+            - He turns away a little, his eyes glossy. "He was the best person I've ever known."
