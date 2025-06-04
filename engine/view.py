@@ -490,6 +490,10 @@ class WebView:
         # TODO: Figure out what the secret key is needed for
         # Having this was suggested by ChatGPT
         self.app.config["SECRET_KEY"] = "password"
+        self.app.config.update(
+            SESSION_COOKIE_SAMESITE="None",
+            SESSION_COOKIE_SECURE=True   # Required when SameSite=None
+        )
         self.socketio = SocketIO(self.app, async_mode="eventlet", manage_session=True)
         self.setup_routes()
         self.sid_to_uid = {}
