@@ -1,0 +1,5 @@
+Flask>=3.0,<4.0
+Flask_SocketIO>=5.3,<6.0
+eventlet>=0.35
+gunicorn>=22.0
+PyYAML>=6.0

@@ -15,6 +15,9 @@ else:
     config.view = view.CLIView()
 
 
+app = config.view.app
+
+
 if config.web_view:
     @config.view.socketio.on("connect")
     def handle_connect(auth):
