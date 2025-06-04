@@ -22,6 +22,9 @@ _content:
       - if: int(_args[0]) >= 2
         then:
           - command: input rooms, george, embark, next, wow, focus, reconvene, camp
+      - if: int(_args[0]) >= 3
+        then:
+          - command: input rooms, george, embark, continue, sleep, nope, respect, finally, return
   # Initialization stuff
   - flag: clothes_owned_light_gray_plain
   - flag: clothes_owned_dark_gray_plain
@@ -57,6 +60,12 @@ _vars:
       default: Petunal Blossoms
       singular: Petunal Blossom
       plural: Petunal Blossoms
+  # Exploration equipment
+  - inv_torch: 0
+    _locale:
+      default: Torches
+      singular: Torch
+      plural: Torches
   # Keys
   - key_basement: 0
     _locale:
@@ -68,6 +77,11 @@ _vars:
       default: Courtyard Keys
       singular: Courtyard Key
       plural: Courtyard Keys
+  - key_town_warehouse: 0
+    _locale:
+      default: Town Warehouse Keys
+      singular: Town Warehouse Key
+      plural: Town Warehouse Keys
   # Character
   - curr_clothes: light_gray_plain
   - curr_clothes_locale: light gray plain outfit
@@ -81,8 +95,8 @@ _vars:
   # Logic vars
   - param_1: 0
 _shown:
-  - time
   - tunnel_pass
+  - time
   - num_training_expeditions
   - experience
   - coin
@@ -90,6 +104,7 @@ _shown:
       - inv_lemens
       - inv_rosalia
       - inv_petunal
+      - inv_torch
   - skills:
       - skill_sneak
       - skill_gather_lemens
@@ -97,4 +112,5 @@ _shown:
 _include:
   logic: logic.yaml
   orphanage: orphanage.yaml
+  town: town.yaml
   tunnel: tunnel.yaml

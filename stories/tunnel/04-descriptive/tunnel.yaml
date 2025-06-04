@@ -118,7 +118,6 @@ training:
             - '"Then, you can go after your Blue Pass to access the second layer. The process for that is a bit more involved, but most get there after some time. It''s not super bad because the second layer is usually not too dangerous as long as you know what to watch out for, just farther away."'
             - '"The Yellow Pass, which is for the third layer, is the first one that''s a real pain." George grimaces. "The others were a breeze for me, but that one I just got last year. Technically, that''s not even enough for me to train you: I need a Pioneer Pass, which is for the fourth layer. But the legacy of my parents helped those at the orphanage pull a few strings."'
             - '"I can talk about the others another time, but that''s most of them, and it''ll keep you occupied for quite a while." Then he winks at you. "You''ll get them all in due time, I''m sure."'
-            - separator:
             - goto: .
         - choice: dome
           selectable_once:
@@ -126,10 +125,103 @@ training:
           effects:
             - He says, "Well, all I've known we've been in the Dome. Some people are content here, but I've always just wanted somewhere else. It feels a little cramped in here, even if it is a few dozen miles across."
             - '"I think we just need to get through the Tunnel, honestly. I know it''s dangerous but I believe if we just put more effort into it, we could do it. And getting to the other side and returning is the first step in inspiring people into exploring more."'
-            - separator:
             - goto: .
         - choice: father
           selectable_once:
           text: Ask George about his father
           effects:
-            - He turns away a little, his eyes glossy. "He was the best person I've ever known."
+            - He turns away a little, his eyes glossy. "He was the best person I've ever known." He doesn't say much more.
+            - goto: .
+        - choice: continue
+          text: Continue on to the Tunnel
+          effects:
+            - goto: ../petunal_intro
+    petunal_intro:
+      - reveal: inv_petunal
+      - When you get past the gate into the Tunnel, George says that today, you'll be gathering petunal blossoms. George explains that these are purple flowers with yellow specks, and that they are very nutritious when ground up. This will be a bit of a longer trip, since petunal blossoms are harder to find.
+      - In fact, you spend the whole rest of the day without finding any!
+      - sub: /logic/time
+      - choice: sleep
+        text: Set up camp for the night
+    sleep:
+      _content:
+        - You wake up in the middle of the night to a howl in the distance.
+        - choice: investigate
+          text: Investigate the source of the howl
+        - choice: nope
+          text: That sounds like a bad idea
+          effects:
+            - You fall back asleep, which is definitely a much better idea than searching out a mysterious sound in the woods.
+            - separator:
+            - goto: grave
+      investigate:
+        - You get up and listen for another howl. It seems to be coming from the direction of layer 2. You start walking that way, wondering what that sort of thing would make that noise. You've never heard anything like it in the Dome.
+        - After a brief period, the howling stops, and you lose track of the direction it's from. You turn around to walk back, but after a few minutes of walking things just don't look the same.
+        - It feels like an hour passes as you get more and more panicked, what if you can't find your way back? Then, a twig snaps. Someone's here.
+        - choice: freeze
+      freeze:
+        - You hear George's familiar voice yell out from the direction of the twig's snap, "Hey, why'd you go wandering off? I heard you get up and went after you."
+        - choice: apologize
+          text: Apologize and beg for forgiveness
+          effects:
+            - George says, "It's fine, just don't do it again. I know the Tunnel can be alluring but you've gotta stay with me until you have more experience."
+            - goto: walk_back
+        - choice: silent
+          text: Stay silent since you don't really have a good reason
+          effects:
+            - George just shakes his head and says, "I know the Tunnel is alluring, but you can't just go wandering off like this. Stay around me until you have more experience."
+            - goto: walk_back
+        - choice: howl
+          text: Talk about the cool howling
+          effects:
+            - You can't make out his brown eyes well under the dark canopy of the woods you wandered into, but from the tone of his voice you can almost hear them widening. "What?!" He asks. Then he just shakes his head and says, "Nevermind, let's just get back, don't do it again."
+            - goto: walk_back
+        - choice: insult
+          selectable_once:
+          text: Insult George for thinking you couldn't handle this
+          effects:
+            - Why would you do that? You decide against it.
+            - separator:
+            - goto: .
+      walk_back:
+        - On the walk back, George explains that you entered a shifting forest. The trees emit a pollen that impairs one's sense of direction for a short period of time. George himself has been trained in how to deal with it, but it's an easy trap for new adventures. "This is why you should stick around me," he adds.
+        - separator:
+        - goto: ../grave
+    grave:
+      - The next day, the search begins for the petunal blossoms. Unfortunately, your bad luck continues, and you don't find any. However, at one point you and George come across the grave of a fallen adventurer. George kneels, stays silent for a while, then leaves a rosalia on the grave before moving on.
+      - choice: respect
+        text: Follow George's lead and pay your respects
+        cost: 1 inv_rosalia
+        effects:
+          - flag: tunnel_layer_1_petunal_grave_paid_respects
+          - You set a rosalia down on the grave and stand there for a moment in silence before catching up to George.
+          - goto: unlucky
+      - choice: leave
+        text: Move on
+        effects:
+          - goto: unlucky
+      - choice: destroy
+        text: Destroy the grave
+        effects:
+          - flag: tunnel_layer_1_petunal_grave_destroyed
+          - You kick away the stones laid down to mark the grave and cover the dirt with grass so that no one can find it any more.
+          - You get the feeling that this may come back to haunt you.
+          - goto: unlucky
+    unlucky:
+      - sub: /logic/time
+      - sub: /logic/time
+      - separator:
+      - After two more days, you still can't find any petunal blossoms. You're about to head back when, finally...
+      - choice: finally
+        text: What did we find?
+    finally:
+      - You find three. George lets you keep two. Oh well, not every trip can be a winner.
+      - set: inv_petunal += 2
+        show:
+      - choice: return
+        text: Return to the orphanage
+        effects:
+          - set: param_1 = 3
+          - sub: /logic/inc_exp
+          - separator:
+          - goto: /orphanage

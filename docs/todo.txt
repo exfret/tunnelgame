@@ -4,7 +4,7 @@ Currently:
   - Encyclopedia
 
 Old Currently:
-  - Connection instruction
+  - Connection instruction for moving between locations
   - Block location/locales
   - "check" tag for choices that activates at the same time as require and has custom message for what was missing
 
@@ -34,6 +34,7 @@ Old Currently:
 Big Todo:
   - UI
 
+218. Restructure project to more standard guidelines
 217. A function for the whole process that web view needs to go through for print_displayed_text so that I don't have so much duplicate code
 216. Autofocus on command prompt upon pressing tab
 215. Add colors correctly for web view

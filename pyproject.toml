@@ -11,7 +11,7 @@ readme = "README.md"
 urls = { Homepage = "https://github.com/exfret/tunnelgame" }
 keywords = ["IF", "Interactive Fiction"]
 classifiers = ["Topic :: Games/Entertainment :: Role-Playing"]
-requires-python = ">=3.10"
+requires-python = ">=3.12"
 dependencies = ["build", "pytest", "pyyaml", "rich", "twine", "subprocess", "flask"]
 
 [project.scripts]

@@ -67,9 +67,8 @@ foyer:
       text: Go to the bedrooms
     - choice: town
       text: Go to town
-      require: 50 experience
-      effects:
-        - pass:
+      require: 3 num_training_expeditions
+      effects: /town
     - choice: admin
       text: Snoop around the orphanage admin area
       require: 50 skill_sneak
@@ -363,7 +362,7 @@ rooms:
         then:
           - goto: gift
         else:
-          - Caroline is still content with the last gift you gave her.
+          - Caroline is content with the last gift you gave her. Come back later in a few days when she's done playing with it.
     gift:
       _content:
         - Caroline waits in anticipation to see if you'll give her something.
@@ -392,6 +391,7 @@ rooms:
           _default:
             - Wow, it seems there's nothing more she wants that you can give her actually!
         - inject: gift_handler
+          position: after
           into_choices:
             except: leave steal
       gift_handler:

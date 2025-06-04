@@ -20,7 +20,7 @@ saves_dir.mkdir(exist_ok=True)
 ###########################################################
 
 
-web_view = False
+web_view = True
 story_name = "tunnel/04-descriptive/intro.yaml"
 
 
