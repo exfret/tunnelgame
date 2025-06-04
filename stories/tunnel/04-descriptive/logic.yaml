@@ -2,8 +2,6 @@ _content:
   - pass:
 time:
   _content:
-    # Allow the user to sleep again
-    - unflag: slept_recently
     - set: time += 1
     - subreturn:
 inc_exp:

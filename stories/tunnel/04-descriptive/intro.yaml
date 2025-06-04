@@ -41,6 +41,10 @@ _vars:
       plural: Expeditions
   - experience: 0
     _locale: Experience
+  - energy: 5
+    _locale: Energy
+  - max_energy: 10
+    _locale: Max Energy
   - coin: 0
     _locale:
       default: Coins
@@ -62,6 +66,7 @@ _vars:
       plural: Petunal Blossoms
   # Exploration equipment
   - inv_torch: 0
+    _hidden: nonzero
     _locale:
       default: Torches
       singular: Torch
@@ -99,6 +104,8 @@ _shown:
   - time
   - num_training_expeditions
   - experience
+  - energy
+  - max_energy
   - coin
   - inventory:
       - inv_lemens

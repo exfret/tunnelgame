@@ -9,13 +9,12 @@ from engine import config, view, gameparser
 from engine.gameloop import run
 
 
+app = None
 if config.web_view:
     config.view = view.WebView()
+    app = config.view.app
 else:
     config.view = view.CLIView()
-
-
-app = config.view.app
 
 
 if config.web_view:
@@ -25,6 +24,8 @@ if config.web_view:
         sid = request.sid
         config.view.sid_to_uid[sid] = uid
         join_room(uid)
+
+        config.view.load_web_state(uid)
 
         game_state = config.view.web_state.get(uid)
 

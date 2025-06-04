@@ -42,6 +42,7 @@ training:
         - choice: wow
           effects: lemen_patch
     lemen_patch:
+      _image: lemen_field.png
       _content:
         - reveal: inv_lemens
         - reveal: skill_gather_lemens
@@ -223,5 +224,7 @@ training:
         effects:
           - set: param_1 = 3
           - sub: /logic/inc_exp
+          - reveal: energy
+          - reveal: max_energy
           - separator:
           - goto: /orphanage

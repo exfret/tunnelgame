@@ -298,10 +298,13 @@ def add_vars_with_address(node, address, default_hide=False):  # TODO: Finish up
                         raise IncorrectTypeError()
                     global_value = True
                 elif key == "_hidden":
-                    if not var["_hidden"] is None:
-                        print(f"\033[31mError:\033[0m _hidden is not of type null at {address} node {node}")
+                    if var["_hidden"] is not None and not var["_hidden"] in {True, False, "nonzero"}:
+                        print(f"\033[31mError:\033[0m _hidden is not a valid value at {address} node {node}")
                         raise IncorrectTypeError()
-                    hidden_value = True
+                    if var["_hidden"] == None:
+                        hidden_value = True
+                    else:
+                        hidden_value = var["_hidden"]
                 elif key == "_locale":
                     if not isinstance(var["_locale"], str) and not isinstance(var["_locale"], dict):
                         print(f"\033[31mError:\033[0m _locale is not of type string or dict at {address} node {node}")
@@ -435,6 +438,14 @@ def parse_node(node, context, address):
         else:
             print(f"\033[31mError:\033[0m _expr is neither a numerical or string type at {address} node {node}")
             raise IncorrectTypeError()
+    elif context == "_hidden_config":
+        if node is not None and not isinstance(node, str | bool):
+            print(f"\033[31mError:\033[0m _hidden_config is not of type bool or string at {address} node {node}")
+            raise IncorrectTypeError()
+        
+        if node not in {None, True, False, "nonzero"}:
+            print(f"\033[31mError:\033[0m _hidden_config has invalid value at {address} node {node}")
+            raise WrongFormattingError()
     elif context == "_id":
         if not isinstance(node, str):
             print(f"\033[31mError:\033[0m _id is not of type string at {address} node {node}")

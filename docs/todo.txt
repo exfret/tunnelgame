@@ -2,6 +2,7 @@ Currently:
   - Implementing view print messages
   - Organize and go through "Old Currently"
   - Encyclopedia
+  - Styled text for UI
 
 Old Currently:
   - Connection instruction for moving between locations
@@ -34,6 +35,12 @@ Old Currently:
 Big Todo:
   - UI
 
+224. Make save/loads user dependent as well (or at least have that as an option)
+223. Styled text
+222. More flexible new values for reveal command (maybe also rename to set_hidden)
+221. Inventory items that are programmed to always show up, but only when you have at least one of them (good for some things like torches)
+220. Ability to display "Energy/Max Energy" instead of having them on separate lines
+219. Check that images exist on story load
 218. Restructure project to more standard guidelines
 217. A function for the whole process that web view needs to go through for print_displayed_text so that I don't have so much duplicate code
 216. Autofocus on command prompt upon pressing tab

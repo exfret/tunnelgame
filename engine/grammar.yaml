@@ -63,7 +63,7 @@ VAR: # Has special built-in checking
   type: dict
   optional:
     _global: _null
-    _hidden: _null
+    _hidden: _hidden_config
     _locale: VAR_LOCALE
     _type: _var_type
   other: _complex_value

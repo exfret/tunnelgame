@@ -2,6 +2,7 @@ _header:
   - choice: home
     text: Return to the orphanage
     effects: /orphanage
+_image: town.png
 _content:
   - Where in town would you like to go?
   # Market is always available
@@ -49,11 +50,26 @@ market:
         shown: 2 coin
         effects:
           - goto: .
-      # TODO: Something else to buy
+      # TODO: Something else to buy``
 outskirts:
   - pass:
 abandoned:
   - pass:
 job:
-  # TODO
-  - pass:
+  _content:
+    - You look at the job board, which hosts any sort of odd jobs that can be picked up by people in town.
+    - choice: town
+      text: Go somewhere else in town
+      effects: ..
+    - choice: farmhand
+      text: Work as a lousy farm hand
+      cost: 4 energy
+      shown: 3 coin
+      effects: farmhand
+  farmhand:
+    _content:
+      - sub: /logic/time
+      - You never knew you could sweat so much. At least you earn more than you do selling pitiful amounts of flowers. It's a hard day's work.
+      - choice: next
+        text: Continue to the next day
+        effects: ..

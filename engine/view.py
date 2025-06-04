@@ -192,13 +192,13 @@ class CLIView:
         var_dict = utility.collect_vars_with_dicts(state, vars_address)
         for var_group in shown_vars:
             if isinstance(var_group, str):
-                if not var_dict[var_group]["hidden"]:
+                if var_dict[var_group]["hidden"] is False or (var_dict[var_group]["hidden"] == "nonzero" and var_dict_vals[var_group] != 0):
                     print(utility.localize(var_group, vars_address) + ":\t" + str(var_dict_vals[var_group]))
             elif isinstance(var_group, dict):
                 label = next(iter(var_group))
                 print(label + "...")
                 for var in var_group[label]:
-                    if not var_dict[var]["hidden"]:
+                    if var_dict[var]["hidden"] is False or (var_dict[var]["hidden"] == "nonzero" and var_dict_vals[var] != 0):
                         print("\t" + utility.localize(var, vars_address) + ":\t" + str(var_dict_vals[var]))
 
 
@@ -498,8 +498,10 @@ class WebView:
         self.setup_routes()
         self.sid_to_uid = {}
 
+
+    def load_web_state(self, uid):
         try:
-            self.web_state = pickle.loads((config.saves / "_web_state").with_suffix(".pkl").read_bytes())
+            self.web_state = pickle.loads((config.saves / ("_web_state_"  + str(uid))).with_suffix(".pkl").read_bytes())
         except FileNotFoundError:
             self.web_state = {}
     
@@ -532,6 +534,8 @@ class WebView:
                 "client_side": {}
             }
 
+            (config.saves / ("_web_state_" + str(uid))).with_suffix(".pkl").write_bytes(pickle.dumps(self.web_state))
+
 
     def save_game_state(self, uid, game_obj, state_obj):
         entry = self.web_state.setdefault(uid, {})
@@ -540,7 +544,7 @@ class WebView:
         entry["client_side"] = {} # TODO
 
         # Save across server restarts
-        (config.saves / "_web_state").with_suffix(".pkl").write_bytes(pickle.dumps(self.web_state))
+        (config.saves / ("_web_state_" + str(uid))).with_suffix(".pkl").write_bytes(pickle.dumps(self.web_state))
 
 
     ######################################################################
@@ -604,12 +608,12 @@ class WebView:
         var_dict = utility.collect_vars_with_dicts(state, vars_address)
         for var_group in shown_vars:
             if isinstance(var_group, str):
-                if not var_dict[var_group]["hidden"]:
+                if var_dict[var_group]["hidden"] is False or (var_dict[var_group]["hidden"] == "nonzero" and var_dict_vals[var_group] != 0):
                     self.socketio.emit("print_var", {"text": utility.localize(var_group, vars_address) + ":\t" + str(var_dict_vals[var_group])})
             elif isinstance(var_group, dict):
                 label = next(iter(var_group))
                 for var in var_group[label]:
-                    if not var_dict[var]["hidden"]:
+                    if var_dict[var]["hidden"] is False or (var_dict[var]["hidden"] == "nonzero" and var_dict_vals[var] != 0):
                         self.socketio.emit("print_var", {"group": label, "name": utility.localize(var, vars_address), "value": str(var_dict_vals[var])})
                 # Close the group if needed, or by default
                 #is_open = False
