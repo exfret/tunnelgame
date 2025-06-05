@@ -656,12 +656,17 @@ class WebView:
                     effects_text = " [Effects: "
                 for modification in spec:
                     expr_val = eval(modification["amount"], {}, var_dict_vals)
+                    if (spec_type == "cost_spec" or spec_type == "req_spec") and var_dict_vals[modification["var"]] < expr_val:
+                        effects_text += "<span style=\"color:red\">"
                     sign = ""
                     if expr_val >= 0:
                         sign = "+"
                     if spec_type == "req_spec" or spec_type == "cost_spec":
                         sign = ""
-                    effects_text += f"{sign}{expr_val} {utility.localize(modification["var"], choice["choice_address"])}, "
+                    effects_text += f"{sign}{expr_val} {utility.localize(modification["var"], choice["choice_address"])}"
+                    if (spec_type == "cost_spec" or spec_type == "req_spec") and var_dict_vals[modification["var"]] < expr_val:
+                        effects_text += "</span>"
+                    effects_text += ", "
                 effects_text = effects_text[:-2]
                 effects_text += "]"
                 return effects_text

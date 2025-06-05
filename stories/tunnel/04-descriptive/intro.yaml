@@ -71,6 +71,12 @@ _vars:
       default: Torches
       singular: Torch
       plural: Torches
+  # Parts to things
+  - inv_sewing_needle: 0
+    _locale:
+      default: Sewing Needles
+      singular: Sewing Needle
+      plural: Sewing Needles
   # Keys
   - key_basement: 0
     _locale:

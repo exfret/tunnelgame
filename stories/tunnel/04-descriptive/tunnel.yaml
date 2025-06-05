@@ -108,6 +108,7 @@ training:
     depart:
       _image: path_to_tunnel.png
       _content:
+        - storypoint: third_tunnel_exploration
         - While trekking to the entrance of the first layer yet again, you daydream about the world beyond a Tunnel exploring trainee. Although you're only 15, George started when he was 13 and already had a green pass by your age. Of course, it helped that his parents were famous Tunnel explorers before they mysteriously disappeared. Still, you're anxious to see how you will compare to your mentor.
         - goto: talk
       talk:
@@ -141,11 +142,11 @@ training:
       - reveal: inv_petunal
       - When you get past the gate into the Tunnel, George says that today, you'll be gathering petunal blossoms. George explains that these are purple flowers with yellow specks, and that they are very nutritious when ground up. This will be a bit of a longer trip, since petunal blossoms are harder to find.
       - In fact, you spend the whole rest of the day without finding any!
-      - sub: /logic/time
       - choice: sleep
         text: Set up camp for the night
     sleep:
       _content:
+        - sub: /logic/time
         - You wake up in the middle of the night to a howl in the distance.
         - choice: investigate
           text: Investigate the source of the howl
@@ -185,7 +186,7 @@ training:
             - separator:
             - goto: .
       walk_back:
-        - On the walk back, George explains that you entered a shifting forest. The trees emit a pollen that impairs one's sense of direction for a short period of time. George himself has been trained in how to deal with it, but it's an easy trap for new adventures. "This is why you should stick around me," he adds.
+        - On the walk back, George explains that you entered a shifting forest. The trees emit a pollen that impairs one's sense of direction for a short period of time. George himself has been trained in how to deal with it, but it's an easy trap for new adventurers. "This is why you should stick around me," he adds.
         - separator:
         - goto: ../grave
     grave:
@@ -216,15 +217,74 @@ training:
       - choice: finally
         text: What did we find?
     finally:
-      - You find three. George lets you keep two. Oh well, not every trip can be a winner.
-      - set: inv_petunal += 2
+      - You find one. George lets you keep it. Oh well, not every trip can be a winner.
+      - set: inv_petunal += 1
         show:
       - choice: return
         text: Return to the orphanage
         effects:
           - set: param_1 = 3
           - sub: /logic/inc_exp
-          - reveal: energy
-          - reveal: max_energy
           - separator:
           - goto: /orphanage
+  fourth:
+    depart:
+      - storypoint: fourth_tunnel_exploration
+      - sub: /logic/time
+      - "George says as you walk to the Tunnel, that this time he'll allow you to choose what to gather: rosalia, lemens, or petunal blossoms."
+      - He talks more about all the different flowers, and as he's deep into a side-tangent about the optimal ripeness for harvesting rosalia, you spot a cloth pouch on the ground to your left, nearly obscured by the grass. It appears full of coins.
+      - choice: take
+        text: Take it
+        effects:
+          - You're about to take the pouch when George notices and tells you to put it back. "Whoever lost it will be looking for it around here." He points out. "It's most likely to get back to them if we just leave it where it is. Though picking it up to try returning it was a noble thought." He smiles innocently back at you.
+          - separator:
+          - goto: decision
+      - choice: leave
+        text: Leave it
+        effects:
+          - You leave the pouch on the ground.
+          - separator:
+          - goto: decision
+    decision:
+      - After you pass the gate for the Tunnel, George asks what you would like to do.
+      # TODO: Ghostly orb or something such encounter?
+      - choice: rosalia
+        text: Gather rosalia
+      - choice: lemen
+        text: Gather lemens
+      - choice: petunal
+        text: Gather petunal blossoms
+    rosalia:
+      - set: inv_rosalia += skill_gather_rosalia
+        show:
+      - goto: return
+    lemen:
+      - set: inv_lemens += skill_gather_lemens
+        show:
+      - goto: return
+    petunal:
+      - You don't find a petunal blossoms. Neither does George.
+      - choice: awww
+        text: That's unfortunate
+        effects:
+          - Just kidding! You find 2 and George finds 4.
+          - choice: ask
+            text: Ask George for 1 of his
+            effects:
+              - He obliges.
+              - set: inv_petunal += 1
+                show:
+              - goto: return
+          - choice: accept
+            text: Accept what you gathered
+            effects:
+              - George says, "Oh right, I almost forgot to share!" Then gives you half of his petunal blossoms. "Don't worry about sharing with me," he says, "you're still training anyways."
+              - set: inv_petunal += 2
+                show:
+              - goto: return
+    return:
+      - separator:
+      - After a successful gathering trip, you return to the orphanage to sleep.
+      - sub: /logic/time
+      - separator:
+      - goto: /orphanage

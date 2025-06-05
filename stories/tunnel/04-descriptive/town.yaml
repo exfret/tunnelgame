@@ -9,6 +9,7 @@ _content:
   - choice: market
     text: Buy and sell stuff and things in the market
   # TODO: Need a square hat to visit town square
+  # TODO: Need a streets hat to visit the streets
   - choice: outskirts
     text: Visit the outskirts of town
     require: 50 experience
@@ -27,6 +28,7 @@ market:
       text: Go to the general store
   general:
     _content:
+      - storypoint: visited_general_store
       - The shopkeeper asks, "So what can I do for you today?"
       - choice: leave
         text: Return to the main market area
@@ -68,6 +70,7 @@ job:
       effects: farmhand
   farmhand:
     _content:
+      - storypoint: worked_as_farmhand
       - sub: /logic/time
       - You never knew you could sweat so much. At least you earn more than you do selling pitiful amounts of flowers. It's a hard day's work.
       - choice: next

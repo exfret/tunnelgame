@@ -1,4 +1,5 @@
 Currently:
+  - Make requirements not met different color? Maybe bolded and red yeah
   - Implementing view print messages
   - Organize and go through "Old Currently"
   - Encyclopedia
@@ -35,6 +36,8 @@ Old Currently:
 Big Todo:
   - UI
 
+226. Make a skeleton-creator tool for moving around, actions allowed in each room
+225. Figure out solution to config.game and config.state needing to be user-dependent
 224. Make save/loads user dependent as well (or at least have that as an option)
 223. Styled text
 222. More flexible new values for reveal command (maybe also rename to set_hidden)

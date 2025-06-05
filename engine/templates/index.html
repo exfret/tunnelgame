@@ -440,9 +440,15 @@
             for (const choice_id in msg.choices) {
                 const choice = msg.choices[choice_id];
                 if (!choice.action) {
-                    addToStoryBoard(
-                        `<button class="button" onclick='socket.emit("make_choice",{choice_id:"${choice_id}"})'>${choice_id}</button> ${choice.text}${msg.effects_texts[choice_id] ?? ""}`
-                    );
+                    if (choice.missing.length > 0) {
+                        addToStoryBoard(
+                            `<span style="color:gray"><button disabled class="button">${choice_id}</button> ${choice.text}${msg.effects_texts[choice_id] ?? ""}</span>`
+                        );
+                    } else {
+                        addToStoryBoard(
+                            `<button class="button" onclick='socket.emit("make_choice",{choice_id:"${choice_id}"})'>${choice_id}</button> ${choice.text}${msg.effects_texts[choice_id] ?? ""}`
+                        );
+                    }
                 }
             }
         });

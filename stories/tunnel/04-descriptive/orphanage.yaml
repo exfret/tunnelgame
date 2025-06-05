@@ -60,6 +60,8 @@ foyer:
   _content:
     - reveal: experience
     - reveal: coin
+    - reveal: energy
+    - reveal: max_energy
     - You're in the foyer.
     - choice: common
       text: Go to the common hallways
@@ -96,16 +98,47 @@ common:
       - choice: common
         text: Return to the common hallway
         effects: ../common
+      - if: researched_reading_1
+        then:
+          - choice: catalog
+            text: Read the library catalog of all the books
       - if: not researched_botany_1
         then:
           - choice: botany
             text: Read the textbook on Botany I
             cost: 2 inv_rosalia
             effects: botany_1
-      # TODO: Second initial research option
+      - if: not researched_good_habits_1
+        then:
+          - choice: habits
+            text: Read the textbook on Good Habits I
+            cost: 4 inv_rosalia
+            effects: good_habits_1
+      - if: not researched_reading_1
+        then:
+          - choice: reading
+            text: Read the textbook on Reading I
+            cost: 5 inv_rosalia
+            effects: reading_1
+      - if: not researched_observation_1
+        then:
+          - choice: observation
+            text: Read the textbook on Observation I
+            cost: 6 inv_rosalia
+            effects: observation_1
+    catalog:
+      _content:
+        - '<b>Botany I:</b> Also known as "Flowers for idiots" by Emerald Lemson. This book teaches you the basics of botany, covering lemens and rosalia in particular.'
+        # TODO
+        #- 'Artifacts I: Also known as "That rusty old book that my players never research" by Kyle Hess, it reveals the secrets of blue coins to you (if you haven''t already learned about them), and, even more importantly, allows you to start discovering persistence artifacts from layers 2 and beyond.'
+        # TODO: Import other books
+        - '<b>Reading Skills I:</b> Has the title "Reading, for people who don''t know how to… wait… oh" and the author''s name is missing. Is an important prerequisite to many other researches.'
+        - '<b>Good Habits I:</b> Gives some tips on conserving your energy. Also an important prereq to other books. Oh yeah, the title is "3.14 Successful Habits you can Count On" by Queen Smith.'
+        - '<b>Observation I:</b> A very advanced book (for a redhead) with the title "Keep this away from redheads, they won''t understand it anyways" by two authors, soon to be dead. Despite its atrocious title, the book goes over very important details about observing aspects of your encounters.'
+        - choice: back
+          effects: ..
     botany_1:
       _content:
-        # TODO: Time passing
         - flag: researched_botany_1
         - storypoint: researched_botany_1
         - sub: /logic/time
@@ -120,11 +153,72 @@ common:
           show:
         - separator:
         - goto: ..
+    good_habits_1:
+      _content:
+        - flag: researched_good_habits_1
+        - storypoint: researched_good_habits_1
+        - sub: /logic/time
+        - You spend the day reading about good habits. The good habits you learn help you to realize your true self with more gusto and energy.
+        - set: max_energy += 1
+          show:
+        - set: energy += 1
+          show:
+        - separator:
+        - goto: ..
+    reading_1:
+      _content:
+        - flag: researched_reading_1
+        - storypoint: researched_reading_1
+        - sub: /logic/time
+        - You spend the day reading about reading. How does that work?
+        - Anyways, you feel ready to tackle more complex books. In return, Mabel offers you access to the full library catalogue. (You may still not see options for some books you haven't done the prerequisites for yet).
+        - separator:
+        - goto: ..
+    # Unlocks inspect action?
+    observation_1:
+      _content:
+        - flag: researched_observation_1
+        - storypoint: researched_observation_1
+        - sub: /logic/time
+        - You read about the fine art of observation. Now, you will notice more things on your journey.
+        - separator:
+        - goto: ..
+    # Writing I that unlocks diary?
   courtyard:
     _content:
+      - storypoint: visited_orphanage_courtyard
       - choice: common
         text: Return to the common hallway
         effects: ../common
+      - The courtyard holds a small graveyard and a pond surrounded by slimy stones. The water is stagnant full of algae. You've never seen fish in it.
+      - choice: read
+        text: Read the graves
+        effects:
+          - The older gravestones from back when the orphanage was prosperous have very ornate carvings, but recent ones don't even have the names of the deceased.
+          - separator:
+          - goto: .
+      - choice: pond
+        text: Look into the pond
+        effects:
+          - You check if a fish has magically appeared in the pond today, but there still aren't any there.
+          - separator:
+          - goto: .
+      # TODO: Something for the sewing needle, like fabric, so this is more rewarding earlier
+      - choice: corner
+        text: Examing the corners of the courtyard
+        effects:
+          - if: not orphanage_courtyard_found_sewing_needle
+            then:
+              - tag: sewing_machine
+              - flag: orphanage_courtyard_found_sewing_needle
+              - You find a sewing needle!
+              - set: inv_sewing_needle += 1
+                show:
+            else:
+              # TODO: Find something new on second look
+              - There appears to be nothing else here.
+          - separator:
+          - goto: .
 rooms:
   _image: orphanage_rooms.png
   _content:
@@ -146,12 +240,13 @@ rooms:
       effects: caroline/knock
     - choice: benedict
       text: Visit Benedict's room
-      require: 6 num_training_expeditions
+      require: 4 num_training_expeditions
       effects: benedict/knock
     - choice: rose
       text: Visit Rose's room
       require: 8 num_training_expeditions
       effects: rose/knock
+    # Chloe dies right beforehand?
     - choice: chloe
       text: Visit Chloe's room
       require: 10 num_training_expeditions
@@ -201,8 +296,8 @@ rooms:
               - goto: .
       - if: energy < max_energy
         then:
-          - choice: sleep
-            text: Sleep the day away (you might forget some things)
+          - choice: rest
+            text: Take a full day of rest (you might forget some things)
             cost: (ceil(experience / 10)) experience
             shown: (max_energy - energy) energy
             effects:
@@ -265,6 +360,7 @@ rooms:
             - switch: num_training_expeditions
               "2": /tunnel/training/second/depart
               "3": /tunnel/training/third/depart
+              "4": /tunnel/training/fourth/depart
         - choice: steal
           text: Steal a sock from George when he isn't looking
           require: 10 skill_sneak
@@ -324,7 +420,7 @@ rooms:
             - choice: key
               text: Buy a key to the orphanage courtyard
               selectable_once:
-              cost: 8 inv_petunal
+              cost: 4 inv_petunal
               shown: 1 key_courtyard
               effects:
                 - The courtyard can be accessed from the commons hallway.
@@ -372,21 +468,21 @@ rooms:
               cost: 1 inv_lemens
               shown: 5 experience
               effects:
-                - She is fascinated by the lemen's glow.
+                - She covers the lemens with her hands, then uncovers them, watching their light appear and disappear.
           "2":
             - choice: give
               text: Give her a rosalia
               cost: 1 inv_rosalia
               shown: 7 experience
               effects:
-                - She crushes up part of the dried leaf and smells it, then puts it on her tongue and let's it sit there.
+                - She crushes up part of the dried leaf and smells it, then puts it on her tongue and let's it sit there. You would have never dared that, since you assumed the rosalia had to be brewed or something first. You try with the other bits of the leaf she didn't use and it actually tastes quite good!
           "3":
             - choice: give
               text: Give her a petunal blossom
               cost: 1 inv_petunal
               shown: 11 experience
               effects:
-                - She puts the petals in her mouth and chews on them. You've heard petunal blossoms are good for seasoning food when dried, but this makes you wonder how they taste raw.
+                - She puts the petals in her mouth and chews on them. You've heard petunal blossoms are good for seasoning food when dried, but this makes you wonder how they taste raw. You try some and... it's not as good of an experience as with the rosalia. Caroline spits them out, too.
           _default:
             - Wow, it seems there's nothing more she wants that you can give her actually!
         - inject: gift_handler
