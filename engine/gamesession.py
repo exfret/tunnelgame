@@ -2,7 +2,7 @@
 from engine.gameobject import GameObject
 from engine.gamestate import GameState
 from engine.config import Config
-from engine.view import CLIView, WebView
+from engine.view import CLIView, ViewForTesting, WebView
 from engine.addressing import Addressing
 from engine.utility import Utility
 from engine.gameparser import GameParser
@@ -23,6 +23,8 @@ class GameSession:
         self.utility = Utility(self.gamestate, self.addressing)
         if view_type == "cli":
             self.view = CLIView(self.gamestate, self.config, self.addressing, self.utility)
+        elif view_type == "test":
+            self.view = ViewForTesting(self.gamestate, self.config, self.addressing, self.utility)
         elif view_type == "web":
             self.view = WebView(self.gamestate, self.config, self.addressing, self.utility, app, socketio, uid)
         else:

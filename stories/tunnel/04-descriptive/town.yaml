@@ -13,9 +13,6 @@ _content:
   - choice: outskirts
     text: Visit the outskirts of town
     require: 50 experience
-  - choice: abandoned
-    text: Check out the abandoned warehouse
-    require: 1 key_town_warehouse
   - choice: job
     text: Look at the job board
 market:
@@ -26,6 +23,9 @@ market:
       effects: ..
     - choice: general
       text: Go to the general store
+    - choice: abandoned
+      text: Check out the abandoned warehouse at the end of market street
+      require: 1 key_town_warehouse
   general:
     _content:
       - storypoint: visited_general_store
@@ -40,22 +40,28 @@ market:
         effects:
           - goto: .
       - choice: lemen
-        text: Sell lemens
+        text: Sell [[lemen]]s
         cost: 3 inv_lemens
         shown: 1 coin
         effects:
           - goto: .
       # TODO: Make it so you can only do this when it's in season
       - choice: rosalia
-        text: Sell rosalia
+        text: Sell [[rosalia]]
         cost: 2 inv_rosalia
         shown: 2 coin
         effects:
           - goto: .
-      # TODO: Something else to buy``
+      - choice: warehouse
+        text: Buy the shopkeeper's key to the abandoned warehouse
+        cost: 55 coin
+        shown: 1 key_town_warehouse
+        effects:
+          - goto: .
+      # TODO: Something else to buy
+  abandoned:
+    - pass:
 outskirts:
-  - pass:
-abandoned:
   - pass:
 job:
   _content:

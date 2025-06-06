@@ -35,7 +35,6 @@
         .settings {
             width: 40px;
             height: 40px;
-            background: url("/settings.png") no-repeat center/contain;
             margin: 15px;
         }
 
@@ -126,10 +125,6 @@
             display: flex;
             flex-direction: column;
             height: 100%;
-            font-family: 'Roboto', sans-serif;
-        }
-
-        p {
             margin: 0;
             line-height: 1.2;
             font-size: 1rem;
@@ -266,9 +261,79 @@
         }
 
         .third-centered {
-            width: 33.33%;
+            width: 40%;
             display: block;
             margin: 0 auto;
+        }
+
+        #middle-top.inspect-mode {
+            display: flex;
+            gap: 16px;
+            align-items: flex-start;
+        }
+
+        #middle-top.inspect-mode #image-area {
+            flex: 0 0 40%;
+            margin: 0;
+        }
+
+        #middle-top.inspect-mode #info-area {
+            display: block;
+        }
+
+        /* picture sticks left */
+        #info-area {
+            flex: 1;
+            display: none;
+            margin: 10px
+        }
+
+        /* a little affordance for clickable words */
+        .clickable-word {
+            cursor: pointer;
+            text-decoration: underline dotted;
+        }
+
+        .clickable-word:hover {
+            background: #ffff99;
+        }
+
+        #middle-top-container {
+            display: flex
+        }
+
+        #middle-top {
+            flex: 1 1 auto;
+        }
+
+        #middle-top-filler-left {
+            flex: 0 0 10%
+        }
+
+        #middle-top-filler-right {
+            flex: 0 0 10%
+        }
+
+        .clickable-word {
+            cursor: pointer;
+            text-decoration: underline dotted;
+
+            /* subtle yellow highlight (≈20 % opaque) */
+            background: rgba(255, 255, 0, .40);
+
+            /* a tiny bit of padding so the colour
+            reaches past descenders like “g” */
+            padding: 0 2px;
+            border-radius: 2px;
+            /* soft corners */
+            transition: background .15s;
+            /* smooth fade */
+        }
+
+        .clickable-word:hover,
+        .clickable-word:focus {
+            /* brighten on interaction */
+            background: rgba(255, 255, 0, .85);
         }
     </style>
 </head>
@@ -289,7 +354,14 @@
 
         <!-- ⑤  —––  COLUMN: STORY  –––---------------------------------- -->
         <div class="middle-section">
-            <div id="image-area" class="third-centered"></div>
+            <div id="middle-top-container">
+                <span id="middle-top-filler-left"></span>
+                <span id="middle-top">
+                    <span id="image-area" class="third-centered"></span>
+                    <span id="info-area"></span>
+                </span>
+                <span id="middle-top-filler-right"></span>
+            </div>
             <div class="text-area">
                 <p id="story-board">
                     <button class="button" id="startButton">Start</button>
@@ -389,7 +461,11 @@
         });
 
         /* ---------- STORY EVENTS (unchanged) ------------------------- */
-        socket.on("clear", () => story_board.innerHTML = "");
+        socket.on("clear", () => {
+            story_board.innerHTML = ""
+            middle.classList.remove("inspect-mode");
+            document.getElementById("info-area").innerHTML = ""
+        });
         socket.on("separator", () => addToStoryBoard("&mdash;".repeat(40)));
         socket.on("print", msg => addToStoryBoard(msg.text));
         socket.on("print_feedback_message", msg => addToStoryBoard(msg.text));
@@ -465,9 +541,62 @@
             window.location.reload();
         });
 
+
         /* ---------- START BUTTON (unchanged) ------------------------- */
         document.getElementById("startButton")
             .addEventListener("click", () => socket.emit("make_choice", { choice_id: "start" }));
+
+
+        /* -------------------------------------------------------------
+        CLICK‑REVEAL BEHAVIOUR
+        ------------------------------------------------------------- */
+        const middle = document.getElementById('middle-top');
+        const infoArea = document.getElementById('info-area');
+        const imgArea = document.getElementById('image-area');
+        let panelLocked = false;
+
+        // click on a special word ➜ show description + shift layout
+        document.addEventListener('click', ev => {
+            const w = ev.target.closest('.clickable-word');
+            if (!w) return;
+
+            // Populate description
+            infoArea.innerHTML = w.dataset.info ?? '(no description)';
+            // Activate inspect‑mode
+            middle.classList.add('inspect-mode');
+            panelLocked = true;
+        });
+
+        // click ANYWHERE else ➜ reset
+        document.addEventListener('click', (ev) => {
+            const w = ev.target.closest('.clickable-word');
+            if (w) return;
+
+            middle.classList.remove('inspect-mode');
+            infoArea.innerHTML = '';
+            panelLocked = false
+        });
+
+        // a) Hover in  → preview
+        document.addEventListener('mouseenter', (ev) => {
+            const w = ev.target.closest('.clickable-word');
+            if (!w) return;
+
+            // Fill info panel
+            infoArea.innerHTML = w.dataset.info ?? '(no description)';
+            // Apply layout
+            middle.classList.add('inspect-mode');
+        }, true);                  // **useCapture=true** ⇒ we get the event early
+
+        // b) Hover out → clear if not locked
+        document.addEventListener('mouseleave', (ev) => {
+            const w = ev.target.closest('.clickable-word');
+            if (!w || panelLocked) return;
+
+            middle.classList.remove('inspect-mode');
+            infoArea.innerHTML = '';
+        }, true);
+
     </script>
 </body>
 

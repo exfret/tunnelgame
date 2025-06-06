@@ -25,6 +25,9 @@ _content:
       - if: int(_args[0]) >= 3
         then:
           - command: input rooms, george, embark, continue, sleep, nope, respect, finally, return
+      - if: int(_args[0]) >= 4
+        then:
+          - command: input common, study, botany, common, foyer, rooms, george, embark, leave, rosalia
   # Initialization stuff
   - flag: clothes_owned_light_gray_plain
   - flag: clothes_owned_dark_gray_plain
@@ -103,6 +106,8 @@ _vars:
     _locale: Lemen Gathering Skill
   - skill_gather_rosalia: 3
     _locale: Rosalia Gathering Skill
+  # Misc.
+  - last_training_expedition: 0
   # Logic vars
   - param_1: 0
 _shown:
@@ -122,6 +127,11 @@ _shown:
       - skill_sneak
       - skill_gather_lemens
       - skill_gather_rosalia
+_keywords:
+  George: George is your mentor and friend. He is your guide as you learn about Tunnel adventuring and navigate the complex world around you. Although he shares your freckles, he does not share your red hair. Though we'll forgive him for that.
+  lemen: Lemens are bulbous glowing flowers from the Tunnel, often used for lighting. Once they have been taken outside the Tunnel and into the Dome, they lose their brightness over time.
+  petuanl blossom: Petunal blossoms are skinny purple flowers with yellow flecks on their petals. The petals are often dried and said to be very nutritrious and yummy when used as seasoning. Though some people even eat them raw!
+  rosalia: Rosalia is a type of red flower found in the Tunnel. Its leaves are often ground up and for teas.
 _include:
   logic: logic.yaml
   orphanage: orphanage.yaml

@@ -509,6 +509,52 @@ class WebView(View):
         (self.config.saves_dir / ("_web_state_" + str(self.uid))).with_suffix(".pkl").write_bytes(pickle.dumps(self.web_state))
 
 
+    def expand_tagged_words(self, text, addr=None):
+        # Get keywords
+        keywords = {}
+
+        curr_addr = None
+        if addr is None:
+            curr_addr = self.addressing.get_curr_addr()
+        else:
+            curr_addr = addr
+
+        def get_keywords(addr):
+            node = self.addressing.get_node(addr)
+            if "_keywords" in node:
+                for keyword, description in node["_keywords"].items():
+                    keywords[keyword] = description
+
+        partial_addr = ()
+        get_keywords(partial_addr)
+        for tag in curr_addr:
+            partial_addr += (tag,)
+            get_keywords(partial_addr)
+
+        # Now find and replace keywords
+        while True:
+            expanded = False
+            for i in range(len(text) - 1):
+                ending = None
+                if text[i:i + 2] == "[[":
+                    for j in range(i + 2, len(text) - 1):
+                        if text[j:j + 2] == "]]":
+                            ending = j
+                            break
+                if ending is not None:
+                    expanded = True
+                    # TODO: Parse-time keyword checking
+                    if text[i + 2:j] in keywords:
+                        text = text[:i] + "<span class=\"clickable-word\" data-info=\"" + keywords[text[i + 2:j]] + "\">" + text[i + 2:j] + "</span>" + text[j + 2:]
+                    else:
+                        text = text[:i] + text[i + 2:j] + text[j + 2:]
+                    break
+            if not expanded:
+                break
+        
+        return text
+
+
     ######################################################################
     # Miscellaneous
     ######################################################################
@@ -551,7 +597,7 @@ class WebView(View):
 
     def print_text(self, text, style="", dont_save_print=False):
         string_to_print = self.utility.format.vformat(text, (), self.utility.collect_vars())  # TODO: Exceptions in case of syntax errors
-        string_to_print = self.parse_text(string_to_print)
+        string_to_print = self.expand_tagged_words(self.parse_text(string_to_print))
         self.socketio.emit("print", {"text": string_to_print}, room=self.uid)
         self.gamestate.state["view_text_info"]["displayed_print_msgs"].append({"msg_type": "print", "msg_data": {"text": string_to_print}})
 
@@ -604,8 +650,11 @@ class WebView(View):
         effects_texts = {}
 
         # Fill effects texts (can't eval the python in the javascript)
-        # TODO: Un-duplicate this text
+        # TODO: Un-duplicate this code
         for choice_id, choice in self.gamestate.state["choices"].items():
+            # First, expand tagged words in this choice text
+            choice["text"] = self.expand_tagged_words(choice["text"], choice["choice_address"])
+
             var_dict_vals = self.utility.collect_vars(choice["choice_address"])
 
             def parse_modification_spec(choice, spec, spec_type):

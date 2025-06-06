@@ -2,15 +2,21 @@ _image: orphanage.png
 _content:
   # The foyer is the entry point for the orphanage
   - goto: foyer
+_header:
+  - if: tunnel_pass == "Training" and time - last_training_expedition >= 30
+    then:
+      - The orphanage kicks you out for not training with [[George]]. Then, you die and starve, in that order.
+      - "Hint: You can use the 'revert' command to go back a couple times, or load an autosave if you want to undo your bad decisions. Yes, this is the end. That's what happens when people die."
+      - stop:
 first_journey:
   george_waiting:
     _image: george_coin.png
     _content:
       - reveal: tunnel_pass
-      - George is standing at the dusty entrance to the orphanage, his ruffled brown hair blending with the oak double round-top door that leads outside. He's flipping a coin to pass the time as he waits for you to finish packing for your trip to the Tunnel with him.
+      - "[[George]] is standing at the dusty entrance to the orphanage, his ruffled brown hair blending with the oak double round-top door that leads outside. He's flipping a coin to pass the time as he waits for you to finish packing for your trip to the Tunnel with him."
       - choice: review
         selectable_once:
-        text: Review your encyclopedia notes on rosalia
+        text: Review your encyclopedia notes on [[rosalia]]
         effects:
           # TODO!
           # Maybe make encyclopedia an extra button on the left?
@@ -34,26 +40,27 @@ first_journey:
           - separator:
           - goto: .
       - choice: ready
-        text: Tell George that I'm ready
+        text: Tell [[George]] that I'm ready
         effects:
           - set: num_training_expeditions += 1
           - goto: leave_orphanage
   leave_orphanage:
     _image: path_to_tunnel.png
     _content:
-      - George opens the doors, allowing the light that permeates the outside of the Dome to flood in.
+      - "[[George]] opens the doors, allowing the light that permeates the outside of the Dome to flood in."
       - You hunker along with your heavy packs, heading for the gaping miles-wide gap in the Dome's rocky walls. It's the Tunnel, which is the only way out, and today will be your first day exploring it.
       - It's a day's walk from your small town to the Tunnel.
       - choice: walk
-        text: Walk with George to the Tunnel
+        text: Walk with [[George]] to the Tunnel
         effects:
           - goto: /tunnel/training/first/tunnel_entrance
   return:
     _content:
-      - Despite the short trip, you feel exhaustion kick in as soon as you get back to the orphanage. Both you and George go straight to bed.
+      - Despite the short trip, you feel exhaustion kick in as soon as you get back to the orphanage. Both you and [[George]] go straight to bed.
       - choice: next
         effects:
           - sub: /logic/time
+          - set: last_training_expedition = time
           - goto: /orphanage
 foyer:
   _image: foyer.png
@@ -63,6 +70,17 @@ foyer:
     - reveal: energy
     - reveal: max_energy
     - You're in the foyer.
+    - if: tunnel_pass == "Training" and time - last_training_expedition >= 14
+      then:
+        - if: not orphanage_foyer_had_no_expeditions_talk
+          then:
+            - flag: orphanage_foyer_had_no_expeditions_talk
+            - Ms. Bee spots you and hurriedly walks over with a scowl on her face. Uh-oh, this can't be good.
+            - choice: gulp
+              effects: no_expeditions
+            - stop:
+          else:
+            - You think about how it's been a while since your last training with [[George]] and recall what Ms. Bee said.
     - choice: common
       text: Go to the common hallways
     - choice: rooms
@@ -71,9 +89,18 @@ foyer:
       text: Go to town
       require: 3 num_training_expeditions
       effects: /town
+    - choice: volunteer
+      text: Go on a volunteering trip with the orphanage
+      require: 4 num_training_expeditions
     - choice: admin
       text: Snoop around the orphanage admin area
       require: 50 skill_sneak
+  no_expeditions:
+    - '"It''s been two weeks since you last trained with [[George]]!" Ms. Bee states. "We give you special treatment so you can go be a Tunnel adventurer, not do random side-quests. Go train! And make sure this doesn''t happen again."'
+    - choice: okay
+      text: Tell her "yes ma'am" regardless of what you're planning to do because that's the only choice
+      effects:
+        - goto: /orphanage
 common:
   _image: commons.png
   _content:
@@ -128,7 +155,7 @@ common:
             effects: observation_1
     catalog:
       _content:
-        - '<b>Botany I:</b> Also known as "Flowers for idiots" by Emerald Lemson. This book teaches you the basics of botany, covering lemens and rosalia in particular.'
+        - '<b>Botany I:</b> Also known as "Flowers for idiots" by Emerald Lemson. This book teaches you the basics of botany, covering [[lemen]]s and [[rosalia]] in particular.'
         # TODO
         #- 'Artifacts I: Also known as "That rusty old book that my players never research" by Kyle Hess, it reveals the secrets of blue coins to you (if you haven''t already learned about them), and, even more importantly, allows you to start discovering persistence artifacts from layers 2 and beyond.'
         # TODO: Import other books
@@ -144,11 +171,11 @@ common:
         - sub: /logic/time
         - You spend the day reading about plants!
         - The book goes over the author's love for the different flowers, which is why this first book in the botany series is devoted to them.
-        - The book is split into two parts, a piece about lemens, a glowing plant used for light inside buildings, and rosalia, which you already know about.
+        - The book is split into two parts, a piece about [[lemen]]s, a glowing plant used for light inside buildings, and [[rosalia]], which you already know about.
         - if: not knowledge_lemens
           then:
             - flag: knowledge_lemens
-        - The last part helps you gain an appreciation for how different rosalia leaves taste different, with the smallest hardest-to-get ones actually being the most potent and tasteful. This will help you gather rosalia better!
+        - The last part helps you gain an appreciation for how different [[rosalia]] leaves taste different, with the smallest hardest-to-get ones actually being the most potent and tasteful. This will help you gather [[rosalia]] better!
         - set: skill_gather_rosalia += 2
           show:
         - separator:
@@ -228,7 +255,7 @@ rooms:
     - choice: lily
       text: Visit my own room
     - choice: george
-      text: Visit George's room
+      text: Visit [[George]]'s room
       effects: george/knock
     - choice: jaz
       text: Visit Jaz's room
@@ -347,10 +374,10 @@ rooms:
     knock:
       _content:
         - reveal: skill_sneak
-        - George says, "What can I do for you, Lily?" and smiles back at you.
+        - '[[George]] says, "What can I do for you, Lily?" and smiles back at you.'
         - choice: back
           effects:
-            - You exit the room and George waves bye.
+            - You exit the room and [[George]] waves bye.
             - separator:
             - goto: ../..
         - choice: embark
@@ -362,7 +389,7 @@ rooms:
               "3": /tunnel/training/third/depart
               "4": /tunnel/training/fourth/depart
         - choice: steal
-          text: Steal a sock from George when he isn't looking
+          text: Steal a sock from [[George]] when he isn't looking
           require: 10 skill_sneak
           effects:
             - pass:
@@ -414,7 +441,7 @@ rooms:
         - if: (inv_petunal > 0 and not orphanage_rooms_jaz_introduced_courtyard_key)
           then:
             - flag: orphanage_rooms_jaz_introduced_courtyard_key
-            - Jaz sees that you have some petunal blossoms from the Tunnel. "Wow, I always wondered what those were like!" She says. "If you give me some I'll part with this key to the courtyard. I put a lot of effort into stealing it."
+            - Jaz sees that you have some [[petunal blossom]]s from the Tunnel. "Wow, I always wondered what those were like!" She says. "If you give me some I'll part with this key to the courtyard. I put a lot of effort into stealing it."
         - if: orphanage_rooms_jaz_introduced_courtyard_key
           then:
             - choice: key
@@ -464,25 +491,25 @@ rooms:
         - switch: gift_num
           "1":
             - choice: give
-              text: Give her a lemen
+              text: Give her a [[lemen]]
               cost: 1 inv_lemens
               shown: 5 experience
               effects:
-                - She covers the lemens with her hands, then uncovers them, watching their light appear and disappear.
+                - She covers the [[lemen]]s with her hands, then uncovers them, watching their light appear and disappear.
           "2":
             - choice: give
-              text: Give her a rosalia
+              text: Give her a [[rosalia]]
               cost: 1 inv_rosalia
               shown: 7 experience
               effects:
-                - She crushes up part of the dried leaf and smells it, then puts it on her tongue and let's it sit there. You would have never dared that, since you assumed the rosalia had to be brewed or something first. You try with the other bits of the leaf she didn't use and it actually tastes quite good!
+                - She crushes up part of the dried leaf and smells it, then puts it on her tongue and let's it sit there. You would have never dared that, since you assumed the [[rosalia]] had to be brewed or something first. You try with the other bits of the leaf she didn't use and it actually tastes quite good!
           "3":
             - choice: give
               text: Give her a petunal blossom
               cost: 1 inv_petunal
               shown: 11 experience
               effects:
-                - She puts the petals in her mouth and chews on them. You've heard petunal blossoms are good for seasoning food when dried, but this makes you wonder how they taste raw. You try some and... it's not as good of an experience as with the rosalia. Caroline spits them out, too.
+                - She puts the petals in her mouth and chews on them. You've heard [[petunal blossom]]s are good for seasoning food when dried, but this makes you wonder how they taste raw. You try some and... it's not as good of an experience as with the [[rosalia]]. Caroline spits them out, too.
           _default:
             - Wow, it seems there's nothing more she wants that you can give her actually!
         - inject: gift_handler
@@ -509,6 +536,87 @@ rooms:
 basement:
   _content:
     - pass:
+volunteer:
+  _vars:
+    - num_volunteering_trips: 0
+  _content:
+    - if: _visits == 1
+      then:
+        - Due to the poor public perception of orphans, the orphanage does volunteering trips and other activities to boost public perception. Normally, these are mandatory, but they would rather you focus on your Tunnel adventures, so you and [[George]] can go whenever.
+    # TODO: No volunteering on weekends
+    # TODO: Something to make it so you don't *just* volunteer?
+    - set: num_volunteering_trips += 1
+    - switch: num_volunteering_trips
+      "1": first
+      "2": second
+  first:
+    _content:
+      - storypoint: first_volunteering_trip
+      - For your first volunteering trip, you are all repairing a path in town with Ms. Bee, who, along with Mabel, helps to run the orphanage's daily operations. It's hard work, and you have to dig up a lot of rocks. In fact, you start wheezing and get lightheaded as you constantly pick up the pointy rocks. You wonder how much energy you should expend on this.
+      - choice: lots
+        text: Use a lot of energy to get this job done efficiently
+        cost: 4 energy
+        effects:
+          - You do so well that Ms. Bee gives you 3 coins for your hard labor.
+          - set: coin += 3
+            show:
+          - goto: done_volunteering
+      - choice: some
+        text: Use a decent amount of energy to get the job done efficiently
+        cost: 2 energy
+        effects:
+          - Once the work day is done, Ms. Bee lines everyone up and congratulates you all for your hard work. She gives each of you a coin to spend in town next time you all visit there. Not that a single coin could be used for much.
+          - set: coin += 1
+            show:
+          - goto: done_volunteering
+      - choice: little
+        text: Use only a little energy and let others get the job done
+        effects:
+          - Once the work day is done, Ms. Bee lines everyone up and congratulates you all for your hard work, shooting you a stern look. She gives everyone but you a single coin.
+          - set: coin += 1
+            show:
+          - goto: done_volunteering
+    done_volunteering:
+      - sub: /logic/time
+      - separator:
+      - goto: /orphanage
+  second:
+    _content:
+      - Everyone lines up in front of the double oak doors while Ms. Bee and Mabel stare and wait. Then, they open the doors and lead everyone to a farm a 10 minute walk away.
+      - You head to a common destination for volunteering... Karo's farm. Unlike others, he pays the orphanage for the labor depsite it being technically volunteering work. It's still not good pay, but it's something. Of course, you don't get a single coin from it. It's the orphanage's money you're earning, and in return you get a place to eat and sleep.
+      - During lunch break, Jaz, sits next to you and asks what the Tunnel is like.
+      - choice: exciting
+        effects:
+          - You explain how exciting it was to be outside the flat barren ground of the Dome and in a new environment.
+          - goto: jaz_response
+      - choice: sublime
+        effects:
+          - You say it's hard to explain just how different and "nature"-y things are in the Tunnel as compared to the Dome. The "essence" of the place is just... well, different.
+          - goto: jaz_response
+      - choice: short
+        effects:
+          - You sigh and complain that your trips are too short, but you look forward to going again soon!
+          - goto: jaz_response
+    jaz_response:
+      - Jaz rolls her eyes and says she wishes she could go. "It's always preferential treatment to you and [[George]]!" Sometimes you wonder why [[George]] chose to train you, but then you remember it's because you were the best candidate who showed the most promise with regards to Tunnel adventuring in every way. Hey, not everyone can be as excellent as you.
+      - choice: give
+        text: Give Jaz one of my [[rosalia]]
+        cost: 1 inv_rosalia
+        effects:
+          - flag: orphanage_volunteer_second_jaz_gave_rosalia
+          - Jaz smiles from ear to ear. "Thanks!" She chirps.
+          - goto: back_to_work
+      - choice: nah
+        text: Don't give Jaz any [[rosalia]]
+        effects:
+          - flag: orphanage_volunteer_second_jaz_not_gave_rosalia
+          - Jaz frowns. The rest of the conversation is somewhat flat.
+          - goto: back_to_work
+    back_to_work:
+      - After lunch ends, everyone finishes off the work and heads back home.
+      - sub: /logic/time
+      - separator:
+      - goto: /orphanage
 admin:
   _content:
     - pass:

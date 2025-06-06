@@ -5,7 +5,10 @@ import sys
 
 class Config:
     def __init__(self, story_name, view_type):
-        self.data_dir = Path(os.getenv("TUNNELGAME_DATA_DIR", Path.home() / "tunnelgame"))
+        if os.getenv("RENDER") == "TRUE":
+            self.data_dir = Path("/data")
+        else:
+            self.data_dir = Path(os.getenv("TUNNELGAME_DATA_DIR", Path.home() / "tunnelgame"))
         self.data_dir.mkdir(exist_ok=True)
         self.graphics_dir = self.data_dir / "graphics"
         self.graphics_dir.mkdir(exist_ok=True)

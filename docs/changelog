@@ -1,6 +1,12 @@
-2025/06/04 (4k words - ?)
-- Added "nonzero" hidden setting for variables (only hides them if you have zero of them, but visible otherwise)
+2025/06/05 (5k words - ?)
+- Complete refactor into class-based approach, fixing issue with global game/state only allowing one concurrent user
 - Made clearer what was missing when something was missing for a choice
+- Story: Added volunteering to version 4
+- Story: You now can't go too long without tunnel training
+- Support for keywords
+
+2025/06/04 (4k words - 5k words)
+- Added "nonzero" hidden setting for variables (only hides them if you have zero of them, but visible otherwise)
 
 2025/06/03 (3k words - 4k words)
 - Worked on story (third training expedition)

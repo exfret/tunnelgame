@@ -8,6 +8,7 @@ START:
     _image: _text # Actually is a filename, but we don't have to pay attention to that for now
     _include: INCLUDE_DICT
     _injections: BLOCK_INJECTIONS_LIST
+    _keywords: KEYWORDS_DICT
     _listeners: LISTENERS
     _meta: META_DICT
     _shown: SHOWN_LIST
@@ -27,6 +28,9 @@ BLOCK_INJECTION_BEFORE:
   type: dict
   mandatory:
     before: _addr
+KEYWORDS_DICT:
+  type: dict
+  other: _text
 LISTENERS:
   type: list
   elements: LISTENER
@@ -88,6 +92,7 @@ DICT_BLOCK: # Has special built-in checking
     _content: CONTENT
     _image: _text # Actually is a filename, but we don't have to pay attention to that for now
     _include: INCLUDE_DICT
+    _keywords: KEYWORDS_DICT
     _listeners: LISTENERS
     _meta: META_DICT
     _vars: VARS
