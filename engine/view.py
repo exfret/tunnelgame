@@ -1,4 +1,5 @@
 # Web imports
+# TODO: Not needed anymore?
 from flask import Flask, render_template, jsonify, session, request
 from flask_socketio import SocketIO, emit, join_room
 from uuid import uuid4
@@ -6,13 +7,6 @@ from uuid import uuid4
 import copy
 import pickle
 import textwrap
-
-# Module imports
-from engine import addressing, config, utility
-
-
-game = config.game
-state = config.state
 
 
 feedback_msg = {
@@ -69,50 +63,35 @@ feedback_msg = {
 }
 
 
-old_print = print
-
-# Valid views are game and console
-# Only game is currently implemented (everything else is just "console")
-def print(text="", view=None, dont_save_print=False):
-    # Having __null__ in the string indicates it should not be printed
-    # TODO: Some way to escape __null__ like with a backslash?
-    if isinstance(text, str) and "__null__" in text:
-        return
-    
-    if not dont_save_print:
-        if view is not None and view in state["view_displayed_text"]:
-            # TODO: Some sort of warning if view is not in state["view_displayed_text"]
-            state["view_displayed_text"][view] += str(text) + "\n"
-        state["displayed_text"] += str(text) + "\n"
-
-    old_print(text)
+# Story board - Supports different views, currently just story view which displays story and flavor-related text
+# Stats board - Will support buttons to change views of story board, currently just var changes
+# Console - Prints feedback and takes input
 
 
-# In newer versions, this only accepts two descriptiveness levels, descriptive/moderate (equivalent), and minimal
-def parse_text(text):
-    # Decide what part of the text to print
-    split_text = text.split("-->")
-    if len(split_text) == 1:
-        text = split_text[0]
-    elif len(split_text) > 1:
-        if state["settings"]["descriptiveness"] == "minimal":
-            text = split_text[1].strip()
-        else:
-            text = split_text[0].strip()
-
-    return text
+class View:
+    def __init__(self, gamestate, config, addressing, utility):
+        self.gamestate = gamestate
+        self.config = config
+        self.addressing = addressing
+        self.utility = utility
 
 
-# Story board (Left up) - Supports different views, currently just story view which displays story and flavor-related text
-# Stats board (Right up) - Will support buttons to change views of story board, currently just var changes
-# Console (bottom) - Prints feedback and takes input
+    # In newer versions, this only accepts two descriptiveness levels, descriptive/moderate (equivalent), and minimal
+    def parse_text(self, text):
+        # Decide what part of the text to print
+        split_text = text.split("-->")
+        if len(split_text) == 1:
+            text = split_text[0]
+        elif len(split_text) > 1:
+            if self.gamestate.state["settings"]["descriptiveness"] == "minimal":
+                text = split_text[1].strip()
+            else:
+                text = split_text[0].strip()
+
+        return text
 
 
-class CLIView:
-    def __init__(self):
-        pass
-
-
+class CLIView(View):
     ######################################################################
     # Miscellaneous
     ######################################################################
@@ -121,30 +100,47 @@ class CLIView:
     # Clears console and story view
     def clear(self, dont_reset_displayed_text=False):
         if not dont_reset_displayed_text:
-            state["displayed_text"] = ""
+            self.gamestate.state["displayed_text"] = ""
             
-            for key in state["view_displayed_text"].keys():
-                state["view_displayed_text"][key] = ""
+            for key in self.gamestate.state["view_displayed_text"].keys():
+                self.gamestate.state["view_displayed_text"][key] = ""
 
         # Clears console with ansi code
-        old_print("\033[H\033[J", end="")
-
+        print("\033[H\033[J", end="")
     
+
+    # Valid views are game and console
+    # Only game is currently implemented (everything else is just "console")
+    def print(self, text="", view=None, dont_save_print=False):
+        # Having __null__ in the string indicates it should not be printed
+        # TODO: Some way to escape __null__ like with a backslash?
+        if isinstance(text, str) and "__null__" in text:
+            return
+        
+        if not dont_save_print:
+            if view is not None and view in self.gamestate.state["view_displayed_text"]:
+                # TODO: Some sort of warning if view is not in state["view_displayed_text"]
+                self.gamestate.state["view_displayed_text"][view] += str(text) + "\n"
+            self.gamestate.state["displayed_text"] += str(text) + "\n"
+
+        print(text)
+    
+
     # Sets the displayed text to just be the text from one display
     def set_displayed_text(self, view):
-        if view in state["view_displayed_text"]:
-            state["displayed_text"] = state["view_displayed_text"][view]
-
+        if view in self.gamestate.state["view_displayed_text"]:
+            self.gamestate.state["displayed_text"] = self.gamestate.state["view_displayed_text"][view]
+    
 
     # Reprints displayed text for save/loads
-    def print_displayed_text(self, view=None, add_save_text=False):
-        old_print(state["displayed_text"], end="")
+    def print_displayed_text(self, add_save_text=False):
+        print(self.gamestate.state["displayed_text"], end="")
 
         # Whether to print a mock "save text" since the "Save complete!" text isn't saved
         if add_save_text:
             self.print_feedback_message("save_completed")
 
-
+    
     ######################################################################
     # Story board
     ######################################################################
@@ -152,29 +148,29 @@ class CLIView:
 
     def print_flavor_text(self, text, dont_save_print=False):
         self.print_text(text, view="game", dont_save_print=dont_save_print)
-
+    
 
     def print_separator(self, dont_save_print=False):
-        print("-" * 90 + "\n", view="game", dont_save_print=dont_save_print)
+        self.print("-" * 90 + "\n", view="game", dont_save_print=dont_save_print)
 
 
     def print_table(self, tbl_to_display, dont_save_print=False):
         border = f"+-{'-' * len(tbl_to_display[0])}-+"
-        print(border, view="game", dont_save_print=dont_save_print)
+        self.print(border, view="game", dont_save_print=dont_save_print)
         for row in tbl_to_display:
             row = map(str, row)
-            print(f"| {''.join(row)} |", view="game")
-        print(border, view="game", dont_save_print=dont_save_print)
-
+            self.print(f"| {''.join(row)} |", view="game")
+        self.print(border, view="game", dont_save_print=dont_save_print)
+    
 
     def print_text(self, text, style="", view="game", dont_save_print=False):
         ansi_code = "\033[0m"
         if style == "bold":
             ansi_code = "\033[1m"
 
-        string_to_print = utility.format.vformat(text, (), utility.collect_vars(state))  # TODO: Exceptions in case of syntax errors
-        string_to_print = parse_text(string_to_print)
-        print(ansi_code + textwrap.fill(string_to_print, 100) + "\033[0m\n", view=view, dont_save_print=dont_save_print)
+        string_to_print = self.utility.format.vformat(text, (), self.utility.collect_vars())  # TODO: Exceptions in case of syntax errors
+        string_to_print = self.parse_text(string_to_print)
+        self.print(ansi_code + textwrap.fill(string_to_print, 100) + "\033[0m\n", view=view, dont_save_print=dont_save_print)
 
 
     ######################################################################
@@ -187,35 +183,35 @@ class CLIView:
 
 
     def print_shown_vars(self, shown_vars, vars_address):
-        print("\nRelevant values:")
-        var_dict_vals = utility.collect_vars(state, vars_address)
-        var_dict = utility.collect_vars_with_dicts(state, vars_address)
+        self.print("\nRelevant values:")
+        var_dict_vals = self.utility.collect_vars(vars_address)
+        var_dict = self.utility.collect_vars_with_dicts(vars_address)
         for var_group in shown_vars:
             if isinstance(var_group, str):
                 if var_dict[var_group]["hidden"] is False or (var_dict[var_group]["hidden"] == "nonzero" and var_dict_vals[var_group] != 0):
-                    print(utility.localize(var_group, vars_address) + ":\t" + str(var_dict_vals[var_group]))
+                    self.print(self.utility.localize(var_group, vars_address) + ":\t" + str(var_dict_vals[var_group]))
             elif isinstance(var_group, dict):
                 label = next(iter(var_group))
-                print(label + "...")
+                self.print(label + "...")
                 for var in var_group[label]:
                     if var_dict[var]["hidden"] is False or (var_dict[var]["hidden"] == "nonzero" and var_dict_vals[var] != 0):
-                        print("\t" + utility.localize(var, vars_address) + ":\t" + str(var_dict_vals[var]))
+                        self.print("\t" + self.utility.localize(var, vars_address) + ":\t" + str(var_dict_vals[var]))
 
 
     def print_var(self, text):
-        print(text)
+        self.print(text)
 
 
     def print_var_modification(self, text_to_show_spec, dont_save_print=False):
         operation_text = None
         new_text = ""
         if text_to_show_spec["op"] == "add":
-            print(f"[+{text_to_show_spec['amount']} {text_to_show_spec['var']['locale']}]\n", dont_save_print=dont_save_print)
+            self.print(f"[+{text_to_show_spec['amount']} {text_to_show_spec['var']['locale']}]\n", dont_save_print=dont_save_print)
         elif text_to_show_spec["op"] == "subtract":
-            print(f"[-{text_to_show_spec['amount']} {text_to_show_spec['var']['locale']}]\n", dont_save_print=dont_save_print)
+            self.print(f"[-{text_to_show_spec['amount']} {text_to_show_spec['var']['locale']}]\n", dont_save_print=dont_save_print)
         elif text_to_show_spec["op"] == "set":
-            print(f"[Set {text_to_show_spec['var']['locale']} to {text_to_show_spec['amount']}]\n", dont_save_print=dont_save_print)
-
+            self.print(f"[Set {text_to_show_spec['var']['locale']} to {text_to_show_spec['amount']}]\n", dont_save_print=dont_save_print)
+        
 
     ######################################################################
     # Console
@@ -231,7 +227,7 @@ class CLIView:
             text_to_display += "\n        Choices...\n"
         else:
             text_to_display += "\n        Actions...\n"
-        for choice_id, choice in state["choices"].items():
+        for choice_id, choice in self.gamestate.state["choices"].items():
             is_action = "action" in choice and choice["action"]
 
             # Display only actions/choices, whichever is selected
@@ -240,7 +236,7 @@ class CLIView:
             if display_actions and not is_action:
                 continue
 
-            var_dict_vals = utility.collect_vars(state, choice["choice_address"])
+            var_dict_vals = self.utility.collect_vars(choice["choice_address"])
 
             # Evaluate costs/requirements/shown
             # This is sorta duplicated between here and gameloop
@@ -260,7 +256,7 @@ class CLIView:
                         sign = "+"
                     if spec_type == "req_spec" or spec_type == "cost_spec":
                         sign = ""
-                    effects_text += f"{sign}{expr_val} {utility.localize(modification["var"], choice["choice_address"])}, "
+                    effects_text += f"{sign}{expr_val} {self.utility.localize(modification["var"], choice["choice_address"])}, "
                 effects_text = effects_text[:-2]
                 effects_text += "]"
                 return effects_text
@@ -278,13 +274,13 @@ class CLIView:
                 choice_color = "\033[90m"
                 text_color = "\033[90m"
             new_text = ""
-            if state["visits"][choice["choice_address"]] <= 1:
+            if self.gamestate.state["visits"][choice["choice_address"]] <= 1:
                 new_text = "\033[33m(New) "
 
             text_for_choice = ""
             if "text" in choice:
-                text_for_choice = " " + parse_text(choice["text"])
-            print(f"        {text_color} * {new_text}{choice_color}{choice_id}{text_color}{text_for_choice}{effects_text}")
+                text_for_choice = " " + self.parse_text(choice["text"])
+            self.print(f"        {text_color} * {new_text}{choice_color}{choice_id}{text_color}{text_for_choice}{effects_text}")
             if len(choice["missing"]) > 0:
                 missing_text = "\033[90m              Missing: "
                 for missing in choice["missing"]:
@@ -297,11 +293,11 @@ class CLIView:
                     else:
                         missing_text += missing + ", "
                 missing_text = missing_text[:-2]
-                print(missing_text + "\033[0m")
+                self.print(missing_text + "\033[0m")
 
 
     def print_completion_percentage(self, percentage):
-        print(f"Completed {(100 * percentage):.1f}% of the story!")
+        self.print(f"Completed {(100 * percentage):.1f}% of the story!")
 
 
     # Made feedback messages not save by default
@@ -309,89 +305,93 @@ class CLIView:
         if dont_save:
             # TODO: Switch to just using dont_save_print in new print function
             if not (msg_type in feedback_msg):
-                old_print(feedback_msg["default"])
-            else:
-                old_print(feedback_msg[msg_type])
-        else:
-            if not (msg_type in feedback_msg):
                 print(feedback_msg["default"])
             else:
                 print(feedback_msg[msg_type])
+        else:
+            if not (msg_type in feedback_msg):
+                self.print(feedback_msg["default"])
+            else:
+                self.print(feedback_msg[msg_type])
     
 
     def print_macros(self):
-        if len(state["command_macros"].items()) == 0:
-            print(feedback_msg["info_no_macros"])
+        if len(self.gamestate.state["command_macros"].items()) == 0:
+            self.print(feedback_msg["info_no_macros"])
             return
         
-        for macro_name, macro_def in state["command_macros"].items():
-            print(macro_name + ": " + " ".join(macro_def))
+        for macro_name, macro_def in self.gamestate.state["command_macros"].items():
+            self.print(macro_name + ": " + " ".join(macro_def))
     
 
     def print_num_words(self, num_words):
-        print(num_words)
+        self.print(num_words)
 
 
     def print_settings(self):
-        displayed_text = ""
-        for key in state["settings"].keys():
-            print(f" * {key}")
+        for key in self.gamestate.state["settings"].keys():
+            self.print(f" * {key}")
 
     
     def print_settings_autocomplete_get(self):
-        print(f"Allowed values are 'on' and 'off'. The current value of this setting is '{state['settings']['autocomplete']}'.")
+        self.print(f"Allowed values are 'on' and 'off'. The current value of this setting is '{self.gamestate.state['settings']['autocomplete']}'.")
 
 
     def print_settings_autocomplete_set(self, new_value):
-        print(f"Set autocomplete to '{new_value}'.")
+        self.print(f"Set autocomplete to '{new_value}'.")
 
 
     def print_settings_descriptiveness_get(self):
-        print(f"Allowed values are 'descriptive', 'moderate', and 'minimal'. The current value of this setting is '{state['settings']['descriptiveness']}'.")
+        self.print(f"Allowed values are 'descriptive', 'moderate', and 'minimal'. The current value of this setting is '{self.gamestate.state['settings']['descriptiveness']}'.")
 
 
     def print_settings_descriptiveness_set(self, new_value):
-        print(f"Set descriptiveness to '{new_value}'.")
+        self.print(f"Set descriptiveness to '{new_value}'.")
 
 
     def print_settings_flavor_text_get(self):
-        print(f"Allowed values are 'always', 'once', and 'never'. The current value of this setting is '{state['settings']['show_flavor_text']}'.")
+        self.print(f"Allowed values are 'always', 'once', and 'never'. The current value of this setting is '{self.gamestate.state['settings']['show_flavor_text']}'.")
 
 
     def print_settings_flavor_text_set(self, new_value):
-        print(f"Set show_flavor_text to '{new_value}'.")
+        self.print(f"Set show_flavor_text to '{new_value}'.")
 
 
     def print_var_value(self, var_value):
-        print(var_value)
+        self.print(var_value)
     
 
     def print_vars_defined(self):
         var_names = {}
 
-        curr_addr = addressing.get_block_part(state["last_address"])
+        curr_addr = self.addressing.get_block_part()
         for ind in range(len(curr_addr) + 1):
             addr_to_check = curr_addr[:ind]
 
-            for var_name in state["vars"][addr_to_check].keys():
+            for var_name in self.gamestate.state["vars"][addr_to_check].keys():
                 var_names[var_name] = True
         
         for name in sorted(var_names):
-            print(name)
+            self.print(name)
 
 
     def get_input(self):
-        old_print() # Add a new line
+        print() # Add a new line
         command_string = input("> ")
-        old_print()
-        state["displayed_text"] += "\n> " + command_string + "\n\n"
+        print()
+        self.gamestate.state["displayed_text"] += "\n> " + command_string + "\n\n"
 
         command = command_string.split()
         return command
 
 
-class ViewForTesting:
-    def __init__(self, choice_list=[]):
+class ViewForTesting(View):
+    def __init__(self, gamestate, config, addressing, utility, choice_list=None):
+        if choice_list is None:
+            choice_list = []
+
+        super().__init__(gamestate, config, addressing, utility)
+
         self.num_choices_made = 0
         self.choice_list = choice_list
         self.commands_called = []
@@ -464,7 +464,7 @@ class ViewForTesting:
 
 
     def print_text(self, text, style, dont_save_print=False):
-        self.commands_called.append({"id": "print_text", "text": utility.format.vformat(text, (), utility.collect_vars(state)), "style": style})
+        self.commands_called.append({"id": "print_text", "text": self.utility.format.vformat(text, (), self.utility.collect_vars()), "style": style})
 
 
     def print_var_modification(self, text_to_show_spec, dont_save_print=False):
@@ -483,68 +483,30 @@ class ViewForTesting:
         return self.choice_list[self.num_choices_made - 1].split()
 
 
-# TODO: Storing text for save/load for WebView
-class WebView:
-    def __init__(self):
-        self.app = Flask(__name__)
-        # TODO: Figure out what the secret key is needed for
-        # Having this was suggested by ChatGPT
-        self.app.config["SECRET_KEY"] = "password"
-        self.app.config.update(
-            SESSION_COOKIE_SAMESITE="None",
-            SESSION_COOKIE_SECURE=True   # Required when SameSite=None
-        )
-        self.socketio = SocketIO(self.app, async_mode="eventlet", manage_session=True)
-        self.setup_routes()
-        self.sid_to_uid = {}
+class WebView(View):
+    def __init__(self, gamestate, config, addressing, utility, app, socketio, uid):
+        super().__init__(gamestate, config, addressing, utility)
 
-
-    def load_web_state(self, uid):
+        self.app = app
+        self.socketio = socketio
+        self.uid = uid
+    
+    
+    def load_web_state(self):
         try:
-            self.web_state = pickle.loads((config.saves / ("_web_state_"  + str(uid))).with_suffix(".pkl").read_bytes())
+            self.web_state = pickle.loads((self.config.saves_dir / ("_web_state_"  + str(self.uid))).with_suffix(".pkl").read_bytes())
         except FileNotFoundError:
             self.web_state = {}
-    
-
-    def setup_routes(self):
-        @self.app.route('/')
-        def index():
-            session.setdefault("uid", str(uuid4()))
-            return render_template("index.html")
-        
-
-        @self.socketio.on("make_choice")
-        def handle_choice(data):
-            state["command_buffer"].append([data["choice_id"]])
-        
-
-        @self.socketio.on("command")
-        def handle_command(data):
-            state["command_buffer"].append(data["command"].split())
 
 
-        @self.socketio.on("restart")
-        def handle_restart(data):
-            sid = request.sid
-            uid = self.sid_to_uid.get(sid)
-
-            self.web_state[uid] = {
-                "game": None,
-                "state": None,
-                "client_side": {}
-            }
-
-            (config.saves / ("_web_state_" + str(uid))).with_suffix(".pkl").write_bytes(pickle.dumps(self.web_state))
-
-
-    def save_game_state(self, uid, game_obj, state_obj):
-        entry = self.web_state.setdefault(uid, {})
+    def save_game_state(self, game_obj, state_obj):
+        entry = self.web_state.setdefault(self.uid, {})
         entry["game"] = copy.deepcopy(game_obj)
         entry["state"] = copy.deepcopy(state_obj)
         entry["client_side"] = {} # TODO
 
         # Save across server restarts
-        (config.saves / ("_web_state_" + str(uid))).with_suffix(".pkl").write_bytes(pickle.dumps(self.web_state))
+        (self.config.saves_dir / ("_web_state_" + str(self.uid))).with_suffix(".pkl").write_bytes(pickle.dumps(self.web_state))
 
 
     ######################################################################
@@ -555,18 +517,18 @@ class WebView:
     # Clears console and story view
     def clear(self, dont_reset_displayed_text = False):
         # TODO: Saving displayed text
-        self.socketio.emit("clear", {})
+        self.socketio.emit("clear", {}, room=self.uid)
 
         if not dont_reset_displayed_text:
-            state["view_text_info"]["displayed_print_msgs"] = []
+            self.gamestate.state["view_text_info"]["displayed_print_msgs"] = []
 
 
     # Reprints displayed text for save/loads
     def print_displayed_prints(self):
         # Backwards compatibility with states that don't have proper keys
-        if "view_text_info" in state and "displayed_print_msgs" in state["view_text_info"]:
-            for displayed_print_msg in state["view_text_info"]["displayed_print_msgs"]:
-                self.socketio.emit(displayed_print_msg["msg_type"], displayed_print_msg["msg_data"])
+        if "view_text_info" in self.gamestate.state and "displayed_print_msgs" in self.gamestate.state["view_text_info"]:
+            for displayed_print_msg in self.gamestate.state["view_text_info"]["displayed_print_msgs"]:
+                self.socketio.emit(displayed_print_msg["msg_type"], displayed_print_msg["msg_data"], room=self.uid)
     
 
     ######################################################################
@@ -579,8 +541,8 @@ class WebView:
 
 
     def print_separator(self, dont_save_print=False):
-        self.socketio.emit("separator", {})
-        state["view_text_info"]["displayed_print_msgs"].append({"msg_type": "separator", "msg_data": {}})
+        self.socketio.emit("separator", {}, room=self.uid)
+        self.gamestate.state["view_text_info"]["displayed_print_msgs"].append({"msg_type": "separator", "msg_data": {}})
 
 
     def print_table(self, tbl_to_display, dont_save_print=False):
@@ -588,10 +550,10 @@ class WebView:
 
 
     def print_text(self, text, style="", dont_save_print=False):
-        string_to_print = utility.format.vformat(text, (), utility.collect_vars(state))  # TODO: Exceptions in case of syntax errors
-        string_to_print = parse_text(string_to_print)
-        self.socketio.emit("print", {"text": string_to_print})
-        state["view_text_info"]["displayed_print_msgs"].append({"msg_type": "print", "msg_data": {"text": string_to_print}})
+        string_to_print = self.utility.format.vformat(text, (), self.utility.collect_vars())  # TODO: Exceptions in case of syntax errors
+        string_to_print = self.parse_text(string_to_print)
+        self.socketio.emit("print", {"text": string_to_print}, room=self.uid)
+        self.gamestate.state["view_text_info"]["displayed_print_msgs"].append({"msg_type": "print", "msg_data": {"text": string_to_print}})
 
 
     ######################################################################
@@ -600,37 +562,37 @@ class WebView:
 
 
     def clear_var_view(self):
-        self.socketio.emit("clear_var_view", {})
+        self.socketio.emit("clear_var_view", {}, room=self.uid)
 
 
     def print_shown_vars(self, shown_vars, vars_address):
-        var_dict_vals = utility.collect_vars(state, vars_address)
-        var_dict = utility.collect_vars_with_dicts(state, vars_address)
+        var_dict_vals = self.utility.collect_vars(vars_address)
+        var_dict = self.utility.collect_vars_with_dicts(vars_address)
         for var_group in shown_vars:
             if isinstance(var_group, str):
                 if var_dict[var_group]["hidden"] is False or (var_dict[var_group]["hidden"] == "nonzero" and var_dict_vals[var_group] != 0):
-                    self.socketio.emit("print_var", {"text": utility.localize(var_group, vars_address) + ":\t" + str(var_dict_vals[var_group])})
+                    self.socketio.emit("print_var", {"text": self.utility.localize(var_group, vars_address) + ":\t" + str(var_dict_vals[var_group])}, room=self.uid)
             elif isinstance(var_group, dict):
                 label = next(iter(var_group))
                 for var in var_group[label]:
                     if var_dict[var]["hidden"] is False or (var_dict[var]["hidden"] == "nonzero" and var_dict_vals[var] != 0):
-                        self.socketio.emit("print_var", {"group": label, "name": utility.localize(var, vars_address), "value": str(var_dict_vals[var])})
+                        self.socketio.emit("print_var", {"group": label, "name": self.utility.localize(var, vars_address), "value": str(var_dict_vals[var])}, room=self.uid)
                 # Close the group if needed, or by default
                 #is_open = False
                 #if label in state["view"]["stats_dropdowns_open"] and state["view"]["stats_dropdowns_open"][label]:
                 #    is_open = True
-                #self.socketio.emit("set_dropdown_state", {"group": label, "open": is_open})
+                #self.socketio.emit("set_dropdown_state", {"group": label, "open": is_open}, room=self.uid)
 
 
     def show_curr_image(self):
-        if state["curr_image"] is None:
-            self.socketio.emit("set_image", {"none": True})
+        if self.gamestate.state["curr_image"] is None:
+            self.socketio.emit("set_image", {"none": True}, room=self.uid)
         else:
-            self.socketio.emit("set_image", {"path": "static/graphics/" + state["curr_image"]})
+            self.socketio.emit("set_image", {"path": "static/graphics/" + self.gamestate.state["curr_image"]}, room=self.uid)
 
 
     def print_var(self, text):
-        self.socketio.emit("print_var", {"text": text})
+        self.socketio.emit("print_var", {"text": text}, room=self.uid)
 
 
     ######################################################################
@@ -643,8 +605,8 @@ class WebView:
 
         # Fill effects texts (can't eval the python in the javascript)
         # TODO: Un-duplicate this text
-        for choice_id, choice in state["choices"].items():
-            var_dict_vals = utility.collect_vars(state, choice["choice_address"])
+        for choice_id, choice in self.gamestate.state["choices"].items():
+            var_dict_vals = self.utility.collect_vars(choice["choice_address"])
 
             def parse_modification_spec(choice, spec, spec_type):
                 effects_text = ""
@@ -663,7 +625,7 @@ class WebView:
                         sign = "+"
                     if spec_type == "req_spec" or spec_type == "cost_spec":
                         sign = ""
-                    effects_text += f"{sign}{expr_val} {utility.localize(modification["var"], choice["choice_address"])}"
+                    effects_text += f"{sign}{expr_val} {self.utility.localize(modification["var"], choice["choice_address"])}"
                     if (spec_type == "cost_spec" or spec_type == "req_spec") and var_dict_vals[modification["var"]] < expr_val:
                         effects_text += "</span>"
                     effects_text += ", "
@@ -681,25 +643,24 @@ class WebView:
 
             effects_texts[choice_id] = effects_text
 
-        self.socketio.emit("print_choices", {"choices": state["choices"], "effects_texts": effects_texts})
+        self.socketio.emit("print_choices", {"choices": self.gamestate.state["choices"], "effects_texts": effects_texts}, room=self.uid)
 
 
     def print_completion_percentage(self, percentage):
-        self.socketio.emit("print_feedback_message", {"text": f"Completed {(100 * percentage):.1f}% of the story!"})
+        self.socketio.emit("print_feedback_message", {"text": f"Completed {(100 * percentage):.1f}% of the story!"}, room=self.uid)
 
 
     def print_feedback_message(self, msg_type, dont_save=True):
-        self.socketio.emit("print_feedback_message", {"text": feedback_msg[msg_type]})
+        self.socketio.emit("print_feedback_message", {"text": feedback_msg[msg_type]}, room=self.uid)
 
 
     def print_macros(self):
-        if len(state["command_macros"].items()) == 0:
-            self.socketio.emit("print_feedback_message", {"text": feedback_msg["info_no_macros"]})
+        if len(self.gamestate.state["command_macros"].items()) == 0:
+            self.socketio.emit("print_feedback_message", {"text": feedback_msg["info_no_macros"]}, room=self.uid)
             return
         
-        for macro_name, macro_def in state["command_macros"].items():
-            self.socketio.emit("print_feedback_message", {"text": macro_name + ": " + " ".join(macro_def)})
-        pass # TODO
+        for macro_name, macro_def in self.gamestate.state["command_macros"].items():
+            self.socketio.emit("print_feedback_message", {"text": macro_name + ": " + " ".join(macro_def)}, room=self.uid)
 
 
     def print_settings(self):
@@ -721,17 +682,17 @@ class WebView:
     def print_var_modification(self, text_to_show_spec, dont_save_print=False):
         text_to_print = None
         if text_to_show_spec["op"] == "add":
-            text_to_print = f"[+{text_to_show_spec['amount']} {utility.localize(text_to_show_spec["var_name"], var_to_use=text_to_show_spec["var"])}]\n"
+            text_to_print = f"[+{text_to_show_spec['amount']} {self.utility.localize(text_to_show_spec["var_name"], var_to_use=text_to_show_spec["var"])}]\n"
         elif text_to_show_spec["op"] == "subtract":
-            text_to_print = f"[-{text_to_show_spec['amount']} {utility.localize(text_to_show_spec["var_name"], var_to_use=text_to_show_spec["var"])}]\n"
+            text_to_print = f"[-{text_to_show_spec['amount']} {self.utility.localize(text_to_show_spec["var_name"], var_to_use=text_to_show_spec["var"])}]\n"
         elif text_to_show_spec["op"] == "set":
-            text_to_print = f"[Set {utility.localize(text_to_show_spec["var_name"], var_to_use=text_to_show_spec["var"])} to {text_to_show_spec['amount']}]\n"
+            text_to_print = f"[Set {self.utility.localize(text_to_show_spec["var_name"], var_to_use=text_to_show_spec["var"])} to {text_to_show_spec['amount']}]\n"
         
-        self.socketio.emit("print", {"text": text_to_print})
+        self.socketio.emit("print", {"text": text_to_print}, room=self.uid)
 
 
     def print_var_value(self, var_value):
-        self.socketio.emit("print", {"text": str(var_value)})
+        self.socketio.emit("print", {"text": str(var_value)}, room=self.uid)
 
 
     def get_input(self):

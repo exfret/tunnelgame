@@ -1,39 +1,27 @@
 import os
 from pathlib import Path
 import sys
-import yaml
 
 
-# Make new data dir
-data_dir = Path.home() / "tunnelgame"
-data_dir.mkdir(exist_ok=True)
-graphics_dir = data_dir / "graphics"
-graphics_dir.mkdir(exist_ok=True)
-story_dir = data_dir / "stories"
-story_dir.mkdir(exist_ok=True)
-saves_dir = data_dir / "saves"
-saves_dir.mkdir(exist_ok=True)
+class Config:
+    def __init__(self, story_name, view_type):
+        self.data_dir = Path(os.getenv("TUNNELGAME_DATA_DIR", Path.home() / "tunnelgame"))
+        self.data_dir.mkdir(exist_ok=True)
+        self.graphics_dir = self.data_dir / "graphics"
+        self.graphics_dir.mkdir(exist_ok=True)
+        self.story_dir = self.data_dir / "stories"
+        self.story_dir.mkdir(exist_ok=True)
+        self.saves_dir = self.data_dir / "saves"
+        self.saves_dir.mkdir(exist_ok=True)
 
+        self.story_name = story_name
+        self.view_type = view_type
 
-###########################################################
-# Data sources
-###########################################################
+        # Removed graphics, stories, etc., now it just lives in dir
+        self.local_dir = Path(getattr(sys, '_MEIPASS', os.path.abspath('.')))
+        # Changed to just the dir from the actual object
+        self.grammar_dir = self.local_dir / "engine" / "grammar.yaml"
 
-
-web_view = True
-story_name = "tunnel/04-descriptive/intro.yaml"
-
-
-local_dir = Path(getattr(sys, '_MEIPASS', os.path.abspath('.')))
-stories = story_dir
-saves = saves_dir
-graphics = graphics_dir
-grammar = yaml.safe_load((local_dir / "engine" / "grammar.yaml").read_text())
-max_num_steps = 20000
-max_macro_depth = 100
-choices_between_autosaves = 20
-
-
-game = {}
-state = {}
-view = None
+        self.max_num_steps = 20000
+        self.max_macro_depth = 100
+        self.choices_between_autosaves = 20

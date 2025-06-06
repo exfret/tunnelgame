@@ -1,4 +1,21 @@
 Currently:
+  - Big refactor to class-based approach
+      - Create new classes
+      - Make initial Flask declaration outside View
+      - Local emit rooms
+      - Pass through chatGPT
+    - Refactor state into a class?
+    - Make View class not depend on Game or State? (pass in information as needed)
+    - Unit tests for addressing and such
+    - Add new tests
+    - Removed unused instructions
+    - Reorganize imports
+    - Clean up story loading
+    - Clean up project directory organization
+    - Store uid with view rather than having to pass it in (each user gets their own view anyways)
+    - Make view's web_state just a web_state rather than dictionary of uid to web_state (we already have the dictionary in the __main__ layer)
+
+
   - Make requirements not met different color? Maybe bolded and red yeah
   - Implementing view print messages
   - Organize and go through "Old Currently"
@@ -36,6 +53,11 @@ Old Currently:
 Big Todo:
   - UI
 
+
+230. Apparently, __builtins__ is a module on some platforms, leading to an error in gameparser.py, fix!
+229. Make f-strings in view.py less complex?
+228. Add thread-safety to state (or maybe just state["command_buffer"])
+227. Common View functions for getting what to print about the settings based off state
 226. Make a skeleton-creator tool for moving around, actions allowed in each room
 225. Figure out solution to config.game and config.state needing to be user-dependent
 224. Make save/loads user dependent as well (or at least have that as an option)
