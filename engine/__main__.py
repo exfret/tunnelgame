@@ -3,6 +3,7 @@ from flask_socketio import join_room, emit
 import sys
 
 import copy
+import os
 import pickle
 import yaml
 
@@ -10,11 +11,18 @@ from engine.server import Server
 from engine.gamesession import GameSession
 
 
-story_name = "tunnel/04-descriptive/intro.yaml"
+story_name = "tunnel/new_encounter_demo.yaml"
 # Valid choices are...
 #  cli
+#  test
 #  web
 view_type = "web"
+
+# Enforce to demo version on web if this is deployed to render
+# Actually, for now choose it manually
+#if os.getenv("RENDER") == "TRUE":
+#    story_name = "tunnel/05-demo/root.yaml"
+#    view_type = "web"
 
 
 app = None

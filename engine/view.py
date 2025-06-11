@@ -25,7 +25,7 @@ feedback_msg = {
     "flag_set_successfully": "Flag set successfully",
     "goto_invalid_address_given": "Incorrect address given.",
     "goto_no_address_given": "Must give an address.",
-    "help": "Valid commands are 'clear', 'define', 'exec', 'exit', 'flag', 'goto', 'help', 'info', 'input', 'inspect', 'load', 'repeat', revert', 'save', 'set', 'settings', 'undefine', 'unflag'.",
+    "help": "Valid commands are 'clear', 'define', 'exec', 'exit', 'flag', 'goto', 'help', 'info', 'input', 'inspect', 'load', 'repeat', 'restart', revert', 'save', 'set', 'settings', 'undefine', 'unflag'.",
     "info_options": "Valid options for info are 'actions', 'choices', 'completion', 'macros', 'vars', 'word_count', and 'words_seen'.",
     "info_invalid_option": "Invalid option given for info. Type 'info' for valid options.",
     "info_no_macros": "No macros defined",
@@ -653,7 +653,7 @@ class WebView(View):
         # TODO: Un-duplicate this code
         for choice_id, choice in self.gamestate.state["choices"].items():
             # First, expand tagged words in this choice text
-            choice["text"] = self.expand_tagged_words(choice["text"], choice["choice_address"])
+            choice["text"] = self.expand_tagged_words(self.utility.format.vformat(choice["text"], (), self.utility.collect_vars(address=choice["choice_address"])), choice["choice_address"])
 
             var_dict_vals = self.utility.collect_vars(choice["choice_address"])
 
@@ -710,6 +710,10 @@ class WebView(View):
         
         for macro_name, macro_def in self.gamestate.state["command_macros"].items():
             self.socketio.emit("print_feedback_message", {"text": macro_name + ": " + " ".join(macro_def)}, room=self.uid)
+
+
+    def print_num_words(self, num_words):
+        self.socketio.emit("print_feedback_message", {"text": "Words: " + str(num_words)})
 
 
     def print_settings(self):

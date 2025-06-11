@@ -1,0 +1,27 @@
+_image: town.png
+_header:
+  - choice: home
+    text: Return to the orphanage
+    effects: /orphanage
+_content:
+  - Where in town would you like to go?
+  - choice: general
+    text: Head to the general store
+  - choice: job
+    text: Work as a farmhand
+general:
+  # TODO: Finish image
+  _content:
+    - choice: back
+      text: Return to town
+      effects: ..
+    - choice: torch
+      text: Buy a torch
+      # TODO: Decide on exact number of coins
+      cost: 15 coin
+      shown: 1 inv_torch
+      effects: .
+job:
+  # TODO: Image
+  _content:
+    - pass:

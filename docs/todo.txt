@@ -54,6 +54,10 @@ Big Todo:
   - UI
 
 
+239. New text fades in
+238. Error handling on nil addresses correctly
+237. Mobile support for web view (suggested sidebar; stowed by default)
+236. Better Addressing exception information
 235. Ability for var locales to be keywords
 234. Make CLI view ignore keyword brackets
 233. Allow keywords to have custom text

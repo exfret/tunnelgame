@@ -1,0 +1,71 @@
+_game_id: tunnel-05-demo
+_image: tunnel.png
+_content:
+  - You are [[Lily]].
+  - Right now, you are only known as an orphan.
+  - However, you are sure that one day, you will be known as the greatest [[Tunnel]] [[explorer]] that there ever was!
+  - choice: start
+    text: I'm ready
+    effects:
+      # TODO: OTHER STORYPOINTS
+      - storypoint: start
+      - goto: /tunnel/training
+_keywords:
+  clackadoo: Clackadoo birds, which inhabit layers 3 and beyond have an innate sense of impending danger. This infuses their feathers with the distinctive ability to blow away whenever mortal danger is nearby, making them incredibly useful for adventurers or others who may find themselves in unexpectedly sticky situations. Unfortunately it also makes the birds incredibly hard to catch.
+  Dome: For as long as anyone remembers, humanity is confined to a 100-mile-across or so Dome. Some say there was a time before this, a time when there was wide open space that would take many seasons just to traverse in one direction. Others say that's crazy.
+  explorer: Most people are content with uneventful, comfortable lives in the Dome, away from the dangers of the Tunnel. But a few yearn for more, and venture out into the Tunnel for glory, riches, and knowledge. Many goods in the Dome require things that can only be obtained in the Tunnel, making these foolishly brave adventurers like you vital to humanity's continued existence.
+  George: George is your mentor and friend. He trained you in Tunnel adventuring, and it's because of him that you are where you are today. Although he shares your freckles, he does not share your red hair. Though we'll forgive him for that.
+  lemen: Lemens are bulbous glowing flowers from the Tunnel, often used for lighting. Once they have been taken outside the Tunnel and into the Dome, they lose their brightness over time.
+  Lily: Lily? That's you! Silly redhead.
+  pass: A pass is needed to go into the Tunnel, with different depths requiring different levels of passes. A Training Pass allows you access to the first layer, but only with a guide. A Green Pass allows you into the first layer on your own, but no further. And a Blue Pass allows you into the second. George holds a Yellow Pass, which is the "level after" Blue Pass. Then there is the Pioneer Pass, the Emerald Pass, the Crimson Pass, and then the most coveted of all, the Rose Pass.
+  petunal blossom: Petunal blossoms are skinny purple flowers with yellow flecks on their petals. The petals are often dried and said to be very nutritrious and yummy when used as seasoning that way. Though some people even eat them raw!
+  rosalia: Rosalia is a type of flower with deep red petals. It is found in the Tunnel, where it grows best. Its leaves are often ground up and for a variety of teas.
+  Tunnel: The only exit to the 100-mile-across Dome that humanity is. However, no one has gotten to the other side and returned to tell the tale. Maybe you can change that?
+_vars:
+  # Main/Important vars
+  - tunnel_pass: Training Pass
+    _locale: Tunnel Pass
+  - time: 0
+    _locale: Weeks Passed
+  - experience: 0
+    _locale: Experience
+  - energy: 5
+    _locale: Energy
+  - max_energy: 10
+    _locale: Max Energy
+  - coin: 0
+    _locale: Coin
+  # Inventory
+  - inv_lemens: 0
+    _locale: Lemens
+  - inv_rosalia: 0
+    _locale: Rosalia
+  - inv_petunal: 0
+    _locale: Petunal Blossoms
+  - inv_torch: 0
+    _locale: One-Use Torches
+  # Skills
+  - skill_athleticism: 0
+    _locale: Athleticism
+  - skill_gather_lemens: 4
+    _locale: Lemen Gathering Proficiency
+_shown:
+  - tunnel_pass
+  - time
+  - experience
+  - energy
+  - max_energy
+  - coin
+  - inventory:
+      - inv_lemens
+      - inv_rosalia
+      - inv_petunal
+      - inv_torch
+  - skills:
+      - skill_athleticism
+      - skill_gather_lemens
+_include:
+  logic: logic.yaml
+  orphanage: orphanage.yaml
+  town: town.yaml
+  tunnel: tunnel.yaml

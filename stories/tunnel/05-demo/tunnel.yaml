@@ -1,0 +1,104 @@
+# _content is below training
+training:
+  _content:
+    - goto: george_waiting
+  george_waiting:
+    _image: george_coin.png
+    _content:
+      - "[[George]] is standing at the dusty entrance to the orphanage, his ruffled brown hair blending with the oak double round-top door that leads outside. He's flipping a coin to pass the time as he waits for you to finish packing for your trip to the [[Tunnel]] with him."
+      - choice: review
+        selectable_once:
+        text: Review your notes on [[rosalia]]
+        effects:
+          - You realize that by hovering over highlighted/underlined words like [[rosalia]], you can see information about about the thing that word refers to.
+          - separator:
+          - goto: .
+      - choice: check
+        selectable_once:
+        text: Check that you have your training [[pass]]
+        effects:
+          - Your training [[pass]] is used for entering the Tunnel. You can easily see you can have it by checking the stats panel to your right.
+          - separator:
+          - goto: .
+      - choice: touch
+        selectable_once:
+        text: Touch the necklace my parents gave me for comfort
+        effects:
+          - The necklace is all you have left of your parents. You remember little of them.
+          - On the other hand, the hairs knotted to the necklace are tied to a vivid memory. An orphan girl wailing just outside the doorway for a room in winter. Usually, the temperature in the [[Dome]] wasn't too bad, but that year was brutal. Director Dicky, the owner of the orphanage, refused to let her in since the place was already so full, and she later became unresponsive and motionless. To his credit, Dicky did let her in at last... to a small graveyard in the orphanage.
+          - You vow to become a great Tunnel [[explorer]], someone who brings back riches and glory. That way, you can provide the funds for anyone to be taken in. You snuck a lock of hair you cut from the poor girl's head as a symbol of your promise.
+          - separator:
+          - goto: .
+      - choice: ready
+        text: Tell George that I'm ready
+        effects:
+          - goto: leave
+  leave:
+    _image: path_to_tunnel.png
+    _content:
+      - You walk along with [[George]] to the gate preventing others from getting hurt by foolishly wandering into the [[Tunnel]] unprepared (though many, including George, swear the real reason is simply so that the Dome's government can regulate and tax [[explorer]]s). Once at the gate, you both show the guard your [[pass]]es and are allowed on.
+      - Lately, George has been letting you lead the way with training, but this time he charges right ahead to some unknown location as soon as you get past the gate. You wonder what he has in mind. You almost lose him as he dashes up a large hill, but then when you get to the top, your jaw drops.
+      - choice: look
+        text: Look out over the hill
+        effects: clackadoo
+  clackadoo:
+    _image: lemen_field.png
+    _content:
+      - It's the largest [[lemen]] field you've ever seen. The glow is incredible. [[George]] speaks to you through the chirps of birds from some nearby trees. "My father was great at catching [[clackadoo]] birds. He left me quite a few feathers when he went on his last trip into the [[Tunnel]]. I decided I'd give one to each mentee I had when they'd finished training. Well, here's your Green Pass. And your feather." George wears an enormous grin on his face. "Congratulations," He says, "you're done with training!" Then, he pulls you in for a big hug.
+      - set: tunnel_pass = "Green Pass (First Layer)"
+      - choice: yay
+        text: Celebrate
+        effects:
+          - After some time reminiscing and a few days of scouting, you return back to the orphanage.
+          - sub: /logic/time
+          - separator:
+          - goto: /orphanage
+_content:
+  - random: lemen, rosalia, cave
+return:
+  - sub: /logic/time
+  - choice: return
+    effects: /orphanage
+lemen:
+  - You come across the [[lemen]] patch that [[George]] showed you, and you're able to gather many lemens.
+  - set: inv_lemens += skill_gather_lemens
+    show:
+  - set: skill_gather_lemens += 1
+    show:
+  - goto: return
+rosalia:
+  - You come across a [[rosalia]] field. You used to gather these a lot with George, so you know just what to do.
+  - set: inv_rosalia += 5
+    show:
+  - if: _visits == 2
+    then:
+      - As you're wrapping up your gather mission, a little squirrel squeaks furiously at you.
+      # TODO: Some squirrel prologue in this demo
+  - goto: return
+cave:
+  _content:
+    - You come across some rocks rising up from the ground. They stick straight up an lean on each other like a house of cards, leaving a hole between them. This hole is the entrance to a cave with an abyssal, dark interior. The ground slopes downward toward the hole, as if to suck you in.
+    - choice: around
+      text: Go around the rocks
+    - choice: inside
+      text: Enter the cave
+      cost: 1 inv_torch
+    - choice: top
+      text: Get on top of the rocks
+  around:
+    - if: _visits == 1
+      then:
+        - Hey, you find 2 [[petunal blossom]]s!
+        - set: inv_petunal += 2
+          show:
+      else:
+        - Sadly, there are no more flowers here to be seen.
+    - goto: ../return
+  inside:
+    - The cave continues into a small chamber. There is a giant red gemstone embedded into the far wall.
+    # TODO: Something with the gemstone
+    - goto: ../return
+  top:
+    - You are able to climb up a layer of the cave, but need higher athleticism to get higher.
+    # TODO
+    - goto: ../return

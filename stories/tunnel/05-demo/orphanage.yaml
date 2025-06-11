@@ -1,0 +1,36 @@
+_image: foyer.png
+_content:
+  - You're in the orphanage foyer, where would you like to go?
+  - choice: tunnel
+    text: Adventure to the Tunnel
+    effects: /tunnel
+  - choice: town
+    text: Visit town
+    effects: /town
+  - choice: study
+    text: Go to the orphanage's study
+    effects: study
+  - choice: george
+    text: Talk to my mentor, George
+  - if: energy < max_energy
+    then:
+      - choice: rest
+        cost: (ceil(experience / 10)) experience
+        shown: (max_energy - energy) energy
+        text: Take a week of rest
+        effects:
+          - sub: /logic/time
+          - goto: .
+study:
+  _image: orphanage_study.png
+  _content:
+    - pass:
+george:
+  # TODO: Image
+  _content:
+    - '[[George]] says, "What can I do for you, Lily?" and smiles back at you.'
+    - choice: back
+      effects:
+        - You exit the room and [[George]] waves bye.
+        - separator:
+        - goto: ..

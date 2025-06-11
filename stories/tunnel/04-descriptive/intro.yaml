@@ -130,8 +130,10 @@ _shown:
 _keywords:
   George: George is your mentor and friend. He is your guide as you learn about Tunnel adventuring and navigate the complex world around you. Although he shares your freckles, he does not share your red hair. Though we'll forgive him for that.
   lemen: Lemens are bulbous glowing flowers from the Tunnel, often used for lighting. Once they have been taken outside the Tunnel and into the Dome, they lose their brightness over time.
+  Ms. Bee: Ms. Bee is a the one in command of the orphanage's daily operations. Together with Mable, she strikes the just enough terror in the hearts of the orphans here to make them behave. She knows it's best for them (including you) that she's strict. And she's probably right.
   petuanl blossom: Petunal blossoms are skinny purple flowers with yellow flecks on their petals. The petals are often dried and said to be very nutritrious and yummy when used as seasoning. Though some people even eat them raw!
   rosalia: Rosalia is a type of red flower found in the Tunnel. Its leaves are often ground up and for teas.
+  Troy: Troy is farm boy and son of Karo, who himself is a supporter of the orphanage. He's a bit derpy, and more than a bit sweet.
 _include:
   logic: logic.yaml
   orphanage: orphanage.yaml

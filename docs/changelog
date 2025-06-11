@@ -1,9 +1,24 @@
-2025/06/05 (5k words - ?)
+2025/06/11
+- Work on new_encounter.yaml
+
+2025/06/10
+- Work on new_encounter.yaml, lots of scope creep
+
+2025/06/09 (6k words - 6k words)
+- Worked a lot on new_encounter_demo.yaml, for showing off how encounters might work more in the future and also demonstrating the writing style that I'm going for
+
+2025/06/08 (6k words - 6k words)
+- Implemented encyclopedia
+- Chatted and planned with regards to next steps
+
+2025/06/05 (5k words - 6k words)
 - Complete refactor into class-based approach, fixing issue with global game/state only allowing one concurrent user
 - Made clearer what was missing when something was missing for a choice
 - Story: Added volunteering to version 4
 - Story: You now can't go too long without tunnel training
 - Support for keywords
+- Improved visual layout of webpage
+- Started demo version for a minimum contained story to host
 
 2025/06/04 (4k words - 5k words)
 - Added "nonzero" hidden setting for variables (only hides them if you have zero of them, but visible otherwise)

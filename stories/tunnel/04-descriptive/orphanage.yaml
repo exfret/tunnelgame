@@ -40,7 +40,7 @@ first_journey:
           - separator:
           - goto: .
       - choice: ready
-        text: Tell [[George]] that I'm ready
+        text: Tell George that I'm ready
         effects:
           - set: num_training_expeditions += 1
           - goto: leave_orphanage
@@ -51,7 +51,7 @@ first_journey:
       - You hunker along with your heavy packs, heading for the gaping miles-wide gap in the Dome's rocky walls. It's the Tunnel, which is the only way out, and today will be your first day exploring it.
       - It's a day's walk from your small town to the Tunnel.
       - choice: walk
-        text: Walk with [[George]] to the Tunnel
+        text: Walk with George to the Tunnel
         effects:
           - goto: /tunnel/training/first/tunnel_entrance
   return:
@@ -75,7 +75,7 @@ foyer:
         - if: not orphanage_foyer_had_no_expeditions_talk
           then:
             - flag: orphanage_foyer_had_no_expeditions_talk
-            - Ms. Bee spots you and hurriedly walks over with a scowl on her face. Uh-oh, this can't be good.
+            - "[[Ms. Bee]] spots you and hurriedly walks over with a scowl on her face. Uh-oh, this can't be good."
             - choice: gulp
               effects: no_expeditions
             - stop:
@@ -389,7 +389,7 @@ rooms:
               "3": /tunnel/training/third/depart
               "4": /tunnel/training/fourth/depart
         - choice: steal
-          text: Steal a sock from [[George]] when he isn't looking
+          text: Steal a sock from George when he isn't looking
           require: 10 skill_sneak
           effects:
             - pass:
@@ -549,6 +549,7 @@ volunteer:
     - switch: num_volunteering_trips
       "1": first
       "2": second
+      "3": third
   first:
     _content:
       - storypoint: first_volunteering_trip
@@ -598,7 +599,7 @@ volunteer:
           - You sigh and complain that your trips are too short, but you look forward to going again soon!
           - goto: jaz_response
     jaz_response:
-      - Jaz rolls her eyes and says she wishes she could go. "It's always preferential treatment to you and [[George]]!" Sometimes you wonder why [[George]] chose to train you, but then you remember it's because you were the best candidate who showed the most promise with regards to Tunnel adventuring in every way. Hey, not everyone can be as excellent as you.
+      - Jaz rolls her eyes and says she wishes she could go. "It's always preferential treatment to you and [[George]]!" Sometimes you wonder why George chose to train you, but then you remember it's because you were the best candidate who showed the most promise with regards to Tunnel adventuring in every way. Hey, not everyone can be as excellent as you.
       - choice: give
         text: Give Jaz one of my [[rosalia]]
         cost: 1 inv_rosalia
@@ -607,7 +608,7 @@ volunteer:
           - Jaz smiles from ear to ear. "Thanks!" She chirps.
           - goto: back_to_work
       - choice: nah
-        text: Don't give Jaz any [[rosalia]]
+        text: Don't give Jaz any rosalia
         effects:
           - flag: orphanage_volunteer_second_jaz_not_gave_rosalia
           - Jaz frowns. The rest of the conversation is somewhat flat.
@@ -617,6 +618,14 @@ volunteer:
       - sub: /logic/time
       - separator:
       - goto: /orphanage
+  third:
+    _content:
+      - You're back to work at Karo's farm. It's hard work, but this time, Karo's son, [[Troy]], is there to help. He's a little quiet and awkward, but he's warmed up to you recently.
+      - You''re hard at work pulling up some weeds in the garden behind the house when Troy comes out and pipes up, "Hey, Lily!" It causes you to jump a little at first, but then you calm when you see it's him. Troy is too caught up in sharing what he had to say that he doesn't even notice the fright he caused. "Karo made some extra tea so I decided to share some with you!"
+      - choice: accept
+        text: Accept the tea
+    accept:
+      - pass:
 admin:
   _content:
     - pass:

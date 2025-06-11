@@ -57,7 +57,7 @@
         }
 
         .left-section {
-            flex: 0 0 100px;
+            flex: 0.125;
             background: #f0f0f0;
         }
 
@@ -79,7 +79,7 @@
         }
 
         .middle-section {
-            flex: 1;
+            flex: 0.65;
             background: #fff;
         }
 
@@ -102,7 +102,7 @@
         }
 
         .right-section {
-            flex: 0 0 350px;
+            flex: 0.225;
             background: #f0f0f0;
         }
 
@@ -275,6 +275,8 @@
         #middle-top.inspect-mode #image-area {
             flex: 0 0 40%;
             margin: 0;
+            max-width: 300px;
+            /* or use 40vh for a viewport‑relative cap */
         }
 
         #middle-top.inspect-mode #info-area {
@@ -285,7 +287,9 @@
         #info-area {
             flex: 1;
             display: none;
-            margin: 10px
+            margin: 10px;
+            overflow-y: auto;
+            min-height: 0;
         }
 
         /* a little affordance for clickable words */
@@ -298,20 +302,29 @@
             background: #ffff99;
         }
 
+        /* ─── middle‑top: two equal columns ─────────────────────────────── */
         #middle-top-container {
-            display: flex
+            display: flex;
+            gap: 16px;
+            height: 300px;
+            /* or use 40vh for a viewport‑relative cap */
+            overflow-y: hidden;
+            margin-bottom: 20px;
         }
 
-        #middle-top {
-            flex: 1 1 auto;
+        #middle-top-container>#image-area,
+        #middle-top-container>#info-area {
+            flex: 1 1 40%;
+            display: block;
+            /* 50 % / 50 % split                    */
         }
 
-        #middle-top-filler-left {
-            flex: 0 0 10%
-        }
-
-        #middle-top-filler-right {
-            flex: 0 0 10%
+        /* info pane looks like a boxed card */
+        #middle-top-container>#info-area {
+            border: 2px solid #ccc;
+            border-radius: 6px;
+            padding: 12px;
+            background: #fafafa;
         }
 
         .clickable-word {
@@ -319,7 +332,7 @@
             text-decoration: underline dotted;
 
             /* subtle yellow highlight (≈20 % opaque) */
-            background: rgba(255, 255, 0, .40);
+            background: rgba(255, 255, 0, .30);
 
             /* a tiny bit of padding so the colour
             reaches past descenders like “g” */
@@ -333,7 +346,98 @@
         .clickable-word:hover,
         .clickable-word:focus {
             /* brighten on interaction */
-            background: rgba(255, 255, 0, .85);
+            background: rgba(255, 255, 0, .75);
+        }
+
+        /* ─── keep any picture fully inside #image-area ────────────────── */
+        #image-area img {
+            /* respect both width *and* height limits of the pane */
+            max-width: 100%;
+            /* never overflow horizontally         */
+            max-height: 100%;
+            /* never overflow vertically           */
+
+            width: auto;
+            /* let the browser choose the limiting side */
+            height: auto;
+            object-fit: contain;
+            /* preserve aspect ratio while shrinking    */
+
+            display: block;
+            /* avoids the tiny baseline gap of <img>    */
+            margin: 0 auto;
+            /* optional: centre when it doesn’t fill    */
+        }
+
+        /* ─── encyclopedia overlay ────────────────────────── */
+        #encyclopedia-panel {
+            position: fixed;
+            inset: 70px 40px 40px 40px;
+            /* leave space for header/footer */
+            background: #fafafa;
+            border: 2px solid #4169E1;
+            border-radius: 8px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, .3);
+            padding: 24px 32px;
+            overflow-y: auto;
+            z-index: 500;
+            /* high enough to sit on top */
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        body.encyclopedia #encyclopedia-panel {
+            display: block;
+        }
+
+        /* while encyclopedia is open, hide the normal UI */
+        body.encyclopedia .container,
+        body.encyclopedia footer {
+            filter: blur(3px);
+            pointer-events: none;
+            /* prevents accidental clicks behind */
+            user-select: none;
+        }
+
+        /* ─── make #main-container the containing block ─────────── */
+        #main-container {
+            position: relative;
+        }
+
+        /* ─── encyclopedia panel: fills the container with padding ─ */
+        #encyclopedia-panel {
+            position: absolute;
+            inset: 0;
+            top: 24px;
+            /* vertical gap */
+            bottom: 24px;
+            left: 32px;
+            /* horizontal gap */
+            right: 32px;
+            /* stretch to all four edges */
+            padding: 24px 32px;
+            /* ← your requested padding */
+
+            background: #fafafa;
+            border: 2px solid #4169E1;
+            border-radius: 8px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, .3);
+            overflow-y: auto;
+            z-index: 5;
+            /* only needs to beat siblings */
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* while open, blur the OTHER children of #main-container */
+        #main-container.ency-open> :not(#encyclopedia-panel) {
+            filter: blur(3px);
+            pointer-events: none;
+            user-select: none;
         }
     </style>
 </head>
@@ -344,23 +448,30 @@
         <h1 class="title">Tunnel</h1>
     </header>
 
-    <div class="container">
+    <div class="container" id="main-container">
         <!-- ④  —––  COLUMN: NAV  –––------------------------------------ -->
         <div class="left-section">
+            <p style="font-size: 20px; font-weight: bold; text-align: center; margin-bottom: 10px;">
+                Options
+            </p>
             <div class="buttons">
                 <button class="button nav-button" id="restartButton">Restart</button>
+                <button class="button nav-button" id="encyclopediaButton">
+                    Encyclopedia
+                </button>
             </div>
         </div>
 
         <!-- ⑤  —––  COLUMN: STORY  –––---------------------------------- -->
         <div class="middle-section">
             <div id="middle-top-container">
-                <span id="middle-top-filler-left"></span>
-                <span id="middle-top">
-                    <span id="image-area" class="third-centered"></span>
-                    <span id="info-area"></span>
+                <span id="image-area" class="third-centered"></span>
+                <span id="info-area" class="info-box">
+                    <p style="font-weight: bold; text-align: center; margin-bottom: 10px;">
+                        Info Box
+                    </p>
+                    <div id="info-text" style="margin: auto;"></div>
                 </span>
-                <span id="middle-top-filler-right"></span>
             </div>
             <div class="text-area">
                 <p id="story-board">
@@ -375,7 +486,21 @@
 
         <!-- ⑥  —––  COLUMN: IMAGE + STATS  –––--------------------------- -->
         <div class="right-section">
+            <p style="font-size: 20px; font-weight: bold; text-align: center; margin-bottom: 10px;">
+                Stats Panel
+            </p>
             <div id="stats-board" class="tree"></div>
+        </div>
+
+        <div id="encyclopedia-panel" class="hidden">
+            <h2>Encyclopedia</h2>
+            <p style="margin-bottom:12px;font-style:italic">
+                Click a term below to read about it.
+            </p>
+            <button id="backToStory" class="button">
+                Back to story
+            </button>
+            <div id="encyclopedia-list"></div>
         </div>
     </div>
 
@@ -390,6 +515,8 @@
             const d = document.createElement("div");
             d.innerHTML = `<div style="padding-bottom:10px">${html}</div>`;
             story_board.appendChild(d);
+
+            harvestTerms(d);
         }
         /* -------------------------------------------------------------- */
 
@@ -464,7 +591,7 @@
         socket.on("clear", () => {
             story_board.innerHTML = ""
             middle.classList.remove("inspect-mode");
-            document.getElementById("info-area").innerHTML = ""
+            document.getElementById("info-text").innerHTML = "<p style=\"color:gray\">(Hover over a highlighted keyword to learn more about it here).</p>"
         });
         socket.on("separator", () => addToStoryBoard("&mdash;".repeat(40)));
         socket.on("print", msg => addToStoryBoard(msg.text));
@@ -532,12 +659,14 @@
         /* ---------- NAV BUTTONS -------------------------------------- */
         document.getElementById("restartButton").addEventListener("click", () => {
             socket.emit("restart", {});
+            closeEncyclopedia();
             window.location.reload();
         });
         // Messaged to restart
         socket.on("restart_html", msg => {
             // Send a message for view to also restart
             socket.emit("restart", {});
+            closeEncyclopedia();
             window.location.reload();
         });
 
@@ -550,8 +679,8 @@
         /* -------------------------------------------------------------
         CLICK‑REVEAL BEHAVIOUR
         ------------------------------------------------------------- */
-        const middle = document.getElementById('middle-top');
-        const infoArea = document.getElementById('info-area');
+        const middle = document.getElementById('middle-top-container');
+        const infoArea = document.getElementById('info-text');
         const imgArea = document.getElementById('image-area');
         let panelLocked = false;
 
@@ -561,7 +690,7 @@
             if (!w) return;
 
             // Populate description
-            infoArea.innerHTML = w.dataset.info ?? '(no description)';
+            infoArea.innerHTML = w.dataset.info ?? '(No description)';
             // Activate inspect‑mode
             middle.classList.add('inspect-mode');
             panelLocked = true;
@@ -573,7 +702,7 @@
             if (w) return;
 
             middle.classList.remove('inspect-mode');
-            infoArea.innerHTML = '';
+            infoArea.innerHTML = "<p style=\"color:gray\">(Hover over a highlighted keyword to learn more about it here).</p>";
             panelLocked = false
         });
 
@@ -583,7 +712,7 @@
             if (!w) return;
 
             // Fill info panel
-            infoArea.innerHTML = w.dataset.info ?? '(no description)';
+            infoArea.innerHTML = w.dataset.info ?? '(No description)';
             // Apply layout
             middle.classList.add('inspect-mode');
         }, true);                  // **useCapture=true** ⇒ we get the event early
@@ -594,9 +723,79 @@
             if (!w || panelLocked) return;
 
             middle.classList.remove('inspect-mode');
-            infoArea.innerHTML = '';
+            infoArea.innerHTML = "<p style=\"color:gray\">(Hover over a highlighted keyword to learn more about it here).</p>";
         }, true);
 
+        /* ---------------- Encyclopedia support ---------------- */
+        const encyBtn = document.getElementById('encyclopediaButton');
+        const backBtn = document.getElementById('backToStory');
+        const encyPanel = document.getElementById('encyclopedia-panel');
+        const encyList = document.getElementById('encyclopedia-list');
+        const mainCont = document.getElementById('main-container');
+        let isEncyclopediaMode = false
+
+        let glossary = new Map();   // term → description
+
+        // Collect terms the first time a keyword is clicked or hovered
+        function registerTerm(el) {
+            const term = (el.dataset.term ?? el.textContent).trim();
+            const desc = el.dataset.info ?? '(No description yet)';
+            if (!glossary.has(term)) glossary.set(term, desc);
+        }
+
+        // Build nice HTML once per open
+        function renderEncyclopedia() {
+            encyList.innerHTML = '';         // clear old list
+            if (glossary.size === 0) {
+                encyList.innerHTML = '<p>(No terms discovered yet.)</p>';
+                return;
+            }
+            [...glossary.entries()]
+                .sort((a, b) => a[0].localeCompare(b[0]))  // alphabetical
+                .forEach(([term, desc]) => {
+                    encyList.insertAdjacentHTML('beforeend', `
+                        <details style="margin-bottom:8px">
+                            <summary style="cursor:pointer;font-weight:700">${term}</summary>
+                            <p style="margin-top:6px">${desc}</p>
+                        </details>
+                    `);
+                });
+        }
+
+        // open / close helpers
+        function openEncyclopedia() {
+            isEncyclopediaMode = true
+            renderEncyclopedia();
+            mainCont.classList.add('ency-open');
+            encyPanel.classList.remove('hidden');
+        }
+        function closeEncyclopedia() {
+            isEncyclopediaMode = false
+            mainCont.classList.remove('ency-open'); // <── was body.classList…
+            encyPanel.classList.add('hidden');
+        }
+
+        // wire up buttons
+        encyBtn.addEventListener('click', openEncyclopedia);
+        backBtn.addEventListener('click', closeEncyclopedia);
+
+        // hook into your existing keyword events ----------------------------------
+        // Every time you hover‑preview or click‑lock, register the term.
+        document.addEventListener('mouseenter', ev => {
+            const w = ev.target.closest('.clickable-word');
+            if (w) registerTerm(w);
+        }, true);
+        document.addEventListener('click', ev => {
+            const w = ev.target.closest('.clickable-word');
+            if (w) registerTerm(w);
+        });
+
+        /** Scan a DOM subtree for .clickable-word elements and register them. */
+        function harvestTerms(root) {
+            root.querySelectorAll('.clickable-word').forEach(registerTerm);
+        }
+
+        window.addEventListener('load', () => harvestTerms(document));
     </script>
 </body>
 

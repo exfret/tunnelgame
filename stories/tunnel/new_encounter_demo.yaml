@@ -1,0 +1,3609 @@
+_image: tunnel.png
+_vars:
+  - days_passed: 0
+    _locale: Total Days Passed
+  - days_of_equipment_left: 3
+    _locale: Days of Equipment Left
+  - time_of_day: Morning
+    _locale: Time of Day
+  # TODO: Update the "14" number whenever I add gemstones
+  - gemstone: 0
+    _locale: Gemstones (out of 14)
+  # Coin:
+  #   * >>> From squirrel king vault
+  #   * >>> Gotten from selling flowers
+  #   * <<< Used by trainer
+  #   * <<< Used by blacksmith
+  - coin: 0
+    _locale: Coins
+  # Skills
+  # Athletics
+  #   * <<< Used for cave climbing
+  #   * >>> Gotten from track running
+  #   * >>> Gotten from trainer
+  - skill_athleticism: 0
+    _locale: Athleticism
+  #   * <<< Used for squirrel encounter
+  #   * <<< Used for giants encounter
+  #   * >>> Gotten from base training dummy
+  #   * >>> Gotten from trainer
+  - skill_fighting: 0
+    _locale: Fighting Skill
+  - skill_gather_rosalia: 1
+    _locale: Rosalia Gathering Skill
+  # Inventory
+  #   * >>> Gotten from lemen fields
+  #   * <<< Used in the flower/key shop
+  #   * <<< Given to plant for coins
+  - inv_lemens: 0
+    _locale: Lemens
+  #   * >>> Gotten from rosalia fields
+  #   * <<< Used for grave (paying respects)
+  #   * <<< Required for tickling giant's nose
+  #   * <<< Used for research/reading textbooks
+  #   * <<< Used in the flower/key shop
+  - inv_rosalia: 0
+    _locale: Rosalia
+  - inv_petunal: 0
+    _locale: Petunal Blossoms
+  - inv_torch: 0
+    _locale: One-use Torches
+  - inv_building_materials: 0
+    _locale: Building Materials
+  - inv_acorn: 1
+    _locale: Acorns
+  # Tool Levels
+  - tool_climbing: 0
+    _locale: Climbing Gear Level
+  - tool_pickaxe: 0
+    _locale: Pickaxe Level
+  - tool_shovel: 0
+    _locale: Shovel Level
+  # Keys
+  - key_maintenance: 0
+    _locale: Maintenance Room Key
+  - key_vault: 0
+    _locale: Vault Key
+  - key_skeleton: 0
+    _locale: Skeleton Key
+  # Visited locations
+  - visited_hills: 0
+    _locale: In Hills (7 Total)
+  - visited_plains: 0
+    _locale: In Plains (5 Total)
+  - visited_woods: 0
+    _locale: In Woods (7 Total)
+  # Misc vars
+  # Curses last for 7 days
+  - last_time_cursed: -10
+  - treehouse_wall_level: 0
+  - topic_discussed_pineapple: false
+  - last_place_visited:
+  # Logic vars
+  - param1: 0
+_shown:
+  # Time-based stuff
+  - time_of_day
+  - days_of_equipment_left
+  - days_passed
+  - gemstone
+  - Skills:
+      - skill_athleticism
+      - skill_fighting
+      - skill_gather_rosalia
+  - Inventory:
+      - coin
+      # Flowers
+      - inv_lemens
+      - inv_rosalia
+      - inv_petunal
+      # Exploration
+      - inv_torch
+      # Materials
+      - inv_building_materials
+      # Sidequest items
+      - inv_acorn
+  - Tool Levels:
+      - tool_climbing
+      - tool_pickaxe
+      - tool_shovel
+  - Keys:
+      - key_maintenance
+      - key_vault
+      - key_skeleton
+  - Locations Visited:
+      - visited_hills
+      - visited_plains
+      - visited_woods
+_keywords:
+  acorn: Squirrels like acorns.
+  camp: Each day is split into morning, afternoon, and evening, and night. Most things take up one portion of the day, and as soon as it's nighttime, you have to leave to set up camp. So, there is usually three things you can do each day, once you discount nighttime, which is used for resting.
+  coin: Coins are the standard unit of currency in the Tunnel. They're not as valuable as gemstones, but are very useful for buying smaller items in shops.
+  Dome: For as long as anyone remembers, humanity is confined to a 100-mile-across or so Dome. Some say there was a time before this, a time when there was wide open space that would take many seasons just to traverse in one direction. Others say that's crazy.
+  equipment: You only have enough equipment for three days of exploring at a time. You have to stay in the same area during that time, but you can choose a different area on your next expedition.
+  exfret: exfret is the author's online name, but he also accepts "Our Gracious and Benevolent Overlord" as a name.
+  explorer: Most people are content with uneventful, comfortable lives in the Dome, away from the dangers of the Tunnel. But a few yearn for more, and venture out into the Tunnel for glory, riches, and knowledge. Many goods in the Dome require things that can only be obtained in the Tunnel, making these foolishly brave adventurers like you vital to humanity's continued existence.
+  George: George is your friend, and trained you to become a Tunnel adventurer. Although he shares your freckles, he does not share your red hair. Though we'll forgive him for that. (In this version of the game, there is no George. George is a lie.)
+  gemstone: Collect all 14 gemstones to complete the demo and show your superiority to others!
+  Gemstone of Light: You provide a beacon of hope and guidance to those who are lost. Found in a cave.
+  Gemstone of Climbing: No matter what obstacles you're faced with, you'll always come out on top. Found on top of some rocks.
+  Gemstone of Persistence: You know just who to think about for inspiration, which makes you infinitely more persistent than those around you. Found on a mountain.
+  Gemstone of Friendship: Not even death can ruin your friendships. Received from a ghostly friend.
+  Gemstone of Secrets: You can always be trusted on to keep a secret. You don't remember where you got this from anymore. It's as if it was erased from your mind.
+  Gemstone of Mourning: You know the correct way to be sad, unlike your friends. You got this from mourning at a grave.
+  Gemstone of Speed: When it comes to racing, you leave even the fastest rocks in the dust. You got this from a racing track.
+  Gemstone of Henry: You met Henry. Given to you by Henry.
+  Gemstone of Paranoia: You constantly worry that your walls need to be a little higher. You found this while digging a moat for your treehouse.
+  Gemstone of Snot: Nothing can stop you from collecting all the gemstones. Though sometimes you wonder if this one is actually just a booger. Found in a giant's nose.
+  Gemstone of Sanity: If something stupid gives you a good result, you'll do again, no questions asked. Found in the same place as the Gemstone of Snot.
+  Gemstone of Stupidity: It's a miracle that you're alive. Left behind by some giants.
+  Gemstone of Royalty: You are royalty. Or at least, you are among squirrels. That's something at least, though. Awarded to you as part of your coronation.
+  Gemstone of Eloquence: You're an avid reader who, as a result, is now quite eloquent. Found in a book.
+  layer: The Tunnel is split into layers, each one after the last, and each one more dangerous. Your character in this demo only has the Green Pass in this demo, which is only enough to travel in the first layer. To go to the second layer, you would need a Blue Pass. George, the one who trained you in Tunnel exploration, holds the next one, a Yellow Pass. Then there is the Pioneer Pass, the Emerald Pass, the Crimson Pass, and then the most coveted of all, the Rose Pass. Of course, there are more layers past that, but good luck getting through them. (Especially since they're not written!)
+  lemen: Lemens are bulbous glowing flowers from the Tunnel, often used for lighting. Once picked, they spoil quickly.
+  Lily: Lily? That's you! Silly redhead.
+  Mark: Mark is a burly man who operates the cliff elevator in the hills. Make sure you knock if you're going to visit him!
+  orphan: You are an orphan. Orphans aren't treated well in this world. It's your hope to change that by bringing riches back to your orphanage in the form of gemstones.
+  petunal blossom: Petunal blossoms are skinny purple flowers with yellow flecks on their petals. The petals are often dried and said to be very nutritrious and yummy when used as seasoning that way. Though some people even eat them raw!
+  rosalia: Rosalia is a type of flower with deep red petals. It is found in the Tunnel, where it grows best. Its leaves are often ground up and for a variety of teas.
+  Tunnel: The only exit to the 100-mile-across Dome that humanity is. However, no one has gotten to the other side and returned to tell the tale. Maybe you can change that?
+logic:
+  inc_day:
+    - set: days_of_equipment_left -= 1
+    - set: days_passed += 1
+    # Only make a separator if there was some text announcement
+    - unflag: has_day_message
+    - if: days_passed % 13 == 0 and skill_gather_rosalia >= 3
+      then:
+        - flag: has_day_message
+        - You forget a little about [[rosalia]] gathering overnight.
+        - set: skill_gather_rosalia -= 1
+          show:
+    - if: inv_lemens >= 5 and days_passed % 12 == 2
+      then:
+        - flag: has_day_message
+        - Some of your [[lemen]]s spoiled.
+        - set: inv_lemens -= floor(inv_lemens / 5)
+          show:
+    - if: days_passed - last_time_cursed == 7
+      then:
+        - flag: has_day_message
+        - Your bad luck wears off! You are no longer cursed.
+    - if: days_passed - last_time_cursed < 7 and coin >= 1
+      then:
+        - random:
+            1 lose:
+              - flag: has_day_message
+              - You're so unlucky a [[coin]] slips from your pocket!
+              - set: coin -= 1
+                show:
+            6 continue:
+              - pass:
+    - if: has_day_message
+      then:
+        - separator:
+    - subreturn:
+  inc_time_of_day:
+    - if: time_of_day == "Morning"
+      then:
+        - set: time_of_day = "Afternoon"
+        - subreturn:
+    - if: time_of_day == "Afternoon"
+      then:
+        - set: time_of_day = "Evening"
+        - subreturn:
+    - if: time_of_day == "Evening"
+      then:
+        - set: time_of_day = "Night"
+        - subreturn:
+    - if: time_of_day == "Night"
+      then:
+        - set: time_of_day = "Morning"
+        - subreturn:
+  reset_encounter_flags:
+    - unflag: hills_cave_went_around
+    - unflag: hills_cave_went_inside
+    - unflag: hills_cave_went_top
+    - unflag: hills_cave_went_gathered
+    - unflag: hills_cliff_entered_maintenance_room
+    - unflag: hills_secret_sat_bench
+    - subreturn:
+  inc_rosalia_gather_skill:
+    - if: not researched_botany
+      then:
+        # Max rosalia gather skill is 5 without botany
+        - if: skill_gather_rosalia == 5
+          then:
+            - You try to get better at gathering rosalia, but you feel like there's something missing that only a book on the topic could teach you.
+        - if: skill_gather_rosalia < 5 and skill_gather_rosalia + param1 > 5
+          then:
+            - You improve a little at gathering rosalia, but not as much as you should have. You feel like there's something missing that only a book on the topic could teach you.
+            - set: skill_gather_rosalia = 5
+              show:
+        - if: skill_gather_rosalia + param1 <= 5
+          then:
+            - set: skill_gather_rosalia += param1
+              show:
+      else:
+        - set: skill_gather_rosalia += param1
+          show:
+    - subreturn:
+# IDEA: Mention Dome more somewhere in this story
+# IDEA: An ending and a diary that gets printed out at the end
+# IDEA: Also plenty past the gemstones for the encounters
+# IDEA: Confirmation box to restart button, now that the story is a significant length
+_content:
+  - This is a demo for how I was thinking expeditions would go in the future. It simply includes the "Tunnel exploration part".
+  - choice: start
+    text: Try it out!
+    effects:
+      - storypoint: started
+      - goto: entrance
+  - choice: background
+    selectable_once:
+    text: Background information about the story
+    effects:
+      - In this story, you are [[Lily]], an [[orphan]] [[Tunnel]] [[explorer]] who has sworn to herself to bring back riches and glory for her orphanage so that it no longer has to turn away children it can't afford to feed. This demo simply includes the "Tunnel exploration" part to demonstrate an idea for how I was thinking of doing it, but in the full game there will be the ability to talk to others at the orphanage, explore the town around the orphanage, and even delve deeper into the Tunnel.
+      - goto: .
+return:
+  - set: days_of_equipment_left = 3
+  # IDEA: A research/ability to allow switching where you are once for free
+  - if: read_catalog and not killed_observation_authors
+    then:
+      - storypoint: killed_observation_authors
+      - flag: killed_observation_authors
+      - You return to the [[orphan]]age and do some stuff, including a middle-of-the-night trip to a nearby town, then you set out again.
+    else:
+      - You return to the [[orphan]]age and do some stuff, then you set out again.
+  - if: woods_treehouse_affirmation_station_built
+    then:
+      - When you are at the [[orphan]]age, the affirmation station you built yells out to you from afar...
+      - sub: /woods/treehouse/affirmation
+  - choice: adventure
+    text: Go on another expedition
+    effects: entrance
+  - choice: retire
+    text: Retire from [[Tunnel]] adventuring
+    effects:
+      # Go over: Number of coins/success of orphanage, gemstones/fame, and journal
+      - if: gemstone == 0
+        then:
+          - You return to the [[orphan]]age completely empty-handed with regards to valuable [[gemstone]]s. You're immediately thrown out, then you die and starve in that order.
+      - if: 1 <= gemstone and gemstone <= 1
+        then:
+          - You return with a single [[gemstone]]. You're immediately thrown out, then you die and starve in that order.
+      - if: 2 <= gemstone and gemstone <= 2
+        then:
+          - You don't return to the [[orphan]]age with many [[gemstone]]s. The orphanage director throws you out. You sell enough to last on your own for a while, but the money eventually runs out, and you die and starve in that order.
+      - if: 3 <= gemstone and gemstone <= 3
+        then:
+          - Apparently, you need a fair bit of [[gemstone]]s for your winnings to be enough. The [[orphan]]age director lets you stay for a while, but is still disappointed in your "early" retirement. After a few years, he kicks you out, and you die and starve in that order.
+      - if: 4 <= gemstone and gemstone <= 4
+        then:
+          - You bring back barely enough [[gemstone]]s to support your own stay in the [[orphan]]age. You at least are allowed to stay their the rest of your life, but you're not celebrated as the savior you were hoping to be.
+      - if: 5 <= gemstone and gemstone <= 5
+        then:
+          - You bring back a decent number of [[gemstone]]s to the [[orphan]]age. It's able to support you and an extra orphan, but nothing extraordinary, and your contributions are soon forgotten.
+      - if: 6 <= gemstone and gemstone <= 6
+        then:
+          - You bring back a good number of [[gemstone]]s when you return to the [[orphan]]age. It's able to afford a few renovations, and the director thanks you profusely. A plaque is placed in a hall somewhere commemorating your contributions, but it soon gets dusty and forgotten.
+      - if: 7 <= gemstone and gemstone <= 8
+        then:
+          - You bring back a large number of [[gemstone]]s for the [[orphan]]age. You are eventually promoted to a staff, and allowed to have a hand in orphanage decisions. Quite a few renovations are made and a special plaque is placed prominently in the orphanage's foyer commemorating your contributions. Without you, the orphanage wouldn't be what it is now.
+      - if: 9 <= gemstone and gemstone <= 10
+        then:
+          - The director of the [[orphan]]age raises his eyebrows when you announce the number of [[gemstone]]s you brought back. You are given a special position as a patron of the orphanage, and get to live in a cozy special-built room. A fund is set up with all the money you get from selling your gemstones, and the orphanage returns to its previous state as a prosperous haven for unfortunate souls.
+      - if: 11 <= gemstone and gemstone <= 11
+        then:
+          - The number of [[gemstone]]s you have makes you one of the richest people in town. The director of the [[orphan]]age doesn't even believe how many gemstones you have until you show him. You singlehandedly bring the orphanage to the most prosperous it's ever been, even opening another one a town over. You live in a fancy room inside town, and the [[Dome]] as a whole becomes a better place for every orphan.
+      - if: 12 <= gemstone and gemstone <= 12
+        then:
+          - You bring back a massive pile of [[gemstone]]s, making you by far the richest person in town and one of the richest in the entire Dome. The director of the [[orphan]]age stumbles over his words when he learns of your wealth, hoping to get on your good side. You open several orphanages throughout the [[Dome]], and become known as the patron saint of orphans. You move into the central city of the Dome, living in a penthouse suite at one of the fancy inns. You will be remembered for many years to come for your contributions.
+      - if: 13 <= gemstone and gemstone <= 13
+        then:
+          - You have so many [[gemstone]]s you decide to simply go straight to the Dome's government with a funding plan for new [[orphan]]ages. They tell you that you have so many gemstones, though, that you might as well fund the entire welfare program, or even the whole government. Everyone becomes happier and lives better lives, and your wealth alone elevates you to the highest level of status within the Dome. Even if you don't hold the title of ruler, every decision goes through you. You construct a custom-built mansion as your abode, and enjoy life as the richest orphan to ever live.
+      - if: 14 <= gemstone
+        then:
+          # Just a small easter egg: If you said you liked pineapple on pizza, it says its legalized
+          - if: topic_discussed_pineapple
+            then:
+              - You go straight to the Dome's government with your pile of [[gemstones]]. They promptly appoint you leader in return for your funding the government, and taxes are abolished as they are no longer necessary with your massive wealth. A small economic shock rocks the [[Dome]] from the new influx of wealth, but you turn out to be an excellent leader and handle the situation brilliantly. The Dome prospers. A huge palace is built in your honor, the cure to mortality is found, pineapple on pizza is legalized, and you are able to fund a massive successful expedition to getting to the other side of the [[Tunnel]], which you lead. This is the most you could hope for.
+            else:
+              - You go straight to the Dome's government with your pile of [[gemstones]]. They promptly appoint you leader in return for your funding the government, and taxes are abolished as they are no longer necessary with your massive wealth. A small economic shock rocks the [[Dome]] from the new influx of wealth, but you turn out to be an excellent leader and handle the situation brilliantly. The Dome prospers. A huge palace is built in your honor, the cure to mortality is found, and you are able to fund a massive successful expedition to getting to the other side of the [[Tunnel]], which you lead. This is the most you could hope for.
+      - choice: back
+        text: Scratch that actually, I want to adventure more!
+        effects: .
+entrance:
+  - Which area of [[layer]] 1 would you like to go to?
+  - choice: hills
+    text: The rolling hills, full of many undiscovered nooks and crannies
+  - choice: plains
+    text: The plains, which have plenty of flowers ripe for gathering
+  - choice: woods
+    text: The woods full of wildlife
+hills:
+  camp:
+    _image: layer_1_river_sleep.png
+    _content:
+      - storypoint: camped_in_hills
+      - sub: /logic/reset_encounter_flags
+      - You find a nice spot next to a quick, cold stream cozily nestled between two hills.
+      - if: days_of_equipment_left == 1
+        then:
+          - choice: return
+            text: Return to the [[orphan]]age now that you're out of [[equipment]]
+            effects:
+              - sub: /logic/inc_time_of_day
+              - sub: /logic/inc_day
+              - goto: /return
+        else:
+          - choice: next
+            text: Go on to the next day
+            effects:
+              - sub: /logic/inc_time_of_day
+              - sub: /logic/inc_day
+              - goto: ..
+  _content:
+    - storypoint: hills
+    - sub: /logic/reset_encounter_flags
+    - random:
+        # Very small chance of finding the secret spot
+        5 cave:
+          - if: last_place_visited == "cave"
+            then:
+              - goto: .
+          - set: last_place_visited = "cave"
+          - if: not hills_visited_cave
+            then:
+              - flag: hills_visited_cave
+              - set: visited_hills += 1
+          - storypoint: cave
+          - goto: cave
+        5 stream:
+          - if: last_place_visited == "stream"
+            then:
+              - goto: .
+          - set: last_place_visited = "stream"
+          - if: not hills_visited_stream
+            then:
+              - flag: hills_visited_stream
+              - set: visited_hills += 1
+          - storypoint: stream
+          - goto: stream
+        5 mountain:
+          - if: last_place_visited == "mountain"
+            then:
+              - goto: .
+          - set: last_place_visited = "mountain"
+          - if: not hills_visited_mountain
+            then:
+              - flag: hills_visited_mountain
+              - set: visited_hills += 1
+          - storypoint: mountain
+          - goto: mountain
+        5 ghost:
+          - if: last_place_visited == "ghost"
+            then:
+              - goto: .
+          - set: last_place_visited = "ghost"
+          - if: not hills_visited_ghost
+            then:
+              - flag: hills_visited_ghost
+              - set: visited_hills += 1
+          - storypoint: ghost
+          - goto: ghost
+        5 trainer:
+          - if: last_place_visited == "trainer"
+            then:
+              - goto: .
+          - set: last_place_visited = "trainer"
+          - if: not hills_visited_trainer
+            then:
+              - flag: hills_visited_trainer
+              - set: visited_hills += 1
+          - storypoint: trainer
+          - goto: trainer
+        5 cliff:
+          - if: last_place_visited == "cliff"
+            then:
+              - goto: .
+          - set: last_place_visited = "cliff"
+          - if: not hills_visited_cliff
+            then:
+              - flag: hills_visited_cliff
+              - set: visited_hills += 1
+          - storypoint: cliff
+          - goto: cliff
+        1 secret:
+          - if: last_place_visited == "secret"
+            then:
+              - goto: .
+          - set: last_place_visited = "secret"
+          - if: not hills_visited_secret
+            then:
+              - flag: hills_visited_secret
+              - set: visited_hills += 1
+          - storypoint: secret
+          - goto: secret
+  cave:
+    _image: layer_1_cave.png
+    _content:
+      - You come across some rocks rising up from the ground. They stick straight up and lean on each other like a house of cards, leaving a hole between them. This hole is the entrance to a cave with an abyssal, dark interior. The ground slopes downward toward the hole, as if to suck you in.
+      - goto: cave_choice
+    cave_choice:
+      - Where would you like to explore?
+      - if: not hills_cave_went_around
+        then:
+          - choice: around
+            text: Go around the rocks
+            effects:
+              - storypoint: cave_around
+              - flag: hills_cave_went_around
+              - goto: around
+      - if: not hills_cave_went_inside
+        then:
+          - choice: inside
+            text: Enter the cave
+            cost: 1 inv_torch
+            effects:
+              - storypoint: cave_inside
+              - flag: hills_cave_went_inside
+              - goto: inside
+      - if: not hills_cave_went_top
+        then:
+          - choice: top
+            text: Get on top of the rocks
+            effects:
+              - storypoint: cave_top
+              - flag: hills_cave_went_top
+              - goto: top
+      - if: not hills_cave_went_gathered
+        then:
+          - choice: gather
+            text: Gather some rocks as building materials
+            shown: 2 inv_building_materials
+            effects:
+              - storypoint: cave_gathered
+              - flag: hills_cave_went_gathered
+              - goto: gather
+      - choice: nah
+        text: Travel elsewhere
+        effects:
+          - sub: /logic/inc_time_of_day
+          - if: time_of_day == "Night"
+            then:
+              - Unfortunately, you didn't have time to go anywhere else before nightfall.
+              - choice: camp
+                text: Set up [[camp]] for the night
+                effects: /hills/camp
+            else:
+              - goto: /hills
+    around:
+      _content:
+        - You find two [[petunal blossom]]s behind the cave!
+        - set: inv_petunal += 2
+          show:
+        - goto: wrap_up
+    inside:
+      _content:
+        - if: not gemstone_collected_light
+          then:
+            - The cave continues into a small chamber. There is a giant red [[gemstone]] embedded into the far wall.
+            - choice: extract
+              text: Extract the gemstone with a high-level pickaxe
+              require: 2 tool_pickaxe
+              shown: 1 gemstone
+              effects:
+                - storypoint: gemstone_light
+                - flag: gemstone_collected_light
+                - You collect the [[Gemstone of Light]], then head back out of the cave, victorious.
+                - goto: wrap_up
+          else:
+            - The cave is in dire need of an interior designer. It could really use a centerpiece, like a [[gemstone]] or something similar.
+        - choice: leave
+          text: Leave the cave
+          effects:
+            - goto: wrap_up
+        # IDEA: Alternative choice of something to do inside the cave
+        # Maybe an interior design research? But what benefit would you get?
+    top:
+      _content:
+        - if: days_passed - last_time_cursed < 7
+          then:
+            - You're really unlucky with where you put your feet and slip back to the bottom. Oof.
+            - choice: down
+              text: Get down
+              effects: wrap_up
+            - stop:
+        - You manage to scramble on top of the first few rocks, but going further would take more time and athletic skill.
+        - if: not hills_cave_top_climbing_gear_found
+          then:
+            - flag: hills_cave_top_climbing_gear_found
+            - However, you at least find some climbing gear. Unfortunately, it's not the type used for rock scrambling, so it won't help you here, but maybe it will be useful elsewhere?
+            - set: tool_climbing += 1
+              show:
+        - if: time_of_day == "Evening"
+          then:
+            - sub: /logic/inc_time_of_day
+            - Unfortunately, the Sun is about to set, so you have to get down to make camp.
+            - choice: camp
+              text: Set up [[camp]] for the night
+              effects: /hills/camp
+          else:
+            - choice: continue
+              text: Continue ascending
+              require: 10 skill_athleticism
+              effects:
+                - storypoint: gemstone_climbing
+                - sub: /logic/inc_time_of_day
+                - if: not gemstone_collected_climbing
+                  then:
+                    - flag: gemstone_collected_climbing
+                    - You get to the top. There, you find a [[gemstone]]. It's the [[Gemstone of Climbing]]!
+                    - set: gemstone += 1
+                      show:
+                  else:
+                    - You get to the top. There's not a gemstone here, but there is a good view.
+                - choice: down
+                  text: Get down
+                  effects: wrap_up
+            - choice: down
+              text: Get down
+              effects: wrap_up
+    gather:
+      _content:
+        - Gathering the rocks is hard work, so you're glad this version doesn't have an energy counter.
+        - goto: wrap_up
+    wrap_up:
+      - sub: /logic/inc_time_of_day
+      - if: time_of_day == "Night"
+        then:
+          - Unfortunately, you don't have any time to explore the cave more.
+          - choice: camp
+            text: Set up [[camp]] for the night
+            effects: /hills/camp
+        else:
+          - separator:
+          - goto: cave_choice
+  stream:
+    _image: layer_1_stream.png
+    _content:
+      # IDEA: Reward for finding river
+      - flag: hills_stream_found
+      - You find a slow-moving, groggy river at the foot of the hills. The river also has some wet stones to sharpen your imaginary sword on, increasing your fighting skill.
+      - set: skill_fighting += 1
+        show:
+      - if: time_of_day == "Evening"
+        then:
+          - Unfortunately, you don't have any time to travel further up the stream.
+          - choice: camp
+            text: Set up [[camp]] for the night
+            effects: /hills/camp
+        else:
+          - choice: upstream
+            text: Travel upward along the stream
+            effects:
+              - sub: /logic/inc_time_of_day
+              - goto: upstream
+          - choice: nah
+            text: Travel elsewhere
+            effects:
+              - sub: /logic/inc_time_of_day
+              - if: time_of_day == "Night"
+                then:
+                  - Unfortunately, you didn't have time to go anywhere else before nightfall.
+                  - choice: camp
+                    text: Set up [[camp]] for the night
+                    effects: /hills/camp
+                else:
+                  - goto: /hills
+    upstream:
+      # IDEA: Another reward when the acorn is gone
+      - storypoint: stream_upstream
+      - The current is stronger, and the water clearer as you travel up the stream.
+      - if: not hills_stream_upstream_acorn_found
+        then:
+          - flag: hills_stream_upstream_acorn_found
+          - You find an [[acorn]] upstream!
+          - set: inv_acorn += 1
+            show:
+      - if: time_of_day == "Evening"
+        then:
+          - Unfortunately, you don't have any time to travel further up the stream.
+          - choice: camp
+            text: Set up [[camp]] for the night
+            effects: /hills/camp
+        else:
+          - choice: upstreamer
+            text: Travel upwarder along the stream
+            effects:
+              - sub: /logic/inc_time_of_day
+              - goto: upstreamer
+          - choice: nah
+            text: Travel elsewhere
+            effects:
+              - sub: /logic/inc_time_of_day
+              - if: time_of_day == "Night"
+                then:
+                  - Unfortunately, you didn't have time to go anywhere else before nightfall.
+                  - choice: camp
+                    text: Set up [[camp]] for the night
+                    effects: /hills/camp
+                else:
+                  - goto: /hills
+    upstreamer:
+      - storypoint: stream_upstreamer
+      - "The river is smaller but zips along so fast it's louder than ever. Soon enough, it sounds like a roaring. Or, no wait, that's not the river... Up ahead you spot the actual source: A tiny waterfall at least fifty feet high! You look around and find some [[coin]]s behind the waterfall. Don't worry about stealing, there's a sign saying they're free!"
+      - set: coin += 3
+        show:
+      - sub: /logic/inc_time_of_day
+      # It must be nighttime when we get here
+      - choice: camp
+        text: Set up [[camp]] for the night
+        effects: /hills/camp
+  mountain:
+    _image: layer_1_mountain.png
+    _vars:
+      - mountain_progress: 0
+    _content:
+      - if: _visits == 1
+        then:
+          - You come across a very tall hill, or a small mountain, depending on how you look at it. It's very tricky to climb (or hike, which I suppose is more accurate for the hill-inclined vocabulary). Each time you visit, you can make some progress, learn some shortcuts, etc., which allows you to skip right to where you left off last time.
+        else:
+          - if: mountain_progress < 3
+            then:
+              - You come across the sizable hill again.
+            else:
+              - if: mountain_progress < 5
+                then:
+                  - Hey, it's the mountill again.
+                else:
+                  - if: mountain_progress < 7
+                    then:
+                      - You end up at the small mountain you were climbing once more.
+      - goto: choice
+    choice:
+      - if: mountain_progress == 0
+        then:
+          - You're currently at the very foot of the tall hill/small mountain thing. It doesn't look too bad.
+      - if: mountain_progress == 1
+        then:
+          - storypoint: moutain_1
+          - You're about to go into a forest at the base of this hill mountain (mountill?). You've made good progress and hopefully all the brush in the forest doesn't slow you down.
+      - if: mountain_progress == 2
+        then:
+          - storypoint: moutain_2
+          - You've just broken away from that stupid forest, took a whole part of a day to trudge through. Looking up, you seem no further to the peak, however.
+      - if: mountain_progress == 3
+        then:
+          - storypoint: moutain_3
+          - The peak appears just as close as it did when you first started this trek. Okay, okay. Maybe this isn't just any mountill, but a large mountill.
+      - if: mountain_progress == 4
+        then:
+          - storypoint: moutain_4
+          - "Finally, you feel like you've made some progress, and the peak actually feels closer than before. But with that progress comes sight of some new challenges ahead: You'll need some climbing gear for the next section."
+      - if: mountain_progress == 5
+        then:
+          - storypoint: moutain_5
+          - The peak is just a bit of a ways away. Do hills have peaks? No, this must be a mountain. But a small mountain, a very small one. You've seen bigger. This isn't bad.
+      - if: mountain_progress == 6
+        then:
+          - storypoint: moutain_6
+          - You stand, nearly defeated, the peak seemingly just as far as before. Okay, maybe this mountain is more on the small-but-not-very-small mountain? Not a hill though. You regret ever thinking that.
+      - if: mountain_progress == 7
+        then:
+          - storypoint: moutain_7
+          - You stand atop an enormous mountain, conquered by your foot. The view is a bit obscured by other, even larger mountains but... hey trust me, this is a pretty big mountain!
+          - Unfortunately, a mountain does not extend beyond its peak, and the gemstone there was already looted. On the other hand, you discover quite a few [[lemen]]s here, untouched. Most people must not bother coming up here.
+          - set: inv_lemens += 4
+            show:
+      - if: mountain_progress != 4 and mountain_progress < 7
+        then:
+          - choice: climb
+            text: To the peak!
+            effects:
+              - if: days_passed - last_time_cursed < 7 and mountain_progress >= 1
+                then:
+                  - random:
+                      2 backward:
+                        - You're unlucky with your sense of direction and actually go the opposite direction... oops.
+                        - set: mountain_progress -= 1
+                        - sub: /logic/inc_time_of_day
+                        - if: time_of_day == "Night"
+                          then:
+                            - That's all the climbing you can do for today; it's almost nighttime!
+                            - choice: camp
+                              text: Set up [[camp]] for the night
+                              effects: /hills/camp
+                          else:
+                            - goto: .
+                        - stop:
+                      3 forward:
+                        - pass:
+              - set: mountain_progress += 1
+              - if: mountain_progress == 7
+                then:
+                  - You tire from walking so much. So much time wasted on this stupid mountain. You should just give up.
+                  - choice: yeah
+                    text: Yeah, let's give up
+                    effects:
+                      - You realize there was another option, one that took PERSISTENCE to realize. Really, you should have typed "all hail [[exfret]]" into the command box, and that would have given you the final burst of energy you needed! But first, you must type in "revert" to undo your recent foolish action.
+                      - (Type "revert" into the command box and press enter, then type in "all hail exfret" and press enter).
+                  - choice: all
+                    action:
+                    effects:
+                      - choice: leave
+                        text: Travel elsewhere
+                        effects:
+                          - sub: /logic/inc_time_of_day
+                          - if: time_of_day == "Night"
+                            then:
+                              - Unfortunately, you didn't have time to go anywhere else before nightfall.
+                              - choice: camp
+                                text: Set up [[camp]] for the night
+                                effects: /hills/camp
+                            else:
+                              - goto: /hills
+                      - remove_choice: yeah
+                      - command: clear
+                      - separator:
+                      - Thinking of exfret, your holy savior, gives you just the burst of energy you need to finish and ascend to the peak! And look, there's a [[gemstone]].
+                      - set: gemstone += 1
+                        show:
+                      - flag: gemstone_collected_persistence
+                      - You collect the [[Gemstone of Persistence]].
+                else:
+                  - sub: /logic/inc_time_of_day
+                  - if: time_of_day == "Night"
+                    then:
+                      - That's all the climbing you can do for today; it's almost nighttime!
+                      - choice: camp
+                        text: Set up [[camp]] for the night
+                        effects: /hills/camp
+                    else:
+                      - goto: .
+      - if: mountain_progress == 4
+        then:
+          - choice: climb
+            text: To the peak!
+            require: 1 tool_climbing
+            effects:
+              - if: days_passed - last_time_cursed < 7 and mountain_progress >= 1
+                then:
+                  - random:
+                      2 backward:
+                        - You're unlucky with your sense of direction and actually go the opposite direction... oops.
+                        - set: mountain_progress -= 1
+                        - sub: /logic/inc_time_of_day
+                        - if: time_of_day == "Night"
+                          then:
+                            - That's all the climbing you can do for today; it's almost nighttime!
+                            - choice: camp
+                              text: Set up [[camp]] for the night
+                              effects: /hills/camp
+                          else:
+                            - goto: .
+                        - stop:
+                      3 forward:
+                        - pass:
+              - set: mountain_progress += 1
+              - sub: /logic/inc_time_of_day
+              - if: time_of_day == "Night"
+                then:
+                  - That's all the climbing you can do for today; it's almost nighttime!
+                  - choice: camp
+                    text: Set up [[camp]] for the night
+                    effects: /hills/camp
+                else:
+                  - goto: .
+      - choice: nah
+        text: Travel elsewhere
+        effects:
+          - sub: /logic/inc_time_of_day
+          - if: time_of_day == "Night"
+            then:
+              - Unfortunately, you didn't have time to go anywhere else before nightfall.
+              - choice: camp
+                text: Set up [[camp]] for the night
+                effects: /hills/camp
+            else:
+              - goto: /hills
+  ghost:
+    _image: layer_1_ghost.png
+    _vars:
+      - times_ghost_talked: 0
+      - topic_discussed_1: none
+    _content:
+      - if: _visits == 1
+        then:
+          - You come across a ghost. She looks a little sad.
+        else:
+          - You come across that ghost again.
+      - goto: choice
+    choice:
+      # IDEA: ghostly orb interaction? Or ghostly orb in general
+      - if: days_passed - last_time_cursed < 7
+        then:
+          - The ghost can tell that you're cursed with bad luck. "I don't want to associate myself with the cursed," she says.
+          - if: times_ghost_talked >= 1
+            then:
+              - '"I''m really sorry [[Lily]], I guess that means we can''t be friends for now. I promise I won''t spill your secrets, still. Maybe in the future we can be friends again?"'
+              - flag: hills_ghost_rejected
+          - choice: sadge
+            text: Travel elsewhere, dejected
+            effects:
+              - sub: /logic/inc_time_of_day
+              - if: time_of_day == "Night"
+                then:
+                  - Unfortunately, you didn't have time to go anywhere else before nightfall.
+                  - choice: camp
+                    text: Set up [[camp]] for the night
+                    effects: /hills/camp
+                else:
+                  - goto: /hills
+          - stop:
+      - if: hills_ghost_rejected
+        then:
+          - unflag: hills_ghost_rejected
+          - The ghost says, "Hey, your curse wore off! We can talk again." :)
+      - if: times_ghost_talked == 0
+        then:
+          - choice: talk
+            text: Talk to her to cheer her up
+            effects:
+              - storypoint: ghost_talked
+              - goto: talk_1
+        else:
+          - if: woods_key_shop_is_sign_winner and not hills_ghost_congratulated
+            then:
+              - flag: hills_ghost_congratulated
+              - 'I saw on a sign somewhere that you have the most [[rosalia]] out of anyone. Congratulations [[Lily]], I''m so proud!"'
+            else:
+              - if: topic_discussed_1 == "memorize"
+                then:
+                  - '"Don''t worry," she whispers softly, "your personal details are safe with me!" Then she winks. (The winks in morse code spell out your social security number.)'
+              - if: topic_discussed_1 == "reveal"
+                then:
+                  - '"Don''t worry," she whispers softly, "I understand that crushes can drive you to do crazy, super creepy things. I won''t tell any of them." Then she winks.'
+              - if: topic_discussed_1 == "confess"
+                then:
+                  - '"Don''t worry," she whispers softly, "I was a redhead in life, myself, so I get it. Besides, what''s life without a little spicy murder action?" Then she winks.'
+              - if: topic_discussed_1 == "ramble"
+                then:
+                  - '"Don''t worry," she whispers softly, "While I don''t agree with what you believe, I won''t make fun of it. I''m here for you regardless of what delusions you suffer from." Then she winks.'
+              - if: topic_discussed_pineapple
+                then:
+                  - After that she adds, "And, by the way... I like pineapple on pizza, too." You both stare into each other's eyes. A true friend.
+          - choice: talk
+            text: Talk to your ghost friend
+            effects:
+              - sub: /logic/inc_time_of_day
+              - You talk for hours; the conversation simply melts the time away.
+              - if: not gemstone_collected_friendship
+                then:
+                  - storypoint: gemstone_friendship
+                  - At the end, she tells you that she wants you to have something special... a [[gemstone]] from her grave.
+                  - set: gemstone += 1
+                    show:
+                  - flag: gemstone_collected_friendship
+                  - You collect the [[Gemstone of Friendship]]!
+                else:
+                  - She disappoints you with the news that she has no more gemstones, but that's okay. You're still both besties for ever!
+              - choice: power
+                text: Via the power of friendship, Travel elsewhere
+                effects:
+                  - if: time_of_day == "Night"
+                    then:
+                      - Unfortunately, you didn't have time to go anywhere else before nightfall.
+                      - choice: camp
+                        text: Set up [[camp]] for the night
+                        effects: /hills/camp
+                    else:
+                      - goto: /hills
+      - choice: nah
+        text: Travel elsewhere
+        effects:
+          - sub: /logic/inc_time_of_day
+          - if: time_of_day == "Night"
+            then:
+              - Unfortunately, you didn't have time to go anywhere else before nightfall.
+              - choice: camp
+                text: Set up [[camp]] for the night
+                effects: /hills/camp
+            else:
+              - goto: /hills
+    talk_1:
+      - She smiles faintly. She can't talk back, but you can tell she enjoys listening. You look around and see there's no one nearby. This may be your one chance to say something without anyone else truly knowing.
+      - choice: memorize
+        text: Practice memorizing your social security number and credit card number in front of the ghost aloud
+        effects:
+          - set: topic_discussed_1 = "memorize"
+          - goto: talked
+      - choice: reveal
+        text: Reveal that I keep a shrine to all my crushes in my room and talk about each one in detail
+        effects:
+          - set: topic_discussed_1 = "reveal"
+          - goto: talked
+      - if: killed_observation_authors
+        then:
+          - choice: confess
+            text: Confess to a murder
+            effects:
+              - set: topic_discussed_1 = "confess"
+              - goto: talked
+      - choice: ramble
+        text: Ramble on about all your fringe political opinions
+        effects:
+          - set: topic_discussed_1 = "ramble"
+          - goto: talked
+      - choice: admit
+        selectable_once:
+        text: Admit to enjoying pineapple on pizza
+        effects:
+          - set: topic_discussed_pineapple = True
+          - Okay, let's not get ahead of ourselves. Maybe start with a topic that's a little less likely to cause trouble?
+          - separator:
+          - goto: .
+    talked:
+      - set: times_ghost_talked += 1
+      - The ghost speaks up, "Don't worry, I won't tell anyone!" Then winks at you innocently. Wait, she can speak? Hopefully she's good at keeping her word.
+      - sub: /logic/inc_time_of_day
+      - if: time_of_day == "Night"
+        then:
+          - Unfortunately, you don't have time to talk anymore before setting up camp.
+          - choice: camp
+            text: Set up [[camp]] for the night
+            effects: /hills/camp
+        else:
+          - goto: choice
+  trainer:
+    _image: layer_1_george.png
+    _content:
+      - You come across a more senior [[explorer]]. He offers to train you in some things for [[coin]]s.
+      - goto: choice
+    choice:
+      - choice: fighting
+        text: Train my fighting skill
+        cost: 4 coin
+        shown: 4 skill_fighting
+        effects:
+          - storypoint: trainer_fighting
+          - if: days_passed - last_time_cursed < 7
+            then:
+              - You feel like you would have trained a little better if you weren't so unlucky. You don't get the full benefits.
+              - set: skill_fighting -= 1
+          - sub: /logic/inc_time_of_day
+          - if: time_of_day == "Night"
+            then:
+              - Unfortunately, you don't have time to do anything else before nightfall.
+              - choice: camp
+                text: Set up [[camp]] for the night
+                effects: /hills/camp
+            else:
+              - goto: .
+      - choice: athletics
+        text: Train my athletics skill
+        cost: 3 coin
+        shown: 5 skill_athleticism
+        effects:
+          - storypoint: trainer_athleticsd
+          - if: days_passed - last_time_cursed < 7
+            then:
+              - You feel like you would have trained a little better if you weren't so unlucky. You don't get the full benefits.
+              - set: skill_fighting -= 1
+          - sub: /logic/inc_time_of_day
+          - if: time_of_day == "Night"
+            then:
+              - Unfortunately, you don't have time to do anything else before nightfall.
+              - choice: camp
+                text: Set up [[camp]] for the night
+                effects: /hills/camp
+            else:
+              - goto: .
+      - choice: free
+        text: Ask for some free advice on athletics
+        shown: 2 skill_athleticism
+        effects:
+          - storypoint: trainer_advice_athletics
+          - if: time_of_day == "Afternoon"
+            then:
+              - She actually puts more effort into giving advice this time, since afternoon is her favorite time of day. You get one bonus athleticism.
+              - set: skill_athleticism += 1
+                show:
+            else:
+              - She doesn't put much effort into giving good or well-tailored advice, but hey, it's free.
+          - sub: /logic/inc_time_of_day
+          - if: time_of_day == "Night"
+            then:
+              - Unfortunately, you don't have time to do anything else before nightfall.
+              - choice: camp
+                text: Set up [[camp]] for the night
+                effects: /hills/camp
+            else:
+              - separator:
+              - goto: .
+      - choice: climbing
+        selectable_once:
+        text: Buy her fancy climbing gear even though it's really expensive
+        cost: 20 coin
+        shown: 3 tool_climbing
+        effects:
+          - storypoint: trainer_climbing
+          - She gives you a quizzical look; not many [[orphan]]s in the [[Dome]] have that many [[coin]]s. But, hey, coins are coins.
+          - separator:
+          - goto: .
+      - choice: nah
+        text: Travel elsewhere
+        effects:
+          - sub: /logic/inc_time_of_day
+          - if: time_of_day == "Night"
+            then:
+              - Unfortunately, you didn't have time to go anywhere else before nightfall.
+              - choice: camp
+                text: Set up [[camp]] for the night
+                effects: /hills/camp
+            else:
+              - goto: /hills
+  cliff:
+    _image: layer_1_cliff.png
+    _content:
+      - You come across a small, but very steep cliff blocking your path.
+      - if: days_passed - last_time_cursed < 7
+        then:
+          - There's an elevator here. Unfortunately, due to your bad luck, it seems to be out of service.
+      - choice: left
+        text: Walk to the left
+        effects:
+          - storypoint: cliff_left
+          - goto: left
+      - choice: right
+        text: Walk to the right
+        effects:
+          - storypoint: cliff_right
+          - goto: right
+      - choice: run
+        text: Run up the side of the vertical cliff face
+        require: 30 skill_athleticism
+        effects:
+          - storypoint: cliff_run
+          - It's so much quicker to run up a vertical cliff face that you wonder why more people don't do this.
+          - goto: top
+      - if: days_passed - last_time_cursed >= 7
+        then:
+          - choice: elevator
+            text: Take the elevator
+            effects:
+              - storypoint: cliff_elevator
+              - The elevator pauses and gets stuck at the halfway point for some time, and it's also quite slow in general, but it fixes itself finally and you make it to the top.
+              - sub: /logic/inc_time_of_day
+              - if: time_of_day == "Night"
+                then:
+                  - Unfortunately, it's nighttime when you get off, so you need to leave to set up camp.
+                  - choice: camp
+                    text: Set up [[camp]] for the night
+                    effects: /hills/camp
+                else:
+                  - goto: top
+      - if: not hills_cliff_entered_maintenance_room
+        then:
+          - choice: maintenance
+            text: Examine the elevator maintenance room
+            require: 1 key_maintenance
+            effects:
+              - storypoint: cliff_maintenance_barged_in
+              - flag: hills_cliff_entered_maintenance_room
+              - goto: maintenance
+      - if: hills_cliff_maintenance_can_knock or woods_blacksmith_gemstone_asked
+        then:
+          - choice: knock
+            text: Knock on the elevator maintenance room door
+            effects:
+              - storypoint: cliff_maintenance_knocked
+              # TODO: Finish storypoints (from here)
+              - flag: hills_cliff_entered_maintenance_room
+              - if: hills_cliff_maintenance_can_knock
+                then:
+                  - "[[Mark]], the maintainer of the elevator opens the door and lets you in."
+                else:
+                  - flag: hills_cliff_maintenance_can_knock
+                  - A burly man comes out and answers the door, letting you in. "Hi, miss, I don't know who you are, but you were polite enough to knock and that's better than a lot of people. Some of them come sneaking in here to take stuff while I'm not looking. Anyways, then name's [[Mark]]. What can I do for you? Red hair's the best, by the way."
+              - goto: maintenance/maintainer_talk
+      - choice: nah
+        text: Travel elsewhere
+        effects:
+          - sub: /logic/inc_time_of_day
+          - if: time_of_day == "Night"
+            then:
+              - Unfortunately, you didn't have time to go anywhere else before nightfall.
+              - choice: camp
+                text: Set up [[camp]] for the night
+                effects: /hills/camp
+            else:
+              - goto: /hills
+    left:
+      - To the left are some trees. As you walk along, they get denser. It seems you've wandered quite close to the woods. Finally, as you get to the spot where you can double back up along the top of the cliff, you see some [[petunal blossom]]s leading deeper into the forest.
+      - choice: petunal
+        text: Pick up the petunal blossoms
+        shown: 3 inv_petunal
+        effects:
+          - storypoint: cliff_left_followed_petunal
+          - You follow the trail of [[petunals blossoms]], picking them up as you go. You get quite a few, but then you realize you've entered the woods and completely forget how to get back!
+          - sub: /logic/inc_time_of_day
+          - if: time_of_day == "Night"
+            then:
+              - Unfortunately, you need to stop to set up camp before nightfall.
+              - choice: camp
+                text: Set up [[camp]] for the night
+                effects: /woods/camp
+            else:
+              - choice: continue
+                text: Go somewhere in the woods.
+                effects: /woods
+      - choice: cliff
+        text: Double back toward the top of the cliff
+        effects:
+          - storypoint: cliff_left_wishing_well
+          - You pass a wishing well as you walk up along the top of the cliff face toward where you were before.
+          - choice: wish
+            text: Wish for something
+            cost: 1 coin
+            effects: wish
+          - choice: ascend
+            text: Keep ascending along the cliff
+            effects:
+              - sub: /logic/inc_time_of_day
+              - if: time_of_day == "Night"
+                then:
+                  - Unfortunately, you need to stop to set up camp before nightfall.
+                  - choice: camp
+                    text: Set up [[camp]] for the night
+                    effects: /hills/camp
+                else:
+                  - goto: top
+    wish:
+      - What do you wish for? You only get one wish
+      - choice: coins
+        text: Two [[coin]]s
+        effects:
+          - storypoint: cliff_wish_coins
+          - Nice try.
+          - choice: ascend
+            text: Continue ascending along the cliff
+            effects:
+              - sub: /logic/inc_time_of_day
+              - if: time_of_day == "Night"
+                then:
+                  - Unfortunately, you need to stop to set up camp before nightfall.
+                  - choice: camp
+                    text: Set up [[camp]] for the night
+                    effects: /hills/camp
+                else:
+                  - goto: top
+      - choice: wishes
+        text: Two wishes
+        effects:
+          - storypoint: cliff_wish_wishes
+          - Sorry, but that's not how it works
+          - choice: ascend
+            text: Continue ascending along the cliff
+            effects:
+              - sub: /logic/inc_time_of_day
+              - if: time_of_day == "Night"
+                then:
+                  - Unfortunately, you need to stop to set up camp before nightfall.
+                  - choice: camp
+                    text: Set up [[camp]] for the night
+                    effects: /hills/camp
+                else:
+                  - goto: top
+      - if: not hills_cliff_wished_acorn
+        then:
+          - choice: acorn
+            text: An [[acorn]]
+            effects:
+              - storypoint: cliff_wish_acorn
+              - flag: hills_cliff_wished_acorn
+              - You get an [[acorn]].
+              - set: inv_acorn += 1
+                show:
+              - choice: ascend
+                text: Continue ascending along the cliff
+                effects:
+                  - sub: /logic/inc_time_of_day
+                  - if: time_of_day == "Night"
+                    then:
+                      - Unfortunately, you need to stop to set up camp before nightfall.
+                      - choice: camp
+                        text: Set up [[camp]] for the night
+                        effects: /hills/camp
+                    else:
+                      - goto: top
+      - if: days_passed - last_time_cursed >= 7
+        then:
+          - choice: bad_luck
+            text: Get cursed with bad luck
+            effects:
+              - Sure. You are now cursed with bad luck.
+              - set: last_time_cursed = days_passed
+              - choice: ascend
+                text: Continue ascending along the cliff
+                effects:
+                  - sub: /logic/inc_time_of_day
+                  - if: time_of_day == "Night"
+                    then:
+                      - Unfortunately, you need to stop to set up camp before nightfall.
+                      - choice: camp
+                        text: Set up [[camp]] for the night
+                        effects: /hills/camp
+                    else:
+                      - goto: top
+        else:
+          - choice: good_luck
+            text: Wish for good luck
+            effects:
+              - Sure. You now have good luck again.
+              - set: last_time_cursed = -10
+              - choice: ascend
+                text: Continue ascending along the cliff
+                effects:
+                  - sub: /logic/inc_time_of_day
+                  - if: time_of_day == "Night"
+                    then:
+                      - Unfortunately, you need to stop to set up camp before nightfall.
+                      - choice: camp
+                        text: Set up [[camp]] for the night
+                        effects: /hills/camp
+                    else:
+                      - goto: top
+      - choice: nothing
+        text: Don't wish for anything
+        effects:
+          - Okay, then that's what you get.
+          - choice: ascend
+            text: Continue ascending along the cliff
+            effects:
+              - sub: /logic/inc_time_of_day
+              - if: time_of_day == "Night"
+                then:
+                  - Unfortunately, you need to stop to set up camp before nightfall.
+                  - choice: camp
+                    text: Set up [[camp]] for the night
+                    effects: /hills/camp
+                else:
+                  - goto: top
+    right:
+      - if: not hills_cliff_right_acorn_gathered
+        then:
+          - flag: hills_cliff_right_acorn_gathered
+          - You find an [[acorn]] along the way!
+          - set: inv_acorn += 1
+            show:
+      - The cliff just gets higher, but it gets more climbable, too, if you have the right equipment.
+      - choice: climb
+        text: Climb the cliff normally
+        require: 2 tool_climbing
+        effects:
+          - storypoint: cliff_right_climbed
+          - You manage to make it up the cliff safely!
+          - sub: /logic/inc_time_of_day
+          - if: time_of_day == "Night"
+            then:
+              - Unfortunately, you need to stop to set up camp before nightfall.
+              - choice: camp
+                text: Set up [[camp]] for the night
+                effects: /hills/camp
+            else:
+              - goto: top
+          - goto: top
+      - choice: climber
+        text: Climb the cliff in style
+        require: 5 tool_climbing
+        effects:
+          - storypoint: cliff_right_climbed_in_style
+          - You manage to make it up the cliff safely! And, in style! So much style, that someone throws a [[petunal blossom]] at you from offscreen.
+          - set: inv_petunal += 1
+            show:
+          - sub: /logic/inc_time_of_day
+          - if: time_of_day == "Night"
+            then:
+              - Unfortunately, you need to stop to set up camp before nightfall.
+              - choice: camp
+                text: Set up [[camp]] for the night
+                effects: /hills/camp
+            else:
+              - goto: top
+          - goto: top
+      - choice: around
+        text: Keep going around to the right
+        effects:
+          - storypoint: cliff_right_around
+          - You travel and travel along the cliff face, but it only seems to get taller. Night comes before you have the chance to ever loop back around.
+          - set: time_of_day = "Night"
+          - choice: camp
+            text: Set up [[camp]] for the night
+            effects: /hills/camp
+    top:
+      - storypoint: cliff_top
+      - if: _visits == 1
+        then:
+          - On the top of the cliff, you find a better shovel than what you had before! You leave your old shovel here and trade it out for the new one.
+        else:
+          - if: _visits == 2
+            then:
+              - On the top of the cliff, you find the shovel you left here last time. However, leaving it here has also left a hole in your heart; you just dig the other shovel so much, nothing could dirt-er you from trading it out with your current one. You promise to the old shovel to bury the hatchet, and tell him that you'll never leave him behind again.
+            else:
+              - On the top of the cliff, you find the shovel you left here before. You know you said this last time, but leaving this shovel here has also left a hole in your heart; you just dig it so much, nothing could dirt-er you from trading it out with your current one. You promise to the old shovel to bury the hatchet, and tell him that you'll never leave him behind again. For reals this time.
+      - Getting a better shovel increases your shovel level!
+      - set: tool_shovel += 1
+        show:
+      # IDEA: More stuff to do up at the top of the cliff
+      - choice: continue
+        text: Continue on somewhere else
+        effects:
+          - sub: /logic/inc_time_of_day
+          - if: time_of_day == "Night"
+            then:
+              - Unfortunately, you didn't have time to go anywhere else before nightfall.
+              - choice: camp
+                text: Set up [[camp]] for the night
+                effects: /hills/camp
+            else:
+              - goto: /hills
+    maintenance:
+      _content:
+        # IDEA: Different text on second visit
+        - You wander around the maintenance room, which is dim, greasy, and full of odd machine parts and doohickeys. You notice that the elevator isn't hooked up to any of the machinery, however.
+        - choice: steal
+          text: Steal some of the scrap for building materials
+          shown: 5 inv_building_materials
+          effects:
+            - set: inv_building_materials -= 5
+            - The parts are all so greasy they slip straight out of your fingers. You knew 5 building materials at once was too good to be true. Suddenly, you hear a booming voice, "Who's there?"
+            - goto: maintainer
+        - choice: look
+          text: Look around more
+          effects:
+            - You're looking around at the various gadgets and wizmos scattered about when you hear a booming voice shout, "Who's there?"
+            - goto: maintainer
+        - choice: leave
+          text: Leave the maintenance room
+          effects: ..
+        # IDEA: Something that requires a torch to go further here
+      maintainer:
+        - if: hills_cliff_maintenance_can_knock
+          then:
+            - '"I told you to knock, you dimwit!" He says before throwing you out. "Like I said, you can come back, but be sure to knock!"'
+            - goto: ../..
+        # IDEA: If you've seen the blacksmith, describe him as similar
+        - A burly man comes out and looks at you in a way that probably means, "Hey, I am [[Mark]], the maintainer of this elevator. What are you doing in here? Anything I can help you with, miss? Also, red hair is the best!"
+        - goto: maintainer_questions
+      maintainer_questions:
+        # IDEA: Some way of accessing these questions later
+        - choice: thank
+          selectable_once:
+          text: Thank [[Mark]] for his correct opinion of red hair
+          effects:
+            - He replies, "Of course!"
+            - goto: .
+        - choice: elevator
+          selectable_once:
+          text: Ask him what he does to maintain the elevator
+          effects:
+            - '"Oh, not a lot of maintaining, I still need to get it working in the first place." He says, "Right now, I just pull people up manually. Of course, sometimes I need a rest break in the middle."'
+            - goto: .
+        - choice: apologize
+          text: Apologize for intruding
+          effects:
+            - flag: hills_cliff_maintenance_can_knock
+            - He says, "No problem, you can come in any time, just make sure to knock first in the future.
+            - goto: maintainer_talk
+      maintainer_talk:
+        - if: not hills_cliff_maintenance_asked_gemstone
+          then:
+            - choice: gemstone
+              text: Ask [[Mark]] about something shiny
+              effects:
+                - flag: hills_cliff_maintenance_asked_gemstone
+                - Oh I don't have anything shiny. It's all covered with grease! But if you mean a [[gemstone]], I at least know where to look for a couple! My knowledge isn't free though. I could really use some [[lemen]]s to brighten this place up, so I'll accept those as payment for my hints. Don't worry, I won't give a hint about a gemstone you've already found.
+                - goto: .
+          else:
+            - choice: hint
+              text: Get a hint from [[Mark]] about where a [[gemstone]] is that I haven't found in return for [[lemen]]s
+              cost: 5 inv_lemens
+              effects:
+                # TODO: Update this number
+                - if: gemstone == 14
+                  then:
+                    - '"In your pocket." He smirks, "Hey, that''s where all the gemstones are! You found them all." Then, he gives your [[lemen]]s back.'
+                    - set: inv_lemens += 5
+                      show:
+                    - goto: .
+                - random: hint_light, hint_climbing, hint_persistence, hint_friendship, hint_secret, hint_mourning, hint_speed, hint_henry, hint_paranoia, hint_snot, hint_sanity, hint_stupidity, hint_royalty, hint_eloquence
+        - choice: leave
+          text: Leave the maintenance room
+          effects: ..
+      hint_light:
+        - if: not gemstone_collected_light
+          then:
+            - '"I heard there''s this one that''s in a cave somewhere in these here hills."'
+            - goto: maintainer_talk
+        - goto: hint_climbing
+      hint_climbing:
+        - if: not gemstone_collected_climbing
+          then:
+            - '"Hey, I just remembered there''s this one gemstone that I know exactly where it is; there''s these rocks a bit of a ways away. If you find them, ya gotta climb up those rocks! I wasn''t athletic enough, but with my good vision, I could definitely see one up there."'
+            - goto: maintainer_talk
+        - goto: hint_persistence
+      hint_persistence:
+        - if: not gemstone_collected_persistence
+          then:
+            - '"Oh ye, there''s a small hill ya gotta climb for one of ''em! You can find the small hill somewhere around here."'
+            - goto: maintainer_talk
+        - goto: hint_friendship
+      hint_friendship:
+        - if: not gemstone_collected_friendship
+          then:
+            - '"Apparently, you get one of them by finding a ghost in the hills and befriending it. Probably a good idea to befriend ghosts in general actually due to their honesty; I hear they''re very transparent!"'
+            - goto: maintainer_talk
+        - goto: hint_secret
+      hint_secret:
+        - if: not gemstone_collected_secret
+          then:
+            - '"Oh I remember finding this place once. It was in the hills here. But as soon as you leave it, you forget about where it is! Just gotta keep looking if you wanna stumble across that one."'
+            - goto: maintainer_talk
+        - goto: hint_mourning
+      hint_mourning:
+        - if: not gemstone_collected_mourning
+          then:
+            - '"One of the gemstones you find by mourning at a grave during morning time. Make sure to leave your respects first!"'
+        - goto: hint_speed
+      hint_speed:
+        - if: not gemstone_collected_speed
+          then:
+            - '"I hear they do races in the plains, ya just gotta find the race track. If you win all three, you getta gem! Make sure to get there early so that you have time for all three."'
+            - goto: maintainer_talk
+        - goto: hint_henry
+      hint_henry:
+        - if: not gemstone_collected_henry
+          then:
+            - '"There''s this dude named Henry, usually in the plains area; if you come across him, he''s more than happy to share his trinkets, and one of them is even a gemstone!"'
+            - goto: maintainer_talk
+        - goto: hint_paranoia
+      hint_paranoia:
+        - if: not gemstone_collected_paranoia
+          then:
+            - '"I know there''s someone who buried a gemstone near a tree in this one clearing. Talking ''bout that clearing, I always thought it would be a good spot for a treehouse. Just gotta dig around it some to find the gemstone I suppose."'
+            - goto: maintainer_talk
+        - goto: hint_snot
+      hint_snot:
+        - if: not gemstone_collected_snot
+          then:
+            - '"You''re not gonna like this one... but apparently there are these giants in the woods, and one of them has a gemstone stuck in his nose!"'
+            - goto: maintainer_talk
+        - goto: hint_sanity
+      hint_sanity:
+        - if: not gemstone_collected_sanity and gemstone_collected_snot
+          then:
+            - '"You know how there was that gemstone in that giant''s nose? Well, there''s second one! But don''t go looking for a third; that would only be asking for trouble."'
+            - goto: maintainer_talk
+        - goto: hint_stupidity
+      hint_stupidity:
+        - if: not gemstone_collected_stupidity
+          then:
+            - '"I don''t know about you, but this one gemstone is probably one you should give up on. You have to fight some giants in the woods and survive to get it!"'
+            - goto: maintainer_talk
+        - goto: hint_royalty
+      hint_royalty:
+        - if: not gemstone_collected_royalty
+          then:
+            - '"One of the gemstones is in the crown of the squirrel monarch. All you gotta do is find the monarch and defeat them in battle. Be careful, they have some supporters you''ll have to get through."'
+            - goto: maintainer_talk
+        - goto: hint_eloquence
+      hint_eloquence:
+        - if: not gemstone_collected_eloquence
+          then:
+            - '"I hear you have to read a book at the library in the forest for one of ''em. It''s really hard to figure out which book, honestly, basically random chance, but I hear the correct one is a real hidden gem of a read!"'
+            - goto: maintainer_talk
+        - goto: hint_light
+    # TODO: Add the rest of the gemstone hints here when I finish placing all gemstones down
+  secret:
+    _image: layer_1_secret.png
+    _content:
+      - if: not gemstone_collected_secret
+        then:
+          - You find a little hiding spot with a bench snuggled in between some rocks. You have the feeling you will forget this place as soon as you leave. While looking around, though, you find a [[gemstone]]. It's the [[Gemstone of Secrets]]!
+          - set: gemstone += 1
+            show:
+          - flag: gemstone_collected_secret
+        else:
+          - You find a little hiding spot with a bench snuggled in between some rocks. You get the feeling you've been here before.
+      - if: not hills_secret_sat_bench
+        then:
+          - choice: sit
+            text: Sit on the bench even though you know it's cursed
+            effects:
+              - flag: hills_secret_sat_bench
+              - You receive bad luck for 7 days.
+              - set: last_time_cursed = days_passed
+              - separator:
+              - goto: .
+      # IDEA: Something you still get when you've been here before
+      - choice: nah
+        text: Travel elsewhere
+        effects:
+          - sub: /logic/inc_time_of_day
+          - if: time_of_day == "Night"
+            then:
+              - Unfortunately, you didn't have time to go anywhere else before nightfall.
+              - choice: camp
+                text: Set up [[camp]] for the night
+                effects: /hills/camp
+            else:
+              - goto: /hills
+  # Somewhere with two gemstones at once?
+  # Encounter where light shines during evening, which is when you can get through
+plains:
+  camp:
+    _image: layer_1_plains_camp.png
+    _content:
+      - storypoint: plains_camped
+      - sub: /logic/reset_encounter_flags
+      - You find a [[camp]]ing spot on a soft spot of dirt amongst thousands of beautiful flowers, staring up at the rocky ceiling of the [[Tunnel]].
+      - if: days_of_equipment_left == 1
+        then:
+          - choice: return
+            text: Return to the [[orphan]]age now that you're out of [[equipment]]
+            effects:
+              - sub: /logic/inc_time_of_day
+              - sub: /logic/inc_day
+              - goto: /return
+        else:
+          - choice: next
+            text: Go on to the next day
+            effects:
+              - sub: /logic/inc_time_of_day
+              - sub: /logic/inc_day
+              - goto: ..
+  _content:
+    - storypoint: plains
+    - sub: /logic/reset_encounter_flags
+    # Mainly focused on gathering, so those encounters are more likely
+    - random:
+        3 lemen:
+          - if: last_place_visited == "lemen"
+            then:
+              - goto: .
+          - set: last_place_visited = "lemen"
+          - if: not plains_visited_lemen
+            then:
+              - flag: plains_visited_lemen
+              - set: visited_plains += 1
+          - storypoint: lemen
+          - goto: lemen
+        3 rosalia:
+          - if: last_place_visited == "rosalia"
+            then:
+              - goto: .
+          - set: last_place_visited = "rosalia"
+          - if: not plains_visited_rosalia
+            then:
+              - flag: plains_visited_rosalia
+              - set: visited_plains += 1
+          - storypoint: rosalia
+          - goto: rosalia
+        1 grave:
+          - if: last_place_visited == "grave"
+            then:
+              - goto: .
+          - set: last_place_visited = "grave"
+          - if: not plains_visited_grave
+            then:
+              - flag: plains_visited_grave
+              - set: visited_plains += 1
+          - storypoint: grave
+          - goto: grave
+        1 track:
+          - if: last_place_visited == "track"
+            then:
+              - goto: .
+          - set: last_place_visited = "track"
+          - if: not plains_visited_track
+            then:
+              - flag: plains_visited_track
+              - set: visited_plains += 1
+          - storypoint: track
+          - goto: track
+        1 henry:
+          - if: last_place_visited == "henry"
+            then:
+              - goto: .
+          - set: last_place_visited = "henry"
+          - if: not plains_visited_henry
+            then:
+              - flag: plains_visited_henry
+              - set: visited_plains += 1
+          - storypoint: henry
+          - goto: henry
+  lemen:
+    _image: layer_1_lemen.png
+    _content:
+      - You find a [[lemen]] field! It takes a bit to get going with the lemen gathering, but once you do, you're almost as quick as [[George]].
+      - if: _visits == 4
+        then:
+          - You didn't notice it on your previous 3 trips, but there's an [[acorn]] here!
+          - set: inv_acorn += 1
+            show:
+      - choice: gather
+        text: Gather lemens
+        effects:
+          - sub: /logic/inc_time_of_day
+          - set: inv_lemens += 2
+            show:
+          - You gather some [[lemen]]s, but you're just getting started!
+          - if: time_of_day == "Night"
+            then:
+              - Unfortunately, you don't have time to gather more lemens before nightfall.
+              - choice: camp
+                text: Set up [[camp]] for the night
+                effects: /plains/camp
+            else:
+              - choice: gather
+                text: Gather more lemens
+                effects:
+                  - sub: /logic/inc_time_of_day
+                  - set: inv_lemens += 3
+                    show:
+                  - Yeah, now you're getting some real l[[emen]]-gathering action in! You feel like with a final push, though, you could gather even MORE lemens!
+                  - if: time_of_day == "Night"
+                    then:
+                      - Unfortunately, you don't have time to gather more lemens before nightfall.
+                      - choice: camp
+                        text: Set up [[camp]] for the night
+                        effects: /plains/camp
+                    else:
+                      - choice: gather
+                        text: Gather more lemens
+                        effects:
+                          - sub: /logic/inc_time_of_day
+                          - set: inv_lemens += 4
+                            show:
+                          - You really got into the groove. [[George]] would be impressed with the number of [[lemen]]s you got if he were here now! You should tell him when you get back to the [[orphan]]age. However, it's basically nighttime now, so you better set up camp!
+                          - choice: camp
+                            text: Set up [[camp]] for the night
+                            effects: /plains/camp
+                      - choice: nah
+                        text: Travel elsewhere
+                        effects:
+                          - sub: /logic/inc_time_of_day
+                          - if: time_of_day == "Night"
+                            then:
+                              - Unfortunately, you didn't have time to go anywhere else before nightfall.
+                              - choice: camp
+                                text: Set up [[camp]] for the night
+                                effects: /plains/camp
+                            else:
+                              - goto: /plains
+              - choice: nah
+                text: Travel elsewhere
+                effects:
+                  - sub: /logic/inc_time_of_day
+                  - if: time_of_day == "Night"
+                    then:
+                      - Unfortunately, you didn't have time to go anywhere else before nightfall.
+                      - choice: camp
+                        text: Set up [[camp]] for the night
+                        effects: /plains/camp
+                    else:
+                      - goto: /plains
+      - choice: nah
+        text: Travel elsewhere
+        effects:
+          - sub: /logic/inc_time_of_day
+          - if: time_of_day == "Night"
+            then:
+              - Unfortunately, you didn't have time to go anywhere else before nightfall.
+              - choice: camp
+                text: Set up [[camp]] for the night
+                effects: /plains/camp
+            else:
+              - goto: /plains
+  rosalia:
+    _image: rosalia.png
+    _content:
+      - You come across a [[rosalia]] patch.
+      - goto: choice
+    choice:
+      - choice: gather
+        text: Gather [[rosalia]]
+        effects:
+          - sub: /logic/inc_time_of_day
+          - goto: gather
+      - choice: nah
+        text: Travel elsewhere
+        effects:
+          - sub: /logic/inc_time_of_day
+          - if: time_of_day == "Night"
+            then:
+              - Unfortunately, you didn't have time to go anywhere else before nightfall.
+              - choice: camp
+                text: Set up [[camp]] for the night
+                effects: /plains/camp
+            else:
+              - goto: /plains
+    gather:
+      - if: skill_gather_rosalia == 1
+        then:
+          - You're actually a bit rusty in gathering [[rosalia]], so you only manage to harvest one.
+        else:
+          - if: skill_gather_rosalia <= 4
+            then:
+              - You're still not the best at gathering [[rosalia]], but you try your best to get better.
+            else:
+              - if: skill_gather_rosalia <= 9
+                then:
+                  - With all your experience, you end up gathering a lot of [[rosalia]].
+                else:
+                  - if: skill_gather_rosalia <= 15
+                    then:
+                      - You're a pro at gathering this [[rosalia]] stuff by now.
+                    else:
+                      - You collect [[rosalia]] bunches upon bunches. It's honestly a bit ridiculous. You've probably been playing this game too long.
+      - set: inv_rosalia += skill_gather_rosalia
+        show:
+      - set: param1 = 1
+      - sub: /logic/inc_rosalia_gather_skill
+      - if: time_of_day == "Night"
+        then:
+          - Unfortunately, you don't have time to gather more [[rosalia]] before nightfall.
+          - choice: camp
+            text: Set up [[camp]] for the night
+            effects: /plains/camp
+        else:
+          - goto: choice
+  grave:
+    _image: layer_1_grave.png
+    _content:
+      - if: gemstone_collected_mourning
+        then:
+          # IDEA: Something more to do here
+          - You come across the grave from earlier again, but there's nothing more to do here.
+          - choice: leave
+            text: Leave without doing anything
+            effects: elsewhere
+          - stop:
+      - if: plains_grave_destroyed
+        then:
+          - You come across a kicked-up mound of dirt with some bones poking out. It'll require a skeleton key to put the bones back in place if you want to repair the grave.
+          - choice: repair
+            text: Repair the grave
+            require: 1 key_skeleton
+            effects:
+              - choice: repair
+                text: Repair the grave
+                effects:
+                  - unflag: plains_grave_destroyed
+                  - sub: /logic/inc_time_of_day
+                  - if: time_of_day == "Night"
+                    then:
+                      - Unfortunately, you barely finish repairing the grave before night falls and have to leave to make camp right afterward.
+                      - choice: camp
+                        text: Set up [[camp]] for the night
+                        effects: /plains/camp
+                    else:
+                      - goto: choice
+          - choice: leave
+            text: Leave without doing anything
+            effects:
+              - You move on to somewhere else.
+              - choice: next
+                text: Continue on
+                effects: elsewhere
+          - stop:
+      - if: _visits == 1
+        then:
+          - While wandering about the fields, you stumble across a hastily made dirt grave. You recall that it's customary to leave [[rosalia]] to pay your respects for the dead.
+        else:
+          - You come across the grave from earlier again.
+      - goto: choice
+    choice:
+      - if: not plains_grave_left_respects
+        then:
+          - choice: respect
+            text: Put a rosalia on the grave
+            cost: 1 inv_rosalia
+            effects:
+              - flag: plains_grave_left_respects
+              - You feel the wind blow some good vibes through your red hair.
+              - goto: .
+        else:
+          - Your rosalia is still there.
+          - choice: disrespect
+            text: Take the rosalia back
+            shown: 1 inv_rosalia
+            effects:
+              - unflag: plains_grave_left_respects
+              - You feel the wind blow some good vibes out of your hair. Basically, what happened last time, but backwards. Did that make any sense?
+              - goto: .
+      - choice: mourn
+        text: Mourn for the lost [[explorer]]
+        effects:
+          # Make it a special upgrade, like the "ignore the time taken for the first time you move somewhere else" thing
+          - if: time_of_day == "Morning"
+            then:
+              - if: plains_grave_left_respects
+                then:
+                  - You stay there for some time mourning the dead. Mourning the human condition. Mourning the brevity of life. Suddenly, a [[gemstone]] appears! You got the [[Gemstone of Mourning]].
+                  - flag: gemstone_collected_mourning
+                  - set: gemstone += 1
+                    show:
+                  - choice: leave
+                    text: Leave, since there's nothing more to do here
+                    effects: elsewhere
+                  - stop:
+                else:
+                  - You stay there for some time mourning the dead. Mourning the human condition. Mourning the brevity of life. Unfortunately, you haven't paid your respects yet, so there is no effect.
+            else:
+              - You stay there for some time mourning the dead. Mourning the human condition. Mourning the brevity of life. Unfortunately, it's not time for morning, so there is no effect.
+          - sub: /logic/inc_time_of_day
+          - if: time_of_day == "Night"
+            then:
+              - Unfortunately, you don't have time to do anything else here.
+              - choice: camp
+                text: Set up [[camp]] for the night
+                effects: /plains/camp
+            else:
+              - goto: .
+      - if: not plains_grave_destroyed
+        then:
+          - choice: destroy
+            text: Destroy the grave
+            effects:
+              - flag: plains_grave_destroyed
+              - You feel like this will come back to haunt you. (You were cursed with bad luck for 7 days).
+              - set: last_time_cursed = days_passed
+              - choice: next
+                text: Continue on
+                effects: elsewhere
+      - choice: leave
+        text: Leave without doing anything
+        effects: elsewhere
+    elsewhere:
+      - sub: /logic/inc_time_of_day
+      - if: time_of_day == "Night"
+        then:
+          - Unfortunately, you didn't have time to go anywhere else before nightfall.
+          - choice: camp
+            text: Set up [[camp]] for the night
+            effects: /plains/camp
+        else:
+          - goto: /plains
+  track:
+    _image: layer_1_track.png
+    _content:
+      - You find a racing track. Like, for humans. "Race" by reading an excerpt quickly and then answering a question about it. Make sure to read carefully!
+      - choice: letsgo
+        text: Race! Race! Race!
+        effects: race_1
+      - choice: nah
+        text: Travel elsewhere
+        effects:
+          - sub: /logic/inc_time_of_day
+          - if: time_of_day == "Night"
+            then:
+              - Unfortunately, you didn't have time to go anywhere else before nightfall.
+              - choice: camp
+                text: Set up [[camp]] for the night
+                effects: /plains/camp
+            else:
+              - goto: /plains
+    race_1:
+      # IDEA: A reward for participating in/doing race 1
+      - Mouse A was talking to Mouse B about Mouse C's love for Mouse D's friend, Mouse F. Mouse E overhead them, thinking that Mouse A was Mouse C and that Mouse B was Mouse F, causing a confusion that ultimately led to Mouse H breaking up with Mouse E!
+      - choice: question
+        text: I'm ready for a question
+        effects:
+          - Okay, as promised, you had to read it quickly! So how long did that take you?
+          - if: researched_observation
+            then:
+              - Through your powers of observation, you discern that whatever you do, you should answer this honestly (though don't say you weren't timing yourseld).
+          - choice: fast
+            text: No more than three seconds, I'm a speed-reading pro
+            effects:
+              - I told you to read it carefully... Also I don't believe you.
+              - You failed.
+              - choice: next
+                text: Move on to somewhere else in defeat
+                effects:
+                  - sub: /logic/inc_time_of_day
+                  - if: time_of_day == "Night"
+                    then:
+                      - Unfortunately, you didn't have time to go anywhere else before nightfall.
+                      - choice: camp
+                        text: Set up [[camp]] for the night
+                        effects: /plains/camp
+                    else:
+                      - goto: /plains
+          - choice: slow
+            text: Slower than three seconds
+            effects:
+              - Honesty is the best policy, though I know you tried your best! Alright, onto the next question and excerpt. (If you want more in-world explanation, [[Lily]] runs very fast and beats a turtle!)
+              - In return for your good race, you're rewarded with a [[petunal blossom]].
+              - set: inv_petunal += 1
+                show:
+              - sub: /logic/inc_time_of_day
+              - if: time_of_day == "Night"
+                then:
+                  - Unfortunately, you don't have time for another race before nightfall.
+                  - choice: camp
+                    text: Set up [[camp]] for the night
+                    effects: /plains/camp
+                else:
+                  - choice: ready
+                    text: Ready for the next one!
+                    effects: race_2
+          - choice: what
+            text: I wasn't timing myself
+            effects:
+              - Well whose fault is that? You expect me to program in a timer just for you?
+              - You failed.
+              - choice: next
+                text: Move on to somewhere else in defeat
+                effects:
+                  - sub: /logic/inc_time_of_day
+                  - if: time_of_day == "Night"
+                    then:
+                      - Unfortunately, you didn't have time to go anywhere else before nightfall.
+                      - choice: camp
+                        text: Set up [[camp]] for the night
+                        effects: /plains/camp
+                    else:
+                      - goto: /plains
+    race_2:
+      - Alphie bets [[coin]]s. Debbie eats frogs. Greg hates Izzy. Jake likes meat.
+      - choice: question
+        text: I'm ready for a question
+        effects:
+          - How many words were in the last excerpt?
+          - if: researched_observation
+            then:
+              - Through your powers of observation, you recall that there were 4 sentences with 3 words each.
+          - choice: ten
+            text: Ten, obviously
+            effects:
+              - It was not ten.
+              - choice: next
+                text: Move on to somewhere else in defeat
+                effects:
+                  - sub: /logic/inc_time_of_day
+                  - if: time_of_day == "Night"
+                    then:
+                      - Unfortunately, you didn't have time to go anywhere else before nightfall.
+                      - choice: camp
+                        text: Set up [[camp]] for the night
+                        effects: /plains/camp
+                    else:
+                      - goto: /plains
+          - choice: eleven
+            text: Eleven, clearly
+            effects:
+              - It was not eleven.
+              - choice: next
+                text: Move on to somewhere else in defeat
+                effects:
+                  - sub: /logic/inc_time_of_day
+                  - if: time_of_day == "Night"
+                    then:
+                      - Unfortunately, you didn't have time to go anywhere else before nightfall.
+                      - choice: camp
+                        text: Set up [[camp]] for the night
+                        effects: /plains/camp
+                    else:
+                      - goto: /plains
+          - choice: twelve
+            text: Twelve, without a doubt
+            effects:
+              - It was twelve! Of course, you knew that.
+              - By winning a race against a slug (this is what this all represented after all, after the turtle), you get increased athleticism!
+              - set: skill_athleticism += 5
+                show:
+              - sub: /logic/inc_time_of_day
+              - if: time_of_day == "Night"
+                then:
+                  - Unfortunately, you don't have time for another race before nightfall.
+                  - choice: camp
+                    text: Set up [[camp]] for the night
+                    effects: /plains/camp
+                else:
+                  - choice: ready
+                    text: Ready for the next one!
+                    effects: race_3
+          - choice: thirteen
+            text: Thirteen, duh
+            effects:
+              - It was not thirteen.
+              - choice: next
+                text: Move on to somewhere else in defeat
+                effects:
+                  - sub: /logic/inc_time_of_day
+                  - if: time_of_day == "Night"
+                    then:
+                      - Unfortunately, you didn't have time to go anywhere else before nightfall.
+                      - choice: camp
+                        text: Set up [[camp]] for the night
+                        effects: /plains/camp
+                    else:
+                      - goto: /plains
+    race_3:
+      - Where can you encounter a slow-moving groggy river, where you're given the choice to walk upstream along it? Answer as honestly as possible.
+      - if: researched_observation
+        then:
+          - if: hills_stream_found
+            then:
+              - Through your powers of observation, you recall it was somewhere with hilly terrain.
+            else:
+              - Through your powers of observation, you recall that you haven't seen a river like that before.
+      - choice: hills
+        text: It's in the hills
+        effects:
+          - if: not hills_stream_found
+            then:
+              - While that was true, you couldn't have possibly known because you haven't been to the stream before soooo... you fail.
+              - sub: /logic/inc_time_of_day
+              - choice: camp
+                text: Set up [[camp]] for the night
+                effects: /plains/camp
+              - stop:
+          - goto: reward
+      - choice: plains
+        text: It's in the plains
+        effects:
+          - Nope.
+          - choice: next
+            text: Move on to somewhere else in defeat
+            effects:
+              - sub: /logic/inc_time_of_day
+              - if: time_of_day == "Night"
+                then:
+                  - Unfortunately, you didn't have time to go anywhere else before nightfall.
+                  - choice: camp
+                    text: Set up [[camp]] for the night
+                    effects: /plains/camp
+                else:
+                  - goto: /plains
+      - choice: woods
+        text: It's in the woods
+        effects:
+          - Nope.
+          - choice: next
+            text: Move on to somewhere else in defeat
+            effects:
+              - sub: /logic/inc_time_of_day
+              - if: time_of_day == "Night"
+                then:
+                  - Unfortunately, you didn't have time to go anywhere else before nightfall.
+                  - choice: camp
+                    text: Set up [[camp]] for the night
+                    effects: /plains/camp
+                else:
+                  - goto: /plains
+      - choice: idk
+        text: I don't know, I haven't come across a river like that before
+        effects:
+          - if: hills_stream_found
+            then:
+              - Huh, weird you say that, because that's incorrect. You failed.
+              - choice: next
+                text: Move on to somewhere else in defeat
+                effects:
+                  - sub: /logic/inc_time_of_day
+                  - if: time_of_day == "Night"
+                    then:
+                      - Unfortunately, you didn't have time to go anywhere else before nightfall.
+                      - choice: camp
+                        text: Set up [[camp]] for the night
+                        effects: /plains/camp
+                    else:
+                      - goto: /plains
+            else:
+              - Good on you for telling the truth! That's correct.
+              - goto: reward
+    reward:
+      - if: not gemstone_collected_speed
+        then:
+          - You won all three races. This time, you beat a rock. But it was a really fast rock! Congrats! You rock. As a reward, you get a [[gemstone]] and even more athletic skill. You receive the [[Gemstone of Speed]].
+          - set: skill_athleticism += 10
+            show:
+          - set: gemstone += 1
+            show:
+          - flag: gemstone_collected_speed
+        else:
+          - You won all three races, beating a rock again. As a reward, you get more athletic skill.
+          - set: skill_athleticism += 10
+            show:
+      - sub: /logic/inc_time_of_day
+      - choice: camp
+        text: Set up [[camp]] for the night
+        effects: /plains/camp
+      - stop:
+  henry:
+    _image: layer_1_henry.png
+    _content:
+      - if: not met_henry
+        then:
+          - You pass a middle aged traveler with light brown hair.
+        else:
+          - You see Henry again.
+      - if: days_passed - last_time_cursed < 7
+        then:
+          - He gives you the side-eye; he must not like unlucky people.
+          - choice: continue
+            text: Travel elsewhere
+            effects:
+              - sub: /logic/inc_time_of_day
+              - if: time_of_day == "Night"
+                then:
+                  - Unfortunately, you didn't have time to go anywhere else before nightfall.
+                  - choice: camp
+                    text: Set up [[camp]] for the night
+                    effects: /plains/camp
+                else:
+                  - goto: /plains
+          - stop:
+      - if: met_henry
+        then:
+          - goto: already_visited
+      - if: _visits >= 3
+        then:
+          - He looks a little sad, as if he's recently been ignored more than once by a particular someone.
+      - choice: hi
+        text: Say hi to him
+        effects:
+          - flag: met_henry
+          - goto: hi
+      - choice: nah
+        text: Ignore him
+        effects:
+          - sub: /logic/inc_time_of_day
+          - if: time_of_day == "Night"
+            then:
+              - Unfortunately, you didn't have time to go anywhere else before nightfall.
+              - choice: camp
+                text: Set up [[camp]] for the night
+                effects: /plains/camp
+            else:
+              - goto: /plains
+    hi:
+      - He responds in a friendly manner back to you, "I'm Henry. How are you doing little lass?"
+      - goto: choice
+    choice:
+      - choice: great
+        effects:
+          - '"Ah, I''m doing great myself!" He gestures at his massive pack of trinkets. "Quite a successful expedition I went on, if I may so so myself! But success is never complete until shared."'
+          - goto: share
+      - choice: bad
+        effects:
+          - '"Hope things get better, lass! I''m returning from a not-so-bad expedition myself, so I hope I can share some of the glory? He gestures at hsi massive pack of trinkets."'
+          - goto: share
+      - choice: meh
+        effects:
+          - '"Sounds like a meh-ticulous situation! See what I did there? Hope that cheers you up a little. But if not, I have something that may. He gestures at hsi massive pack of trinkets."'
+          - goto: share
+      - choice: eh
+        effects:
+          - '"Eh? You mean you''re feeling eh-cstatic?! Because I just went on a successful expedition, and am willing to share some to get you feeling more that way!" He gestures at his massive pack of trinkets.'
+          - goto: share
+      - choice: good
+        effects:
+          - '"Good!" He huffs out before walking on. You feel like you might have said the wrong thing.'
+          - choice: next
+            text: Go somewhere else
+            effects:
+              - sub: /logic/inc_time_of_day
+              - if: time_of_day == "Night"
+                then:
+                  - Unfortunately, you didn't have time to go anywhere else before nightfall.
+                  - choice: camp
+                    text: Set up [[camp]] for the night
+                    effects: /plains/camp
+                else:
+                  - goto: /plains
+      - choice: well
+        effects:
+          - '"I''m glad you didn''t say ''good'', lass. For some reason, that word really gets on my nerve! To show my appreciation, maybe I can share something from my most recent successful expedition?" He gestures at his massive pack of trinkets.'
+          - goto: share
+      - choice: spring
+        effects:
+          - '"Yeah, I''m glad you have that spring in your step, just like I do after my successful expedition. Maybe I can share?" Then, he gestures at his massive pack of trinkets.'
+          - goto: share
+      - choice: fountain
+        effects:
+          - '"Fountain ta meet ya as well! And then he tips an imaginary hat to you. In fact, I just came back from a successful expedition, and am looking to share the loot with others!" He gestures at his massive pack of trinkets.'
+          - goto: share
+      - choice: what
+        effects:
+          - '"What, you ask? The ''what'' is the fact that I just returned from a successful expedition, and I''m looking to share some of my winnings! He gestures at his massive pack of trinkets."'
+          - goto: share
+      - choice: oh
+        effects:
+          - '"Oh? Sorry if I surprised you. I was a bit surprised myself with how successful my most recent expedition was. Maybe I could share?" He gestures at his massive pack of trinkets. Then adds on, "Also, did I frighten you? I hope not."'
+          - choice: "yes"
+            text: You scared me
+            effects:
+              - '"Well, I''m deeply sorry ma''am. I hope you''ll forgive me. Maybe I can share something to apologize."'
+              - goto: share
+          - choice: "no"
+            text: No worries, you didn't scare me
+            effects:
+              - '"Ah, I''m glad!" Says Henry. "Now, maybe you''ll let me ask you something?"'
+              - goto: share
+      - choice: it
+        selectable_once:
+        effects:
+          - '"Glad you''re doing well?" Henry questions. "Wait, what do you mean?"'
+          - choice: appropriate
+            text: Choose a more appropriate respose for poor, confused Henry, who just asked you a polite question.
+            effects:
+              - goto: .
+      - choice: was
+        effects:
+          - '"No, you are! Not was! You''re right there! Unless you''re a ghost?"'
+          - choice: "no"
+            text: No, I'm not a ghost
+            effects:
+              - '"Of course not!" He says. "Ghosts aren''t real, anyways, right?" Then he laughs out loud. Kind of a silly thing to say. Everyone knows ghosts are real. "Well, they shouldn''t be real," Henry continues, his voice turning low and ominous. But then he jolts out of it and says, "Well, I just got back from a very successful adventuring trip. Maybe I can share some trinkets with you?" He gestures at his massive pack of trinkets.'
+              - goto: share
+          - choice: "yes"
+            text: Yes, I'm a ghost
+            effects:
+              - Henry runs away.
+              - choice: next
+                text: Go somewhere else
+                effects:
+                  - sub: /logic/inc_time_of_day
+                  - if: time_of_day == "Night"
+                    then:
+                      - Unfortunately, you didn't have time to go anywhere else before nightfall.
+                      - choice: camp
+                        text: Set up [[camp]] for the night
+                        effects: /plains/camp
+                    else:
+                      - goto: /plains
+          - choice: was
+            text: Just say "was" again
+            effects:
+              - '"Right." Says Henry. He stares at you with a mix of judgement and sadness, then moves on.'
+              - choice: next
+                text: Go somewhere else
+                effects:
+                  - sub: /logic/inc_time_of_day
+                  - if: time_of_day == "Night"
+                    then:
+                      - Unfortunately, you didn't have time to go anywhere else before nightfall.
+                      - choice: camp
+                        text: Set up [[camp]] for the night
+                        effects: /plains/camp
+                    else:
+                      - goto: /plains
+      - choice: a
+        effects:
+          - b
+          - choice: c
+            effects:
+              - d
+              - choice: e
+                effects:
+                  - f
+                  - choice: g
+                    effects:
+                      - h...enry shouts "That was a great game! I love the playfulness. Anyways, I got back from a very successful adventuring trip, and am willing to share some of these trinkets!" He gestures back at his pack of trinkets.
+                      - goto: share
+      - choice: pun
+        effects:
+          - '"Pun? Okay," says Henry. "As a certified Dad, I have plenty! What''s a pirate''s favorite letter?"'
+          - choice: a
+            effects:
+              - '"Grade A answer! But no, they''re actually a lover of the C''s. Get it?" He smirks. "Anyways, I just came back from a successful expedition, and was looking to share some of my trinkets." He gestures back at his pack of trinkets.'
+              - goto: share
+          - choice: c
+            effects:
+              - 'Henry looks a little disappointed. "I guess you''ve heard that one before. That they''re lovers of the C? Anyways, I do have some trinkets to share from a successful expedition if you''d like." He gestures back at his pack of trinkets.'
+              - goto: share
+          - choice: r
+            effects:
+              - '"No! While they appreciate ''r'', they''re actually lovers of the ''c''!" Henry grins cheek to cheek. "Anyways, I just am coming back now from a successful expedition into the later [[layer]]s, with many trinkets to share." He gestures back toward his pack full of trinkets.'
+              - goto: share
+          - choice: w
+            effects:
+              - '"No, but that was truly a ''w'' answer." He smiles. "Pirates are actually, lovers of the ''c''. Get it?" After a brief pause, to let the amazing joke sit, he goes on, "So anyways, I have a ton of trinkets to share from a very successful expedition." He gestures back at his pack full of trinkets.'
+              - goto: share
+      - choice: horrendously_awfully_wonderful
+        effects:
+          - '"Wow, that was quite a rollercoaster of a sentence, miss." Henry says. "But to brighten your day, or make it even better, because honestly I''m still not sure if you were saying it was good or bad, I have some trinkets from a very successful expedition, which I''m very happy to share with you." He gestures at his pack full of trinkets.'
+          - goto: share
+    share:
+      - flag: plains_henry_share_asked
+      - Henry asks, "Would you like a trinket?"
+      - choice: "yes"
+        text: Of course!
+        effects:
+          - He hands you a [[gemstone]]! You got the [[Gemstone of Henry]]. Then, he wanders off and says, "see you next time!"
+          - set: gemstone += 1
+            show:
+          - flag: gemstone_collected_henry
+          - choice: next
+            text: Go somewhere else
+            effects:
+              - sub: /logic/inc_time_of_day
+              - if: time_of_day == "Night"
+                then:
+                  - Unfortunately, you didn't have time to go anywhere else before nightfall.
+                  - choice: camp
+                    text: Set up [[camp]] for the night
+                    effects: /plains/camp
+                else:
+                  - goto: /plains
+      - choice: "no"
+        text: Not really feeling like it
+        effects:
+          - Henry goes "oh" and continues on his way.
+          - choice: next
+            text: Go somewhere else
+            effects:
+              - sub: /logic/inc_time_of_day
+              - if: time_of_day == "Night"
+                then:
+                  - Unfortunately, you didn't have time to go anywhere else before nightfall.
+                  - choice: camp
+                    text: Set up [[camp]] for the night
+                    effects: /plains/camp
+                else:
+                  - goto: /plains
+    already_visited:
+      - if: plains_henry_bring_gift
+        then:
+          - '"Hey, I remembered to bring that trinket! He hands you a [[gemstone]]! You got the [[Gemstone of Henry]]. After a brief chat, you both go your separate ways."'
+          - set: gemstone += 1
+            show:
+          - flag: gemstone_collected_henry
+          - choice: next
+            text: Continue on with your travels
+            effects:
+              - sub: /logic/inc_time_of_day
+              - if: time_of_day == "Night"
+                then:
+                  - Unfortunately, you didn't have time to go anywhere else before nightfall.
+                  - choice: camp
+                    text: Set up [[camp]] for the night
+                    effects: /plains/camp
+                else:
+                  - goto: /plains
+          - stop:
+      - if: not gemstone_collected_henry
+        then:
+          - if: not plains_henry_share_asked
+            then:
+              # In this case, you insulted Henry
+              - choice: apologize
+                text: Apologize to Henry for our last interaction
+                effects:
+                  - It'll take more than just an apology, miss.
+                  - choice: gift
+                    text: Buy his sympathies with a gift
+                    cost: 5 inv_petunal
+                    effects:
+                      - flag: plains_henry_share_asked
+                      - Henry accepts the gift. "By the way, I was going to offer you a trinket. I don't have it with me now, but I could bring it next time." He smiles kindly.
+                      - choice: sure
+                        text: Accept the gift then part ways
+                        effects:
+                          - flag: plains_henry_bring_gift
+                          - sub: /logic/inc_time_of_day
+                          - if: time_of_day == "Night"
+                            then:
+                              - Unfortunately, you didn't have time to go anywhere else before nightfall.
+                              - choice: camp
+                                text: Set up [[camp]] for the night
+                                effects: /plains/camp
+                            else:
+                              - goto: /plains
+                      - choice: nah
+                        text: Reject the gift then part ways
+                        effects:
+                          - sub: /logic/inc_time_of_day
+                          - if: time_of_day == "Night"
+                            then:
+                              - Unfortunately, you didn't have time to go anywhere else before nightfall.
+                              - choice: camp
+                                text: Set up [[camp]] for the night
+                                effects: /plains/camp
+                            else:
+                              - goto: /plains
+                  - choice: nah
+                    text: Henry's not worth that much to me; go somewhere else
+                    effects:
+                      - sub: /logic/inc_time_of_day
+                      - if: time_of_day == "Night"
+                        then:
+                          - Unfortunately, you didn't have time to go anywhere else before nightfall.
+                          - choice: camp
+                            text: Set up [[camp]] for the night
+                            effects: /plains/camp
+                        else:
+                          - goto: /plains
+            else:
+              - choice: change
+                text: Change my mind about the trinket
+                effects:
+                  - flag: plains_henry_bring_gift
+                  - '"Great!" He says. "I don''t have it with me now, but I''ll make sure to have it with me next time!"'
+                  - choice: next
+                    text: Go somewhere else
+                    effects:
+                      - sub: /logic/inc_time_of_day
+                      - if: time_of_day == "Night"
+                        then:
+                          - Unfortunately, you didn't have time to go anywhere else before nightfall.
+                          - choice: camp
+                            text: Set up [[camp]] for the night
+                            effects: /plains/camp
+                        else:
+                          - goto: /plains
+        else:
+          - You chat with Henry for a bit, and in return he flips you a [[coin]]. "Always nice chatting, [[Lily]]!" He says. "I hope you still have that [[gemstone]] I gave you."
+          - set: coin += 1
+            show:
+          - if: woods_squirrel_declared_self_first_human_monarch and not plains_henry_squirrel_asked
+            then:
+              - choice: squirrel
+                text: Ask Henry about his tenure as squirrel king
+                effects:
+                  - flag: plains_henry_squirrel_asked
+                  - He responds, "Oh, it was just a side gig. Had good benefits." Then explains no further.
+                  - choice: next
+                    text: Continue on with your travels
+                    effects:
+                      - sub: /logic/inc_time_of_day
+                      - if: time_of_day == "Night"
+                        then:
+                          - Unfortunately, you didn't have time to go anywhere else before nightfall.
+                          - choice: camp
+                            text: Set up [[camp]] for the night
+                            effects: /plains/camp
+                        else:
+                          - goto: /plains
+          - choice: next
+            text: Continue on with your travels
+            effects:
+              - sub: /logic/inc_time_of_day
+              - if: time_of_day == "Night"
+                then:
+                  - Unfortunately, you didn't have time to go anywhere else before nightfall.
+                  - choice: camp
+                    text: Set up [[camp]] for the night
+                    effects: /plains/camp
+                else:
+                  - goto: /plains
+          - stop:
+      - choice: nah
+        text: Move on
+        effects:
+          - sub: /logic/inc_time_of_day
+          - if: time_of_day == "Night"
+            then:
+              - Unfortunately, you didn't have time to go anywhere else before nightfall.
+              - choice: camp
+                text: Set up [[camp]] for the night
+                effects: /plains/camp
+            else:
+              - goto: /plains
+woods:
+  camp:
+    _image: layer_1_tree_sleep.png
+    _content:
+      - storypoint: camped_in_woods
+      - sub: /logic/reset_encounter_flags
+      - You snuggle up to a tree trunk, its leaves providing protection from any elements that might arise.
+      - if: days_of_equipment_left == 1
+        then:
+          - choice: return
+            text: Return to the [[orphan]]age now that you're out of [[equipment]]
+            effects:
+              - sub: /logic/inc_time_of_day
+              - sub: /logic/inc_day
+              - goto: /return
+        else:
+          - choice: next
+            text: Go on to the next day
+            effects:
+              - sub: /logic/inc_time_of_day
+              - sub: /logic/inc_day
+              - goto: ..
+  _content:
+    - storypoint: woods
+    - sub: /logic/reset_encounter_flags
+    - if: days_passed - last_time_cursed < 7
+      then:
+        - random:
+            1 lost:
+              - You get lost in the woods for some time on account of your bad luck.
+              - sub: /logic/inc_time_of_day
+              - choice: continue
+                text: Travel elsewhere
+                effects:
+                  - sub: /logic/inc_time_of_day
+                  - if: time_of_day == "Night"
+                    then:
+                      - Unfortunately, you didn't have time to go anywhere else before nightfall.
+                      - choice: camp
+                        text: Set up [[camp]] for the night
+                        effects: /woods/camp
+                    else:
+                      - goto: /woods
+            9 not:
+              - pass:
+    - random:
+        1 treehouse:
+          - if: last_place_visited == "treehouse"
+            then:
+              - goto: .
+          - set: last_place_visited = "treehouse"
+          - if: not woods_visited_treehouse
+            then:
+              - flag: woods_visited_treehouse
+              - set: visited_woods += 1
+          - storypoint: treehouse
+          - goto: treehouse
+        1 giants:
+          - if: last_place_visited == "giants"
+            then:
+              - goto: .
+          - set: last_place_visited = "giants"
+          - if: not woods_visited_giants
+            then:
+              - flag: woods_visited_giants
+              - set: visited_woods += 1
+          - storypoint: giants
+          - goto: giants
+        1 squirrel:
+          - if: last_place_visited == "squirrel"
+            then:
+              - goto: .
+          - set: last_place_visited = "squirrel"
+          - if: not woods_visited_squirrel
+            then:
+              - flag: woods_visited_squirrel
+              - set: visited_woods += 1
+          - storypoint: squirrel
+          - goto: squirrel
+        1 key_shop:
+          - if: last_place_visited == "key_shop"
+            then:
+              - goto: .
+          - set: last_place_visited = "key_shop"
+          - if: not woods_visited_key_shop
+            then:
+              - flag: woods_visited_key_shop
+              - set: visited_woods += 1
+          - storypoint: key_shop
+          - goto: key_shop
+        1 library:
+          - if: last_place_visited == "library"
+            then:
+              - goto: .
+          - set: last_place_visited = "library"
+          - if: not woods_visited_library
+            then:
+              - flag: woods_visited_library
+              - set: visited_woods += 1
+          - storypoint: library
+          - goto: library
+        1 converter:
+          - if: last_place_visited == "converter"
+            then:
+              - goto: .
+          - set: last_place_visited = "converter"
+          - if: not woods_visited_converter
+            then:
+              - flag: woods_visited_converter
+              - set: visited_woods += 1
+          - storypoint: converter
+          - goto: converter
+        1 blacksmith:
+          - if: last_place_visited == "blacksmith"
+            then:
+              - goto: .
+          - set: last_place_visited = "blacksmith"
+          - if: not woods_visited_blacksmith
+            then:
+              - flag: woods_visited_blacksmith
+              - set: visited_woods += 1
+          - storypoint: blacksmith
+          - goto: blacksmith
+  treehouse:
+    _image: layer_1_treehouse.png
+    affirmation:
+      - random:
+          aff1:
+            - <i>You are beautiful, and will be beautiful no matter how you look on the outside.</i>
+          aff2:
+            - <i>You don't need to complete anything to have self-worth. Self worth is who you are, not what you do.</i>
+          aff3:
+            - <i>You are loved.</i>
+          aff4:
+            - <i>People like to see you.</i>
+          aff5:
+            - <i>You are never alone... you always have yourself.</i>
+          aff6:
+            - <i>Your differences are quirks, not weirds.</i>
+          aff7:
+            - <i>When dogs wag their tail at you, that's genuine.</i>
+          aff8:
+            - <i>Red hair best hair.</i>
+          aff9:
+            - <i>You've come so far.</i>
+          aff10:
+            - <i>Keep on going where you're going, cuz you're gonna go far.</i>
+          aff11:
+            - <i>You matter.</i>
+          aff12:
+            - <i>I believe in you.</i>
+      - subreturn:
+    _content:
+      - if: _visits == 1
+        then:
+          - You find a clearing with a big tree in the center that would be perfect for a treehouse. You just need building materials.
+        else:
+          - You come across that perfect-treehouse-tree-in-the-middle-of-a-clearing-with-a-lot-of-dashes again.
+      - if: woods_treehouse_lemen_garden_built
+        then:
+          - You pluck a [[lemen]] from the garden you built here!
+          - set: inv_lemens += 1
+            show:
+      - goto: choice
+    choice:
+      - if: woods_treehouse_wall_fell and treehouse_wall_level == 0
+        then:
+          - Patroling your domain just isn't the same when you have to step around all the rubble of your previous magnificent wall.
+      - if: treehouse_wall_level == 1
+        then:
+          - if: not woods_treehouse_wall_fell
+            then:
+              - You feel a little safer in your treehouse, surrounded by your hastily made wall.
+            else:
+              - You feel a little safer in your treehouse, surrounded by your wall, which is built slightly better than last time.
+      - if: treehouse_wall_level == 2
+        then:
+          - if: not woods_treehouse_wall_fell
+            then:
+              - Although being up high in a treehouse definitely helps, its the ten-foot wall you've been working on that surrounds the clearing which makes you feel the most safe in here, in your little dominion.
+            else:
+              - Although being up high in a treehouse definitely helps, its the ten-foot wall you've been working on that surrounds the clearing which makes you feel the most safe in here, in your little dominion. You're happy that you rebuilt it.
+      - if: treehouse_wall_level == 3
+        then:
+          - if: not woods_treehouse_wall_fell
+            then:
+              - The well-built border wall surrounding [[Lily]]land's treehouse clearing comforts you. No one is getting past that thing. Some people might call it excessive, or unstable, but those people are on the outside of your wall, so do their opinions even matter?
+            else:
+              - The well-built border wall surrounding [[Lily]]land's treehouse clearing comforts you. No one is getting past that thing. You should probably stop now, though. You don't want it to fall over again.
+      - if: treehouse_wall_level == 4
+        then:
+          - if: not woods_treehouse_wall_fell
+            then:
+              - Even when you climb the Fortress of [[Lily]]land (the name for what others would call your treehouse), it's hard to see over your wall. It sways in the wind, threatening to fall over. You know those are empty threats, though. Your building skills are impeccable. Why would you be so silly as to make a wall that's about to fall over if you add one more level to it?
+            else:
+              - You look up at the massive wall you've built... for the second time. Do you really think your building skills are better this time? It's probably fine for now, and at least you feel safe within your walls.
+      - if: treehouse_wall_level == 5
+        then:
+          - As you're conducting your normal patrol around [[Lily]]land, a particularly strong gust of wind blows through the trees, and the wall starts leaning a little farther toward you than you're comfortable with.
+          - choice: uhoh
+            text: Have my building skills failed me?.. No, that's impossible!
+            effects: wall_fall
+          - stop:
+      - if: not woods_treehouse_affirmation_station_built
+        then:
+          - choice: affirmation
+            text: Build an affirmation station, which will give you a positive affirmation each time you return to the [[orphan]]age
+            cost: 1 inv_building_materials
+            effects:
+              - flag: woods_treehouse_affirmation_station_built
+              - The affirmation station is a bit cobbled together. Maybe you're not so good at building after all. But then the affirmation station comes to save your spirits!
+              - sub: /woods/treehouse/affirmation
+              - sub: /logic/inc_time_of_day
+              - if: time_of_day == "Night"
+                then:
+                  - Unfortunately, you can't fit any more building in before nighttime.
+                  - choice: camp
+                    text: Set up [[camp]] for the night
+                    effects: /woods/camp
+                else:
+                  - separator:
+                  - goto: .
+      - if: not woods_treehouse_lemen_garden_built
+        then:
+          - choice: lemen_garden
+            text: Build a lemen garden at the base of the tree (gives a [[lemen]] each time you visit the treehouse)
+            cost: 1 inv_lemens, 2 inv_building_materials
+            effects:
+              - flag: woods_treehouse_lemen_garden_built
+              - It's a really cute garden. Aunt Petunia, owner of the garden shop back home, would honestly be low key proud!
+              - sub: /logic/inc_time_of_day
+              - if: time_of_day == "Night"
+                then:
+                  - Unfortunately, you can't fit any more building in before nighttime.
+                  - choice: camp
+                    text: Set up [[camp]] for the night
+                    effects: /woods/camp
+                else:
+                  - separator:
+                  - goto: .
+      - if: not woods_treehouse_training_dummy_built
+        then:
+          - choice: training_dummy
+            text: Build a training dummy on one of the tree branches to help you fight better
+            cost: 3 inv_building_materials
+            shown: 7 skill_fighting
+            effects:
+              - flag: woods_treehouse_training_dummy_built
+              - The training dummy trains you well!
+              - sub: /logic/inc_time_of_day
+              - if: time_of_day == "Night"
+                then:
+                  - Unfortunately, you can't fit any more building in before nighttime.
+                  - choice: camp
+                    text: Set up [[camp]] for the night
+                    effects: /woods/camp
+                else:
+                  - separator:
+                  - goto: .
+      - if: not woods_treehouse_moat_dug
+        then:
+          - choice: moat
+            text: Dig a moat and wall around the big tree
+            cost: 2 inv_building_materials
+            require: 3 tool_shovel
+            effects:
+              - flag: woods_treehouse_moat_dug
+              - set: treehouse_wall_level += 1
+              - While digging, you find a [[gemstone]]! You get the [[Gemstone of Paranoia]].
+              - set: gemstone += 1
+                show:
+              - flag: gemstone_collected_paranoia
+              - sub: /logic/inc_time_of_day
+              - if: time_of_day == "Night"
+                then:
+                  - Unfortunately, you can't fit any more building in before nighttime.
+                  - choice: camp
+                    text: Set up [[camp]] for the night
+                    effects: /woods/camp
+                else:
+                  - separator:
+                  - goto: .
+      - if: treehouse_wall_level == 0 and woods_treehouse_wall_fell
+        then:
+          - choice: rebuild
+            text: Clear the rubble and rebuild your wall
+            cost: 1 inv_building_materials
+            effects:
+              - Maybe this time you'll have more restraint?
+              - set: treehouse_wall_level += 1
+              - sub: /logic/inc_time_of_day
+              - if: time_of_day == "Night"
+                then:
+                  - Unfortunately, you can't fit any more building in before nighttime.
+                  - choice: camp
+                    text: Set up [[camp]] for the night
+                    effects: /woods/camp
+                else:
+                  - separator:
+                  - goto: .
+      - if: woods_treehouse_moat_dug and treehouse_wall_level >= 1
+        then:
+          - choice: wall
+            text: Increase the size of your treehouse's wall
+            cost: (treehouse_wall_level + 1) inv_building_materials
+            effects:
+              - if: not woods_treehouse_wall_fell
+                then:
+                  - Staring up at your wall, you feel like it still isn't tall enough.
+                else:
+                  - Staring up at your wall, you feel like it still isn't tall enough. But knowing what happened last time, maybe that's okay.
+              - set: treehouse_wall_level += 1
+              - sub: /logic/inc_time_of_day
+              - if: time_of_day == "Night"
+                then:
+                  - Unfortunately, you can't fit any more building in before nighttime.
+                  - choice: camp
+                    text: Set up [[camp]] for the night
+                    effects: /woods/camp
+                else:
+                  - separator:
+                  - goto: .
+      # Building things that give gemstones
+      - choice: scavenge
+        text: Scavenge for building materials
+        shown: 1 inv_building_materials
+        effects:
+          - It's not as many as you would have gotten from somewhere else, but it's something!
+          - sub: /logic/inc_time_of_day
+          - if: time_of_day == "Night"
+            then:
+              - After your scavenging, the Sun starts to set and it gets time to set up camp.
+              - choice: camp
+                text: Set up [[camp]] for the night
+                effects: /woods/camp
+            else:
+              - separator:
+              - goto: .
+      - choice: nah
+        text: Travel elsewhere
+        effects:
+          - sub: /logic/inc_time_of_day
+          - if: time_of_day == "Night"
+            then:
+              - Unfortunately, you didn't have time to go anywhere else before nightfall.
+              - choice: camp
+                text: Set up [[camp]] for the night
+                effects: /woods/camp
+            else:
+              - goto: /woods
+    wall_fall:
+      _content:
+        - The wall makes a giant creaking sound, then a whoosh as it rushes toward the ground straight in your direction!
+        - flag: woods_treehouse_wall_fell
+        - set: treehouse_wall_level = 0
+        - if: days_passed - last_time_cursed < 7
+          then:
+            # IDEA: Put this in the journal (and the wall in general) when I work on that/do a journal
+            - Of course, it's just your cursed luck that the wall falls straight on you. You survive only on account of your plot armor, but lose half your athletic and fighting skill due to your injuries. You also have to go straight to [[camp]] to mend your injuries.
+            - set: skill_athleticism -= floor(skill_athleticism / 2)
+              show:
+            - set: skill_fighting -= floor(skill_fighting / 2)
+              show:
+            - set: time_of_day = "Night"
+            - goto: /woods/camp
+          else:
+            - Luckily, you're standing right where a hole in the wall you built as a window is. What are the chances? You escape unscathed, but the wall is gone.
+            - separator:
+            - goto: choice
+  giants:
+    _image: layer_1_giant.png
+    _content:
+      # IDEA: Are giants dynamic at all? Do they leave, when you've "defeated" them?
+      - if: time_of_day == "Morning"
+        then:
+          - You come across some sleeping giants. Luckily, they just threw a party and are slumbering the morning away. But you better be quiet, and you better be out of here by the time afternoon hits.
+          - if: researched_observation
+            then:
+              - if: not gemstone_collected_sanity
+                then:
+                  - With your powers of observation, you feel like there's something shiny inside one of the giants' noses.
+                else:
+                  - With your powers of observation, you feel like there's nothing more inside that one giant's nose.
+          - choice: loot
+            text: Loot their partying grounds for useful items
+            shown: 1 inv_torch, 2 inv_building_materials
+            effects:
+              - There is a still-smoldering torch that you are able to salvage for future use, as well as some building materials that the giants were using as party hats. You make your way out of the area as quickly and silently as possible afterward.
+              - sub: /logic/inc_time_of_day
+              - choice: next
+                text: Go somewhere else
+                effects: /woods
+          - choice: rosalia
+            text: Gather some [[rosalia]] from the partying grounds that was being used as decoration
+            shown: 5 inv_rosalia
+            effects:
+              - You gather up a bunch of the flowers, and then hurry off before they can wake up.
+              - sub: /logic/inc_time_of_day
+              - choice: next
+                text: Go somewhere else
+                effects: /woods
+          - choice: poke
+            text: Poke one the giant's eyes
+            effects:
+              - You work up the courage to walk up to one of the giants and poke its eyelid. Luckily for you, the giant is still sound asleep. But you start to realize that this was a very bad idea. Why are you doing this? You leave immediately.
+              - sub: /logic/inc_time_of_day
+              - choice: next
+                text: Go somewhere else
+                effects: /woods
+          - choice: tickle
+            text: Tickle one of the giant's noses with a [[rosalia]]
+            require: 1 inv_rosalia
+            effects:
+              - if: not gemstone_collected_snot
+                then:
+                  - The giant sneezes a [[gemstone]], then flops back to the floor, sound asleep. They must have gone really hard at their party. Probably still shouldn't stick around though. You collected the [[Gemstone of Snot]]!
+                  - set: gemstone += 1
+                    show:
+                  - flag: gemstone_collected_snot
+                  - sub: /logic/inc_time_of_day
+                  - choice: next
+                    text: Go somewhere else
+                    effects: /woods
+                else:
+                  - if: not gemstone_collected_sanity
+                    then:
+                      - The giant sneezes a different [[gemstone]], then flops back to the floor, just like last time. Wait, is this how you get all the rest of the gemstones? Uh, alright. Anyways, you pick up the gemstone that the giant sneezed out. They say insanity is doing the same thing twice and expecting different results. But this time you expected the same result, so maybe you're just being sane? You collected [[Gemstone of Sanity]].
+                      - set: gemstone += 1
+                        show:
+                      - flag: gemstone_collected_sanity
+                      - sub: /logic/inc_time_of_day
+                      - choice: next
+                        text: Go somewhere else
+                        effects: /woods
+                    else:
+                      - 'Something insane happens this time... The giant wakes up! And it''s not exactly happy about what you''re doing. Who would have guessed that could happen? Anyways, you should probably get familiar with the "revert" command at this moment. (Hint: type ''revert'' into the command line and press enter to undo this horrible decision).'
+        else:
+          - You see a few giants' heads poking up from the treetops in the distance. You should probably head the other direction.
+          - if: gemstone_collected_stupidity
+            then:
+              - They probably won't go as nice on you this time...
+          - choice: fight
+            text: Fight the giants; note that you WILL lose if you have fewer than 40 fighting skill... I'm still allowing you to make the choice to fight them, but I don't see why you would fight a frickin' giant!
+            effects:
+              - if: skill_fighting < 40
+                then:
+                  - You die.
+                  - What did you think would happen?
+                  - "Hint: typing 'revert' into the command line and pressing enter can be used for undoing stupid decisions."
+                else:
+                  - if: gemstone_collected_stupidity
+                    then:
+                      - The giants aren't playing this time. I would recommend not going down this path...
+                      - choice: okay
+                        text: Wait, this is the only option? You're going to make me make good decisions? Preposterous!
+                        effects: .
+                    else:
+                      - You somehow survive the encounter, but I wouldn't go so far as to say you won. Simply that the giants decided you were too much trouble to eat.
+                      - The giants left behind a [[gemstone]]. Ironically, it is very small. You collect the [[Gemstone of Stupidity]].
+                      - set: gemstone += 1
+                        show:
+                      - flag: gemstone_collected_stupidity
+                      - sub: /logic/inc_time_of_day
+                      - if: time_of_day == "Night"
+                        then:
+                          - Unfortunately, you didn't have time to go anywhere else before nightfall.
+                          - choice: camp
+                            text: Set up [[camp]] for the night
+                            effects: /woods/camp
+                        else:
+                          - choice: next
+                            text: Continue on
+                            effects: /woods
+      - choice: nah
+        text: Travel elsewhere
+        effects:
+          - sub: /logic/inc_time_of_day
+          - if: time_of_day == "Night"
+            then:
+              - Unfortunately, you didn't have time to go anywhere else before nightfall.
+              - choice: camp
+                text: Set up [[camp]] for the night
+                effects: /woods/camp
+            else:
+              - goto: /woods
+  squirrel:
+    _image: layer_1_squirrel.png
+    _vars:
+      - acorns_given: 0
+    _content:
+      # IDEA: Get something from getting into the territory so that you don't have to defeat gang/bribe with acorn/etc. just to be met with another challenge
+      - if: woods_squirrel_king_defeated
+        then:
+          - You come across your loyal squirrel subjects again. They lead you to the heart of your territory.
+          - goto: territory_yours
+      - if: woods_squirrel_won_dominance_fight
+        then:
+          - You end up in squirrel territory. A gang of squirrels appears and escorts you to the heart of their territory as a sign of fear and respect.
+          - goto: territory
+      - You come across a gang of squirrels. "This is our territory, you should leave!"
+      # You can fight for the acorns back, though they are NOT renewable
+      - choice: pacify
+        text: Pacify the squirrels with an [[acorn]]
+        cost: 1 inv_acorn
+        effects:
+          - set: acorns_given += 1
+          - goto: territory
+      - choice: duel
+        text: Duel the gang leader for entrance to his territory
+        require: 5 skill_fighting
+        effects:
+          - sub: /logic/inc_time_of_day
+          - if: time_of_day == "Night"
+            then:
+              # IDEA: Still have ability to talk to king after the duel with gang (it's not like that takes time)
+              - Unfortunately, you didn't have time to do anything else after fighting the leader.
+              - choice: camp
+                text: Set up [[camp]] for the night
+                effects: /woods/camp
+            else:
+              - goto: territory
+      - choice: fight
+        text: Fight the whole gang to assert your dominance
+        require: 10 skill_fighting
+        effects:
+          - flag: woods_squirrel_won_dominance_fight
+          - sub: /logic/inc_time_of_day
+          - if: time_of_day == "Night"
+            then:
+              - Unfortunately, you didn't have time to do anything else after fighting the leader.
+              - choice: camp
+                text: Set up camp for the night
+                effects: /woods/camp
+            else:
+              - goto: territory
+      - choice: nah
+        text: Travel elsewhere
+        effects:
+          - sub: /logic/inc_time_of_day
+          - if: time_of_day == "Night"
+            then:
+              - Unfortunately, you didn't have time to go anywhere else before nightfall.
+              - choice: camp
+                text: Set up [[camp]] for the night
+                effects: /woods/camp
+            else:
+              - goto: /woods
+    territory:
+      - You are greeted by the squirrel king, who is so fat that his throne might as well be sitting on him. He demands [[acorn]]s.
+      - if: researched_observation
+        then:
+          - Through your powers of observation, you get the sense that if you were to try defeating him, defeating his gang alone first would make it much easier.
+      - goto: territory_choice
+    territory_choice:
+      - choice: sell
+        text: Sell an acorn for [[coin]]s
+        cost: 1 inv_acorn
+        shown: 5 coin
+        effects:
+          - set: acorns_given += 1
+          - set: coin -= 5
+          - if: _visits == 1
+            then:
+              - The squirrel king takes the [[acorn]] and then laughs at you. "You think a squirrel like me would harbor human currency? Silly girl!"
+            else:
+              - The squirrel king chuckles and comments about your gullibility to his followers.
+          - goto: .
+      - choice: crown
+        text: Buy the crown from the king for acorns
+        cost: 3 inv_acorn
+        effects:
+          - set: acorns_given += 3
+          - '"Ha! I''m not giving this up. Thanks for the [[acorn]]s though."'
+          - goto: .
+      - if: not woods_squirrel_won_dominance_fight
+        then:
+          - choice: fight
+            text: Fight the king and his gang at once to get all your [[acorn]]s back
+            require: 20 skill_fighting
+            shown: (acorns_given) inv_acorn
+            effects:
+              - You get all your acorns back!
+              - goto: acorns_back
+        else:
+          - choice: duel
+            text: Duel the king one on one to get all your acorns back (the gang will stand aside out of respect and fear of you)
+            require: (0) skill_fighting
+            shown: (acorns_given) inv_acorn
+            effects:
+              - The king was honestly not a challenge... You get all your [[acorn]]s back!
+              - goto: acorns_back
+      # IDEA: More acorn-based choices? Or other such choices
+      - choice: leave
+        text: Travel elsewhere
+        effects:
+          - sub: /logic/inc_time_of_day
+          - if: time_of_day == "Night"
+            then:
+              - Unfortunately, you didn't have time to go anywhere else before nightfall.
+              - choice: camp
+                text: Set up [[camp]] for the night
+                effects: /woods/camp
+            else:
+              - goto: /woods
+    # A gem for getting all your acorns back!
+    acorns_back:
+      - flag: woods_squirrel_king_defeated
+      - set: acorns_given = 0
+      - Squirrels crowd around you, shouting "New King! New King! New King!" You notice the old squirrel king being carried off by 15 of his previous subjects, and promptly being defenestrated. It seems you have gotten a lot more than just your acorns. A small squirrel bows beneath you and holds up a crown. Hey, it has a [[gemstone]] in it! You collected the [[Gemstone of Royalty]].
+      - set: gemstone += 1
+        show:
+      - flag: gemstone_collected_royalty
+      - sub: /logic/inc_time_of_day
+      - if: time_of_day == "Night"
+        then:
+          - Unfortunately, you didn't have time to go anywhere else before nightfall.
+          - choice: camp
+            text: Set up [[camp]] for the night
+            effects: /woods/camp
+        else:
+          - goto: territory_yours
+    # For when you own the squirrel territory
+    territory_yours:
+      # IDEA: Ability to grow squirrel-kind or smth, maybe squirrel army
+      - Your squirrel subjects await orders anxiously.
+      - choice: vault
+        selectable_once:
+        text: Open the old king's vault
+        require: 1 key_vault
+        effects:
+          - Although you have the one key to start the process, there are many other lock mechanisms in place that must be completed by your (easily distractable) squirrel subjects. It takes a good chunk of a day for the vault to get opened. But once it is, it turns out that the old squirrel king was quite rich.
+          - set: coin += 21
+            show:
+          - sub: /logic/inc_time_of_day
+          - if: time_of_day == "Night"
+            then:
+              - Unfortunately, you now have to depart to set up camp.
+              - choice: camp
+                text: Set up [[camp]] for the night
+                effects: /woods/camp
+            else:
+              - separator:
+              - goto: .
+      - if: not woods_squirrel_declared_self_first_human_monarch
+        then:
+          - choice: declare
+            text: Declare yourself [[Lily]], first human ruler of the squirrels
+            effects:
+              - flag: woods_squirrel_declared_self_first_human_monarch
+              - All the squirrels bow in awe of you, their glorious leader. Chittering fills the air as they hail your name. Then, a tiny member of the squirrel youth in the back pipes up, "Well, we've already had a human ruler. His name was Henry!"
+              - choice: oh
+                text: Acknowledge yourself instead as the first human queen of the squirrels
+                effects:
+                  - The squirrels continue to bow, but change their chant to involve the word "queen" rather than ruler.
+                  - separator:
+                  - goto: .
+              - choice: execute
+                text: Deal with the offender in a reasonable and just way
+                effects:
+                  - You learn that the squirrel who defied you is named Timothy. You also learn the name of his parents, his closest friends, and even his pet roly-poly. As a show of the kind type of ruler you are, you give them each an [[acorn]], with instructions to bury the acorn as deep as possible in the ground for later. Just as they're covering the hole up, you have your guards kick them in, and fill in the hole. What a just punishment!
+                  - separator:
+                  - goto: .
+      # IDEA: Ability to do self-aggrandizing acts
+      - choice: nah
+        text: Travel elsewhere
+        effects:
+          - sub: /logic/inc_time_of_day
+          - if: time_of_day == "Night"
+            then:
+              - Unfortunately, you didn't have time to go anywhere else before nightfall.
+              - choice: camp
+                text: Set up [[camp]] for the night
+                effects: /woods/camp
+            else:
+              - goto: /woods
+  key_shop:
+    _image: layer_1_key_shop.png
+    _vars:
+      - cost_multiplier: 4
+      - amount_rosalia: 32
+      - amount_on_sign: 32
+      - curr_winner: Me
+    _content:
+      - unflag: woods_key_shop_saw_changed_sign
+      # Sorta randomly increase the shopkeepers amount of rosalia per visit
+      # He doesn't ever get more after getting at least 80 though
+      - if: amount_rosalia < 80
+        then:
+          - set: amount_rosalia += days_passed % 5 + 2
+      - set: cost_multiplier = 4
+      - if: amount_rosalia > amount_on_sign and curr_winner != "Me"
+        then:
+          - unflag: woods_key_shop_is_sign_winner
+          - set: curr_winner = "Me"
+          - set: amount_on_sign = amount_rosalia
+          - flag: woods_key_shop_changed_sign
+      - if: curr_winner == "Me"
+        then:
+          - set: amount_on_sign = amount_rosalia
+      - 'A manly dude with curly chest hairs and a dapper top hat greets you to his shop. "Everyone knows a beautiful flower is the key to winning someone''s heart. Well, if you give me flowers, I will give you keys to actual buildings!"'
+      - if: days_passed - last_time_cursed < 7
+        then:
+          - Due to your bad luck, you spill water on the man's best shirt, so he increases his prices higher than normal!
+          - set: cost_multiplier += 3
+      - goto: choice
+    choice:
+      - choice: haggle
+        text: Spend some time haggling down the prices
+        effects:
+          - set: cost_multiplier -= 1.5
+          - sub: /logic/inc_time_of_day
+          - if: time_of_day == "Night"
+            then:
+              - Unfortunately, in all your haggling, you lose track of time and night comes. The shopkeeper throws you out so he can sleep.
+              - choice: camp
+                text: Set up [[camp]] for the night
+                effects: /woods/camp
+            else:
+              - goto: .
+      - choice: vault
+        selectable_once:
+        text: Buy a key to a vault
+        cost: (ceil(7.5 * cost_multiplier)) inv_lemens
+        shown: 1 key_vault
+        effects:
+          - goto: .
+      - choice: key_maintenance
+        selectable_once:
+        text: Buy a key to a maintenance room
+        cost: (ceil(5 * cost_multiplier)) inv_rosalia
+        shown: 1 key_maintenance
+        effects:
+          - set: amount_rosalia += ceil(5 * cost_multiplier)
+          - goto: .
+      - choice: key_skeleton
+        selectable_once:
+        text: Buy a skeleton key
+        cost: (ceil(3 * cost_multiplier)) inv_petunal
+        shown: 1 key_skeleton
+        effects:
+          - goto: .
+      - choice: sign
+        text: Read the sign above him
+        effects:
+          - flag: woods_key_shop_read_sign
+          - '"Person with most [[rosalia]] in the world: {curr_winner} (with {amount_on_sign} rosalia)"'
+          - if: woods_key_shop_changed_sign
+            then:
+              - flag: woods_key_shop_saw_changed_sign
+          - goto: .
+      # IDEA: A benefit to having the most rosalia somewhere
+      - if: woods_key_shop_read_sign
+        then:
+          - if: woods_key_shop_saw_changed_sign
+            then:
+              - choice: huh
+                selectable_once:
+                text: Ask why his name is up there when yours was up there before
+                effects:
+                  - '"Well, I got more [[rosalia]] than what was up there," He says. "If you''ve gotten even more rosalia than that in the meantime, however, you can just let me know and I''ll update it. Just gotta let me know!"'
+                  - goto: .
+          - if: curr_winner != "[[Lily]]"
+            then:
+              - choice: score
+                text: Ask him to update his sign with my name
+                require: (amount_rosalia + 1) inv_rosalia
+                effects:
+                  - flag: woods_key_shop_is_sign_winner
+                  - unflag: woods_key_shop_changed_sign
+                  - set: curr_winner = "[[Lily]]"
+                  - set: amount_on_sign = inv_rosalia
+                  - if: inv_rosalia > 100
+                    then:
+                      - set: amount_on_sign = "excessive amounts of"
+                  - '"Sure thing, boss!" It now says, "Person with most [[rosalia]] in the world: {curr_winner} (with {amount_on_sign} rosalia)"'
+                  - goto: .
+            else:
+              - if: amount_on_sign != inv_rosalia
+                then:
+                  - choice: score
+                    text: Ask him to update his sign with my new amount of [[rosalia]]
+                    effects:
+                      - if: amount_rosalia > inv_rosalia
+                        then:
+                          - unflag: woods_key_shop_is_sign_winner
+                          - set: curr_winner = "Me"
+                          - set: amount_on_sign = amount_rosalia
+                          - 'He says, "Sure thing! I''ll update the name, too, since it seems that might have changed as well..." The sign now says, "Person with most [[rosalia]] in the world: {curr_winner} (with {amount_on_sign} rosalia)"'
+                          - goto: .
+                        else:
+                          - flag: woods_key_shop_is_sign_winner
+                          - unflag: woods_key_shop_changed_sign
+                          - set: amount_on_sign = inv_rosalia
+                          - if: inv_rosalia > 100
+                            then:
+                              - set: amount_on_sign = "excessive amounts of"
+                          - 'He writes the new amount on the sign. It now says, "Person with most [[rosalia]] in the world: {curr_winner} (with {amount_on_sign} rosalia)"'
+                          - goto: .
+      - choice: nah
+        text: Travel elsewhere
+        effects:
+          - sub: /logic/inc_time_of_day
+          - if: time_of_day == "Night"
+            then:
+              - Unfortunately, you didn't have time to go anywhere else before nightfall.
+              - choice: camp
+                text: Set up [[camp]] for the night
+                effects: /woods/camp
+            else:
+              - goto: /woods
+  library:
+    _image: orphanage_study.png
+    _vars:
+      - temp_book_type: book
+    _content:
+      - random:
+          soft_cover:
+            - You come across a huge library. It smells like books. Soft cover books. Not hard cover books. This is the wrong library for hard cover books. That library is in a different spot. Also, the room is saturated with the rich odor of parchment. Soft cover book parchment, specifically. (Yes, there is a difference, trust me).
+            - set: temp_book_type = "soft-cover textbook"
+          hard_cover:
+            - You come across a huge library. It smells like books. Hard cover books. Not soft cover books. This is the wrong library for hard cover books. That library is in a different spot. Also, the room is saturated with the rich odor of parchment. Hard cover book parchment, specifically. (Yes, there is a difference, trust me).
+            - set: temp_book_type = "textbook"
+      - goto: choice
+    choice:
+      - What do you do while at the library?
+      - choice: catalog
+        text: View the catalog
+        effects:
+          - A {temp_book_type} on botany, titled "Flowers, for Idiots", by Emerald Lemsen.
+          - A {temp_book_type} on writing, titled "Getting over Writer's Block". The pages are all empty. The author is Kellan127.
+          - if: not killed_observation_authors
+            then:
+              - flag: read_catalog
+              - A {temp_book_type} on observation, titled "How to Observe", which includes a foreword about how redheads aren't born with the natural ability to observe things well, so they shouldn't bother reading an advanced book like this. As a redhead, you take personal offense to this. It also says the two authors live happily in a town not too far from the [[orphan]]age...
+            else:
+              - A {temp_book_type} on observation, titled "How to Observe", which includes a foreword about how redheads aren't born with the natural ability to observe things well, so they shouldn't bother reading an advanced book like this. You happen to know that the two authors are recently deceased.
+          - separator:
+          - goto: .
+      - if: not researched_botany
+        then:
+          - choice: botany
+            text: Read the {temp_book_type} about botany
+            cost: 3 inv_rosalia
+            effects:
+              - flag: researched_botany
+              - You learn some drawbacks to your old way to gathering [[rosalia]]. Getting around them allows your gathering skill to now increase without bound. You also learn some tips that allow you to gather it better.
+              - set: skill_gather_rosalia += 2
+                show:
+              - sub: /logic/inc_time_of_day
+              - if: time_of_day == "Night"
+                then:
+                  - Unfortunately, you don't have time to do any more research before nightfall.
+                  - choice: camp
+                    text: Set up [[camp]] for the night
+                    effects: /woods/camp
+                else:
+                  - separator:
+                  - goto: .
+      - if: not researched_writing
+        then:
+          - choice: writing
+            text: Read the {temp_book_type} about writing, which doesn't do anything right now
+            cost: 5 inv_rosalia
+            effects:
+              - flag: researched_writing
+              - The book is blank, so it doesn't teach you anything. You still spend quite a bit of time flipping through the blank pages, however.
+              - sub: /logic/inc_time_of_day
+              - if: time_of_day == "Night"
+                then:
+                  - Unfortunately, you don't have time to do any more research before nightfall.
+                  - choice: camp
+                    text: Set up [[camp]] for the night
+                    effects: /woods/camp
+                else:
+                  - separator:
+                  - goto: .
+      - if: not researched_observation
+        then:
+          # IDEA: More things that observation helps with
+          - choice: observation
+            text: Read the {temp_book_type} about observation, which will allow you to get hints about the world around you
+            cost: 6 inv_rosalia
+            effects:
+              - flag: researched_observation
+              - You can feel your awareness heighten as you learn new tips about observing the world around you.
+              - sub: /logic/inc_time_of_day
+              - if: time_of_day == "Night"
+                then:
+                  - Unfortunately, you don't have time to do any more research before nightfall.
+                  - choice: camp
+                    text: Set up [[camp]] for the night
+                    effects: /woods/camp
+                else:
+                  - separator:
+                  - goto: .
+      - if: not researched_riveting_story
+        then:
+          - choice: riveting
+            text: Read the riveting {temp_book_type}, a not-so-well-known hidden gem of a book that with some of the most beautiful prose you've ever seen
+            cost: 8 inv_rosalia
+            effects:
+              - flag: researched_riveting_story
+              - You find a hidden [[gemstone]] inside the book. Who would have guessed? You collected the [[Gemstone of Eloquence]].
+              - flag: gemstone_collected_eloquence
+              - set: gemstone += 1
+                show:
+              - sub: /logic/inc_time_of_day
+              - if: time_of_day == "Night"
+                then:
+                  - Unfortunately, you don't have time to do any more research before nightfall.
+                  - choice: camp
+                    text: Set up [[camp]] for the night
+                    effects: /woods/camp
+                else:
+                  - separator:
+                  - goto: .
+      # Check if they've researched everything, and if so provide a special research
+      - if: _num_choices == 1
+        then:
+          - You researched everything? Nerd.
+          - choice: read
+            text: Read for fun, like a nerd
+            effects:
+              - Nerds are well-known for their fighting prowess.
+              - set: skill_fighting += 5
+                show:
+              - sub: /logic/inc_time_of_day
+              - if: time_of_day == "Night"
+                then:
+                  - Unfortunately, you don't have time to do any more research before nightfall.
+                  - choice: camp
+                    text: Set up [[camp]] for the night
+                    effects: /woods/camp
+                else:
+                  - separator:
+                  - goto: .
+      - choice: nah
+        text: Travel elsewhere
+        effects:
+          - sub: /logic/inc_time_of_day
+          - if: time_of_day == "Night"
+            then:
+              - Unfortunately, you didn't have time to go anywhere else before nightfall.
+              - choice: camp
+                text: Set up [[camp]] for the night
+                effects: /woods/camp
+            else:
+              - goto: /woods
+  converter:
+    _image: layer_1_converter.png
+    _content:
+      - You come across a flower in the woods that eats flowers. Depending on the time of day, it is in the mood for different flowers.
+      - goto: redirect
+    redirect:
+      - choice: wait
+        text: Wait around for the next meal
+        effects:
+          - sub: /logic/inc_time_of_day
+          - if: time_of_day == "Night"
+            then:
+              - Night falls and the plant falls asleep, so you head back to set up camp.
+              - choice: camp
+                text: Set up [[camp]] for the night
+                effects: /woods/camp
+            else:
+              - goto: .
+      - if: time_of_day == "Morning"
+        then:
+          - goto: morning
+      - if: time_of_day == "Afternoon"
+        then:
+          - goto: afternoon
+      - if: time_of_day == "Evening"
+        then:
+          - goto: evening
+    morning:
+      - For breakfast, it would like some [[lemen]]s.
+      - choice: feed
+        cost: 3 inv_lemens
+        shown: 3 coin
+        effects: redirect
+      - choice: nah
+        text: Travel elsewhere
+        effects:
+          - sub: /logic/inc_time_of_day
+          - if: time_of_day == "Night"
+            then:
+              - Unfortunately, you didn't have time to go anywhere else before nightfall.
+              - choice: camp
+                text: Set up [[camp]] for the night
+                effects: /woods/camp
+            else:
+              - goto: /woods
+    afternoon:
+      - For lunch, it wants some [[rosalia]].
+      - choice: feed
+        cost: 7 inv_rosalia
+        shown: 2 coin
+        effects: redirect
+      - choice: nah
+        text: Travel elsewhere
+        effects:
+          - sub: /logic/inc_time_of_day
+          - if: time_of_day == "Night"
+            then:
+              - Unfortunately, you didn't have time to go anywhere else before nightfall.
+              - choice: camp
+                text: Set up [[camp]] for the night
+                effects: /woods/camp
+            else:
+              - goto: /woods
+    evening:
+      - For dinner, it would like some [[petunal blossom]]s.
+      - choice: feed
+        cost: 2 inv_petunal
+        shown: 2 coin
+        effects: redirect
+      - choice: nah
+        text: Travel elsewhere
+        effects:
+          - sub: /logic/inc_time_of_day
+          - if: time_of_day == "Night"
+            then:
+              - Unfortunately, you didn't have time to go anywhere else before nightfall.
+              - choice: camp
+                text: Set up [[camp]] for the night
+                effects: /woods/camp
+            else:
+              - goto: /woods
+  blacksmith:
+    _image: layer_1_blacksmith.png
+    _content:
+      - You come across a burly blacksmith. He grunts at you, in a way that probably means, "I can offer you some of my services, like improving your tools. Also, I like your red hair. My daughter has red hair. Thanks for stopping by."
+      - goto: choice
+    choice:
+      - choice: pick
+        text: Ask him to upgrade my pickaxe
+        cost: 2 coin
+        shown: 1 tool_pickaxe
+        effects:
+          - He spends a part of the day making your pickaxe better.
+          - sub: /logic/inc_time_of_day
+          - if: time_of_day == "Night"
+            then:
+              - Unfortunately, you the blacksmith has to sleep now, and so do you, so you leave to set up camp.
+              - choice: camp
+                text: Set up [[camp]] for the night
+                effects: /woods/camp
+            else:
+              - separator:
+              - goto: .
+      - choice: shovel
+        text: Ask him to upgrade my shovel
+        cost: 2 coin
+        shown: 2 tool_shovel
+        effects:
+          - He spends a part of the day making your shovel better.
+          - sub: /logic/inc_time_of_day
+          - if: time_of_day == "Night"
+            then:
+              - Unfortunately, you the blacksmith has to sleep now, and so do you, so you leave to set up camp.
+              - choice: camp
+                text: Set up [[camp]] for the night
+                effects: /woods/camp
+            else:
+              - separator:
+              - goto: .
+      - choice: sword
+        text: Ask him to upgrade my imaginary sword
+        cost: 0 coin
+        shown: 1 skill_fighting
+        effects:
+          - He does it for free, because, well, it's imaginary. But the thought of it being upgraded still fills you with the determination you need to take on bigger, badder foes.
+          - sub: /logic/inc_time_of_day
+          - if: time_of_day == "Night"
+            then:
+              - Unfortunately, you the blacksmith has to sleep now, and so do you, so you leave to set up camp.
+              - choice: camp
+                text: Set up [[camp]] for the night
+                effects: /woods/camp
+            else:
+              - separator:
+              - goto: .
+      - choice: scrap
+        text: Sell some building materials as scrap
+        cost: 2 inv_building_materials
+        shown: 2 coin
+        effects:
+          - He accepts the building materials
+          - separator:
+          - goto: .
+      - choice: gemstone
+        selectable_once:
+        text: Ask about where to find [[gemstone]]s
+        effects:
+          - flag: woods_blacksmith_gemstone_asked
+          - He tells you that, although he doesn't know, his brother would. Just gotta find his abode inside a cliff and knock.
+          - separator:
+          - goto: .
+      - choice: nah
+        text: Travel elsewhere
+        effects:
+          - sub: /logic/inc_time_of_day
+          - if: time_of_day == "Night"
+            then:
+              - Unfortunately, you didn't have time to go anywhere else before nightfall.
+              - choice: camp
+                text: Set up [[camp]] for the night
+                effects: /woods/camp
+            else:
+              - goto: /woods
