@@ -1,0 +1,1 @@
+Each day has four phases: morning, afternoon, evening, and night. Some parts of the game advance a full day, or even multiple days at a time, skipping over what happens in each phase of the day. A phase is simply the smallest unit of time. Normally, nothing can happen at night, as it is used for sleeping.

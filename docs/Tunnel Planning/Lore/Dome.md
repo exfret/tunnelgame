@@ -1,0 +1,1 @@
+Humanity is confined to an underground Dome that is a couple hundred miles across. The only exit is the [[Tunnel]], a hole in the Dome that is itself about 20 miles in diameter. No one's gotten to the end of Tunnel on account of the danger in the later layers. Some people even think there is no end.

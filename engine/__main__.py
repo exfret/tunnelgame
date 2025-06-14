@@ -11,7 +11,7 @@ from engine.server import Server
 from engine.gamesession import GameSession
 
 
-story_name = "tunnel/new_encounter_demo.yaml"
+story_name = "small_story.yaml"
 # Valid choices are...
 #  cli
 #  test

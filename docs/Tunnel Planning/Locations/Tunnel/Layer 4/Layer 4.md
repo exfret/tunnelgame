@@ -1,0 +1,1 @@
+Layer 4 is the location of the mountains/volcano/dragon in the images I've drawn with those. The mountains provide an important separating point between the earlier and later layers.

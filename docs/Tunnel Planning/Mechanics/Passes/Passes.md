@@ -1,0 +1,12 @@
+ID: pass_level
+
+Going into the [[Layers]] of the [[Tunnel]] requires a Tunnel Pass for that corresponding layer. Each pass has certain requirements, listed on their page. I want to space out when you get the passes, as detailed in the entry about [[Age]].
+
+1. The [[Training Pass]] is your first pass at the beginning of the story. It requires you have a mentor like [[Characters/George]] with you to even go on an expedition.
+2. The [[Green Pass]] is your first pass as an independent explorer. It allows you entrance into [[Layer 1]]. Achieving this pass should mark the exit of the "tutorial" stage. It should take about 6-12 in-game months.
+3. The [[Blue Pass]] allows access to [[layer 2]], and should not be too hard to get. It should be early to allow players to see the contrast in the layers, and also to allow more choices for which encounters they want. This should also take about 6-12 in-game months.
+4. The [[Yellow Pass]] is the first very significant pass, allowing access into [[Layer 3]]. The danger of this layer is in accordance with the difficulty of achieving this pass. Ideally, there would be enough content with the first two passes to allow this one to take a full 1-3 in-game years or so.
+5. Next is the [[Pioneer Pass]] for [[Layer 4]], which is usually held those well past their teenage years. Accordingly, it should be another 3-5 years for you to get this pass, bringing you to an age of 22 years, or about 24 years when accounting for the extra month in game.
+6. Afterward comes the [[Emerald Pass]] for [[Layer 5]], which is a jungle. This only takes 2-3 years.
+7. The [[Crimson Pass]] is the last pass that you can get "normally". It's for [[Layer 6]], which is poorly documented due to [[Tunnel Sickness]]. Despite all the dangers, this pass only usually takes an extra 3-4 years to get.
+8. Finally, there is the [[Rose Pass]], which allows you access into [[Layer 7]], and even allows you to push further. It requires special permission from the Dome's government. Past Layer 7, the Tunnel seemingly ends, but there is actually a network of caves called [[Klonan's Caves]]. After that is [[Abyssal Dark]], where the monster [[Klonan]] guards the exit. Ideally, the player is in their 30's when they finally exit.

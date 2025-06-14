@@ -1,0 +1,1 @@
+You start at a little over 15 years old, though there are 13 months per year in this world (because of [[Octember]]), so [[Characters/Lily]] is actually nearing 17 in real-life terms. I would like the progression in terms of passes to feel realistic, so no getting a new pass every month or two.

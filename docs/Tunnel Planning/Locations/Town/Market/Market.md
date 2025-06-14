@@ -1,0 +1,1 @@
+The market initially just holds the general store, but eventually subareas are unlocked, like the [[Market Square]].

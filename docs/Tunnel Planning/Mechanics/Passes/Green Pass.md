@@ -1,0 +1,1 @@
+Ideally, this takes 6 months to a year to collect. Since each expedition is 4 days (3 days in the [[Tunnel]] plus a day of traveling there and back).

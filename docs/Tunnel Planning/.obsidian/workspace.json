@@ -8,35 +8,20 @@
         "type": "tabs",
         "children": [
           {
-            "id": "a5878e4da7829926",
+            "id": "a99c7e6c2ad12e4f",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "People/George.md",
+                "file": "Locations/Town/Job Board/Job Board.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "George"
-            }
-          },
-          {
-            "id": "08b7907128f08458",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Encounters/Layer 1/Cave.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "Cave"
+              "title": "Job Board"
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "vertical"
@@ -109,7 +94,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Encounters/Layer 1/Cave.md",
+                "file": "Locations/Town/Job Board/Job Board.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -119,7 +104,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks for Cave"
+              "title": "Backlinks for Job Board"
             }
           },
           {
@@ -128,12 +113,12 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Encounters/Layer 1/Cave.md",
+                "file": "Locations/Town/Job Board/Job Board.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "Outgoing links from Cave"
+              "title": "Outgoing links from Job Board"
             }
           },
           {
@@ -157,13 +142,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Encounters/Layer 1/Cave.md",
+                "file": "Items/Flowers/Rosalia.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of Cave"
+              "title": "Outline of Rosalia"
             }
           }
         ]
@@ -183,14 +168,43 @@
       "command-palette:Open command palette": false
     }
   },
-  "active": "08b7907128f08458",
+  "active": "a99c7e6c2ad12e4f",
   "lastOpenFiles": [
-    "People/George.md",
-    "Encounters/Layer 1/Cave.md",
-    "Encounters/Layer 1",
-    "Encounters",
-    "create a link.md",
-    "People",
-    "Welcome.md"
+    "Mechanics/Mechanics.md",
+    "Locations/Town/Job Board/Job Board.md",
+    "Items/Flowers/Petunal Blossoms.md",
+    "Items/Flowers/Lemen.md",
+    "Items/Flowers/Rosalia.md",
+    "Locations/Town/Event Board/Petunal Festival.md",
+    "Mechanics/Gardens.md",
+    "Items/Exploration Equipment/Lemen Lantern.md",
+    "Locations/Tunnel/Layer 1/Hills/Caves/Caves.md",
+    "Locations/Town/Town Square/Lemen Society/Lemen Society.md",
+    "Locations/Town/Town Square/Lemen Society",
+    "Locations/Town/Residential Bit",
+    "Locations/Town/Event Board",
+    "Locations/Town/Job Board",
+    "Locations/Town/Streets",
+    "Locations/Town/Town Square",
+    "Locations/Town/Market/Market.md",
+    "Locations/Town/Market/Market Square/Booths.md",
+    "Locations/Town/Market/Market Square/Market Square.md",
+    "Locations/Town/Market/Market Square",
+    "Story/Training/Next Expeditions.md",
+    "Locations/Town/Outskirts/Tea Shop.md",
+    "Story/Training/First Expedition.md",
+    "Mechanics/Spoiling.md",
+    "Mechanics/Tracking.md",
+    "Mechanics/Vigor.md",
+    "Mechanics/Volunteering.md",
+    "Skills/Gathering/Lemen Gather Skill.md",
+    "Items/Rare/Clackadoo Feather.md",
+    "Items/Rare",
+    "Mechanics/Fighting.md",
+    "Mechanics/Hats.md",
+    "Locations/Town/Outskirts/Outskirts.md",
+    "Locations/Town/Outskirts/Abandoned Warehouse.md",
+    "Locations/Town/Outskirts",
+    "Mechanics/Jobs/Farming"
   ]
 }

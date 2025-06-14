@@ -1,0 +1,1 @@
+The outskirts have different buildings that you can access once you get enough experience.

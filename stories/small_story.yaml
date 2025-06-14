@@ -1,0 +1,15 @@
+_content:
+  - Number 1
+  - choice: test
+test:
+  - Number 2
+  - choice: test2
+    effects:
+      - Hi
+      - choice: test3
+        effects:
+          - Bye
+          - choice: test4
+test4:
+  - choice: back
+    effects: ..

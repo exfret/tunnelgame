@@ -1,0 +1,1 @@
+A thick, short jungle. This is where the main events of the [[Squirrel Wars]] take place. There is an impenetrable fog at the end that makes seeing into Layer 6 impossible until you get there.

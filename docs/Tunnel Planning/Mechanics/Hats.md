@@ -1,0 +1,3 @@
+ID: hat_{Insert name of hat here}
+
+Certain areas require a hat to access. Hats can be found throughout the world. Some hats can be found in Gillian's clothing store for ridiculous prices.

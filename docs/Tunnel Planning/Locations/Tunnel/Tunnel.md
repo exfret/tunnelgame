@@ -1,0 +1,1 @@
+The only exit from the [[Dome]].

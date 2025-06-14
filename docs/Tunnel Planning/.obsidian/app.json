@@ -4,5 +4,6 @@
   "spellcheck": false,
   "autoPairBrackets": false,
   "autoPairMarkdown": false,
-  "smartIndentList": true
+  "smartIndentList": true,
+  "alwaysUpdateLinks": true
 }

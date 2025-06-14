@@ -1,0 +1,1 @@
+Some items have a chance to spoil every day. This decreases the amount in your inventory by some percentage amount. [[Items/Flowers/Lemen|Lemen]]s are an example of such an item.

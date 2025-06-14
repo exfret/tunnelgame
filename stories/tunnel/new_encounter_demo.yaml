@@ -1421,7 +1421,7 @@ hills:
                 - random: hint_light, hint_climbing, hint_persistence, hint_friendship, hint_secret, hint_mourning, hint_speed, hint_henry, hint_paranoia, hint_snot, hint_sanity, hint_stupidity, hint_royalty, hint_eloquence
         - choice: leave
           text: Leave the maintenance room
-          effects: ..
+          effects: ../..
       hint_light:
         - if: not gemstone_collected_light
           then:
@@ -2938,9 +2938,9 @@ woods:
             then:
               - They probably won't go as nice on you this time...
           - choice: fight
-            text: Fight the giants; note that you WILL lose if you have fewer than 40 fighting skill... I'm still allowing you to make the choice to fight them, but I don't see why you would fight a frickin' giant!
+            text: Fight the giants; note that you WILL lose if you have fewer than 30 fighting skill... I'm still allowing you to make the choice to fight them, but I don't see why you would fight a frickin' giant!
             effects:
-              - if: skill_fighting < 40
+              - if: skill_fighting < 30
                 then:
                   - You die.
                   - What did you think would happen?

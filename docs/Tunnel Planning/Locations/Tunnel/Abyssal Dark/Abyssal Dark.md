@@ -1,0 +1,1 @@
+At the end of Klonan's caves is the [[Abyssal Dark]] (not discovered until [[Characters/Lily]]/the player finds it), where the caves open up more into a massive chamber, which eventually reaches around 30 miles or so in width. True to it's name, however, it's completely dark, and all sources of lighting fail. In the center lies a monster named [[Klonan]], who guards the exit.

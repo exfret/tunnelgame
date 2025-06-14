@@ -1,0 +1,1 @@
+Myths say that a man named Klonan the Wise initially led humanity through the [[Tunnel]] and into the [[Dome]] due to an impending apocalypse, saving everyone. He turns out to actually be a massive monster at the end of the [[Tunnel]] who guards the exit.

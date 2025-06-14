@@ -512,6 +512,7 @@
         /* ---------------- story helpers (unchanged) ------------------ */
         const story_board = document.getElementById("story-board");
         function addToStoryBoard(html) {
+            performance.mark("storyPaint")
             const d = document.createElement("div");
             d.innerHTML = `<div style="padding-bottom:10px">${html}</div>`;
             story_board.appendChild(d);
@@ -639,6 +640,11 @@
         });
 
         /* ---------- CHOICE BUTTONS (unchanged) ----------------------- */
+        function make_choice(choice_id) {
+            performance.mark("madeChoice")
+            socket.emit("make_choice", { choice_id: choice_id })
+        }
+
         socket.on("print_choices", msg => {
             for (const choice_id in msg.choices) {
                 const choice = msg.choices[choice_id];
@@ -649,7 +655,7 @@
                         );
                     } else {
                         addToStoryBoard(
-                            `<button class="button" onclick='socket.emit("make_choice",{choice_id:"${choice_id}"})'>${choice_id}</button> ${choice.text}${msg.effects_texts[choice_id] ?? ""}`
+                            `<button class="button" onclick='make_choice("${choice_id}")'>${choice_id}</button> ${choice.text}${msg.effects_texts[choice_id] ?? ""}`
                         );
                     }
                 }

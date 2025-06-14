@@ -1,0 +1,1 @@
+While you are working on getting the Yellow Pass, George transitions to full adulthood, moving completely out of the orphanage, and foreshadowing your departure as well.
