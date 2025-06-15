@@ -1,4 +1,7 @@
 Currently:
+  - Lookaheads
+    - Make lookaheads not work for choices with args, etc.
+
   - Big refactor to class-based approach
       - Create new classes
       - Make initial Flask declaration outside View
@@ -54,6 +57,9 @@ Big Todo:
   - UI
 
 
+242. Go back to async saves and remove short autosaves for web view
+241. Save on CPU time somehow
+240. Make autosaves user-specific
 239. New text fades in
 238. Error handling on nil addresses correctly
 237. Mobile support for web view (suggested sidebar; stowed by default)

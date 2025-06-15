@@ -2,6 +2,12 @@
 import copy
 import pickle
 
+from engine.addressing import Addressing
+from engine.utility import Utility
+from engine.view import WebView
+from engine.gameparser import GameParser
+from engine.interpreter import Interpreter
+
 
 class GameLoop:
     def __init__(self, gameobject, gamestate, config, addressing, utility, view, gameparser, interpreter):
@@ -15,7 +21,7 @@ class GameLoop:
         self.interpreter = interpreter
 
 
-    def run(self, game_name, packaged=True, parent_game=None, parent_state=None, exec_block=None, loaded_game_state=None, uid=None):
+    def run(self, game_name, packaged=True, parent_game=None, parent_state=None, exec_block=None, loaded_game_state=None, uid=None, do_lookaheads=False, starting_input=[], is_lookahead=False):
         if loaded_game_state is None:
             story_path = None
             if packaged:
@@ -44,7 +50,8 @@ class GameLoop:
             #config.view = loaded_game_state["view"]
             # TODO: print_displayed_text
             # TODO: Do I need to set view?
-            pass
+            # Load module vars, just in case they weren't loaded yet
+            self.gameparser.add_module_vars()
 
 
         # Sync state vars so that upstream state can be modified
@@ -105,6 +112,30 @@ class GameLoop:
                 self.gameparser.remove_module_vars()
                 self.view.save_game_state(self.gameobject.game, self.gamestate.state)
                 self.gameparser.add_module_vars()
+        
+
+        def do_autosaves():
+            # Autosave after every choice, for last 3 choices
+            save_game("_autosave_short_" + str(self.gamestate.state["choice_num"] % 3))
+            # If this is the web view, save some web info
+            if self.config.view_type == "web":
+                # TODO: What is this for?..
+                (self.config.saves_dir / "_web_info").with_suffix(".pkl").write_bytes(pickle.dumps({"running": True, "choice_num": self.gamestate.state["choice_num"]}))
+            self.gamestate.state["choice_num"] += 1
+
+            # Second, do a less frequent autosave every 20 choices
+            self.gamestate.state["last_autosave"] += 1
+            if self.gamestate.state["last_autosave"] >= self.config.choices_between_autosaves:
+                self.gamestate.state["last_autosave"] = 0
+                save_game("_autosave_long")
+            
+            self.gameparser.remove_module_vars()
+            state_to_save = copy.deepcopy(self.gamestate.state)
+            self.gameparser.add_module_vars()
+            del state_to_save["history"]
+            self.gamestate.state["history"] = [state_to_save,] + self.gamestate.state["history"]
+            if len(self.gamestate.state["history"]) > 10:
+                self.gamestate.state["history"].pop()
 
 
         def make_choice(new_addr, command=["start"], choice={}, is_action_override=False):
@@ -258,6 +289,46 @@ class GameLoop:
                 save_game("_autosave")
                 
                 make_choice(self.gamestate.state["choices"]["start"]["address"])
+        
+
+        # Append passed input to gamestate input
+        self.gamestate.state["command_buffer"].extend(starting_input)
+
+
+        # If we have lookaheads, we need to populate the history now
+        if do_lookaheads:
+            do_autosaves()
+
+        
+        # TODO: Should this go in state?
+        # Seems like not
+        lookahead_gamesession_info = None
+
+        def calc_lookahead_gamesession_info():
+            new_lookahead_gamesession_info = {}
+            for lookahead_choice_id in self.gamestate.state["choices"]:
+                self.gameparser.remove_module_vars()
+
+                new_game = copy.deepcopy(self.gameobject)
+                new_state = copy.deepcopy(self.gamestate)
+                new_config = copy.deepcopy(self.config)
+                # We need to initialize these to make sure they're given the proper gameobjects and gamestates
+                new_addressing = Addressing(new_game, new_state)
+                new_utility = Utility(new_state, new_addressing)
+                # We can't deepcopy view (no pickling the socketio stuff), but it should be stateless enough 
+                new_view = WebView(new_state, new_config, new_addressing, new_utility, self.view.app, self.view.socketio, uid, is_lookahead=True)
+                # Since view is inside gameparser and interpreter, we need to just create new ones of those
+                new_gameparser = GameParser(new_game, new_state, new_config, new_addressing, new_utility)
+                new_interpreter = Interpreter(new_game, new_state, new_config, new_addressing, new_utility, new_view, new_gameparser)
+                new_gameloop = GameLoop(new_game, new_state, new_config, new_addressing, new_utility, new_view, new_gameparser, new_interpreter)
+
+                new_lookahead_gamesession_info[lookahead_choice_id] = new_gameloop.run(game_name=game_name, packaged=packaged, loaded_game_state={"game": new_game, "state": new_state}, uid=uid, do_lookaheads=False, starting_input=[lookahead_choice_id.split(), "exit".split()], is_lookahead=True)
+                
+                self.gameparser.add_module_vars()
+                new_view.is_lookahead = False
+            return new_lookahead_gamesession_info
+        if do_lookaheads:
+            lookahead_gamesession_info = calc_lookahead_gamesession_info()
 
 
         # Load game if this is web view and we were refreshed
@@ -275,11 +346,11 @@ class GameLoop:
         while True:
             # Check if the game's been closed
             if "closed" in self.gamestate.state and self.gamestate.state["closed"] is True:
-                break
+                self.gameparser.remove_module_vars()
+                return {"game": self.gameobject.game, "state": self.gamestate.state, "view": self.view}
 
 
             if self.config.view_type == "web":
-                # TODO: What is the purpose of this? Maybe remove?
                 self.view.socketio.sleep(0)
 
 
@@ -407,7 +478,9 @@ class GameLoop:
                 self.view.clear(True)
                 self.view.print_displayed_text()
             elif command[0] == "exit":
-                break
+                # Return in case this was a lookahead
+                self.gameparser.remove_module_vars()
+                return {"game": self.gameobject.game, "state": self.gamestate.state, "view": self.view}
             elif command[0] == "flag":
                 if len(command) < 2:
                     self.view.print_feedback_message("flag_no_flag_given")
@@ -520,13 +593,19 @@ class GameLoop:
                 
                 self.view.socketio.emit("restart_html", {})
             elif command[0] == "revert":
-                if len(self.gamestate.state["history"]) == 0:
+                if (len(self.gamestate.state["history"]) == 0) or (len(self.gamestate.state["history"]) == 1 and do_lookaheads):
                     self.view.print_feedback_message("revert_no_reversions")
                     continue
                 
                 history = self.gamestate.state["history"]
-                self.gamestate.state.clear()
-                self.gamestate.state.update(history.pop(0))
+                # Need to do an extra pop with lookaheads since the history is stored *after* the choice is made
+                if do_lookaheads:
+                    history.pop(0)
+                    self.gamestate.state.clear()
+                    self.gamestate.state.update(copy.deepcopy(history[0]))
+                else:
+                    self.gamestate.state.clear()
+                    self.gamestate.state.update(history.pop(0))
                 self.gameparser.add_module_vars()
                 self.gamestate.state["history"] = history
 
@@ -543,6 +622,8 @@ class GameLoop:
                     self.gameparser.remove_module_vars()
                     self.view.save_game_state(self.gameobject.game, self.gamestate.state)
                     self.gameparser.add_module_vars()
+                if do_lookaheads:
+                    lookahead_gamesession_info = calc_lookahead_gamesession_info()
             elif command[0] == "save":
                 try:
                     save_slot = command[1]
@@ -634,46 +715,52 @@ class GameLoop:
                     self.view.print_feedback_message("choice_missing_requirements")
                 elif not self.utility.eval_conditional(choice["enforce"], choice["choice_address"]):
                     # TODO: Should autosaves/etc. happen after alt effects
+                    # TODO: Also need to make this work with lookahead
                     if choice["alt_address"]:
                         make_choice(choice["alt_address"], command, choice, is_action_override=True)
                     else:
                         self.view.print_feedback_message("choice_enforce_false")
                 else:
-                    # Autosave after every choice, for last 3 choices
-                    save_game("_autosave_short_" + str(self.gamestate.state["choice_num"] % 3))
-                    # If this is the web view, save some web info
-                    if self.config.view_type == "web":
-                        # TODO: What is this for?..
-                        (self.config.saves_dir / "_web_info").with_suffix(".pkl").write_bytes(pickle.dumps({"running": True, "choice_num": self.gamestate.state["choice_num"]}))
-                    self.gamestate.state["choice_num"] += 1
+                    if do_lookaheads:
+                        new_gamesession_info = lookahead_gamesession_info[command[0]]
 
-                    # Second, do a less frequent autosave every 20 choices
-                    self.gamestate.state["last_autosave"] += 1
-                    if self.gamestate.state["last_autosave"] >= self.config.choices_between_autosaves:
-                        self.gamestate.state["last_autosave"] = 0
-                        save_game("_autosave_long")
+                        self.gameobject.game.clear()
+                        self.gameobject.game.update(new_gamesession_info["game"])
+                        self.gamestate.state.clear()
+                        self.gamestate.state.update(new_gamesession_info["state"])
+                        self.gameparser.add_module_vars()
+                        self.view.do_emits(new_gamesession_info["view"].lookahead_emits)
 
-                    self.gameparser.remove_module_vars()
-                    state_to_save = copy.deepcopy(self.gamestate.state)
-                    self.gameparser.add_module_vars()
-                    del state_to_save["history"]
-                    self.gamestate.state["history"] = [state_to_save,] + self.gamestate.state["history"]
-                    if len(self.gamestate.state["history"]) > 10:
-                        self.gamestate.state["history"].pop()
+                        self.view.socketio.sleep(0)
 
-                    # Pay required costs
-                    for modification in choice["modifications"]:
-                        if ("type_to_modify" in modification) and modification["type_to_modify"] == "bag":
-                            modification["bag_ref"]["value"][modification["item"]] += modification["amount"]
-                        else:
-                            var_ref = self.utility.get_var(self.gamestate.state["vars"], modification["var"], choice["choice_address"])
+                        do_autosaves()
 
-                            var_ref["value"] += modification["amount"]  # TODO: Print modifications
+                        # Need to manually save game state since the lookaheads don't
+                        self.gameparser.remove_module_vars()
+                        self.view.save_game_state(self.gameobject.game, self.gamestate.state)
+                        self.gameparser.add_module_vars()
 
-                    if choice["choice_address"] not in self.gamestate.state["visits_choices"]:
-                        self.gamestate.state["visits_choices"][choice["choice_address"]] = 0
-                    self.gamestate.state["visits_choices"][choice["choice_address"]] += 1
+                        # For each new choice in new gamestate, try making that choice
+                        # How to communicate results/new gamesessions?
 
-                    make_choice(choice["address"], command, choice)
+                        lookahead_gamesession_info = calc_lookahead_gamesession_info()
+                    else:
+                        if not is_lookahead:
+                            do_autosaves()
+
+                        # Pay required costs
+                        for modification in choice["modifications"]:
+                            if ("type_to_modify" in modification) and modification["type_to_modify"] == "bag":
+                                modification["bag_ref"]["value"][modification["item"]] += modification["amount"]
+                            else:
+                                var_ref = self.utility.get_var(self.gamestate.state["vars"], modification["var"], choice["choice_address"])
+
+                                var_ref["value"] += modification["amount"]  # TODO: Print modifications
+
+                        if choice["choice_address"] not in self.gamestate.state["visits_choices"]:
+                            self.gamestate.state["visits_choices"][choice["choice_address"]] = 0
+                        self.gamestate.state["visits_choices"][choice["choice_address"]] += 1
+
+                        make_choice(choice["address"], command, choice)
             else:
                 self.view.print_feedback_message("unrecognized_command")

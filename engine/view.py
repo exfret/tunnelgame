@@ -484,15 +484,21 @@ class ViewForTesting(View):
 
 
 class WebView(View):
-    def __init__(self, gamestate, config, addressing, utility, app, socketio, uid):
+    def __init__(self, gamestate, config, addressing, utility, app, socketio, uid, is_lookahead=False):
         super().__init__(gamestate, config, addressing, utility)
 
         self.app = app
         self.socketio = socketio
         self.uid = uid
-    
+        self.is_lookahead = is_lookahead
+        self.lookahead_emits = []
+
     
     def load_web_state(self):
+        # Don't load for lookaheads
+        if self.is_lookahead:
+            return
+
         try:
             self.web_state = pickle.loads((self.config.saves_dir / ("_web_state_"  + str(self.uid))).with_suffix(".pkl").read_bytes())
         except FileNotFoundError:
@@ -500,6 +506,10 @@ class WebView(View):
 
 
     def save_game_state(self, game_obj, state_obj):
+        # Don't save for lookaheads
+        if self.is_lookahead:
+            return
+
         entry = self.web_state.setdefault(self.uid, {})
         entry["game"] = copy.deepcopy(game_obj)
         entry["state"] = copy.deepcopy(state_obj)
@@ -553,6 +563,18 @@ class WebView(View):
                 break
         
         return text
+    
+
+    def emit_message(self, msg_type, msg_data, room):
+        if self.is_lookahead:
+            self.lookahead_emits.append({"msg_type": msg_type, "msg_data": msg_data, "room": room})
+        else:
+            self.socketio.emit(msg_type, msg_data, room=room)
+    
+
+    def do_emits(self, emits_to_do):
+        for emit in emits_to_do:
+            self.emit_message(emit["msg_type"], emit["msg_data"], emit["room"])
 
 
     ######################################################################
@@ -563,7 +585,7 @@ class WebView(View):
     # Clears console and story view
     def clear(self, dont_reset_displayed_text = False):
         # TODO: Saving displayed text
-        self.socketio.emit("clear", {}, room=self.uid)
+        self.emit_message("clear", {}, self.uid)
 
         if not dont_reset_displayed_text:
             self.gamestate.state["view_text_info"]["displayed_print_msgs"] = []
@@ -574,7 +596,7 @@ class WebView(View):
         # Backwards compatibility with states that don't have proper keys
         if "view_text_info" in self.gamestate.state and "displayed_print_msgs" in self.gamestate.state["view_text_info"]:
             for displayed_print_msg in self.gamestate.state["view_text_info"]["displayed_print_msgs"]:
-                self.socketio.emit(displayed_print_msg["msg_type"], displayed_print_msg["msg_data"], room=self.uid)
+                self.emit_message(displayed_print_msg["msg_type"], displayed_print_msg["msg_data"], self.uid)
     
 
     ######################################################################
@@ -587,7 +609,7 @@ class WebView(View):
 
 
     def print_separator(self, dont_save_print=False):
-        self.socketio.emit("separator", {}, room=self.uid)
+        self.emit_message("separator", {}, self.uid)
         self.gamestate.state["view_text_info"]["displayed_print_msgs"].append({"msg_type": "separator", "msg_data": {}})
 
 
@@ -598,7 +620,7 @@ class WebView(View):
     def print_text(self, text, style="", dont_save_print=False):
         string_to_print = self.utility.format.vformat(text, (), self.utility.collect_vars())  # TODO: Exceptions in case of syntax errors
         string_to_print = self.expand_tagged_words(self.parse_text(string_to_print))
-        self.socketio.emit("print", {"text": string_to_print}, room=self.uid)
+        self.emit_message("print", {"text": string_to_print}, self.uid)
         self.gamestate.state["view_text_info"]["displayed_print_msgs"].append({"msg_type": "print", "msg_data": {"text": string_to_print}})
 
 
@@ -608,7 +630,7 @@ class WebView(View):
 
 
     def clear_var_view(self):
-        self.socketio.emit("clear_var_view", {}, room=self.uid)
+        self.emit_message("clear_var_view", {}, self.uid)
 
 
     def print_shown_vars(self, shown_vars, vars_address):
@@ -617,12 +639,16 @@ class WebView(View):
         for var_group in shown_vars:
             if isinstance(var_group, str):
                 if var_dict[var_group]["hidden"] is False or (var_dict[var_group]["hidden"] == "nonzero" and var_dict_vals[var_group] != 0):
-                    self.socketio.emit("print_var", {"text": self.utility.localize(var_group, vars_address) + ":\t" + str(var_dict_vals[var_group])}, room=self.uid)
+                    text_to_print = self.utility.localize(var_group, vars_address) + ":\t" + str(var_dict_vals[var_group])
+
+                    self.emit_message("print_var", {"text": text_to_print}, self.uid)
             elif isinstance(var_group, dict):
                 label = next(iter(var_group))
                 for var in var_group[label]:
                     if var_dict[var]["hidden"] is False or (var_dict[var]["hidden"] == "nonzero" and var_dict_vals[var] != 0):
-                        self.socketio.emit("print_var", {"group": label, "name": self.utility.localize(var, vars_address), "value": str(var_dict_vals[var])}, room=self.uid)
+                        group_data = {"group": label, "name": self.utility.localize(var, vars_address), "value": str(var_dict_vals[var])}
+
+                        self.emit_message("print_var", group_data, self.uid)
                 # Close the group if needed, or by default
                 #is_open = False
                 #if label in state["view"]["stats_dropdowns_open"] and state["view"]["stats_dropdowns_open"][label]:
@@ -632,13 +658,13 @@ class WebView(View):
 
     def show_curr_image(self):
         if self.gamestate.state["curr_image"] is None:
-            self.socketio.emit("set_image", {"none": True}, room=self.uid)
+            self.emit_message("set_image", {"none": True}, self.uid)
         else:
-            self.socketio.emit("set_image", {"path": "static/graphics/" + self.gamestate.state["curr_image"]}, room=self.uid)
+            self.emit_message("set_image", {"path": "static/graphics/" + self.gamestate.state["curr_image"]}, self.uid)
 
 
     def print_var(self, text):
-        self.socketio.emit("print_var", {"text": text}, room=self.uid)
+        self.emit_message("print_var", {"text": text}, self.uid)
 
 
     ######################################################################
@@ -692,28 +718,28 @@ class WebView(View):
 
             effects_texts[choice_id] = effects_text
 
-        self.socketio.emit("print_choices", {"choices": self.gamestate.state["choices"], "effects_texts": effects_texts}, room=self.uid)
+        self.emit_message("print_choices", {"choices": self.gamestate.state["choices"], "effects_texts": effects_texts}, self.uid)
 
 
     def print_completion_percentage(self, percentage):
-        self.socketio.emit("print_feedback_message", {"text": f"Completed {(100 * percentage):.1f}% of the story!"}, room=self.uid)
+        self.emit_message("print_feedback_message", {"text": f"Completed {(100 * percentage):.1f}% of the story!"}, self.uid)
 
 
     def print_feedback_message(self, msg_type, dont_save=True):
-        self.socketio.emit("print_feedback_message", {"text": feedback_msg[msg_type]}, room=self.uid)
+        self.emit_message("print_feedback_message", {"text": feedback_msg[msg_type]}, self.uid)
 
 
     def print_macros(self):
         if len(self.gamestate.state["command_macros"].items()) == 0:
-            self.socketio.emit("print_feedback_message", {"text": feedback_msg["info_no_macros"]}, room=self.uid)
+            self.emit_message("print_feedback_message", {"text": feedback_msg["info_no_macros"]}, self.uid)
             return
         
         for macro_name, macro_def in self.gamestate.state["command_macros"].items():
-            self.socketio.emit("print_feedback_message", {"text": macro_name + ": " + " ".join(macro_def)}, room=self.uid)
+            self.emit_message("print_feedback_message", {"text": macro_name + ": " + " ".join(macro_def)}, self.uid)
 
 
     def print_num_words(self, num_words):
-        self.socketio.emit("print_feedback_message", {"text": "Words: " + str(num_words)})
+        self.emit_message("print_feedback_message", {"text": "Words: " + str(num_words)}, self.uid)
 
 
     def print_settings(self):
@@ -741,11 +767,11 @@ class WebView(View):
         elif text_to_show_spec["op"] == "set":
             text_to_print = f"[Set {self.utility.localize(text_to_show_spec["var_name"], var_to_use=text_to_show_spec["var"])} to {text_to_show_spec['amount']}]\n"
         
-        self.socketio.emit("print", {"text": text_to_print}, room=self.uid)
+        self.emit_message("print", {"text": text_to_print}, self.uid)
 
 
     def print_var_value(self, var_value):
-        self.socketio.emit("print", {"text": str(var_value)}, room=self.uid)
+        self.emit_message("print", {"text": str(var_value)}, self.uid)
 
 
     def get_input(self):

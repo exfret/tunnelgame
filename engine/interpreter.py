@@ -27,7 +27,7 @@ class Interpreter:
 
     def step(self):
         curr_addr = self.addressing.get_curr_addr()
-        
+
         if curr_addr == False:
             return False
 

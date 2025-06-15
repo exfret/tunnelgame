@@ -3,6 +3,9 @@ _content:
   - choice: test
 test:
   - Number 2
+  - choice: test5
+    effects:
+      - LOL
   - choice: test2
     effects:
       - Hi

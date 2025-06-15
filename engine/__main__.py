@@ -11,7 +11,7 @@ from engine.server import Server
 from engine.gamesession import GameSession
 
 
-story_name = "small_story.yaml"
+story_name = "tunnel/new_encounter_demo.yaml"
 # Valid choices are...
 #  cli
 #  test
@@ -74,8 +74,8 @@ if view_type == "web":
 
         def start():
             if web_state["game"] is not None and web_state["state"] is not None:
-                gamesession.gameobject.game.update(copy.deepcopy(web_state["game"]))
-                gamesession.gamestate.state.update(copy.deepcopy(web_state["state"]))
+                gamesession.gameobject.game = copy.deepcopy(web_state["game"])
+                gamesession.gamestate.state = copy.deepcopy(web_state["state"])
                 gamesession.gameparser.add_module_vars()
 
                 gamesession.view.clear()
@@ -83,9 +83,9 @@ if view_type == "web":
                 gamesession.view.print_shown_vars(gamesession.gamestate.state["view_text_info"]["shown_vars"], gamesession.gamestate.state["last_address_list"][-1])
                 gamesession.view.show_curr_image()
 
-                gamesession.gameloop.run(story_name, packaged=True, loaded_game_state=web_state, uid=uid)
+                gamesession.gameloop.run(story_name, packaged=True, loaded_game_state=web_state, uid=uid, do_lookaheads=True)
             else:
-                gamesession.gameloop.run(story_name, packaged=True, uid=uid)
+                gamesession.gameloop.run(story_name, packaged=True, uid=uid, do_lookaheads=True)
 
 
         server.socketio.start_background_task(start)
@@ -101,7 +101,7 @@ if view_type == "web":
     @server.socketio.on("make_choice")
     def handle_choice(data):
         gamesession = uid_to_gamesession[session["uid"]]
-        gamesession.gamestate.state["command_buffer"].append([data["choice_id"]])
+        gamesession.gamestate.state["command_buffer"].append(data["choice_id"].split())
     
 
     @server.socketio.on("command")
