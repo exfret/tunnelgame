@@ -1,0 +1,1 @@
+You find a note from [[Characters/Orphans/George|George's]] father, [[Characters/Tso|Tso]].

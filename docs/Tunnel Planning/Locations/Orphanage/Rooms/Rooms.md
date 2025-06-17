@@ -1,0 +1,1 @@
+There is initially one empty where [[Troy]] can stay if you save him.

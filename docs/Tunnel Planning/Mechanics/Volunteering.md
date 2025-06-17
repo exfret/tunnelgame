@@ -1,1 +1,1 @@
-You can engage in volunteering at the orphanage, which advances certain storylines and gives something to do between expedition trips.
+You can engage in [[Locations/Orphanage/Volunteering/Volunteering|Volunteering]] at the orphanage, which advances certain storylines and gives something to do between expedition trips. See that link for the specifics of each trip.

@@ -4,7 +4,7 @@ import sys
 
 
 class Config:
-    def __init__(self, story_name, view_type):
+    def __init__(self, story_name, view_type, profiling=False):
         if os.getenv("RENDER") == "TRUE":
             self.data_dir = Path("/data")
         else:
@@ -19,6 +19,11 @@ class Config:
 
         self.story_name = story_name
         self.view_type = view_type
+        self.profiling = profiling
+        if self.profiling:
+            self.last_instr_time = None
+            self.total_instr_time = 0
+            self.total_num_instrs = 0
 
         # Removed graphics, stories, etc., now it just lives in dir
         self.local_dir = Path(getattr(sys, '_MEIPASS', os.path.abspath('.')))

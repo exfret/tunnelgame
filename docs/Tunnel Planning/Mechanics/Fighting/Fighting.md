@@ -1,0 +1,7 @@
+Fighting is gated behind a certain [[Age]]. See [[Variables/Fighting/Fighting|Fighting]] for the different stats used.
+
+Fights go in phases, with each party dealing a certain amount of damage of a given [[Damage Types|Damage Type]] to another party. The attacking party's [[Offense]] and the defending party's [[Defense]] determines the outcome of this attack, and the amount of [[Health]] lost. If [[Characters/Orphans/Lily|Lily]] drops to 0 [[Health]] or below, the player is kicked out from any fights and considered in a [[Critical Condition]]. This impacts several encounters and also prevents you from engaging in further fights.
+
+Fighting attacks are written like "2x5 Physical", which in this case means 3 attacks at 4 Physical Damage each. Then, this is compared to the defender's defense. The defense can reduce the damage from various types taken by a flat amount, or by a percentage. Defense stats are usually written as X/Y where X is the flat amount and Y is the percentage amount. The "X" part is applied first. So 3/50% reduces *each* attack's Physical damage by 3, then reduces it by 50%. In this case, each attack of 5 Physical is reduced to 2 damage, then by 50% to only 1 damage. Since there are 2 attacks, there is then a total of 2 damage.
+
+Note that damage is always rounded down to the nearest whole number, so percentage-based resistances can essentially act as flat resistances when it comes to ignoring a certain amount of damage. For example, a 0/99% resistance requires one to deal at least 100 damage at once to do anything to a foe.

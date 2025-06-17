@@ -1,0 +1,1 @@
+At the treehouse, you have the choice to build things, but once you build this you can build things to interact with too, and this is where you do that. (There is a choice to visit the interaction station). This is so that there aren't too many choices at once, even when there is a lot of choices of what to build.

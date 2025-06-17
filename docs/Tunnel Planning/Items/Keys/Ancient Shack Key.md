@@ -1,0 +1,1 @@
+ID: key_ancient_shack

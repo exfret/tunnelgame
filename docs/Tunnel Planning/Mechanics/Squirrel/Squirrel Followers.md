@@ -1,0 +1,1 @@
+Squirrel armies can be allied to any of a number of [[Squirrel Prince|Squirrel Princes]]. They can be personal followers whose allegiance can be changed at will, or simply independent, meaning they a cost to be paid each time you want them to change loyalties.

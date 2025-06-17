@@ -17,10 +17,13 @@ story_name = "tunnel/new_encounter_demo.yaml"
 #  test
 #  web
 view_type = "web"
+profiling = True
 
 # Enforce to demo version on web if this is deployed to render
 # Actually, for now choose it manually
-#if os.getenv("RENDER") == "TRUE":
+if os.getenv("RENDER") == "TRUE":
+    # Never profile for render
+    profiling = False
 #    story_name = "tunnel/05-demo/root.yaml"
 #    view_type = "web"
 
@@ -40,7 +43,7 @@ if view_type == "web":
         server.sid_to_uid[sid] = uid
         join_room(uid)
 
-        gamesession = uid_to_gamesession.get(uid) or GameSession(story_name, "web", server.app, server.socketio, uid)
+        gamesession = uid_to_gamesession.get(uid) or GameSession(story_name, "web", server.app, server.socketio, uid, profiling=profiling)
         uid_to_gamesession[uid] = gamesession
 
         gamesession.view.load_web_state()
@@ -73,7 +76,8 @@ if view_type == "web":
 
 
         def start():
-            if web_state["game"] is not None and web_state["state"] is not None:
+            # Need to check that web_state["game"] is nonempty since this seems to be an issue for some reason
+            if web_state["game"] is not None and len(web_state["game"]) != 0 and web_state["state"] is not None:
                 gamesession.gameobject.game = copy.deepcopy(web_state["game"])
                 gamesession.gamestate.state = copy.deepcopy(web_state["state"])
                 gamesession.gameparser.add_module_vars()
@@ -126,7 +130,7 @@ def main():
     if view_type == "web":
         server.socketio.run(server.app, port=5001, debug=True)
     else:
-        gamesession = GameSession(story_name, view_type)
+        gamesession = GameSession(story_name, view_type, profiling=profiling)
 
         if len(sys.argv) == 1:
             gamesession.gameloop.run(story_name, packaged=True)

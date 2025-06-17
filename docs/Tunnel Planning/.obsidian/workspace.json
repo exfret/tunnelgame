@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Locations/Town/Job Board/Job Board.md",
+                "file": "Items/Major Items/Equipment.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Job Board"
+              "title": "Equipment"
             }
           }
         ]
@@ -94,7 +94,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Locations/Town/Job Board/Job Board.md",
+                "file": "Items/Major Items/Equipment.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -104,7 +104,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks for Job Board"
+              "title": "Backlinks for Equipment"
             }
           },
           {
@@ -113,12 +113,12 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Locations/Town/Job Board/Job Board.md",
+                "file": "Items/Major Items/Equipment.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "Outgoing links from Job Board"
+              "title": "Outgoing links from Equipment"
             }
           },
           {
@@ -170,41 +170,41 @@
   },
   "active": "a99c7e6c2ad12e4f",
   "lastOpenFiles": [
-    "Mechanics/Mechanics.md",
-    "Locations/Town/Job Board/Job Board.md",
-    "Items/Flowers/Petunal Blossoms.md",
-    "Items/Flowers/Lemen.md",
-    "Items/Flowers/Rosalia.md",
-    "Locations/Town/Event Board/Petunal Festival.md",
+    "Items/Major Items/Coin.md",
+    "Items/Major Items/Equipment.md",
+    "Locations/Tunnel/Layer 1/Woods/Scrolls/Grove.md",
+    "Locations/Orphanage/Rooms/Lily.md",
+    "Mechanics/Vigor/Vigor Points.md",
+    "Mechanics/Vigor/Vigor.md",
+    "Mechanics/Vigor/Long Rest.md",
+    "Mechanics/Events.md",
+    "Mechanics/Experience.md",
     "Mechanics/Gardens.md",
-    "Items/Exploration Equipment/Lemen Lantern.md",
-    "Locations/Tunnel/Layer 1/Hills/Caves/Caves.md",
-    "Locations/Town/Town Square/Lemen Society/Lemen Society.md",
-    "Locations/Town/Town Square/Lemen Society",
-    "Locations/Town/Residential Bit",
-    "Locations/Town/Event Board",
-    "Locations/Town/Job Board",
-    "Locations/Town/Streets",
-    "Locations/Town/Town Square",
-    "Locations/Town/Market/Market.md",
-    "Locations/Town/Market/Market Square/Booths.md",
-    "Locations/Town/Market/Market Square/Market Square.md",
-    "Locations/Town/Market/Market Square",
-    "Story/Training/Next Expeditions.md",
-    "Locations/Town/Outskirts/Tea Shop.md",
-    "Story/Training/First Expedition.md",
+    "Mechanics/Mechanics.md",
     "Mechanics/Spoiling.md",
     "Mechanics/Tracking.md",
-    "Mechanics/Vigor.md",
     "Mechanics/Volunteering.md",
-    "Skills/Gathering/Lemen Gather Skill.md",
-    "Items/Rare/Clackadoo Feather.md",
-    "Items/Rare",
-    "Mechanics/Fighting.md",
-    "Mechanics/Hats.md",
-    "Locations/Town/Outskirts/Outskirts.md",
-    "Locations/Town/Outskirts/Abandoned Warehouse.md",
-    "Locations/Town/Outskirts",
-    "Mechanics/Jobs/Farming"
+    "Mechanics/Passes/Green Pass.md",
+    "Mechanics/Time",
+    "Mechanics/Passes/Passes.md",
+    "Mechanics/Passes/Pioneer Pass.md",
+    "Mechanics/Passes/Yellow Pass.md",
+    "Mechanics/Passes/Rose Pass.md",
+    "Mechanics/Passes/Training Pass.md",
+    "Mechanics/Passes/Blue Pass.md",
+    "Mechanics/Time/Day.md",
+    "Characters/Mabel.md",
+    "Lore/Dome.md",
+    "Locations/Tunnel/Layer 1/Plains/Rosalia/Rosalia.md",
+    "Items/Flowers/Rosalia.md",
+    "Locations/Orphanage/Volunteering",
+    "Variables/Vigor",
+    "Mechanics/Research/Creatures",
+    "Mechanics/Research/Construction",
+    "Locations/City",
+    "Locations/Dome/Quarry",
+    "Locations/Dome",
+    "Locations/Tunnel/Layer 1/Valley/Sword",
+    "Items/Fighting/Weapons"
   ]
 }

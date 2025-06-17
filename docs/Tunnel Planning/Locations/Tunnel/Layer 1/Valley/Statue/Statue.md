@@ -1,0 +1,1 @@
+You come across a large statue shaped like a face.

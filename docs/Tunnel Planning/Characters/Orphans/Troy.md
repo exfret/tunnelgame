@@ -1,0 +1,1 @@
+Not an orphan at the beginning of the story, he later becomes one and begs for a place to stay at the [[Orphanage]] in the spare seventh room. [[Directory Wicky]] only allows him to stay if you give him the [[Clackadoo Feather]].

@@ -1,1 +1,1 @@
-Around this time, you follow George's footsteps and depart the orphanage as well.
+Around this time, you follow [[Characters/Orphans/George|George|George's]] footsteps and depart the [[Orphanage]] as well.

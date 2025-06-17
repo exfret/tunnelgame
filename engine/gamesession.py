@@ -15,10 +15,10 @@ class InvalidViewType(Exception):
 
 
 class GameSession:
-    def __init__(self, story_name, view_type, app=None, socketio=None, uid=None):
+    def __init__(self, story_name, view_type, app=None, socketio=None, uid=None, profiling=False):
         self.gameobject = GameObject()
         self.gamestate = GameState()
-        self.config = Config(story_name, view_type)
+        self.config = Config(story_name, view_type, profiling=profiling)
         self.addressing = Addressing(self.gameobject, self.gamestate)
         self.utility = Utility(self.gamestate, self.addressing)
         if view_type == "cli":

@@ -1,6 +1,7 @@
 # Standard imports
 import copy
 import pickle
+import time
 
 from engine.addressing import Addressing
 from engine.utility import Utility
@@ -77,8 +78,10 @@ class GameLoop:
 
         def save_game(save_slot):
             self.gameparser.remove_module_vars()
+            self.gamestate.state["game"] = copy.deepcopy(self.gameobject.game)
             (self.config.saves_dir / save_slot).with_suffix(".pkl").write_bytes(pickle.dumps(self.gamestate.state))
             self.gameparser.add_module_vars()
+            del self.gamestate.state["game"]
 
 
         def load_game(load_slot, add_save_text=False):
@@ -98,6 +101,8 @@ class GameLoop:
             # Update game with state's game
             self.gameobject.game.clear()
             self.gameobject.game.update(self.gamestate.state["game"])
+            # Remove game from state (only put there for saving)
+            del self.gamestate.state["game"]
             # Update view
             self.view.clear(True) # True doesn't reset saved text
             if self.config.view_type != "web":
@@ -116,7 +121,7 @@ class GameLoop:
 
         def do_autosaves():
             # Autosave after every choice, for last 3 choices
-            save_game("_autosave_short_" + str(self.gamestate.state["choice_num"] % 3))
+            #save_game("_autosave_short_" + str(self.gamestate.state["choice_num"] % 3))
             # If this is the web view, save some web info
             if self.config.view_type == "web":
                 # TODO: What is this for?..
@@ -189,6 +194,13 @@ class GameLoop:
                     self.view.clear()
                 else:
                     break
+            if self.config.profiling:
+                #print("\nInstruction time info:")
+                #print(self.config.total_num_instrs)
+                #print(self.config.total_instr_time)
+                #print(self.config.total_instr_time / self.config.total_num_instrs)
+                self.config.total_instr_time = 0
+                self.config.total_num_instrs = 0
             
 
             # Update the choices now with proper costs and such
@@ -305,13 +317,37 @@ class GameLoop:
         lookahead_gamesession_info = None
 
         def calc_lookahead_gamesession_info():
+            start_time = None
+            time_doing_copies = 0
+            if self.config.profiling:
+                start_time = time.time()
+
             new_lookahead_gamesession_info = {}
             for lookahead_choice_id in self.gamestate.state["choices"]:
                 self.gameparser.remove_module_vars()
 
-                new_game = copy.deepcopy(self.gameobject)
+                # TODO: Make sure doing a reference to the original gameobject doesn't break anything
+                new_game = self.gameobject
+                # To make up for legacy code/saves, delete "game" from gamestate if it's still there
+                if "game" in self.gamestate.state:
+                    del self.gamestate.state["game"]
+                # Backwards compatibility: Just don't deepcopy visits, which will make it inaccurate but at least not crash
+                old_visits = self.gamestate.state["visits"]
+                old_story_data = self.gamestate.state["story_data"]
+                del self.gamestate.state["visits"]
+                del self.gamestate.state["story_data"]
+
+                start_time_doing_copy = time.time()
                 new_state = copy.deepcopy(self.gamestate)
-                new_config = copy.deepcopy(self.config)
+                time_doing_copies += time.time() - start_time_doing_copy
+
+                new_state.state["visits"] = old_visits
+                new_state.state["story_data"] = old_story_data
+                self.gamestate.state["visits"] = old_visits
+                self.gamestate.state["story_data"] = old_story_data
+                # TODO: Also make sure having the config not change doesn't break anything
+                new_config = self.config
+
                 # We need to initialize these to make sure they're given the proper gameobjects and gamestates
                 new_addressing = Addressing(new_game, new_state)
                 new_utility = Utility(new_state, new_addressing)
@@ -326,6 +362,11 @@ class GameLoop:
                 
                 self.gameparser.add_module_vars()
                 new_view.is_lookahead = False
+
+            if self.config.profiling:
+                print("\nLookahead calculation time: " + str(time.time() - start_time))
+                print("Time that was spent on copies: " + str(time_doing_copies))
+            
             return new_lookahead_gamesession_info
         if do_lookaheads:
             lookahead_gamesession_info = calc_lookahead_gamesession_info()
@@ -342,8 +383,23 @@ class GameLoop:
         #        pass
 
 
+        def do_profiling(start_time):
+            if self.config.profiling:
+                print("\nCommand time info:")
+                print(time.time() - start_time)
+
+
+        start_time = None
+
+
         # Main game loop
         while True:
+            # Do profiling from last start time
+            if start_time is not None:
+                do_profiling(start_time)
+                start_time = None
+
+
             # Check if the game's been closed
             if "closed" in self.gamestate.state and self.gamestate.state["closed"] is True:
                 self.gameparser.remove_module_vars()
@@ -362,6 +418,9 @@ class GameLoop:
 
             if len(command) == 0:
                 continue
+
+
+            start_time = time.time()
 
 
             # Check for macros first so that they can be reversed if needed
@@ -724,8 +783,9 @@ class GameLoop:
                     if do_lookaheads:
                         new_gamesession_info = lookahead_gamesession_info[command[0]]
 
-                        self.gameobject.game.clear()
-                        self.gameobject.game.update(new_gamesession_info["game"])
+                        # Game doesn't change anymore between lookaheads
+                        #self.gameobject.game.clear()
+                        #self.gameobject.game.update(new_gamesession_info["game"])
                         self.gamestate.state.clear()
                         self.gamestate.state.update(new_gamesession_info["state"])
                         self.gameparser.add_module_vars()

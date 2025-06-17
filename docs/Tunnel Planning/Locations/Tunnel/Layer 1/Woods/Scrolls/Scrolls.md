@@ -5,5 +5,5 @@ If you've made a visit to the [[Grove]], you get the following warning:
 
 Choices:
 - Visit the [[Grove]]
-- Walk around, which leads to the [[Lake]]
+- Walk around, which leads to the [[Locations/Tunnel/Layer 1/Woods/Scrolls/Lake|Lake]]
 - I'm wondering if there should be a third option of something to do, as well; if there is, one choice could be walking around to the right, and the other walking around to the left

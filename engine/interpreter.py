@@ -1,5 +1,6 @@
 import yaml
 import random
+import time
 
 
 class ErrorNode(Exception):
@@ -25,10 +26,22 @@ class Interpreter:
         self.view.print_text(text, style, dont_save_print=dont_save_print)
 
 
+    def do_profiling(self, start_time):
+        if self.config.profiling:
+            self.config.last_instr_time = time.time() - start_time
+            self.config.total_instr_time += time.time() - start_time
+            self.config.total_num_instrs += 1
+
+
     def step(self):
+        start_time = None
+        if self.config.profiling:
+            start_time = time.time()
+
         curr_addr = self.addressing.get_curr_addr()
 
         if curr_addr == False:
+            self.do_profiling(start_time)
             return False
 
         parent_block = self.addressing.get_block_part(curr_addr)
@@ -54,6 +67,7 @@ class Interpreter:
 
             self.gamestate.state["bookmark"] = self.addressing.get_next_bookmark(self.gamestate.state["bookmark"])
 
+            self.do_profiling(start_time)
             return True
 
 
@@ -77,6 +91,7 @@ class Interpreter:
 
                     self.addressing.set_curr_addr(new_addr)
 
+                    self.do_profiling(start_time)
                     return True
         elif "call" in curr_node:
             # TODO: Implement global/local vars that persist or don't persist after calls
@@ -98,6 +113,7 @@ class Interpreter:
                         if "global" in var and var["global"]:
                             self.gamestate.state["vars"][key][var_name] = var
 
+            self.do_profiling(start_time)
             return True
         elif "choice" in curr_node:
             if not "selectable_once" in curr_node or not curr_addr in self.gamestate.state["visits_choices"] or self.gamestate.state["visits_choices"][curr_addr] == 0:
@@ -196,6 +212,7 @@ class Interpreter:
                 else:
                     self.addressing.set_curr_addr(curr_addr + ("flavor", 0))
 
+                    self.do_profiling(start_time)
                     return True
         elif "gosub" in curr_node:
             sub_address = self.addressing.parse_addr(curr_addr, curr_node["gosub"])
@@ -205,10 +222,12 @@ class Interpreter:
 
             self.gamestate.state["bookmark"] = (sub_address,) + self.gamestate.state["bookmark"]
 
+            self.do_profiling(start_time)
             return True
         elif "goto" in curr_node:
             self.addressing.set_curr_addr(self.addressing.parse_addr(curr_addr, curr_node["goto"]))
 
+            self.do_profiling(start_time)
             return True
         elif "if" in curr_node:
             exception_occurred = False
@@ -223,10 +242,12 @@ class Interpreter:
                 if condition_value:
                     self.addressing.set_curr_addr(curr_addr + ("then", 0))
 
+                    self.do_profiling(start_time)
                     return True
                 elif "else" in curr_node:
                     self.addressing.set_curr_addr(curr_addr + ("else", 0))
 
+                    self.do_profiling(start_time)
                     return True
         elif "inject" in curr_node:
             if "into_choices" in curr_node:
@@ -327,6 +348,7 @@ class Interpreter:
                 else:
                     self.addressing.set_curr_addr(curr_addr + ("once", 0))
 
+                    self.do_profiling(start_time)
                     return True
         elif "pass" in curr_node:
             pass
@@ -369,10 +391,12 @@ class Interpreter:
                         # Feedback messages should already not save
                         self.view.print_feedback_message("runtime_error_invalid_seed")
 
+                        self.do_profiling(start_time)
                         return False
                 else:
                     self.addressing.set_curr_addr(self.addressing.parse_addr(curr_addr, possibilities_list[random.randint(0, len(possibilities_list) - 1)]))
 
+                self.do_profiling(start_time)
                 return True
 
             total_weight = 0
@@ -401,11 +425,13 @@ class Interpreter:
                     else:
                         self.addressing.set_curr_addr(curr_addr + ("random", seed, 0))
 
+                    self.do_profiling(start_time)
                     return True
                 else:
                     # Feedback messages should already not save
                     self.view.print_feedback_message("runtime_error_invalid_seed")
 
+                    self.do_profiling(start_time)
                     return False
 
             curr_weight = 0
@@ -418,6 +444,7 @@ class Interpreter:
                     else:
                         self.addressing.set_curr_addr(curr_addr + ("random", possibility[1], 0))
 
+                    self.do_profiling(start_time)
                     return True
         elif "remove_choice" in curr_node:
             # TODO: Warning if this choice was not in the story?
@@ -445,6 +472,7 @@ class Interpreter:
 
             self.gamestate.state["bookmark"] = self.addressing.get_next_bookmark(self.gamestate.state["bookmark"])
 
+            self.do_profiling(start_time)
             return False
         elif "seed" in curr_node:
             self.gamestate.state["seed"].append(curr_node["seed"])
@@ -529,6 +557,7 @@ class Interpreter:
             # Need to remove this address now from the queue
             self.gamestate.state["bookmark"] = self.gamestate.state["bookmark"][1:]
 
+            self.do_profiling(start_time)
             return False
         elif "storypoint" in curr_node:
             if curr_node["storypoint"] is None:
@@ -543,6 +572,7 @@ class Interpreter:
             self.gamestate.state["sub_stack"] = (self.addressing.get_next_bookmark(self.gamestate.state["bookmark"]),) + self.gamestate.state["sub_stack"]
             self.gamestate.state["bookmark"] = self.addressing.make_bookmark((), self.addressing.parse_addr(curr_addr, curr_node["sub"]))
 
+            self.do_profiling(start_time)
             return True
         elif "subreturn" in curr_node:
             if len(self.gamestate.state["sub_stack"]) == 0:
@@ -552,6 +582,7 @@ class Interpreter:
                 self.gamestate.state["bookmark"] = self.gamestate.state["sub_stack"][0]
                 self.gamestate.state["sub_stack"] = self.gamestate.state["sub_stack"][1:]
 
+                self.do_profiling(start_time)
                 return True
         elif "switch" in curr_node:
             switch_value = eval(curr_node["switch"], {}, self.utility.collect_vars())
@@ -561,6 +592,7 @@ class Interpreter:
                 else:
                     self.addressing.set_curr_addr(curr_addr + (str(switch_value), 0))
 
+                self.do_profiling(start_time)
                 return True
             elif "_default" in curr_node:
                 if isinstance(curr_node["_default"], str):
@@ -568,6 +600,7 @@ class Interpreter:
                 else:
                     self.addressing.set_curr_addr(curr_addr + ("_default", 0))
 
+                self.do_profiling(start_time)
                 return True
         elif "tag" in curr_node:
             pass # Tags currently do nothing
@@ -578,4 +611,5 @@ class Interpreter:
 
         self.gamestate.state["bookmark"] = self.addressing.get_next_bookmark(self.gamestate.state["bookmark"])
 
+        self.do_profiling(start_time)
         return True

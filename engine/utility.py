@@ -333,7 +333,8 @@ class Utility:
         elif isinstance(node, dict):
             for key, subnode in node.items():
                 if count_node:
-                    num_words += len(key.split())
+                    num_words += 1
+                    #num_words += len(key.split())
                 num_words += self.count_words(subnode, only_count_visited, address + (key,))
         
         return num_words

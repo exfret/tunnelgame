@@ -1,0 +1,1 @@
+Frugal director and primary benefactor to the orphanage. Makes tough decisions that make him seem cold-hearted, but truly he does care.

@@ -2,7 +2,7 @@ ID: pass_level
 
 Going into the [[Layers]] of the [[Tunnel]] requires a Tunnel Pass for that corresponding layer. Each pass has certain requirements, listed on their page. I want to space out when you get the passes, as detailed in the entry about [[Age]].
 
-1. The [[Training Pass]] is your first pass at the beginning of the story. It requires you have a mentor like [[Characters/George]] with you to even go on an expedition.
+1. The [[Training Pass]] is your first pass at the beginning of the story. It requires you have a mentor like [[Characters/Orphans/George]] with you to even go on an expedition.
 2. The [[Green Pass]] is your first pass as an independent explorer. It allows you entrance into [[Layer 1]]. Achieving this pass should mark the exit of the "tutorial" stage. It should take about 6-12 in-game months.
 3. The [[Blue Pass]] allows access to [[layer 2]], and should not be too hard to get. It should be early to allow players to see the contrast in the layers, and also to allow more choices for which encounters they want. This should also take about 6-12 in-game months.
 4. The [[Yellow Pass]] is the first very significant pass, allowing access into [[Layer 3]]. The danger of this layer is in accordance with the difficulty of achieving this pass. Ideally, there would be enough content with the first two passes to allow this one to take a full 1-3 in-game years or so.

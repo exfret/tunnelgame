@@ -1,1 +1,1 @@
-The only exit from the [[Dome]].
+The only exit from the [[Lore/Dome]].

@@ -1,1 +1,1 @@
-You can research different upgrades by reading a book. At first, this involves paying [[Mabel]] some [[Rosalia]] to rent a book from the [[Study]]
+You can research different upgrades by reading a book. At first, this involves paying [[Mabel]] some [[Items/Flowers/Rosalia|Rosalia]] to rent a book from the [[Study]].

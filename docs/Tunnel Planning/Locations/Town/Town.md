@@ -1,0 +1,1 @@
+From here, you can navigate to the main parts of town.

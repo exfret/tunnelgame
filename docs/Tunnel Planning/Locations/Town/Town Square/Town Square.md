@@ -1,0 +1,1 @@
+Requires the [[Square Hat]] to visit.

@@ -130,7 +130,7 @@ class GameParser:
             "world": {"objects": {}, "descriptors": {}, "relationships": {}} # TODO: Update exec?
         }
         self.gamestate.state.update(copy.deepcopy(starting_state))
-        self.gamestate.state["game"] = self.gameobject.game
+        #self.gamestate.state["game"] = self.gameobject.game
     
 
     def construct_game(self, node, story_path, address=()):

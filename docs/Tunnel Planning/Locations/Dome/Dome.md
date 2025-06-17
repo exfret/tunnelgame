@@ -1,0 +1,1 @@
+Where miscellaneous locations in the Dome are put. See [[Lore/Dome|Dome]] for more information.

@@ -10,7 +10,7 @@ Second Visit:
 - If you have high enough observation/fighting skills, maybe an option to defeat them on the first try.
 
 Third+ Visit (Scrolls Undefeated):
-- There's an option to do [[Fighting]] against the scrolls.
+- There's an option to do [[Mechanics/Fighting/Fighting|Fighting]] against the scrolls.
 - If you lose, you also lose the same [[Research]] as above again.
 - If you win, you get some bonus related to researching, and also the following text:
 	- You rip the scrolls to shreds. It seems they were guarding an ancient locked shack back here.

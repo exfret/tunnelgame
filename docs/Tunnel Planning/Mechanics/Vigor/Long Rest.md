@@ -1,0 +1,1 @@
+You can engage in a Long Rest at certain locations, which fully restores [[Mechanics/Vigor/Vigor]] at the cost of 15% of your [[Experience]] (rounded up). The amount of Experience lost can be decreased additively with certain abilities, but can never reach 0%.

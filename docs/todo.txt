@@ -1,6 +1,12 @@
 Currently:
+  - Optimization
+    - Profiling
+    - Need to do tests to make sure things still work, like saving/loading/etc.
+      - First need to decide what tests to do
+
   - Lookaheads
     - Make lookaheads not work for choices with args, etc.
+    - Test saving/loading capabilities with lookaheads
 
   - Big refactor to class-based approach
       - Create new classes
@@ -57,6 +63,8 @@ Big Todo:
   - UI
 
 
+244. Decide what to do with _visits
+243. Do profiling more consistently (just do it everywhere, I don't think time.time() is big overhead since it's not "proper" profiling)
 242. Go back to async saves and remove short autosaves for web view
 241. Save on CPU time somehow
 240. Make autosaves user-specific
@@ -135,7 +143,6 @@ Big Todo:
 162. Catch exceptions for any errors from expressions
 161. Think about whether to do type checking in expressions
 160. An interrupt for repeat/input commands when they're taking too long
-158. Named storypoints
 157. Goto commands don't seem to be resetting the address
 156. Label commands that can be goto'd rather than needed whole new blocks
 155. Tags for keeping track of people/places/things etc.
@@ -163,8 +170,7 @@ Big Todo:
 132. Warning for choice/effects without gotos
 131. Persistent stats about a story, like how much completion you've achieved across all your runs of it
 130. Composite repo logic that looks in both built-in and non-built-in stories
-129. Print error for too many args in commands?
-128. Test for stop commands
+128. Test cases for stop commands
 127. Compound instructions (separated by ;?)
 126. Fix goto command (I think broken in choice effects)
 125. Warnings for = in text (for set statements)
@@ -179,10 +185,9 @@ Big Todo:
 116. Special ways to access variables, for example, from different scopes with custom parsing of variables in {} curly braces
 115. Tag/filter system... filter only for blocks with a certain tag when doing instructions/commands
 114. Make list of definitive features to test
-113. Ability to organize vars more into "blocks" that are just for organizational purposes
+113. Ability to organize vars more into "var blocks" that are just for organizational purposes
 112. Tags about story elements for debugging? What would these do? Maybe built-in changelogs and messages
 111. Make random number generator deterministic
-109. Attach which game "id" each save is from
 108. Overwrite confirmation for saving over an old file?
 107. Default load value too?
 106. State organization overhaul?
@@ -202,11 +207,12 @@ Big Todo:
 90. Titles for locations
 89. Fix gameparser for requirement specifications
 88. Make sure "help" string is up to date
-87. Change "stop" to "wait" statement? Maybe "pause". Make wait keep execution stack and stop get rid of it. How to do headers?
 81. Error on choices in story that are more than one word
 80. Iteration loops (iterate through a list and do something for each thing in the list)
 
 DONE
+158. Named storypoints
+109. Attach which game "id" each save is from
 174. "seed" command that forces the next few "random" values to prechosen values (doesn't actually seed generator)
 77. _args overhaul to use list of variable dicts, not just numbers
 70. Plural/gender/etc. localizations for variables (just plural/singular though for now, but more can easily be added later)
@@ -269,6 +275,7 @@ DONE
 1. Checking that story is formatted correctly
 
 NOT DOING
+87. Change "stop" to "wait" statement? Maybe "pause". Make wait keep execution stack and stop get rid of it. How to do headers?
 74. Write a story that allows the reader to write their own story, just for the meta-ness nerd cred (the call command is probably hopelessly broken now, not to mention basically useless, and fixing it scares me)
 68. World object that exists separately for each block (or even just a macro) (need to rethink world objects)
 63. Check that insert commands and such are only used with bags (starting to rethink bags)
@@ -303,6 +310,7 @@ I FORGET WHAT THIS MEANS
 57. Automatic stopping outside of effects blocks!
 
 DEFUNCT
+129. Print error for too many args in commands?
 75. Should "stops" deconstruct the call stack like they do now? In general, how could we do choices within a gosub? (I ended up using sub commands instead, so I think I ended up resolving this in a different way)
 37. Add special lib var that is a library accessible to expressions but doesn't get saved with the state
 8. Add back in variable sensing?

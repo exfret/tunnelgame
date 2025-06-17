@@ -1,0 +1,3 @@
+This is a [[Next Expeditions|Training Encounter]].
+
+The first time you appear here, you see a pile of [[Building Materials]]. (Note that [[Characters/Orphans/George|George]] can be with you at this time; maybe he gets you extra [[Building Materials]]). The second time, you find an [[Acorns|Acorn]]. The third time, you find two dead [[World Features/Creatures/Squirrel|Squirrels]]. An elderly squirrel, [[Peasant]], pops up and tells you about the [[Squirrel Wars]]. If [[Characters/Orphans/George|George]] is with you at that time, he gets distracted and doesn't believe you later when you tell him about it.

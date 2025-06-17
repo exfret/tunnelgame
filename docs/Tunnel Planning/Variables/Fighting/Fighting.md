@@ -1,0 +1,1 @@
+This is for referencing the different skills/stats used for [[Mechanics/Fighting/Fighting|Fighting]], and how they are stored in variable form, like their ID's. For how the actual mechanic works, see that page.

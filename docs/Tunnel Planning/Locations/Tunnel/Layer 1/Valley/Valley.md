@@ -1,0 +1,1 @@
+A valley tucked away between the [[Hills]] and the walls of the [[Tunnel]]. Requires [[Exploration I]] to access.

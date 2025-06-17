@@ -1,0 +1,1 @@
+Henry is a middle-aged [[Tunnel]] explorer with light brown hair. He usually has a cheery attitude. He has a hand in many things, including being a contender for the throne in the [[Squirrel Wars]] as well as owning a [[Ghostly Orbs|Ghostly Orb]].

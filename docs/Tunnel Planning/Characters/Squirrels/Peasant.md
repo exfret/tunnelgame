@@ -1,0 +1,1 @@
+An elderly squirrel who protests the destructive results of the [[Squirrel Wars]].

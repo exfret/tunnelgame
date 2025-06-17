@@ -1,0 +1,1 @@
+When your [[Health]] is 0 or below, you are then in critical condition. This impacts many tasks, and prevents you from engaging in futher fights.

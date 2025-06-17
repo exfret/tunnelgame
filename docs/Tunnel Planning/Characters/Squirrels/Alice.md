@@ -1,0 +1,1 @@
+Leader of the Bushytail Clan in the [[Hills]].

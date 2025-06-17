@@ -1,0 +1,1 @@
+This is the player's/main character's/[[Locations/Orphanage/Rooms/Lily|Lily's]] room. You can do a 
