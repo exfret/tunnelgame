@@ -1,4 +1,11 @@
 Currently:
+  - Huge refactor with diffs
+    - Remove web_state["game"]
+    - Rename seed command
+    - Update history with diffs
+    - Fix main.py
+    - Check systematically for where bulk or vars are referenced
+
   - Optimization
     - Profiling
     - Need to do tests to make sure things still work, like saving/loading/etc.
@@ -63,6 +70,8 @@ Big Todo:
   - UI
 
 
+246. Implement savefile_names in SavesData
+245. Make choices into their own class
 244. Decide what to do with _visits
 243. Do profiling more consistently (just do it everywhere, I don't think time.time() is big overhead since it's not "proper" profiling)
 242. Go back to async saves and remove short autosaves for web view

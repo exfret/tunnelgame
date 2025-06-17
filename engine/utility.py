@@ -1,6 +1,10 @@
 from string import Formatter
 
 
+from engine.gamestate import GameState
+from engine.addressing import Addressing
+
+
 class CustomFormatter(Formatter):
     def get_value(self, key, args, kwargs):
         # TODO: Support nested bags
@@ -102,6 +106,10 @@ class ArgsList(list):
 
 
 class Utility:
+    gamestate : GameState
+    addressing : Addressing
+
+
     def __init__(self, gamestate, addressing):
         self.gamestate = gamestate
         self.addressing = addressing
@@ -135,27 +143,27 @@ class Utility:
 
         for ind in range(len(address)):
             addr_to_check = address[:ind]
-            if addr_to_check in self.gamestate.state["vars"]:
-                new_vars_dict = self.gamestate.state["vars"][addr_to_check]
+            if addr_to_check in self.gamestate.bulk.vars:
+                new_vars_dict = self.gamestate.bulk.vars[addr_to_check]
 
                 for var_name, var_spec in new_vars_dict.items():
                     var_dict[var_name] = var_spec
         
         # Add module vars/other special vars
-        for ind, val in self.gamestate.state["vars"].items():
+        for ind, val in self.gamestate.bulk.vars.items():
             if not isinstance(ind, tuple):
                 var_dict[ind] = val
-        for flag in self.gamestate.state["vars"]["flags"]:
-            if self.gamestate.state["vars"]["flags"][flag]:
+        for flag in self.gamestate.bulk.vars["flags"]:
+            if self.gamestate.bulk.vars["flags"][flag]:
                 var_dict[flag] = True
             else:
                 var_dict[flag] = False
 
-        var_dict["_visits"] = self.gamestate.state["visits"][address]
-        var_dict["_num_choices"] = len(self.gamestate.state["choices"])
-        var_dict["_address"] = self.addressing.get_block_part(self.gamestate.state["last_address"])
-        if len(self.gamestate.state["last_address_list"]) >= 1:
-            var_dict["_previous_address"] =self.addressing.get_block_part(self.gamestate.state["last_address_list"][-1])
+        var_dict["_visits"] = self.gamestate.bulk.per_line[address].visits
+        var_dict["_num_choices"] = len(self.gamestate.light.choices)
+        var_dict["_address"] = self.addressing.get_block_part(self.gamestate.light.last_address)
+        if len(self.gamestate.light.last_address_list) >= 1:
+            var_dict["_previous_address"] = self.addressing.get_block_part(self.gamestate.light.last_address_list[-1])
         else:
             var_dict["_previous_address"] = ()
 
@@ -316,7 +324,7 @@ class Utility:
     # Used in word counting commands
     def count_words(self, node, only_count_visited=False, address=()):
         count_node = True
-        if only_count_visited and self.gamestate.state["visits"][address] == 0:
+        if only_count_visited and self.gamestate.bulk.per_line[address].visits == 0:
             count_node = False
 
         num_words = 0

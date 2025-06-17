@@ -3,6 +3,14 @@ import random
 import time
 
 
+from engine.gamestate import GameState
+from engine.config import Config
+from engine.addressing import Addressing
+from engine.utility import Utility
+from engine.view import View
+from engine.gameparser import GameParser
+
+
 class ErrorNode(Exception):
     pass
 
@@ -12,8 +20,15 @@ class UnrecognizedInstruction(Exception):
 
 
 class Interpreter:
-    def __init__(self, gameobject, gamestate, config, addressing, utility, view, gameparser):
-        self.gameobject = gameobject
+    gamestate : GameState
+    config : Config
+    addressing : Addressing
+    utility : Utility
+    view : View
+    gameparser : GameParser
+
+
+    def __init__(self, gamestate, config, addressing, utility, view, gameparser):
         self.gamestate = gamestate
         self.config = config
         self.addressing = addressing
@@ -22,7 +37,7 @@ class Interpreter:
         self.gameparser = gameparser
 
 
-    def do_print(self, text, style="", dont_save_print=False):  # TODO: Move ansi code handling to view as well
+    def do_print(self, text, style="", dont_save_print=False):
         self.view.print_text(text, style, dont_save_print=dont_save_print)
 
 
@@ -47,13 +62,12 @@ class Interpreter:
         parent_block = self.addressing.get_block_part(curr_addr)
         # Don't save footer addresses
         if len(parent_block) == 0 or parent_block[-1] != "_footer":
-            self.gamestate.state["last_address"] = curr_addr
+            self.gamestate.light.last_address = curr_addr
 
         curr_node = self.addressing.get_node(curr_addr)
+
         # Mark that we've visited this node (again)
-        if not (curr_addr in self.gamestate.state["visits"]):
-            self.gamestate.state["visits"][curr_addr] = 0
-        self.gamestate.state["visits"][curr_addr] += 1
+        self.gamestate.inc_visits(curr_addr)
 
         # Figure out if we are in a dont_save_print block
         dont_save_print = False
@@ -65,7 +79,7 @@ class Interpreter:
         if isinstance(curr_node, str):
             self.do_print(curr_node, dont_save_print=dont_save_print)
 
-            self.gamestate.state["bookmark"] = self.addressing.get_next_bookmark(self.gamestate.state["bookmark"])
+            self.gamestate.light.bookmark = self.addressing.get_next_bookmark(self.gamestate.light.bookmark)
 
             self.do_profiling(start_time)
             return True
@@ -75,13 +89,13 @@ class Interpreter:
         # TODO: Verify this part of stories
         if "back" in curr_node:
             while True:
-                if len(self.gamestate.state["last_address_list"]) == 0:
+                if len(self.gamestate.light.last_address_list) == 0:
                     break
 
-                new_addr = self.addressing.get_block_part(self.gamestate.state["last_address_list"].pop())
+                new_addr = self.addressing.get_block_part(self.gamestate.light.last_address_list.pop())
 
                 # Don't count footers
-                if self.addressing.get_block_part(self.gamestate.state["last_address"]) != new_addr:
+                if self.addressing.get_block_part(self.gamestate.light.last_address) != new_addr:
                     parent_node = self.addressing.get_node(new_addr)
 
                     if isinstance(parent_node, list):
@@ -94,6 +108,8 @@ class Interpreter:
                     self.do_profiling(start_time)
                     return True
         elif "call" in curr_node:
+            # TODO: Currently borken!!!
+
             # TODO: Implement global/local vars that persist or don't persist after calls
             # Right now no variables persist after calls
             self.gamestate.state["call_stack"].append({"bookmark": self.gamestate.state["bookmark"], "vars": self.gamestate.state["vars"]})
@@ -116,10 +132,10 @@ class Interpreter:
             self.do_profiling(start_time)
             return True
         elif "choice" in curr_node:
-            if not "selectable_once" in curr_node or not curr_addr in self.gamestate.state["visits_choices"] or self.gamestate.state["visits_choices"][curr_addr] == 0:
+            if not "selectable_once" in curr_node or self.gamestate.bulk.per_line[curr_addr].choice_visits == 0:
                 vars_by_name = self.utility.collect_vars_with_dicts()
 
-                self.gamestate.state["choices"][curr_node["choice"]] = {}
+                self.gamestate.light.choices[curr_node["choice"]] = {}
 
                 choice_args = []
                 if "args" in curr_node:
@@ -127,9 +143,9 @@ class Interpreter:
                         pass # TODO: Remove this sort of args checking
                 
                 # By default there is nothing enforced
-                self.gamestate.state["choices"][curr_node["choice"]]["enforce"] = "True"
+                self.gamestate.light.choices[curr_node["choice"]]["enforce"] = "True"
                 if "enforce" in curr_node:
-                    self.gamestate.state["choices"][curr_node["choice"]]["enforce"] = curr_node["enforce"]
+                    self.gamestate.light.choices[curr_node["choice"]]["enforce"] = curr_node["enforce"]
 
                 missing_list = []
                 modify_list = []
@@ -137,17 +153,17 @@ class Interpreter:
                 if "text" in curr_node:
                     text = curr_node["text"]
                 if "cost" in curr_node:
-                    self.gamestate.state["choices"][curr_node["choice"]]["cost_spec"] = self.utility.parse_requirement_spec(curr_node["cost"])
+                    self.gamestate.light.choices[curr_node["choice"]]["cost_spec"] = self.utility.parse_requirement_spec(curr_node["cost"])
                 if "require" in curr_node:
-                    self.gamestate.state["choices"][curr_node["choice"]]["req_spec"] = self.utility.parse_requirement_spec(curr_node["require"])
+                    self.gamestate.light.choices[curr_node["choice"]]["req_spec"] = self.utility.parse_requirement_spec(curr_node["require"])
                 if "shown" in curr_node:
-                    self.gamestate.state["choices"][curr_node["choice"]]["shown_spec"] = self.utility.parse_requirement_spec(curr_node["shown"])
+                    self.gamestate.light.choices[curr_node["choice"]]["shown_spec"] = self.utility.parse_requirement_spec(curr_node["shown"])
                 if "per_cost" in curr_node:
-                    self.gamestate.state["choices"][curr_node["choice"]]["per_cost_spec"] = self.utility.parse_requirement_spec(curr_node["per_cost"])
+                    self.gamestate.light.choices[curr_node["choice"]]["per_cost_spec"] = self.utility.parse_requirement_spec(curr_node["per_cost"])
                 if "per_require" in curr_node:
-                    self.gamestate.state["choices"][curr_node["choice"]]["per_req_spec"] = self.utility.parse_requirement_spec(curr_node["per_require"])
+                    self.gamestate.light.choices[curr_node["choice"]]["per_req_spec"] = self.utility.parse_requirement_spec(curr_node["per_require"])
                 if "per_shown" in curr_node:
-                    self.gamestate.state["choices"][curr_node["choice"]]["per_shown_spec"] = self.utility.parse_requirement_spec(curr_node["per_shown"])
+                    self.gamestate.light.choices[curr_node["choice"]]["per_shown_spec"] = self.utility.parse_requirement_spec(curr_node["per_shown"])
 
                 def get_effect_address(key):
                     effect_address = ""
@@ -168,18 +184,20 @@ class Interpreter:
                 if "action" in curr_node:
                     is_action = True
 
-                self.gamestate.state["choices"][curr_node["choice"]]["text"] = text
-                self.gamestate.state["choices"][curr_node["choice"]]["address"] = effect_address
-                self.gamestate.state["choices"][curr_node["choice"]]["alt_address"] = alt_effect_address
-                self.gamestate.state["choices"][curr_node["choice"]]["missing"] = missing_list
-                self.gamestate.state["choices"][curr_node["choice"]]["modifications"] = modify_list
-                self.gamestate.state["choices"][curr_node["choice"]]["choice_address"] = curr_addr
-                self.gamestate.state["choices"][curr_node["choice"]]["action"] = is_action
+                self.gamestate.light.choices[curr_node["choice"]]["text"] = text
+                self.gamestate.light.choices[curr_node["choice"]]["address"] = effect_address
+                self.gamestate.light.choices[curr_node["choice"]]["alt_address"] = alt_effect_address
+                self.gamestate.light.choices[curr_node["choice"]]["missing"] = missing_list
+                self.gamestate.light.choices[curr_node["choice"]]["modifications"] = modify_list
+                self.gamestate.light.choices[curr_node["choice"]]["choice_address"] = curr_addr
+                self.gamestate.light.choices[curr_node["choice"]]["action"] = is_action
         elif "command" in curr_node:
             commands = curr_node["command"].split(";")
             for subcommand in commands:
-                self.gamestate.state["command_buffer"].append(subcommand.split())
+                self.gamestate.light.command_buffer.append(subcommand.split())
         elif "descriptive" in curr_node:
+            # TODO: Currently BROKEN!!
+
             # Default to setting that's at least as descriptive
             if self.gamestate.state["settings"]["descriptiveness"] == "descriptive":
                 if not curr_node["descriptive"] is None:
@@ -204,8 +222,10 @@ class Interpreter:
         elif "error" in curr_node:
             raise ErrorNode("Error raised.")
         elif "flag" in curr_node:
-            self.gamestate.state["vars"]["flags"][curr_node["flag"]] = True
+            self.gamestate.modify_flag(curr_node["flag"], True)
         elif "flavor" in curr_node:
+            # TODO: CURRENTLY BROKEN!!!
+
             if self.gamestate.state["settings"]["show_flavor_text"] != "never" and (self.gamestate.state["visits"][curr_addr] <= 1 or self.gamestate.state["settings"]["show_flavor_text"] == "always"):
                 if isinstance(curr_node["flavor"], str):  # TODO: Allow style spec tag with flavor text
                     self.view.print_flavor_text(curr_node["flavor"], dont_save_print=dont_save_print)
@@ -218,9 +238,9 @@ class Interpreter:
             sub_address = self.addressing.parse_addr(curr_addr, curr_node["gosub"])
 
             # Increment current address so that when we return we don't just go back to the gosub
-            self.gamestate.state["bookmark"] = self.addressing.get_next_bookmark(self.gamestate.state["bookmark"])
+            self.gamestate.light.bookmark = self.addressing.get_next_bookmark(self.gamestate.light.bookmark)
 
-            self.gamestate.state["bookmark"] = (sub_address,) + self.gamestate.state["bookmark"]
+            self.gamestate.light.bookmark = (sub_address,) + self.gamestate.light.bookmark
 
             self.do_profiling(start_time)
             return True
@@ -256,7 +276,7 @@ class Interpreter:
                 if isinstance(curr_node["into_choices"], dict):
                     # Right now, just except is valid, which put it into all choices except the given ones
                     if "except" in curr_node["into_choices"]:
-                        choices_to_inject_into = list(self.gamestate.state["choices"].keys())
+                        choices_to_inject_into = list(self.gamestate.light.choices.keys())
 
                         choices_not_to_inject_into = curr_node["into_choices"]["except"].split()
                         for choice_id in choices_not_to_inject_into:
@@ -264,7 +284,7 @@ class Interpreter:
                                 choices_to_inject_into.remove(choice_id)
                 elif isinstance(curr_node["into_choices"], str):
                     if curr_node["into_choices"] == "_all":
-                        choices_to_inject_into = list(self.gamestate.state["choices"].keys())
+                        choices_to_inject_into = list(self.gamestate.light.choices.keys())
                     else:
                         choices_to_inject_into = curr_node["into_choices"].split()
 
@@ -274,10 +294,10 @@ class Interpreter:
 
                 for choice_id in choices_to_inject_into:
                     # TODO: Warning when trying to inject into a choice that doesn't exist
-                    if choice_id in self.gamestate.state["choices"]:
-                        if not "injections" in self.gamestate.state["choices"][choice_id]:
-                            self.gamestate.state["choices"][choice_id]["injections"] = []
-                        self.gamestate.state["choices"][choice_id]["injections"].append({"address": self.addressing.parse_addr(curr_addr, curr_node["inject"]), "position": position})
+                    if choice_id in self.gamestate.light.choices:
+                        if not "injections" in self.gamestate.light.choices[choice_id]:
+                            self.gamestate.light.choices[choice_id]["injections"] = []
+                        self.gamestate.light.choices[choice_id]["injections"].append({"address": self.addressing.parse_addr(curr_addr, curr_node["inject"]), "position": position})
         elif "insert" in curr_node:
             vars_by_name = self.utility.collect_vars_with_dicts()
 
@@ -301,8 +321,10 @@ class Interpreter:
             new_val = None
             if "add" in curr_node:
                 new_val = old_val + self.utility.eval_values(curr_node["add"])
-            self.utility.set_value(var_to_change, new_val)
+            self.utility.set_val(var_to_change, new_val)
         elif "move" in curr_node:
+            # TODO: CURRENTLY BROKEN
+
             # Make sure to only get the block's address, not its inside instructions
             block_to_move_addr = self.addressing.parse_addr(curr_addr, curr_node["move"], only_block_part=True)
             # Make sure we're not trying to move the root block
@@ -342,7 +364,7 @@ class Interpreter:
                     self.addressing.set_curr_addr(curr_addr)
                     # Don't return anything because we actually still need to increment the address            
         elif "once" in curr_node:
-            if self.gamestate.state["visits"][curr_addr] <= 1:
+            if self.gamestate.bulk.per_line[curr_addr].visits <= 1:
                 if isinstance(curr_node["once"], str):
                     self.do_print(curr_node["once"], dont_save_print=dont_save_print)
                 else:
@@ -357,7 +379,7 @@ class Interpreter:
             # Useful for injections
             # TODO: Label what parts of the bookmark queue represent (subroutine, injection, header, etc.) and use this to more easily manipulate it
             try:
-                self.gamestate.state["bookmark"] = self.gamestate.state["bookmark"][:1] + self.gamestate.state["bookmark"][2:]
+                self.gamestate.light.bookmark = self.gamestate.light.bookmark[:1] + self.gamestate.light.bookmark[2:]
             except Exception:
                 # If there was out of index error, do nothing
                 pass
@@ -382,9 +404,9 @@ class Interpreter:
                 for id in curr_node["random"].split(","):
                     possibilities_list.append(id.strip())
 
-                if len(self.gamestate.state["seed"]) > 0:
+                if len(self.gamestate.light.random_buffer) > 0:
                     # Check if the seed is in the possibilities list
-                    seed = self.gamestate.state["seed"].pop(0)
+                    seed = self.gamestate.light.random_buffer.pop(0)
                     if seed in possibilities_list:
                         self.addressing.set_curr_addr(self.addressing.parse_addr(curr_addr, seed))
                     else:
@@ -410,8 +432,8 @@ class Interpreter:
                 possibilities_list.append((weight, key))
             
             # Check if the seed exists and is in the possibilities list
-            if len(self.gamestate.state["seed"]) > 0:
-                seed = self.gamestate.state["seed"].pop(0)
+            if len(self.gamestate.light.random_buffer) > 0:
+                seed = self.gamestate.light.random_buffer.pop(0)
 
                 # Can't just use "in" here since possibilities_list is more complex
                 is_possible = False
@@ -448,9 +470,11 @@ class Interpreter:
                     return True
         elif "remove_choice" in curr_node:
             # TODO: Warning if this choice was not in the story?
-            if curr_node["remove_choice"] in self.gamestate.state["choices"]:
-                del self.gamestate.state["choices"][curr_node["remove_choice"]]
+            if curr_node["remove_choice"] in self.gamestate.light.choices:
+                del self.gamestate.light.choices[curr_node["remove_choice"]]
         elif "return" in curr_node:
+            # TODO: CURRENTLY BROKEN
+
             # TODO: Give warning if call stack is empty
             if len(self.gamestate.state["call_stack"]) >= 1:
                 stack_state = self.gamestate.state["call_stack"].pop()
@@ -464,6 +488,8 @@ class Interpreter:
 
             var_dict[curr_node["reveal"]]["hidden"] = False
         elif "run" in curr_node:
+            # TODO: CURRENTLY BROKEN
+
             contents = self.utility.get_var(self.gamestate.state["vars"], curr_node["run"], curr_addr)["value"]
             temp_yaml = self.config.story_dir / "_temp.yaml"
             temp_yaml.write_bytes(yaml.dump(contents).encode('utf-8'))
@@ -475,7 +501,7 @@ class Interpreter:
             self.do_profiling(start_time)
             return False
         elif "seed" in curr_node:
-            self.gamestate.state["seed"].append(curr_node["seed"])
+            self.gamestate.light.random_buffer.append(curr_node["seed"])
         elif "send" in curr_node:
             # Just trigger child blocks and current block for now by default
             parent_block_addr = self.addressing.get_block_part(curr_addr)
@@ -488,7 +514,7 @@ class Interpreter:
                             child_block_addr_name = (child_block_name,)
                             if child_block_name == ():
                                 child_block_addr_name = ()
-                            self.gamestate.state["bookmark"] = self.gamestate.state["bookmark"] + (parent_block_addr + child_block_addr_name + ("_listeners", index, "handler", 0),)
+                            self.gamestate.light.bookmark = self.gamestate.light.bookmark + (parent_block_addr + child_block_addr_name + ("_listeners", index, "handler", 0),)
         elif "separator" in curr_node:
             self.view.print_separator(dont_save_print=dont_save_print)
         elif "set" in curr_node:
@@ -513,30 +539,37 @@ class Interpreter:
                     last_var_to_modify = var_to_modify
                     var_to_modify = var_to_modify[int(index[:-1])]
 
+                # TODO: Show some text (in this case it doesn't quite make sense how to refer to the variable
                 if modifier == "+":
                     if not (last_index is None):
+                        # TODO: BROKEN
                         last_var_to_modify[last_index] += eval(var_expr_pair[1], {}, self.utility.collect_vars())
-                        # TODO: Show some text (in this case it doesn't quite make sense how to refer to the variable
                     else:
-                        vars_by_name[var_name_indices[0]]["value"] += eval(var_expr_pair[1], {}, self.utility.collect_vars())
+                        var = vars_by_name[var_name_indices[0]]
+                        self.gamestate.modify_var(var["address"], var_name_indices[0], var["value"] + eval(var_expr_pair[1], {}, self.utility.collect_vars()))
                         text_to_show_spec = {"var_name": var_name_indices[0], "op": "add", "amount": eval(var_expr_pair[1], {}, self.utility.collect_vars()), "var": vars_by_name[var_name_indices[0]]}
                 elif modifier == "-":
                     if not (last_index is None):
+                        # TODO: BROKEN
                         last_var_to_modify[last_index] -= eval(var_expr_pair[1], {}, self.utility.collect_vars())
                     else:
-                        vars_by_name[var_name_indices[0]]["value"] -= eval(var_expr_pair[1], {}, self.utility.collect_vars())
+                        var = vars_by_name[var_name_indices[0]]
+                        self.gamestate.modify_var(var["address"], var_name_indices[0], var["value"] - eval(var_expr_pair[1], {}, self.utility.collect_vars()))
                         text_to_show_spec = {"var_name": var_name_indices[0], "op": "subtract", "amount": eval(var_expr_pair[1], {}, self.utility.collect_vars()), "var": vars_by_name[var_name_indices[0]]}
                 else:
                     if not (last_index is None):
+                        # TODO: BROKEN
                         last_var_to_modify[last_index] = eval(var_expr_pair[1], {}, self.utility.collect_vars())
                     else:
-                        vars_by_name[var_name_indices[0]]["value"] = eval(var_expr_pair[1], {}, self.utility.collect_vars())
+                        var = vars_by_name[var_name_indices[0]]
+                        self.gamestate.modify_var(var["address"], var_name_indices[0], eval(var_expr_pair[1], {}, self.utility.collect_vars()))
                         text_to_show_spec = {"var_name": var_name_indices[0], "op": "set", "amount": eval(var_expr_pair[1], {}, self.utility.collect_vars()), "var": vars_by_name[var_name_indices[0]]}
 
                 # TODO: Make show compatible with "to" set statements!
                 if "show" in curr_node:
                     self.view.print_var_modification(text_to_show_spec, dont_save_print=dont_save_print)
             else:
+                # TODO: BROKEN
                 if isinstance(curr_node["to"], (int, float)):
                     vars_by_name[curr_node["set"]]["value"] = curr_node["to"]  # TODO: Allow setting to string literal values
                 else:
@@ -555,32 +588,32 @@ class Interpreter:
             self.addressing.set_curr_addr(partial_addr)
         elif "stop" in curr_node:
             # Need to remove this address now from the queue
-            self.gamestate.state["bookmark"] = self.gamestate.state["bookmark"][1:]
+            self.gamestate.light.bookmark = self.gamestate.light.bookmark[1:]
 
             self.do_profiling(start_time)
             return False
         elif "storypoint" in curr_node:
             if curr_node["storypoint"] is None:
-                self.gamestate.state["story_points"][curr_addr] = True
+                self.gamestate.light.storypoints[curr_addr] = True
             else:
-                self.gamestate.state["story_points"][curr_node["storypoint"]] = True
+                self.gamestate.light.storypoints[curr_node["storypoint"]] = True
         elif "sub" in curr_node:
             # TODO: Make this interact better with "call"
             # (Right now, they each have their own call stacks that interact noncommutatively with each other)
             
             # Need to get next bookmark so after return we increment past the sub command
-            self.gamestate.state["sub_stack"] = (self.addressing.get_next_bookmark(self.gamestate.state["bookmark"]),) + self.gamestate.state["sub_stack"]
-            self.gamestate.state["bookmark"] = self.addressing.make_bookmark((), self.addressing.parse_addr(curr_addr, curr_node["sub"]))
+            self.gamestate.light.sub_stack = (self.addressing.get_next_bookmark(self.gamestate.light.bookmark),) + self.gamestate.light.sub_stack
+            self.gamestate.light.bookmark = self.addressing.make_bookmark((), self.addressing.parse_addr(curr_addr, curr_node["sub"]))
 
             self.do_profiling(start_time)
             return True
         elif "subreturn" in curr_node:
-            if len(self.gamestate.state["sub_stack"]) == 0:
+            if len(self.gamestate.light.sub_stack) == 0:
                 # TODO: Throw error in this case, this is where we try to return from a subroutine but we're not in one
                 pass
             else:
-                self.gamestate.state["bookmark"] = self.gamestate.state["sub_stack"][0]
-                self.gamestate.state["sub_stack"] = self.gamestate.state["sub_stack"][1:]
+                self.gamestate.light.bookmark = self.gamestate.light.sub_stack[0]
+                self.gamestate.light.sub_stack = self.gamestate.light.sub_stack[1:]
 
                 self.do_profiling(start_time)
                 return True
@@ -605,11 +638,11 @@ class Interpreter:
         elif "tag" in curr_node:
             pass # Tags currently do nothing
         elif "unflag" in curr_node:
-            self.gamestate.state["vars"]["flags"][curr_node["unflag"]] = False
+            self.gamestate.modify_flag(curr_node["unflag"], False)
         else:
             raise UnrecognizedInstruction(f"Unrecognized instruction: {curr_node}")
 
-        self.gamestate.state["bookmark"] = self.addressing.get_next_bookmark(self.gamestate.state["bookmark"])
+        self.gamestate.light.bookmark = self.addressing.get_next_bookmark(self.gamestate.light.bookmark)
 
         self.do_profiling(start_time)
         return True

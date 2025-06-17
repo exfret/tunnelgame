@@ -5,6 +5,12 @@ import random
 import yaml
 
 
+from engine.gamestate import GameState, LineData
+from engine.config import Config
+from engine.addressing import Addressing
+from engine.utility import Utility
+
+
 # TODO: Check addresses in program are valid
 
 
@@ -66,71 +72,26 @@ class UndefinedVariableChecker(ast.NodeVisitor):
 
 
 class GameParser:
-    def __init__(self, gameobject, gamestate, config, addressing, utility):
-        self.gameobject = gameobject
+    gamestate : GameState
+    config : Config
+    addressing : Addressing
+    utility : Utility
+
+
+    def __init__(self, gamestate, config, addressing, utility, grammar):
         self.gamestate = gamestate
         self.config = config
         self.addressing = addressing
         self.utility = utility
 
         self.expr_checker = UndefinedVariableChecker()
-        self.grammar = yaml.safe_load((self.config.grammar_dir).read_text())
+        self.grammar = grammar
     
 
     def open_game(self, story_path):
-        self.gameobject.game.clear()
-        self.gamestate.state.clear()
+        self.gamestate.reset()
         contents = yaml.safe_load(story_path.read_text())
-        self.gameobject.game.update(contents)
-
-        # NOTE: Update exec command too!
-        starting_state = {
-            "attached_blocks": [], # Attached blocks
-            "bookmark": (),  # bookmark is a tuple of addresses, which are themselves tuples
-            "call_stack": [],  # List of dicts with bookmarks and vars (TODO: Maybe do last_address_list and choices here too?)
-            "choice_num": 0,
-            "command_buffer": [],
-            "command_macros": {},
-            "choices": {
-                "start": self.utility.create_choice("Start the game", ("_content", 0)),
-            },  # Dict of choice ID's to new locations and descriptions
-            "curr_image": "",
-            "displayed_text": "",
-            "file_data": {
-                "filename": "",
-            },  # TODO: Include some sort of hash or name of game
-            "game": {}, # The current game object
-            "history": [],
-            "last_address": (),
-            "last_address_list": [],
-            "last_autosave": 0,
-            "map": {},  # TODO: What was map again? I think it was the game object, probably need to implement this
-            "story_data": { # NOTE: When adding to this, make sure to update move instruction
-                # dict of old address ("block uuid") to new address
-                # Used to modify content of blocks upon update
-                "block_moves": {}, # TODO: Not actually updated in move instruction yet
-                "file_homes": set(),
-                "node_types": {}
-            },
-            "msg": {},  # Hacky way for things to communicate to gameloop
-            "seed": [], # TODO: Update exec?
-            "settings": {
-                "autocomplete": "off",
-                "descriptiveness": "descriptive",
-                "show_flavor_text": "once"
-            },
-            "story_points": {},
-            "sub_stack": (), # A "stack" of bookmarks
-            "vars": {},
-            "view": {"stats_dropdowns_open": {}},
-            "view_displayed_text": {"console": "", "game": ""}, # TODO: Rename to subview displayed text or something along those lines?
-            "view_text_info": {"shown_vars": [], "displayed_print_msgs": []},
-            "visits": {},
-            "visits_choices": {},
-            "world": {"objects": {}, "descriptors": {}, "relationships": {}} # TODO: Update exec?
-        }
-        self.gamestate.state.update(copy.deepcopy(starting_state))
-        #self.gamestate.state["game"] = self.gameobject.game
+        self.gamestate.game = contents
     
 
     def construct_game(self, node, story_path, address=()):
@@ -138,7 +99,7 @@ class GameParser:
             for block_name, file_name in node["_include"].items():
                 subgame = yaml.safe_load((story_path.parent / file_name).read_text())
                 node[block_name] = copy.deepcopy(subgame)
-                self.gamestate.state["story_data"]["file_homes"].add(address + (block_name,))
+                self.gamestate.game_data.file_homes[address + (block_name,)] = True
         if not "_meta" in node:
             node["_meta"] = {}
 
@@ -156,8 +117,9 @@ class GameParser:
                     if not isinstance(detail["object"], str):
                         print(f"\033[31mError:\033[0m OBJECT_ID is not instance of str at {address} node {node}")
                         raise IncorrectTypeError()
-                    self.gamestate.state["world"]["objects"][detail["object"]] = {"notes": [], "descriptors": [], "relationships": []}
-                    curr = self.gamestate.state["world"]["objects"][detail["object"]]
+                    # TODO: World in gamestate
+                    #self.gamestate.state["world"]["objects"][detail["object"]] = {"notes": [], "descriptors": [], "relationships": []}
+                    #curr = self.gamestate.state["world"]["objects"][detail["object"]]
 
                     # Don't check for extraneous tags here when it's too much hassle, we can have the grammar do that
                     if "_notes" in detail:
@@ -168,7 +130,7 @@ class GameParser:
                             if not isinstance(note, str):
                                 print(f"\033[31mError:\033[0m OBJECT_NOTE is not instance of str at {address} node {node}")
                                 raise IncorrectTypeError()
-                            curr["notes"].append(note)
+                            #curr["notes"].append(note)
                     if "_descriptors" in detail:
                         if not isinstance(detail["_descriptors"], list):
                             print(f"\033[31mError:\033[0m OBJECT_DESCRIPTORS is not instance of list at {address} node {node}")
@@ -177,7 +139,7 @@ class GameParser:
                             if not isinstance(descriptor, str):
                                 print(f"\033[31mError:\033[0m OBJECT_DESCRIPTOR is not instance of str at {address} node {node}")
                                 raise IncorrectTypeError()
-                            curr["descriptors"].append(descriptor)
+                            #curr["descriptors"].append(descriptor)
                     if "_relationships" in detail:
                         if not isinstance(detail["_relationships"], list):
                             print(f"\033[31mError:\033[0m OBJECT_RELATIONSHIP is not instance of list at {address} node {node}")
@@ -195,17 +157,19 @@ class GameParser:
                             if not isinstance(relationship["by"], str) or not isinstance(relationship["to"], str):
                                 print(f"\033[31mError:\033[0m Incorrect type for 'by' or 'to' tag in RELATIONSHIP at {address} node {node}")
                                 raise IncorrectTypeError()
-                            curr["relationships"].append({"by": relationship["by"], "to": relationship["to"]})
+                            #curr["relationships"].append({"by": relationship["by"], "to": relationship["to"]})
                 elif "descriptor" in detail:
                     if not isinstance(detail["descriptor"], str):
                         print(f"\033[31mError:\033[0m DESCRIPTOR is not instance of str at {address} node {node}")
                         raise IncorrectTypeError()
-                    self.gamestate.state["world"]["objects"][detail["descriptor"]] = {}
+                    # TODO: World in gamestate
+                    #self.gamestate.state["world"]["objects"][detail["descriptor"]] = {}
                 elif "relationship" in detail:
                     if not isinstance(detail["relationship"], str):
                         print(f"\033[31mError:\033[0m RELATIONSHIP is not instance of str at {address} node {node}")
                         raise IncorrectTypeError()
-                    self.gamestate.state["world"]["objects"][detail["relationship"]] = {}
+                    # TODO: World in gamestate
+                    #self.gamestate.state["world"]["objects"][detail["relationship"]] = {}
                 else:
                     print(f"\033[31mError:\033[0m Invalid DETAIL disjunct at {address} node {node}")
                     raise InvalidDisjunctError()
@@ -243,8 +207,8 @@ class GameParser:
 
     
     def add_flags(self, node):
-        if not "flags" in self.gamestate.state["vars"]:
-            self.gamestate.state["vars"]["flags"] = {}
+        if not "flags" in self.gamestate.bulk.vars:
+            self.gamestate.bulk.vars["flags"] = {}
 
         if isinstance(node, list):
             for subnode in node:
@@ -252,7 +216,7 @@ class GameParser:
         elif isinstance(node, dict):
             for key, subnode in node.items():
                 if key == "flag":
-                    self.gamestate.state["vars"]["flags"][subnode] = False
+                    self.gamestate.bulk.vars["flags"][subnode] = False
 
                 self.add_flags(subnode)
     
@@ -263,9 +227,9 @@ class GameParser:
         # Run this once
         if address == ():
             # Initialize special vars
-            self.gamestate.state["vars"]["_args"] = self.utility.get_args_list()
-        if not address in self.gamestate.state["vars"]:
-            self.gamestate.state["vars"][address] = {}
+            self.gamestate.bulk.vars["_args"] = self.utility.get_args_list()
+        if not address in self.gamestate.bulk.vars:
+            self.gamestate.bulk.vars[address] = {}
 
         # Change the value of default_hide if needed
         if "_meta" in node and "hidden_by_default" in node["_meta"]:
@@ -373,7 +337,7 @@ class GameParser:
                     var_value = get_arrs(curr_ind, dims)
 
                 # TODO: When adding properties to vars, need to also update the default var for ArgsList in utility.py
-                self.gamestate.state["vars"][address][var_name] = {"address": address, "locale": locale, "possible_values": possible_values, "value": var_value, "global": global_value, "hidden": hidden_value}
+                self.gamestate.bulk.vars[address][var_name] = {"address": address, "locale": locale, "possible_values": possible_values, "value": var_value, "global": global_value, "hidden": hidden_value}
 
         # Recurse into all sub-blocks
         for tag, subnode in node.items():
@@ -383,34 +347,34 @@ class GameParser:
     
     def add_module_vars(self):
         # Add special variables
-        self.gamestate.state["vars"]["random"] = random
-        self.gamestate.state["vars"]["rand"] = lambda num: random.randint(1, num)
-        self.gamestate.state["vars"]["math"] = math
-        self.gamestate.state["vars"]["floor"] = math.floor
-        self.gamestate.state["vars"]["ceil"] = math.ceil
-        self.gamestate.state["vars"]["pow"] = math.pow
+        self.gamestate.bulk.vars["random"] = random
+        self.gamestate.bulk.vars["rand"] = lambda num: random.randint(1, num)
+        self.gamestate.bulk.vars["math"] = math
+        self.gamestate.bulk.vars["floor"] = math.floor
+        self.gamestate.bulk.vars["ceil"] = math.ceil
+        self.gamestate.bulk.vars["pow"] = math.pow
 
 
     def remove_module_vars(self):
-        del self.gamestate.state["vars"]["random"]
-        del self.gamestate.state["vars"]["rand"]
-        del self.gamestate.state["vars"]["math"]
-        del self.gamestate.state["vars"]["floor"]
-        del self.gamestate.state["vars"]["ceil"]
-        del self.gamestate.state["vars"]["pow"]
+        del self.gamestate.bulk.vars["random"]
+        del self.gamestate.bulk.vars["rand"]
+        del self.gamestate.bulk.vars["math"]
+        del self.gamestate.bulk.vars["floor"]
+        del self.gamestate.bulk.vars["ceil"]
+        del self.gamestate.bulk.vars["pow"]
 
 
     def parse_node(self, node, context, address):
-        if not (address in self.gamestate.state["story_data"]["node_types"]):
-            self.gamestate.state["story_data"]["node_types"][address] = {}
-        self.gamestate.state["story_data"]["node_types"][address][context] = True
+        if not (address in self.gamestate.game_data.node_contexts):
+            self.gamestate.game_data.node_contexts[address] = {}
+        self.gamestate.game_data.node_contexts[address][context] = True
 
-        if not (address in self.gamestate.state["visits"]):
-            self.gamestate.state["visits"][address] = 0
+        if not (address in self.gamestate.bulk.per_line):
+            self.gamestate.bulk.per_line[address] = LineData(address)
 
         if context == "_addr":
             # TODO: Make local _meta tags respected here too
-            if not "no_addr_eval" in self.gameobject.game["_meta"]:
+            if not "no_addr_eval" in self.gamestate.game["_meta"]:
                 # Try to access this address to ensure it's valid
                 self.addressing.parse_addr(address, node)
         elif context == "_addr_list":
@@ -431,7 +395,7 @@ class GameParser:
             if isinstance(node, str):
                 # Try to eval the node to make sure it works
                 # TODO: Add variable sensing
-                if not "no_parse_eval" in self.gameobject.game["_meta"]: # TODO: Make local _meta tags repected
+                if not "no_parse_eval" in self.gamestate.game["_meta"]: # TODO: Make local _meta tags repected
                     self.expr_checker.check(node, self.utility.collect_vars(address), address)
             elif isinstance(node, (int, float)):
                 return  # Plain numerical expression
@@ -570,13 +534,13 @@ class GameParser:
         elif context == "_story_point":
             if node is None:
                 # Don't include the storypoint part of the address
-                self.gamestate.state["story_points"][address[:-1]] = False
+                self.gamestate.light.storypoints[address[:-1]] = False
             else:
                 if not isinstance(node, str):
                     print(f"\033[31mError:\033[0m Non-string story point at {address} node {node}")
                     raise IncorrectTypeError()
 
-                self.gamestate.state["story_points"][node] = False
+                self.gamestate.light.storypoints[node] = False
         elif context == "_table_id":
             # First check it's a valid variable reference
             self.parse_node(node, "_var_id", address)
@@ -751,4 +715,4 @@ class GameParser:
 
 
     def parse_game(self):
-        self.parse_node(self.gameobject.game, "START", ())
+        self.parse_node(self.gamestate.game, "START", ())

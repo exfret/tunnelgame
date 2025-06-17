@@ -3,16 +3,27 @@ import copy
 import pickle
 import time
 
+
+from engine.gamestate import GameState
+from engine.config import Config
 from engine.addressing import Addressing
 from engine.utility import Utility
-from engine.view import WebView
+from engine.view import View, WebView
 from engine.gameparser import GameParser
 from engine.interpreter import Interpreter
 
 
 class GameLoop:
-    def __init__(self, gameobject, gamestate, config, addressing, utility, view, gameparser, interpreter):
-        self.gameobject = gameobject
+    gamestate : GameState
+    config : Config
+    addressing : Addressing
+    utility : Utility
+    view : View
+    gameparser : GameParser
+    interpreter : Interpreter
+
+
+    def __init__(self, gamestate, config, addressing, utility, view, gameparser, interpreter):
         self.gamestate = gamestate
         self.config = config
         self.addressing = addressing
@@ -33,17 +44,17 @@ class GameLoop:
 
 
             def setup_game():
-                self.gameparser.construct_game(self.gameobject.game, story_path)
-                self.gameparser.expand_macros(self.gameobject.game)
+                self.gameparser.construct_game(self.gamestate.game, story_path)
+                self.gameparser.expand_macros(self.gamestate.game)
 
                 # We need to do this after construct game and expand macros or else includes and such will be attempted again
                 if exec_block is not None:
-                    self.addressing.get_node(exec_block, parent_game)["_exec"] = copy.deepcopy(self.gameobject.game)
-                    self.gameobject.game.clear()
-                    self.gameobject.game.update(parent_game)
+                    self.addressing.get_node(exec_block, parent_game)["_exec"] = copy.deepcopy(self.gamestate.game)
+                    self.gamestate.game.clear()
+                    self.gamestate.game.update(parent_game)
 
-                self.gameparser.add_flags(self.gameobject.game)
-                self.gameparser.add_vars_with_address(self.gameobject.game, ())
+                self.gameparser.add_flags(self.gamestate.game)
+                self.gameparser.add_vars_with_address(self.gamestate.game, ())
                 self.gameparser.add_module_vars()
                 self.gameparser.parse_game()
             setup_game()
@@ -57,6 +68,8 @@ class GameLoop:
 
         # Sync state vars so that upstream state can be modified
         if exec_block is not None:
+            # TODO: THIS IS CURRENTLY BROKEN
+
             self.gamestate.state["command_macros"] = parent_state["command_macros"]
             # Choices won't be presented during exec, but new ones can be added
             self.gamestate.state["choices"] = parent_state["choices"]
@@ -78,69 +91,55 @@ class GameLoop:
 
         def save_game(save_slot):
             self.gameparser.remove_module_vars()
-            self.gamestate.state["game"] = copy.deepcopy(self.gameobject.game)
-            (self.config.saves_dir / save_slot).with_suffix(".pkl").write_bytes(pickle.dumps(self.gamestate.state))
+            (self.config.saves_dir / save_slot).with_suffix(".pkl").write_bytes(pickle.dumps(self.gamestate.game))
             self.gameparser.add_module_vars()
-            del self.gamestate.state["game"]
 
 
         def load_game(load_slot, add_save_text=False):
             contents = pickle.loads((self.config.saves_dir / load_slot).with_suffix(".pkl").read_bytes())
             self.gameparser.remove_module_vars()
-            old_state = copy.deepcopy(self.gamestate.state)
-            # Update state
-            self.gamestate.state.clear()
-            self.gamestate.state.update(contents)
+            self.gamestate.update(contents)
             self.gameparser.add_module_vars()
-            # Backwards compatibility: simply don't crash when we come across an old save that doesn't have "game"
-            if "game" not in self.gamestate.state:
-                self.gamestate.state.clear()
-                self.gamestate.state.update(old_state)
-                self.gameparser.add_module_vars()
-                return
-            # Update game with state's game
-            self.gameobject.game.clear()
-            self.gameobject.game.update(self.gamestate.state["game"])
-            # Remove game from state (only put there for saving)
-            del self.gamestate.state["game"]
+
             # Update view
             self.view.clear(True) # True doesn't reset saved text
             if self.config.view_type != "web":
                 self.view.print_displayed_text(add_save_text=add_save_text)
             else:
                 self.view.clear_var_view()
-                self.view.print_shown_vars(self.gamestate.state["view_text_info"]["shown_vars"], self.gamestate.state["last_address_list"][-1])
+                self.view.print_shown_vars(self.gamestate.light.view.shown_vars, self.gamestate.light.last_address_list[-1])
                 self.view.show_curr_image()
-                self.view.print_displayed_prints()
+                self.view.print_emit_intercepts()
                 self.view.print_choices()
 
                 self.gameparser.remove_module_vars()
-                self.view.save_game_state(self.gameobject.game, self.gamestate.state)
+                self.view.save_game_state()
                 self.gameparser.add_module_vars()
         
 
         def do_autosaves():
             # Autosave after every choice, for last 3 choices
-            #save_game("_autosave_short_" + str(self.gamestate.state["choice_num"] % 3))
+            #save_game("_autosave_short_" + str(self.gamestate.light.total_choices_made % 3))
             # If this is the web view, save some web info
             if self.config.view_type == "web":
                 # TODO: What is this for?..
-                (self.config.saves_dir / "_web_info").with_suffix(".pkl").write_bytes(pickle.dumps({"running": True, "choice_num": self.gamestate.state["choice_num"]}))
-            self.gamestate.state["choice_num"] += 1
+                (self.config.saves_dir / "_web_info").with_suffix(".pkl").write_bytes(pickle.dumps({"running": True, "choice_num": self.gamestate.light.total_choices_made}))
+            self.gamestate.light.total_choices_made += 1
 
             # Second, do a less frequent autosave every 20 choices
-            self.gamestate.state["last_autosave"] += 1
-            if self.gamestate.state["last_autosave"] >= self.config.choices_between_autosaves:
-                self.gamestate.state["last_autosave"] = 0
+            self.gamestate.light.last_autosave += 1
+            if self.gamestate.light.last_autosave >= self.config.choices_between_autosaves:
+                self.gamestate.light.last_autosave = 0
                 save_game("_autosave_long")
             
             self.gameparser.remove_module_vars()
-            state_to_save = copy.deepcopy(self.gamestate.state)
+            #state_to_save = copy.deepcopy(self.gamestate)
             self.gameparser.add_module_vars()
-            del state_to_save["history"]
-            self.gamestate.state["history"] = [state_to_save,] + self.gamestate.state["history"]
-            if len(self.gamestate.state["history"]) > 10:
-                self.gamestate.state["history"].pop()
+            # TODO: Update history
+            #del state_to_save["history"]
+            #self.gamestate.state["history"] = [state_to_save,] + self.gamestate.state["history"]
+            #if len(self.gamestate.state["history"]) > 10:
+            #    self.gamestate.state["history"].pop()
 
 
         def make_choice(new_addr, command=["start"], choice={}, is_action_override=False):
@@ -148,14 +147,14 @@ class GameLoop:
             if "injections" in choice:
                 inj_list = choice["injections"]
 
-            if self.gamestate.state["bookmark"] == False:
-                self.gamestate.state["bookmark"] = ()
-            self.gamestate.state["bookmark"] = self.addressing.make_bookmark((), new_addr, inj_list) + self.gamestate.state["bookmark"]
+            if self.gamestate.light.bookmark == False:
+                self.gamestate.light.bookmark = ()
+            self.gamestate.light.bookmark = self.addressing.make_bookmark((), new_addr, inj_list) + self.gamestate.light.bookmark
 
             # Only get rid of old choices if this was a proper choice, not an action
             is_action = ("action" in choice and choice["action"]) or is_action_override
             if not is_action:
-                self.gamestate.state["choices"] = {}
+                self.gamestate.light.choices = {}
 
             if not is_action:
                 self.view.clear()
@@ -171,12 +170,14 @@ class GameLoop:
                             self.view.print_feedback_message("could_not_load_autosave")
                         return
 
-                if "signal_run_statement" in self.gamestate.state["msg"] and self.gamestate.state["msg"]["signal_run_statement"]:
+                if "signal_run_statement" in self.gamestate.light.loop_interrupt_msgs and self.gamestate.light.loop_interrupt_msgs["signal_run_statement"]:
+                    # TODO: THIS IS BROKEN
+
                     self.gamestate.state["msg"]["signal_run_statement"] = False
                     # Store state, game, and view
                     self.gameparser.remove_module_vars()
 
-                    temp_game = copy.deepcopy(self.gameobject.game)
+                    temp_game = copy.deepcopy(self.gamestate.game)
                     temp_state = copy.deepcopy(self.gamestate.state)  # TODO: Store view!
 
                     try:
@@ -184,8 +185,8 @@ class GameLoop:
                     except:
                         self.view.print_feedback_message("run_instr_failed")
 
-                    self.gameobject.game.clear()
-                    self.gameobject.game.update(temp_game)
+                    self.gamestate.game.clear()
+                    self.gamestate.game.update(temp_game)
                     self.gamestate.state.clear()
                     self.gamestate.state.update(temp_state)
 
@@ -205,10 +206,7 @@ class GameLoop:
 
             # Update the choices now with proper costs and such
             def update_choice_reqs():
-                # Choices now have cost_spec, req_spec, and shown_spec
-                # TODO: Evaluate missing at choice printing (here)
-
-                for choice_id, choice in self.gamestate.state["choices"].items():
+                for choice_id, choice in self.gamestate.light.choices.items():
                     # Evaluate costs/requirements/shown
                     if not "missing" in choice:
                         choice["missing"] = []
@@ -243,7 +241,7 @@ class GameLoop:
 
             # Only change where we were in the story for "proper" choices
             if not is_action:
-                self.gamestate.state["last_address_list"].append(self.gamestate.state["last_address"])
+                self.gamestate.light.last_address_list.append(self.gamestate.light.last_address)
 
                 self.view.print_choices()
             
@@ -263,17 +261,17 @@ class GameLoop:
             partial_addr = ()
             image_filenames = []
             add_shown_vars_and_image(shown_vars, image_filenames, partial_addr)
-            for tag in self.gamestate.state["last_address_list"][-1]:
+            for tag in self.gamestate.light.last_address_list[-1]:
                 partial_addr = partial_addr + (tag,)
                 add_shown_vars_and_image(shown_vars, image_filenames, partial_addr)
-            self.gamestate.state["view_text_info"]["shown_vars"] = shown_vars
+            self.gamestate.light.view.shown_vars = shown_vars
             if len(shown_vars) > 0:
-                self.view.print_shown_vars(shown_vars, self.gamestate.state["last_address_list"][-1])
+                self.view.print_shown_vars(shown_vars, self.gamestate.light.last_address_list[-1])
             # Only show the last image, if it exists
             if len(image_filenames) == 0:
-                self.gamestate.state["curr_image"] = None
+                self.gamestate.light.curr_image = None
             else:
-                self.gamestate.state["curr_image"] = image_filenames[-1]
+                self.gamestate.light.curr_image = image_filenames[-1]
             # Only show images in web view
             if self.config.view_type == "web":
                 self.view.show_curr_image()
@@ -282,7 +280,7 @@ class GameLoop:
             # Save to view if this is a web state
             if self.config.view_type == "web":
                 self.gameparser.remove_module_vars()
-                self.view.save_game_state(self.gameobject.game, self.gamestate.state)
+                self.view.save_game_state()
                 self.gameparser.add_module_vars()
 
 
@@ -300,11 +298,11 @@ class GameLoop:
             if autostart:
                 save_game("_autosave")
                 
-                make_choice(self.gamestate.state["choices"]["start"]["address"])
+                make_choice(self.gamestate.light.choices["start"]["address"])
         
 
         # Append passed input to gamestate input
-        self.gamestate.state["command_buffer"].extend(starting_input)
+        self.gamestate.light.command_buffer.extend(starting_input)
 
 
         # If we have lookaheads, we need to populate the history now
@@ -323,43 +321,34 @@ class GameLoop:
                 start_time = time.time()
 
             new_lookahead_gamesession_info = {}
-            for lookahead_choice_id in self.gamestate.state["choices"]:
-                self.gameparser.remove_module_vars()
-
-                # TODO: Make sure doing a reference to the original gameobject doesn't break anything
-                new_game = self.gameobject
-                # To make up for legacy code/saves, delete "game" from gamestate if it's still there
-                if "game" in self.gamestate.state:
-                    del self.gamestate.state["game"]
-                # Backwards compatibility: Just don't deepcopy visits, which will make it inaccurate but at least not crash
-                old_visits = self.gamestate.state["visits"]
-                old_story_data = self.gamestate.state["story_data"]
-                del self.gamestate.state["visits"]
-                del self.gamestate.state["story_data"]
-
+            for lookahead_choice_id in self.gamestate.light.choices:
                 start_time_doing_copy = time.time()
-                new_state = copy.deepcopy(self.gamestate)
-                time_doing_copies += time.time() - start_time_doing_copy
 
-                new_state.state["visits"] = old_visits
-                new_state.state["story_data"] = old_story_data
-                self.gamestate.state["visits"] = old_visits
-                self.gamestate.state["story_data"] = old_story_data
+                new_state = GameState()
+                new_state.game = self.gamestate.game
+                new_state.game_data = self.gamestate.game_data
+                new_state.light = copy.deepcopy(self.gamestate.light)
+                new_state.bulk = self.gamestate.bulk
+                new_state.diffs = self.gamestate.diffs
+                new_state.diffs.append([])
                 # TODO: Also make sure having the config not change doesn't break anything
                 new_config = self.config
-
                 # We need to initialize these to make sure they're given the proper gameobjects and gamestates
-                new_addressing = Addressing(new_game, new_state)
+                new_addressing = Addressing(new_state)
                 new_utility = Utility(new_state, new_addressing)
                 # We can't deepcopy view (no pickling the socketio stuff), but it should be stateless enough 
                 new_view = WebView(new_state, new_config, new_addressing, new_utility, self.view.app, self.view.socketio, uid, is_lookahead=True)
                 # Since view is inside gameparser and interpreter, we need to just create new ones of those
-                new_gameparser = GameParser(new_game, new_state, new_config, new_addressing, new_utility)
-                new_interpreter = Interpreter(new_game, new_state, new_config, new_addressing, new_utility, new_view, new_gameparser)
-                new_gameloop = GameLoop(new_game, new_state, new_config, new_addressing, new_utility, new_view, new_gameparser, new_interpreter)
-
-                new_lookahead_gamesession_info[lookahead_choice_id] = new_gameloop.run(game_name=game_name, packaged=packaged, loaded_game_state={"game": new_game, "state": new_state}, uid=uid, do_lookaheads=False, starting_input=[lookahead_choice_id.split(), "exit".split()], is_lookahead=True)
+                new_gameparser = GameParser(new_state, new_config, new_addressing, new_utility, self.gameparser.grammar)
+                new_interpreter = Interpreter(new_state, new_config, new_addressing, new_utility, new_view, new_gameparser)
+                new_gameloop = GameLoop(new_state, new_config, new_addressing, new_utility, new_view, new_gameparser, new_interpreter)
                 
+                time_doing_copies += time.time() - start_time_doing_copy
+
+                new_lookahead_gamesession_info[lookahead_choice_id] = new_gameloop.run(game_name=game_name, packaged=packaged, loaded_game_state={"state": new_state}, uid=uid, do_lookaheads=False, starting_input=[lookahead_choice_id.split(), "exit".split()], is_lookahead=True)
+                
+                # Undo modifications
+                self.gamestate.reverse_last_diffs()
                 self.gameparser.add_module_vars()
                 new_view.is_lookahead = False
 
@@ -401,19 +390,19 @@ class GameLoop:
 
 
             # Check if the game's been closed
-            if "closed" in self.gamestate.state and self.gamestate.state["closed"] is True:
+            if self.gamestate.light.closed:
                 self.gameparser.remove_module_vars()
-                return {"game": self.gameobject.game, "state": self.gamestate.state, "view": self.view}
+                return {"state": self.gamestate, "view": self.view}
 
 
             if self.config.view_type == "web":
                 self.view.socketio.sleep(0)
 
 
-            if len(self.gamestate.state["command_buffer"]) == 0:
+            if len(self.gamestate.light.command_buffer) == 0:
                 command = self.view.get_input()
             else:
-                command = self.gamestate.state["command_buffer"].pop(0)
+                command = self.gamestate.light.command_buffer.pop(0)
 
 
             if len(command) == 0:
@@ -428,18 +417,18 @@ class GameLoop:
                 if len(command) < 2:
                     self.view.print_feedback_message("define_no_name_given")
                     continue
-                self.gamestate.state["command_macros"][command[1]] = command[2:]
+                self.gamestate.light.command_macros[command[1]] = command[2:]
                 self.view.print_feedback_message("define_successful")
                 continue
             elif command[0] == "undefine":
                 if len(command) < 2:
                     self.view.print_feedback_message("undefine_no_macro_given")
                     continue
-                if not command[1] in self.gamestate.state["command_macros"]:
+                if not command[1] in self.gamestate.light.command_macros:
                     self.view.print_feedback_message("undefine_invalid_macro_given")
                     continue
                 self.view.print_feedback_message("undefine_successful")
-                del self.gamestate.state["command_macros"][command[1]]
+                del self.gamestate.light.command_macros[command[1]]
                 continue
 
 
@@ -450,8 +439,8 @@ class GameLoop:
                 macro_expanded = False
                 curr_command = []
                 for subcommand in command:
-                    if subcommand in self.gamestate.state["command_macros"]:
-                        for macro_subcommand in self.gamestate.state["command_macros"][subcommand]:
+                    if subcommand in self.gamestate.light.command_macros:
+                        for macro_subcommand in self.gamestate.light.command_macros[subcommand]:
                             macro_expanded = True
                             curr_command.append(macro_subcommand)
                     else:
@@ -468,7 +457,8 @@ class GameLoop:
 
             # "Autocomplete"
             # This must be done after macro expansion, which means define/undefine isn't sensed, and neither are macros, but that's fine
-            if self.gamestate.state["settings"]["autocomplete"] == "on":
+            # TODO: THIS IS CURRENTLY BROKEN, FIX SETTINGS
+            if False: #self.gamestate.state["settings"]["autocomplete"] == "on":
                 autocomplete_possibilities = set()
                 for built_in_command in {"clear", "define", "exec", "exit", "flag", "goto", "help", "info", "input", "inspect", "load", "repeat", "restart", "revert", "save", "set", "settings", "undefine", "unflag"}:
                     if command[0] == built_in_command:
@@ -506,6 +496,7 @@ class GameLoop:
                 self.view.print_choices()
             # TODO: Fix for web view
             elif command[0] == "exec":
+                # TODO: THIS IS CURRENTLY BROKEN
                 # Note: Favor specific statements like "set" over doing an exec, this is more for show than anything
                 # Enters a "ghost game" with added exec statements, then returns, keeping some modifications to state
 
@@ -513,22 +504,22 @@ class GameLoop:
                     self.view.print_feedback_message("exec_no_story_given")
                     continue
 
-                old_game = copy.deepcopy(self.gameobject.game)
+                old_game = copy.deepcopy(self.gamestate.game)
                 self.gameparser.remove_module_vars()
                 old_state = copy.deepcopy(self.gamestate.state)
 
                 try:
                     exec_block = self.addressing.get_block_part(self.gamestate.state["last_address"])
                     self.run(command[1], parent_game=old_game, parent_state=old_state, exec_block=exec_block)
-                    self.gameobject.game.clear()
-                    self.gameobject.game.update(old_game)
+                    self.gamestate.game.clear()
+                    self.gamestate.game.update(old_game)
                     self.gamestate.state.clear()
                     self.gamestate.state.update(old_state)
                     self.gameparser.add_module_vars()
                 except:
                     # Need to restore game/state before printing feedback message
-                    self.gameobject.game.clear()
-                    self.gameobject.game.update(old_game)
+                    self.gamestate.game.clear()
+                    self.gamestate.game.update(old_game)
                     self.gamestate.state.clear()
                     self.gamestate.state.update(old_state)
                     self.gameparser.add_module_vars()
@@ -539,15 +530,15 @@ class GameLoop:
             elif command[0] == "exit":
                 # Return in case this was a lookahead
                 self.gameparser.remove_module_vars()
-                return {"game": self.gameobject.game, "state": self.gamestate.state, "view": self.view}
+                return {"state": self.gamestate, "view": self.view}
             elif command[0] == "flag":
                 if len(command) < 2:
                     self.view.print_feedback_message("flag_no_flag_given")
                 else:
-                    if command[1] not in self.gamestate.state["vars"]["flags"]:
+                    if command[1] not in self.gamestate.bulk.vars["flags"]:
                         self.view.print_feedback_message("flag_invalid_flag")
                     else:
-                        self.gamestate.state["vars"]["flags"][command[1]] = True
+                        self.gamestate.modify_flag(command[1], True)
                         self.view.print_feedback_message("flag_set_successfully")
             elif command[0] == "goto":
                 if len(command) < 2:
@@ -556,7 +547,7 @@ class GameLoop:
                     address_to_goto = None
                     try:
                         # last_address_list should always be nonempty here since we just made a choice
-                        address_to_goto = self.addressing.parse_addr(self.gamestate.state["last_address_list"][-1], command[1])
+                        address_to_goto = self.addressing.parse_addr(self.gamestate.light.last_address_list[-1], command[1])
                     except Exception as e:  # TODO: Catch only relevant exceptions
                         self.view.print_feedback_message("goto_invalid_address_given")
                     if not (address_to_goto is None):
@@ -572,13 +563,13 @@ class GameLoop:
                 elif command[1] == "choices":
                     self.view.print_choices()
                 elif command[1] == "completion":
-                    if len(self.gamestate.state["story_points"]) == 0:
+                    if len(self.gamestate.light.storypoints) == 0:
                         self.view.print_feedback_message("completion_not_supported")
                         continue
 
                     num_complete = 0
                     total_num = 0
-                    for val in self.gamestate.state["story_points"].values():
+                    for val in self.gamestate.light.storypoints.values():
                         if val:
                             num_complete += 1
                         total_num += 1
@@ -594,13 +585,13 @@ class GameLoop:
                 elif command[1] == "word_count":
                     # TODO: Only error when view doesn't have given method
                     try:
-                        self.view.print_num_words(self.utility.count_words(self.gameobject.game))
+                        self.view.print_num_words(self.utility.count_words(self.gamestate.game))
                     except Exception:
                         self.view.print_feedback_message("command_not_supported")
                 elif command[1] == "words_seen":
                     # TODO: Only error when view doesn't have given method
                     try:
-                        self.view.print_num_words(self.utility.count_words(self.gameobject.game, True))
+                        self.view.print_num_words(self.utility.count_words(self.gamestate.game, True))
                     except Exception:
                         self.view.print_feedback_message("command_not_supported")
                 else:
@@ -610,13 +601,13 @@ class GameLoop:
                 for subcommand in command[1:]:
                     reconstructed_input += subcommand + " "
                 for subcommand in reconstructed_input.split(",")[::-1]:
-                    self.gamestate.state["command_buffer"].insert(0, subcommand.split())
+                    self.gamestate.light.command_buffer.insert(0, subcommand.split())
             elif command[0] == "inspect":
                 if len(command) < 2:
                     self.view.print_feedback_message("inspect_no_variable_given")
                 else:
                     try:
-                        self.view.print_var_value(self.utility.collect_vars(self.gamestate.state["last_address_list"][-1])[command[1]])
+                        self.view.print_var_value(self.utility.collect_vars(self.gamestate.light.last_address_list[-1])[command[1]])
                     except KeyError: # TODO: Make this custom MissingReference Error
                         self.view.print_feedback_message("inspect_invalid_variable_given")
             elif command[0] == "load":
@@ -643,7 +634,7 @@ class GameLoop:
                         self.view.print_feedback_message("repeat_incorrect_num_times_format")
                     else:
                         for i in range(num_repeats):
-                            self.gamestate.state["command_buffer"].insert(0, command[2:])
+                            self.gamestate.light.command_buffer.insert(0, command[2:])
             # TODO: Fix for console view
             elif command[0] == "restart":
                 if self.config.view_type != "web":
@@ -652,6 +643,8 @@ class GameLoop:
                 
                 self.view.socketio.emit("restart_html", {})
             elif command[0] == "revert":
+                # TODO: FIX, CURRENTLY BROKEN
+
                 if (len(self.gamestate.state["history"]) == 0) or (len(self.gamestate.state["history"]) == 1 and do_lookaheads):
                     self.view.print_feedback_message("revert_no_reversions")
                     continue
@@ -679,7 +672,7 @@ class GameLoop:
                     self.view.print_choices()
 
                     self.gameparser.remove_module_vars()
-                    self.view.save_game_state(self.gameobject.game, self.gamestate.state)
+                    self.view.save_game_state()
                     self.gameparser.add_module_vars()
                 if do_lookaheads:
                     lookahead_gamesession_info = calc_lookahead_gamesession_info()
@@ -687,7 +680,7 @@ class GameLoop:
                 try:
                     save_slot = command[1]
                 except IndexError:
-                    save_slot = self.gamestate.state["file_data"]["filename"]
+                    save_slot = self.gamestate.light.last_save_name
                 if not save_slot:
                     self.view.print_feedback_message("save_no_default_name_given")
                     continue
@@ -700,14 +693,16 @@ class GameLoop:
                     if len(command) < 3:
                         self.view.print_feedback_message("set_no_value_given")
                     else:
-                        var_dict = self.utility.collect_vars_with_dicts(self.gamestate.state["last_address_list"][-1])
-                        var_dict_vals = self.utility.collect_vars(self.gamestate.state["last_address_list"][-1])
+                        var_dict = self.utility.collect_vars_with_dicts(self.gamestate.light.last_address_list[-1])
+                        var_dict_vals = self.utility.collect_vars(self.gamestate.light.last_address_list[-1])
                         try:
-                            var_dict[command[1]]["value"] = eval(command[2], {}, var_dict_vals)
+                            var = var_dict[command[1]]
+                            self.gamestate.modify_var(var["address"], command[1], eval(command[2], {}, var_dict_vals))
                             self.view.print_feedback_message("set_command_successful")
                         except:
                             self.view.print_feedback_message("set_invalid_variable_given")
             elif command[0] == "settings":
+                # TODO: FIX, CURRENTLY BORKED
                 if len(command) < 2:
                     self.view.print_feedback_message("settings_no_setting_given")
                     self.view.print_settings()
@@ -740,13 +735,13 @@ class GameLoop:
                 if len(command) < 2:
                     self.view.print_feedback_message("unflag_no_flag_given")
                 else:
-                    if command[1] not in self.gamestate.state["vars"]["flags"]:
+                    if command[1] not in self.gamestate.bulk.vars["flags"]:
                         self.view.print_feedback_message("unflag_invalid_flag")
                     else:
-                        self.gamestate.state["vars"]["flags"][command[1]] = False
+                        self.gamestate.modify_flag(command[1], False)
                         self.view.print_feedback_message("unflag_set_successfully")
-            elif command[0] in self.gamestate.state["choices"]:
-                choice = self.gamestate.state["choices"][command[0]]
+            elif command[0] in self.gamestate.light.choices:
+                choice = self.gamestate.light.choices[command[0]]
                 if "enforce" not in choice:
                     choice["enforce"] = "True"
                 if "missing" not in choice:
@@ -755,9 +750,9 @@ class GameLoop:
                     choice["modifications"] = []
                 
                 # Populate the state vars with any given args
-                self.gamestate.state["vars"]["_args"] = self.utility.get_args_list()
+                self.gamestate.bulk.vars["_args"] = self.utility.get_args_list()
                 for arg in command[1:]:
-                    self.gamestate.state["vars"]["_args"].append(arg)
+                    self.gamestate.bulk.vars["_args"].append(arg)
                 
                 # Unfinished code, I should have committed before writing this since it started requiring large-scale changes that I wasn't ready to make
                 #def find_modifications_and_missing(choice, spec_type):
@@ -781,13 +776,11 @@ class GameLoop:
                         self.view.print_feedback_message("choice_enforce_false")
                 else:
                     if do_lookaheads:
+                        # TODO: Don't allow non-web view to get here
+                        # Web view currently not supported with lookaheads
                         new_gamesession_info = lookahead_gamesession_info[command[0]]
 
-                        # Game doesn't change anymore between lookaheads
-                        #self.gameobject.game.clear()
-                        #self.gameobject.game.update(new_gamesession_info["game"])
-                        self.gamestate.state.clear()
-                        self.gamestate.state.update(new_gamesession_info["state"])
+                        self.gamestate.update(new_gamesession_info["state"])
                         self.gameparser.add_module_vars()
                         self.view.do_emits(new_gamesession_info["view"].lookahead_emits)
 
@@ -797,7 +790,7 @@ class GameLoop:
 
                         # Need to manually save game state since the lookaheads don't
                         self.gameparser.remove_module_vars()
-                        self.view.save_game_state(self.gameobject.game, self.gamestate.state)
+                        self.view.save_game_state()
                         self.gameparser.add_module_vars()
 
                         # For each new choice in new gamestate, try making that choice
@@ -813,13 +806,13 @@ class GameLoop:
                             if ("type_to_modify" in modification) and modification["type_to_modify"] == "bag":
                                 modification["bag_ref"]["value"][modification["item"]] += modification["amount"]
                             else:
-                                var_ref = self.utility.get_var(self.gamestate.state["vars"], modification["var"], choice["choice_address"])
+                                var_ref = self.utility.get_var(self.gamestate.bulk.vars, modification["var"], choice["choice_address"])
 
-                                var_ref["value"] += modification["amount"]  # TODO: Print modifications
+                                self.gamestate.modify_var(var_ref["address"], modification["var"], var_ref["value"] + modification["amount"])
 
-                        if choice["choice_address"] not in self.gamestate.state["visits_choices"]:
-                            self.gamestate.state["visits_choices"][choice["choice_address"]] = 0
-                        self.gamestate.state["visits_choices"][choice["choice_address"]] += 1
+                                # TODO: Print modifications?
+
+                        self.gamestate.inc_choice_visits(choice["choice_address"])
 
                         make_choice(choice["address"], command, choice)
             else:

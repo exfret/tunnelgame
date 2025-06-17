@@ -1,16 +1,21 @@
+from engine.gamestate import GameState
+
+
 class InvalidAddressError(Exception):
     pass
 
 
 class Addressing:
-    def __init__(self, gameobject, gamestate):
-        self.gameobject = gameobject
+    gamestate : GameState
+
+
+    def __init__(self, gamestate):
         self.gamestate = gamestate
     
 
     def get_node(self, addr, curr_node=None):
         if curr_node is None:
-            curr_node = self.gameobject.game
+            curr_node = self.gamestate.game
         if addr == ():
             return curr_node
 
@@ -31,10 +36,10 @@ class Addressing:
 
     def get_curr_addr(self, bookmark=None):
         if bookmark is None:
-            bookmark = self.gamestate.state["bookmark"]
+            bookmark = self.gamestate.light.bookmark
 
         # If queue is empty, we're done
-        if bookmark == False or len(bookmark) == 0:
+        if bookmark is False or len(bookmark) == 0:
             return False
 
         return bookmark[0]
@@ -42,7 +47,7 @@ class Addressing:
 
     # Remove current address and add new address
     def set_curr_addr(self, addr):
-        self.gamestate.state["bookmark"] = (addr,) + self.gamestate.state["bookmark"][1:]
+        self.gamestate.light.bookmark = (addr,) + self.gamestate.light.bookmark[1:]
 
 
     # Get's next instruction's address; returns False if there is no next instruction (i.e.- we're at the end of a block)
@@ -112,18 +117,18 @@ class Addressing:
         next_addr = self.get_next_addr(curr_addr)
         
         # Check if we reached the end of execution for this queue entry
-        if next_addr == False:
+        if next_addr is False:
             # If this is the last part of the address queue, check for footers to execute
             if len(bookmark) == 1:
                 # Ignore any footers that we currently are in
                 trimmed = self.trim_footer(curr_addr)
-                if trimmed == True:
+                if trimmed is True:
                     trimmed = curr_addr
-                elif trimmed == False:
+                elif trimmed is False:
                     return False
 
                 footer = self.search_for_footers(trimmed)
-                if footer == False:
+                if footer is False:
                     return False
                 else:
                     return (self.search_for_footers(trimmed),)
@@ -217,7 +222,7 @@ class Addressing:
             raise InvalidAddressError("Attempt to index into non-block address.")
         elif index[0] == "~": # Corresponds to root of a given file
             while True:
-                if block_addr in self.gamestate.state["story_data"]["file_homes"] or len(block_addr) == 0:
+                if block_addr in self.gamestate.game_data.file_homes or len(block_addr) == 0:
                     break
                 else:
                     block_addr = block_addr[:-1]
@@ -229,7 +234,7 @@ class Addressing:
 
     
     def parse_addr(self, curr_addr, addr_id, only_block_part=False):
-        # Blocks are simply children of the root node with purely string addresses having leading underscores
+        # Blocks are simply children of the root node with purely string addresses having no leading underscores
         curr_addr = self.get_block_part(curr_addr, 0)
         path = tuple(addr_id.split("/"))
 

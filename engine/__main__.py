@@ -54,7 +54,7 @@ if view_type == "web":
         # See whether to reset game state
         # Load the game once just to see if its _game_id is different from before
         reset_game_state = False
-        if web_state is None or web_state["game"] is None or web_state["state"] is None:
+        if web_state is None or web_state["state"] is None:
             reset_game_state = True
         else:
             game_to_load = yaml.safe_load((gamesession.config.local_dir / "stories" / story_name).read_text())
@@ -62,12 +62,12 @@ if view_type == "web":
             if "_game_id" in game_to_load:
                 new_game_id = game_to_load["_game_id"]
             old_game_id = ""
-            if "_game_id" in web_state["game"]:
-                old_game_id = web_state["game"]["_game_id"]
+            if "_game_id" in web_state["state"].game:
+                old_game_id = web_state["state"].game["_game_id"]
             if new_game_id != old_game_id:
                 reset_game_state = True
         if reset_game_state:
-            web_state = {"game": None, "state": None, "client_side": {}}
+            web_state = {"state": None, "client_side": {}}
             gamesession.view.web_state[uid] = web_state
         
         # restore_state itself currently doesn't do anything
@@ -76,15 +76,13 @@ if view_type == "web":
 
 
         def start():
-            # Need to check that web_state["game"] is nonempty since this seems to be an issue for some reason
-            if web_state["game"] is not None and len(web_state["game"]) != 0 and web_state["state"] is not None:
-                gamesession.gameobject.game = copy.deepcopy(web_state["game"])
-                gamesession.gamestate.state = copy.deepcopy(web_state["state"])
+            if web_state["state"] is not None:
+                gamesession.gamestate.update(web_state["state"])
                 gamesession.gameparser.add_module_vars()
 
                 gamesession.view.clear()
                 gamesession.view.print_choices()
-                gamesession.view.print_shown_vars(gamesession.gamestate.state["view_text_info"]["shown_vars"], gamesession.gamestate.state["last_address_list"][-1])
+                gamesession.view.print_shown_vars(gamesession.gamestate.light.view.shown_vars, gamesession.gamestate.light.last_address_list[-1])
                 gamesession.view.show_curr_image()
 
                 gamesession.gameloop.run(story_name, packaged=True, loaded_game_state=web_state, uid=uid, do_lookaheads=True)
@@ -105,20 +103,19 @@ if view_type == "web":
     @server.socketio.on("make_choice")
     def handle_choice(data):
         gamesession = uid_to_gamesession[session["uid"]]
-        gamesession.gamestate.state["command_buffer"].append(data["choice_id"].split())
+        gamesession.gamestate.light.command_buffer.append(data["choice_id"].split())
     
 
     @server.socketio.on("command")
     def handle_command(data):
         gamesession = uid_to_gamesession[session["uid"]]
-        gamesession.gamestate.state["command_buffer"].append(data["command"].split())
+        gamesession.gamestate.light.command_buffer.append(data["command"].split())
 
 
     @server.socketio.on("restart")
     def handle_restart(data):
         gamesession = uid_to_gamesession[session["uid"]]
         gamesession.view.web_state[session["uid"]] = {
-            "game": None,
             "state": None,
             "client_side": {}
         }
@@ -126,9 +123,12 @@ if view_type == "web":
         (gamesession.config.saves_dir / ("_web_state_" + str(session["uid"]))).with_suffix(".pkl").write_bytes(pickle.dumps(gamesession.view.web_state))
 
 
+port = int(os.getenv("PORT", 5001))
+
+
 def main():
     if view_type == "web":
-        server.socketio.run(server.app, port=5001, debug=True)
+        server.socketio.run(server.app, port=port, debug=True)
     else:
         gamesession = GameSession(story_name, view_type, profiling=profiling)
 

@@ -1,12 +1,14 @@
-# Web imports
-# TODO: Not needed anymore?
-from flask import Flask, render_template, jsonify, session, request
-from flask_socketio import SocketIO, emit, join_room
 from uuid import uuid4
 
 import copy
 import pickle
 import textwrap
+
+
+from engine.gamestate import GameState
+from engine.config import Config
+from engine.addressing import Addressing
+from engine.utility import Utility
 
 
 feedback_msg = {
@@ -69,6 +71,12 @@ feedback_msg = {
 
 
 class View:
+    gamestate : GameState
+    config : Config
+    addressing : Addressing
+    utility : Utility
+
+
     def __init__(self, gamestate, config, addressing, utility):
         self.gamestate = gamestate
         self.config = config
@@ -83,7 +91,8 @@ class View:
         if len(split_text) == 1:
             text = split_text[0]
         elif len(split_text) > 1:
-            if self.gamestate.state["settings"]["descriptiveness"] == "minimal":
+            # TODO: Reimplement settings!
+            if False: #self.gamestate.state["settings"]["descriptiveness"] == "minimal":
                 text = split_text[1].strip()
             else:
                 text = split_text[0].strip()
@@ -100,10 +109,11 @@ class CLIView(View):
     # Clears console and story view
     def clear(self, dont_reset_displayed_text=False):
         if not dont_reset_displayed_text:
-            self.gamestate.state["displayed_text"] = ""
+            self.gamestate.light.view.story_text = ""
             
-            for key in self.gamestate.state["view_displayed_text"].keys():
-                self.gamestate.state["view_displayed_text"][key] = ""
+            # TODO: Reimplement view-specific text
+            #for key in self.gamestate.state["view_displayed_text"].keys():
+            #    self.gamestate.state["view_displayed_text"][key] = ""
 
         # Clears console with ansi code
         print("\033[H\033[J", end="")
@@ -118,23 +128,26 @@ class CLIView(View):
             return
         
         if not dont_save_print:
-            if view is not None and view in self.gamestate.state["view_displayed_text"]:
+            # TODO: Remimplement view-specific text
+            #if view is not None and view in self.gamestate.state["view_displayed_text"]:
                 # TODO: Some sort of warning if view is not in state["view_displayed_text"]
-                self.gamestate.state["view_displayed_text"][view] += str(text) + "\n"
-            self.gamestate.state["displayed_text"] += str(text) + "\n"
+            #    self.gamestate.state["view_displayed_text"][view] += str(text) + "\n"
+            self.gamestate.light.view.story_text += str(text) + "\n"
 
         print(text)
     
 
     # Sets the displayed text to just be the text from one display
     def set_displayed_text(self, view):
-        if view in self.gamestate.state["view_displayed_text"]:
-            self.gamestate.state["displayed_text"] = self.gamestate.state["view_displayed_text"][view]
+        # TODO: Reimplement view-specific text
+        #if view in self.gamestate.state["view_displayed_text"]:
+        #    self.gamestate.state["displayed_text"] = self.gamestate.state["view_displayed_text"][view]
+        pass
     
 
     # Reprints displayed text for save/loads
     def print_displayed_text(self, add_save_text=False):
-        print(self.gamestate.state["displayed_text"], end="")
+        print(self.gamestate.light.view.story_text, end="")
 
         # Whether to print a mock "save text" since the "Save complete!" text isn't saved
         if add_save_text:
@@ -227,7 +240,7 @@ class CLIView(View):
             text_to_display += "\n        Choices...\n"
         else:
             text_to_display += "\n        Actions...\n"
-        for choice_id, choice in self.gamestate.state["choices"].items():
+        for choice_id, choice in self.gamestate.light.choices.items():
             is_action = "action" in choice and choice["action"]
 
             # Display only actions/choices, whichever is selected
@@ -274,7 +287,7 @@ class CLIView(View):
                 choice_color = "\033[90m"
                 text_color = "\033[90m"
             new_text = ""
-            if self.gamestate.state["visits"][choice["choice_address"]] <= 1:
+            if self.gamestate.bulk.per_line[choice["choice_address"]].visits <= 1:
                 new_text = "\033[33m(New) "
 
             text_for_choice = ""
@@ -316,11 +329,11 @@ class CLIView(View):
     
 
     def print_macros(self):
-        if len(self.gamestate.state["command_macros"].items()) == 0:
+        if len(self.gamestate.light.command_macros.items()) == 0:
             self.print(feedback_msg["info_no_macros"])
             return
         
-        for macro_name, macro_def in self.gamestate.state["command_macros"].items():
+        for macro_name, macro_def in self.gamestate.light.command_macros.items():
             self.print(macro_name + ": " + " ".join(macro_def))
     
 
@@ -329,32 +342,46 @@ class CLIView(View):
 
 
     def print_settings(self):
-        for key in self.gamestate.state["settings"].keys():
-            self.print(f" * {key}")
+        # TODO: Reimplement settings
+        #for key in self.gamestate.state["settings"].keys():
+            #self.print(f" * {key}")
+        pass
 
     
     def print_settings_autocomplete_get(self):
-        self.print(f"Allowed values are 'on' and 'off'. The current value of this setting is '{self.gamestate.state['settings']['autocomplete']}'.")
+        # TODO: Reimplement settings
+        #self.print(f"Allowed values are 'on' and 'off'. The current value of this setting is '{self.gamestate.state['settings']['autocomplete']}'.")
+        pass
 
 
     def print_settings_autocomplete_set(self, new_value):
-        self.print(f"Set autocomplete to '{new_value}'.")
+        # TODO: Reimplement settings
+        #self.print(f"Set autocomplete to '{new_value}'.")
+        pass
 
 
     def print_settings_descriptiveness_get(self):
-        self.print(f"Allowed values are 'descriptive', 'moderate', and 'minimal'. The current value of this setting is '{self.gamestate.state['settings']['descriptiveness']}'.")
+        # TODO: Reimplement settings
+        #self.print(f"Allowed values are 'descriptive', 'moderate', and 'minimal'. The current value of this setting is '{self.gamestate.state['settings']['descriptiveness']}'.")
+        pass
 
 
     def print_settings_descriptiveness_set(self, new_value):
-        self.print(f"Set descriptiveness to '{new_value}'.")
+        # TODO: Reimplement settings
+        #self.print(f"Set descriptiveness to '{new_value}'.")
+        pass
 
 
     def print_settings_flavor_text_get(self):
-        self.print(f"Allowed values are 'always', 'once', and 'never'. The current value of this setting is '{self.gamestate.state['settings']['show_flavor_text']}'.")
+        # TODO: Reimplement settings
+        #self.print(f"Allowed values are 'always', 'once', and 'never'. The current value of this setting is '{self.gamestate.state['settings']['show_flavor_text']}'.")
+        pass
 
 
     def print_settings_flavor_text_set(self, new_value):
-        self.print(f"Set show_flavor_text to '{new_value}'.")
+        # TODO: Reimplement settings
+        #self.print(f"Set show_flavor_text to '{new_value}'.")
+        pass
 
 
     def print_var_value(self, var_value):
@@ -364,11 +391,11 @@ class CLIView(View):
     def print_vars_defined(self):
         var_names = {}
 
-        curr_addr = self.addressing.get_block_part()
+        curr_addr = self.addressing.get_block_part(self.gamestate.light.last_address)
         for ind in range(len(curr_addr) + 1):
             addr_to_check = curr_addr[:ind]
 
-            for var_name in self.gamestate.state["vars"][addr_to_check].keys():
+            for var_name in self.gamestate.bulk.vars[addr_to_check].keys():
                 var_names[var_name] = True
         
         for name in sorted(var_names):
@@ -379,7 +406,7 @@ class CLIView(View):
         print() # Add a new line
         command_string = input("> ")
         print()
-        self.gamestate.state["displayed_text"] += "\n> " + command_string + "\n\n"
+        self.gamestate.light.view.story_text += "\n> " + command_string + "\n\n"
 
         command = command_string.split()
         return command
@@ -505,14 +532,13 @@ class WebView(View):
             self.web_state = {}
 
 
-    def save_game_state(self, game_obj, state_obj):
+    def save_game_state(self):
         # Don't save for lookaheads
         if self.is_lookahead:
             return
 
         entry = self.web_state.setdefault(self.uid, {})
-        entry["game"] = copy.deepcopy(game_obj)
-        entry["state"] = copy.deepcopy(state_obj)
+        entry["state"] = copy.deepcopy(self.gamestate)
         entry["client_side"] = {} # TODO
 
         # Save across server restarts
@@ -588,15 +614,13 @@ class WebView(View):
         self.emit_message("clear", {}, self.uid)
 
         if not dont_reset_displayed_text:
-            self.gamestate.state["view_text_info"]["displayed_print_msgs"] = []
+            self.gamestate.light.view.emit_intercepts = []
 
 
     # Reprints displayed text for save/loads
-    def print_displayed_prints(self):
-        # Backwards compatibility with states that don't have proper keys
-        if "view_text_info" in self.gamestate.state and "displayed_print_msgs" in self.gamestate.state["view_text_info"]:
-            for displayed_print_msg in self.gamestate.state["view_text_info"]["displayed_print_msgs"]:
-                self.emit_message(displayed_print_msg["msg_type"], displayed_print_msg["msg_data"], self.uid)
+    def print_emit_intercepts(self):
+        for emit_intercept in self.gamestate.light.view.emit_intercepts:
+            self.emit_message(emit_intercept["msg_type"], emit_intercept["msg_data"], self.uid)
     
 
     ######################################################################
@@ -610,7 +634,7 @@ class WebView(View):
 
     def print_separator(self, dont_save_print=False):
         self.emit_message("separator", {}, self.uid)
-        self.gamestate.state["view_text_info"]["displayed_print_msgs"].append({"msg_type": "separator", "msg_data": {}})
+        self.gamestate.light.view.emit_intercepts.append({"msg_type": "separator", "msg_data": {}})
 
 
     def print_table(self, tbl_to_display, dont_save_print=False):
@@ -621,7 +645,7 @@ class WebView(View):
         string_to_print = self.utility.format.vformat(text, (), self.utility.collect_vars())  # TODO: Exceptions in case of syntax errors
         string_to_print = self.expand_tagged_words(self.parse_text(string_to_print))
         self.emit_message("print", {"text": string_to_print}, self.uid)
-        self.gamestate.state["view_text_info"]["displayed_print_msgs"].append({"msg_type": "print", "msg_data": {"text": string_to_print}})
+        self.gamestate.light.view.emit_intercepts.append({"msg_type": "print", "msg_data": {"text": string_to_print}})
 
 
     ######################################################################
@@ -657,10 +681,10 @@ class WebView(View):
 
 
     def show_curr_image(self):
-        if self.gamestate.state["curr_image"] is None:
+        if self.gamestate.light.curr_image is None:
             self.emit_message("set_image", {"none": True}, self.uid)
         else:
-            self.emit_message("set_image", {"path": "static/graphics/" + self.gamestate.state["curr_image"]}, self.uid)
+            self.emit_message("set_image", {"path": "static/graphics/" + self.gamestate.light.curr_image}, self.uid)
 
 
     def print_var(self, text):
@@ -677,7 +701,7 @@ class WebView(View):
 
         # Fill effects texts (can't eval the python in the javascript)
         # TODO: Un-duplicate this code
-        for choice_id, choice in self.gamestate.state["choices"].items():
+        for choice_id, choice in self.gamestate.light.choices.items():
             # First, expand tagged words in this choice text
             choice["text"] = self.expand_tagged_words(self.utility.format.vformat(choice["text"], (), self.utility.collect_vars(address=choice["choice_address"])), choice["choice_address"])
 
@@ -718,7 +742,7 @@ class WebView(View):
 
             effects_texts[choice_id] = effects_text
 
-        self.emit_message("print_choices", {"choices": self.gamestate.state["choices"], "effects_texts": effects_texts}, self.uid)
+        self.emit_message("print_choices", {"choices": self.gamestate.light.choices, "effects_texts": effects_texts}, self.uid)
 
 
     def print_completion_percentage(self, percentage):
@@ -730,11 +754,11 @@ class WebView(View):
 
 
     def print_macros(self):
-        if len(self.gamestate.state["command_macros"].items()) == 0:
+        if len(self.gamestate.light.command_macros.items()) == 0:
             self.emit_message("print_feedback_message", {"text": feedback_msg["info_no_macros"]}, self.uid)
             return
         
-        for macro_name, macro_def in self.gamestate.state["command_macros"].items():
+        for macro_name, macro_def in self.gamestate.light.command_macros.items():
             self.emit_message("print_feedback_message", {"text": macro_name + ": " + " ".join(macro_def)}, self.uid)
 
 

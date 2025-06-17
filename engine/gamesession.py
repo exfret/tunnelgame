@@ -1,8 +1,10 @@
+import yaml
+
+
 # Mirrors order of initialization
-from engine.gameobject import GameObject
 from engine.gamestate import GameState
 from engine.config import Config
-from engine.view import CLIView, ViewForTesting, WebView
+from engine.view import View, CLIView, ViewForTesting, WebView
 from engine.addressing import Addressing
 from engine.utility import Utility
 from engine.gameparser import GameParser
@@ -15,11 +17,24 @@ class InvalidViewType(Exception):
 
 
 class GameSession:
-    def __init__(self, story_name, view_type, app=None, socketio=None, uid=None, profiling=False):
-        self.gameobject = GameObject()
+    gamestate : GameState
+    config : Config
+    addressing : Addressing
+    utility : Utility
+    view : View
+    gameparser : GameParser
+    interpreter : Interpreter
+    gameloop : GameLoop
+
+
+    def __init__(self, story_name, view_type, app=None, socketio=None, uid=None, profiling=False):        
         self.gamestate = GameState()
         self.config = Config(story_name, view_type, profiling=profiling)
-        self.addressing = Addressing(self.gameobject, self.gamestate)
+
+        # Load grammar once so it doesn't have to keep getting reloaded
+        self.grammar = yaml.safe_load((self.config.grammar_dir).read_text())
+
+        self.addressing = Addressing(self.gamestate)
         self.utility = Utility(self.gamestate, self.addressing)
         if view_type == "cli":
             self.view = CLIView(self.gamestate, self.config, self.addressing, self.utility)
@@ -29,10 +44,10 @@ class GameSession:
             self.view = WebView(self.gamestate, self.config, self.addressing, self.utility, app, socketio, uid)
         else:
             raise InvalidViewType()
-        self.gameparser = GameParser(self.gameobject, self.gamestate, self.config, self.addressing, self.utility)
-        self.interpreter = Interpreter(self.gameobject, self.gamestate, self.config, self.addressing, self.utility, self.view, self.gameparser)
-        self.gameloop = GameLoop(self.gameobject, self.gamestate, self.config, self.addressing, self.utility, self.view, self.gameparser, self.interpreter)
+        self.gameparser = GameParser(self.gamestate, self.config, self.addressing, self.utility, self.grammar)
+        self.interpreter = Interpreter(self.gamestate, self.config, self.addressing, self.utility, self.view, self.gameparser)
+        self.gameloop = GameLoop(self.gamestate, self.config, self.addressing, self.utility, self.view, self.gameparser, self.interpreter)
     
 
     def close(self):
-        self.gamestate.state["closed"] = True
+        self.gamestate.light.closed = True
