@@ -1,0 +1,23 @@
+Implemented
+
+The following features are critical to my game engine, and set it apart:
+
+1. Seemless gotos
+    * Pages aren't goto'd, but rather individual blocks. Many blocks can be displayed at once without having to make the user interact for a simple goto, as in Twine.
+    * Choices are added dynamically, letting execution not hang on a choice as in choicescript.
+
+
+Planned
+
+1. Dereferencing
+    * Variables can store other variables (or references to them by name), addresses, or perhaps even other objects such as choices. This is akin to the way gotos can involve dereferencing in choicescript.
+    * This is currently partly implemented for variables in text
+2. Control flow
+    * All standard control flow operations like if/thens and loops are present.
+    * I still need to implement loops.
+
+
+Current drawbacks
+
+1. Clunky syntax
+    * YAML doesn't always lend itself well to custom syntax that is readable.

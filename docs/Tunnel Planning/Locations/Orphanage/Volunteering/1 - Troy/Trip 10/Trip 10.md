@@ -1,0 +1,1 @@
+This could be in the same spot as [[Trip 6]] so as to build continuity for a new place when [[Karo]] disappears.

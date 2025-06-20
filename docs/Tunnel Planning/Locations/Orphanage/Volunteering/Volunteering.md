@@ -1,0 +1,1 @@
+The purpose of this aspect is to expand on the story of the other orphans and also do the [[Characters/Orphans/Troy|Troy]] storyline, which is a whole thing.

@@ -1,0 +1,1 @@
+Second to last trip at [[Karo's Farm]], and last time seeing [[Characters/Orphans/Troy|Troy]] there, as he is out next time fetching stuff for [[Karo]]. This interaction ends with something like "You feel like something is going to change before the next time you see [[Characters/Orphans/Troy|Troy]]".

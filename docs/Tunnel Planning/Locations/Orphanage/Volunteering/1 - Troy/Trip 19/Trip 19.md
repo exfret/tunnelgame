@@ -1,0 +1,3 @@
+You attempt to go to [[Karo's Farm]], but when you get there it's empty. [[Ms. Bee]] turns everyone around and you instead all work on cleaning up the orphanage's [[Courtyard]], with [[Mabel]] and [[Ms. Bee]] exchange worried looks while telling all the orphans that everything's okay.
+
+Following this, the events with [[Characters/Orphans/Troy|Troy]] follow, and volunteering trips are no longer a thing; if you try to choose it, it just says, "there is no more volunteering to be done right now".

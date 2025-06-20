@@ -5,7 +5,7 @@ Description: You come across some rocks that stick straight up and lean on each 
 Subareas:
 - [[Around]]
 - [[Inside]] (requires 1 [[Lemen Lantern]])
-- [[Top]]
+- [[Locations/Tunnel/Layer 1/Hills/Cave/Top]]
 
 Extra choices:
 - Gather Resource

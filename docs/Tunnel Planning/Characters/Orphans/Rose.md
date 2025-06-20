@@ -1,0 +1,1 @@
+Need to throw in a joke about how her favorite flower is actually [[Petunal Blossoms]], not [[Items/Flowers/Rosalia|Rosalia]], despite her name.

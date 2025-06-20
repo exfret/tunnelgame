@@ -1,13 +1,8 @@
 Currently:
   - Huge refactor with diffs
-    - Remove web_state["game"]
     - Rename seed command
-    - Update history with diffs
-    - Fix main.py
-    - Check systematically for where bulk or vars are referenced
 
   - Optimization
-    - Profiling
     - Need to do tests to make sure things still work, like saving/loading/etc.
       - First need to decide what tests to do
 
@@ -22,7 +17,7 @@ Currently:
       - Local emit rooms
       - Pass through chatGPT
       - Getting tests running
-    - Refactor state into a class?
+      - Refactor state into a class?
     - Make View class not depend on Game or State? (pass in information as needed)
     - Unit tests for addressing and such
     - Add new tests
@@ -70,6 +65,7 @@ Big Todo:
   - UI
 
 
+247. Limit diff list size
 246. Implement savefile_names in SavesData
 245. Make choices into their own class
 244. Decide what to do with _visits
@@ -181,7 +177,6 @@ Big Todo:
 130. Composite repo logic that looks in both built-in and non-built-in stories
 128. Test cases for stop commands
 127. Compound instructions (separated by ;?)
-126. Fix goto command (I think broken in choice effects)
 125. Warnings for = in text (for set statements)
 124. Var printing in text of choices?
 123. Test dereferencing abilities
@@ -217,9 +212,9 @@ Big Todo:
 89. Fix gameparser for requirement specifications
 88. Make sure "help" string is up to date
 81. Error on choices in story that are more than one word
-80. Iteration loops (iterate through a list and do something for each thing in the list)
 
 DONE
+126. Fix goto command (I think broken in choice effects)
 158. Named storypoints
 109. Attach which game "id" each save is from
 174. "seed" command that forces the next few "random" values to prechosen values (doesn't actually seed generator)
@@ -284,6 +279,7 @@ DONE
 1. Checking that story is formatted correctly
 
 NOT DOING
+80. Iteration loops: iterate through a list and do something for each thing in the list (Need some concept of a list before I can make loops over one)
 87. Change "stop" to "wait" statement? Maybe "pause". Make wait keep execution stack and stop get rid of it. How to do headers?
 74. Write a story that allows the reader to write their own story, just for the meta-ness nerd cred (the call command is probably hopelessly broken now, not to mention basically useless, and fixing it scares me)
 68. World object that exists separately for each block (or even just a macro) (need to rethink world objects)

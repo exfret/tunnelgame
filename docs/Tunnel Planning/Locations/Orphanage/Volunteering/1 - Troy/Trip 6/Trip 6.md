@@ -1,0 +1,1 @@
+You meet the last orphan, probably [[Benedict]]. Maybe you're both playing a game? I don't know.

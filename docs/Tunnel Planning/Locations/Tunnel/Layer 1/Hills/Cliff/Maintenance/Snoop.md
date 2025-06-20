@@ -1,0 +1,1 @@
+When snooping there's a gate in the back that leads somewhere. If [[Mark]] finds you, he doesn't let you in.

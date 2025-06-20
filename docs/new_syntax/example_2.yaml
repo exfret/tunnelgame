@@ -1,0 +1,103 @@
+# There should be _on_enter and _on_exit events, also _on_choice
+# The _player (maybe not declared explicitly) is the player/where they are in the story, to attach characters and have them follow, instances of them are put in the _player
+# No wait, we could just do a custom container with _on_goto events
+player:
+  # Indicate to the parser that this block can move around
+  # Implement this in a more diff-y manner
+  _meta: movable
+  _on_change_block:
+    # _new_block is a special variable holding the result of the new block during a block change event
+    - move: . to _new_block
+  inventory:
+    _alias: inventory
+    _start:
+      # Open command for allowing access to charge/add things here by default
+      # Things involve objects usually
+      - open: .
+_start:
+  # ** means recursively any file path from here
+  - into: "**"
+    inject:
+      # Prerun happens before anything else inside a block's _run, sorta like _headers but not recursively descending (that's what the inject is for)
+      _prerun:
+        # Need to figure out how to do var display, maybe here? Should it normally persist?
+        - clear_stats:
+        # Iterate over every "thing" we've put in inventory, then display it
+        - for: amount, thing in inventory.instances
+          do:
+            # The inventory/@{thing.parent} is to make it display under a dropdown like "flowers", which is itself under inventory
+            - add_stats: thing, amount under inventory/@{thing.parent}
+_run:
+  - goto: first_training
+world:
+  orphanage:
+    _description: Where you live.
+    _run:
+      - You enter the @{orphanage}.
+    rooms:
+      _run:
+        - choice: george "To George's room"
+      george:
+        - if: "(not george.alive) then (The room seems oddly vancant.; goto: ..)"
+        # Lifetime default is block; this just says that George is in this scene
+        - put: george in .
+        # Send a "greet" message to this block and all its descendants
+        - send: greet to ./**
+  tunnel:
+    _description: Just an everyday Tunnel.
+    _on_enter:
+      # image.png "Image Caption"
+      - set_image: tunnel.png "The Tunnel"
+        lifetime: block
+    _run:
+      - Where in the @{tunnel} would you like to go?
+      - choice: plains "The @{plains}"
+      - choice: woods "The @{woods}"
+    plains:
+      lemen:
+        # Aliases that this block can be referred to by, can have multiple separated by spaces
+        _alias: first_training lemen_encounter
+        _run:
+          - if: _visits == 1
+            then:
+              - "@{george} shows you a large patch of @{lemen|plural}."
+              # If where to put things is not specified, it's in whatever block was last opened (and not closed)
+              - put: 5 lemen
+              - goto:
+          # Ability to do conditions like this, testing if this block has any George instances
+          - if: . has george
+    woods:
+      ghost:
+        _run:
+          - You find a @{ghost}!
+people:
+  orphans:
+    george:
+      _alias: george
+      # When a block with a description is dereferenced, it shows up as a keyword
+      _description: Your mentor.
+      _attributes:
+        - alive: True
+      # At the start of the story, before officially running it
+      _start:
+        # Adds an "instance" of George to the encounter
+        # The lifetime specifies this lasts until that block is entered then exited
+        - put: . in first_training
+          lifetime: block
+      _listeners:
+        greet:
+          - George smiles back at you. "How can I help you?"
+          # If we're in the orphanage, offer choice for tunnel exploration
+          # Experiment with using the tag for the condition
+          - if: orphanage in _instance_location.ancestors
+            then:
+              # Possible --> syntax for effects
+              - choice: train "Go on a training expedition" --> tunnel
+items:
+  flowers:
+    _locale: Flowers
+    lemen:
+      _alias: lemen
+      # Function that adds an "s" for pluralization of default locale if no plural specified
+      # Also make a function that auto-capitalizes
+      _locale: lemen

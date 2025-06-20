@@ -1,1 +1,1 @@
-There is initially one empty where [[Troy]] can stay if you save him.
+There is initially one empty where [[Characters/Orphans/Troy]] can stay if you save him.

@@ -1,0 +1,80 @@
+# _blop are now all listeners
+# _parse runs when the story is parsed, useful for variables etc.
+# _start runs when the story is started
+# _run runs when something is goto'd, subroutine'd, etc.
+#
+# Listeners can be longform or shortform
+# _shortform:
+#   - instructions
+# _longform:
+#
+#   priority: 23
+#   handler:
+#     - instructions
+_parse:
+  - declare: coin
+    value: 0
+    type: int
+    locale: Coin
+_start:
+  - goto: /tunnel/plains/lemen
+world:
+  orphanage:
+    rooms:
+      lily:
+      george:
+  town:
+    shop:
+      _parse:
+        - declare: what_the_sign_says = "Hello" ; str
+      _run:
+        - The sign says {what_the_sign_says}.
+        - choice: torch
+          text: Buy a torch
+          cost: 4 coin from lily/inventory
+        - choice: sign "Pay to change the sign" (costs 8 coin from inventory)
+          effects:
+            - set: what_the_sign_says = "Goodbye"
+  tunnel:
+    hills:
+    plains:
+      lemen:
+        _run:
+          - "@{people/george} shows you a large patch of lemens."
+          # There are no variables, only blocks
+          # Idk maybe some variables? Objects should always be blocks
+          - add: 3 item/flower/lemen to lily/inventory
+    woods:
+lily:
+  _start:
+    - attach:
+  # By default, events are triggered by any instance of this, so any goto anywhere would do this
+  _goto:
+    -
+  inventory:
+    _id: inventory
+    # Checks listen for when a variable is checked
+    _check:
+      -
+    # Charge listens for when a shop actually does a modification
+    _charge:
+      # _choice is the variable for the "shop"
+      # This provides what is needed
+      - show:
+        to: _choice
+item:
+  flower:
+    lemen:
+people:
+  george:
+    # At the start, George is in the plains
+    _start:
+      # This adds a reference to this block inside /tunnel/plains/lemen
+      # This means that this block will capture relevant events, and also emit them there
+      # Lifetime is how long the reference exists; parent means that if we leave the immediate parent, then the reference goes away
+      - reference: .
+        in: /tunnel/plains/lemen
+        lifetime: parent
+      # Maybe we also do something like this:
+      - location: /tunnel/plains/lemen
+      # Either way, we need to figure out a way to move him

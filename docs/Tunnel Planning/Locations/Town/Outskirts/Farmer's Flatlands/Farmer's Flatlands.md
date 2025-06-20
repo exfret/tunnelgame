@@ -1,0 +1,1 @@
+Contains a bunch of farms right outside of [[Town]], especially ones from named characters. (I think it's cool to be able to physically visit these later on).

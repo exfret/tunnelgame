@@ -6,6 +6,7 @@
 #   * World
 
 
+import copy
 from typing import Any
 
 
@@ -21,7 +22,7 @@ class GameData:
 
 
     file_homes : dict[tuple, bool]
-    node_contexts : dict[tuple]
+    node_contexts : dict[tuple, dict[str, bool]]
 
 
     def __init__(self):
@@ -104,7 +105,7 @@ class LightData:
         self.command_macros = {}
         self.curr_image = None
         self.last_address = ()
-        self.last_address_list = []
+        self.last_address_list = [()]
         self.last_autosave = 0
         self.last_save_name = None
         self.loop_interrupt_msgs = {}
@@ -149,7 +150,7 @@ class BulkData:
 
 
     per_line : dict[tuple, LineData]
-    vars : dict[tuple, Any]
+    vars : dict
 
 
     def __init__(self):
@@ -166,6 +167,7 @@ class Diff:
         diff_type: The type of diff this is, accepted types are:
             * choice_visit: Decreases number of times choice was made at data["addr"] by 1
             * flag_set: Sets flag named data["name"] to data["val"]
+            * light_data: Sets gamestate.light to data
             * var_set: Sets variable at address data["addr"] named data["name"] to data["val"]
             * visit: Decreases number of visits to address data["addr"] by 1
     """
@@ -205,7 +207,10 @@ class GameState:
         self.game_data = GameData()
         self.light = LightData()
         self.bulk = BulkData()
-        self.diffs = DiffList([[]])
+        self.diffs = DiffList([[Diff(
+                        diff_type = "light_data",
+                        data = copy.deepcopy(self.light)
+                    )]])
     
 
     def reset(self):
@@ -213,7 +218,10 @@ class GameState:
         self.game_data = GameData()
         self.light = LightData()
         self.bulk = BulkData()
-        self.diffs = DiffList([[]])
+        self.diffs = DiffList([[Diff(
+                        diff_type = "light_data",
+                        data = copy.deepcopy(self.light)
+                    )]])
     
 
     def update(self, other_gamestate):
@@ -250,7 +258,8 @@ class GameState:
             diff_type = "flag_set",
             data = {
                 "name": name,
-                "val": self.bulk.vars["flags"][name]
+                "val": self.bulk.vars["flags"][name],
+                "new_val": val
             }
         ))
         self.bulk.vars["flags"][name] = val
@@ -262,18 +271,27 @@ class GameState:
             data = {
                 "addr": addr,
                 "name": name,
-                "val": self.bulk.vars[addr][name]["value"]
+                "val": self.bulk.vars[addr][name]["value"],
+                "new_val": val
             }
         ))
         self.bulk.vars[addr][name]["value"] = val
 
     
-    def reverse_last_diffs(self):
-        # Check if we can even revert any further
-        if len(self.diffs) == 0:
-            return False
+    def create_new_diff_list(self):
+        self.diffs.append([])
+        self.diffs[-1].append(Diff(
+            diff_type = "light_data",
+            data = copy.deepcopy(self.light)
+        ))
 
+    
+    def reverse_last_diffs(self):
+        if len(self.diffs) == 1:
+            return False
         last_diff_list = self.diffs.pop()
+        if len(self.diffs) == 1:
+            self.diffs.append([last_diff_list[0]])
 
         while len(last_diff_list) > 0:
             last_diff = last_diff_list.pop()
@@ -283,7 +301,31 @@ class GameState:
                 self.bulk.per_line[data["addr"]].choice_visits -= 1
             elif last_diff.diff_type == "flag_set":
                 self.bulk.vars["flags"][data["name"]] = data["val"]
+            elif last_diff.diff_type == "light_data":
+                self.light = data
             elif last_diff.diff_type == "var_set":
                 self.bulk.vars[data["addr"]][data["name"]]["value"] = data["val"]
             elif last_diff.diff_type == "visit":
                 self.bulk.per_line[data["addr"]].visits -= 1
+    
+
+    def apply_diffs(self, diff_list):
+        """
+        Applies a list of diffs to fast forward from one choice to another.
+        """
+
+        self.diffs.append(diff_list)
+
+        for diff in diff_list:
+            data = diff.data
+            
+            if diff.diff_type == "choice_visit":
+                self.bulk.per_line[data["addr"]].choice_visits += 1
+            elif diff.diff_type == "flag_set":
+                self.bulk.vars["flags"][data["name"]] = data["new_val"]
+            elif diff.diff_type == "light_data":
+                self.light = data
+            elif diff.diff_type == "var_set":
+                self.bulk.vars[data["addr"]][data["name"]]["value"] = data["new_val"]
+            elif diff.diff_type == "visit":
+                self.bulk.per_line[data["addr"]].visits += 1

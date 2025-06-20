@@ -1,0 +1,1 @@
+[[Characters/Orphans/Jaz|Jaz]] gets a little more character development here. She asks about help with a trick, which can fail or succeed based off character stats/choices. Rejecting impacts later interactions and [[Locations/Orphanage/Rooms/Jaz|Jaz's room's]] "shop". (Maybe she stops offering the [[Orphanage Courtyard Key]]).

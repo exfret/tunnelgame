@@ -1,0 +1,5 @@
+Description: Everyone lines up in front of the double oak doors while [[Ms. Bee]] and [[Mabel]] stare and wait. Then, they open the doors and lead everyone to a farm. You all head to a common destination for volunteering... [[Karo's Farm]]. Unlike others, [[Karo]] pays the orphanage for the labor depsite it being technically volunteering work. It's still not good pay, but it's something. Of course, you don't get a single [[Coin]] from it. It's the orphanage's money you're earning, and in return you get a place to eat and sleep. During lunch break, [[Characters/Orphans/Jaz|Jaz]], sits next to you and asks what the [[Tunnel]] is like.
+
+(Note: Maybe break the above text up into multiple pages).
+
+You then get choices of what to respond with; the answer doesn't matter much. [[Characters/Orphans/Jaz|Jaz]] responds sarcastically in a way that indicates she wishes she was chosen to be an adventurer, and then you have the option to cheer her up by showing her something from the [[Tunnel]], which she will remember later.

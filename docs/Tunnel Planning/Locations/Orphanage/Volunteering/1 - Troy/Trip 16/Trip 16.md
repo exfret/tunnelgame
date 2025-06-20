@@ -1,0 +1,1 @@
+It's announced that you'll be making regular switches between [[Karo's Farm]] and whatever this secondary location is. (Which quickly falls apart when [[Karo]] disappears).

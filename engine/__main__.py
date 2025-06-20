@@ -2,10 +2,12 @@ from flask import session, request
 from flask_socketio import join_room, emit
 import sys
 
+
 import copy
 import os
 import pickle
 import yaml
+
 
 from engine.server import Server
 from engine.gamesession import GameSession
@@ -80,7 +82,8 @@ if view_type == "web":
                 gamesession.gamestate.update(web_state["state"])
                 gamesession.gameparser.add_module_vars()
 
-                gamesession.view.clear()
+                gamesession.view.clear(True)
+                gamesession.view.print_emit_intercepts()
                 gamesession.view.print_choices()
                 gamesession.view.print_shown_vars(gamesession.gamestate.light.view.shown_vars, gamesession.gamestate.light.last_address_list[-1])
                 gamesession.view.show_curr_image()

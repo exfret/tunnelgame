@@ -479,8 +479,8 @@
                 </p>
             </div>
             <div class="command-bar">
-                <input id="commandInput" type="text" placeholder="Type a command…" autocomplete="off"
-                    spellcheck="false" />
+                <input id="commandInput" type="text" placeholder="Click a choice or type a command..."
+                    autocomplete="off" spellcheck="false" />
             </div>
         </div>
 
@@ -648,17 +648,17 @@
         socket.on("print_choices", msg => {
             for (const choice_id in msg.choices) {
                 const choice = msg.choices[choice_id];
-                if (!choice.action) {
-                    if (choice.missing.length > 0) {
-                        addToStoryBoard(
-                            `<span style="color:gray"><button disabled class="button">${choice_id}</button> ${choice.text}${msg.effects_texts[choice_id] ?? ""}</span>`
-                        );
-                    } else {
-                        addToStoryBoard(
-                            `<button class="button" onclick='make_choice("${choice_id}")'>${choice_id}</button> ${choice.text}${msg.effects_texts[choice_id] ?? ""}`
-                        );
-                    }
+                //if (!choice.action) {
+                if (choice.missing.length > 0) {
+                    addToStoryBoard(
+                        `<span style="color:gray"><button disabled class="button">${choice_id}</button> ${choice.text}${msg.effects_texts[choice_id] ?? ""}</span>`
+                    );
+                } else {
+                    addToStoryBoard(
+                        `<button class="button" onclick='make_choice("${choice_id}")'>${choice_id}</button> ${choice.text}${msg.effects_texts[choice_id] ?? ""}`
+                    );
                 }
+                //}
             }
         });
 

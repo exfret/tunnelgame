@@ -4,7 +4,7 @@ import pickle
 import time
 
 
-from engine.gamestate import GameState
+from engine.gamestate import GameState, Diff
 from engine.config import Config
 from engine.addressing import Addressing
 from engine.utility import Utility
@@ -302,10 +302,13 @@ class GameLoop:
         
 
         # Append passed input to gamestate input
-        self.gamestate.light.command_buffer.extend(starting_input)
+        for command in self.gamestate.light.command_buffer:
+            starting_input.append(command)
+        self.gamestate.light.command_buffer = starting_input
 
 
         # If we have lookaheads, we need to populate the history now
+        # TODO: Do I need to do history autosaves still?..
         if do_lookaheads:
             do_autosaves()
 
@@ -330,7 +333,9 @@ class GameLoop:
                 new_state.light = copy.deepcopy(self.gamestate.light)
                 new_state.bulk = self.gamestate.bulk
                 new_state.diffs = self.gamestate.diffs
-                new_state.diffs.append([])
+                new_state.create_new_diff_list()
+                # TODO: DO WE NEED TO CHOP OFF THE LAST DIFF?
+
                 # TODO: Also make sure having the config not change doesn't break anything
                 new_config = self.config
                 # We need to initialize these to make sure they're given the proper gameobjects and gamestates
@@ -346,7 +351,13 @@ class GameLoop:
                 time_doing_copies += time.time() - start_time_doing_copy
 
                 new_lookahead_gamesession_info[lookahead_choice_id] = new_gameloop.run(game_name=game_name, packaged=packaged, loaded_game_state={"state": new_state}, uid=uid, do_lookaheads=False, starting_input=[lookahead_choice_id.split(), "exit".split()], is_lookahead=True)
-                
+                new_lookahead_gamesession_info[lookahead_choice_id]["diffs"] = copy.deepcopy(new_lookahead_gamesession_info[lookahead_choice_id]["state"].diffs[-1])
+                # Append the light data changes
+                new_lookahead_gamesession_info[lookahead_choice_id]["diffs"].append(Diff(
+                    diff_type = "light_data",
+                    data = new_lookahead_gamesession_info[lookahead_choice_id]["state"].light
+                ))
+
                 # Undo modifications
                 self.gamestate.reverse_last_diffs()
                 self.gameparser.add_module_vars()
@@ -492,10 +503,11 @@ class GameLoop:
                     self.view.set_displayed_text("game")
                     self.view.print_displayed_text()
                 else:
-                    self.view.print_displayed_prints()
+                    self.view.print_emit_intercepts()
                 self.view.print_choices()
             # TODO: Fix for web view
             elif command[0] == "exec":
+                continue
                 # TODO: THIS IS CURRENTLY BROKEN
                 # Note: Favor specific statements like "set" over doing an exec, this is more for show than anything
                 # Enters a "ghost game" with added exec statements, then returns, keeping some modifications to state
@@ -539,6 +551,7 @@ class GameLoop:
                         self.view.print_feedback_message("flag_invalid_flag")
                     else:
                         self.gamestate.modify_flag(command[1], True)
+                        lookahead_gamesession_info = calc_lookahead_gamesession_info()
                         self.view.print_feedback_message("flag_set_successfully")
             elif command[0] == "goto":
                 if len(command) < 2:
@@ -552,6 +565,7 @@ class GameLoop:
                         self.view.print_feedback_message("goto_invalid_address_given")
                     if not (address_to_goto is None):
                         make_choice(address_to_goto) # TODO: Don't add to last_address_list for "back" command with gotos?
+                        lookahead_gamesession_info = calc_lookahead_gamesession_info()
             elif command[0] == "help":
                 self.view.print_feedback_message("help")
             elif command[0] == "info":
@@ -602,6 +616,7 @@ class GameLoop:
                     reconstructed_input += subcommand + " "
                 for subcommand in reconstructed_input.split(",")[::-1]:
                     self.gamestate.light.command_buffer.insert(0, subcommand.split())
+                lookahead_gamesession_info = calc_lookahead_gamesession_info()
             elif command[0] == "inspect":
                 if len(command) < 2:
                     self.view.print_feedback_message("inspect_no_variable_given")
@@ -643,32 +658,16 @@ class GameLoop:
                 
                 self.view.socketio.emit("restart_html", {})
             elif command[0] == "revert":
-                # TODO: FIX, CURRENTLY BROKEN
-
-                if (len(self.gamestate.state["history"]) == 0) or (len(self.gamestate.state["history"]) == 1 and do_lookaheads):
-                    self.view.print_feedback_message("revert_no_reversions")
-                    continue
-                
-                history = self.gamestate.state["history"]
-                # Need to do an extra pop with lookaheads since the history is stored *after* the choice is made
-                if do_lookaheads:
-                    history.pop(0)
-                    self.gamestate.state.clear()
-                    self.gamestate.state.update(copy.deepcopy(history[0]))
-                else:
-                    self.gamestate.state.clear()
-                    self.gamestate.state.update(history.pop(0))
-                self.gameparser.add_module_vars()
-                self.gamestate.state["history"] = history
+                self.gamestate.reverse_last_diffs()
 
                 self.view.clear(True)
                 if self.config.view_type != "web":
                     self.view.print_displayed_text()
                 else:
                     self.view.clear_var_view()
-                    self.view.print_shown_vars(self.gamestate.state["view_text_info"]["shown_vars"], self.gamestate.state["last_address_list"][-1])
+                    self.view.print_shown_vars(self.gamestate.light.view.shown_vars, self.gamestate.light.last_address_list[-1])
                     self.view.show_curr_image()
-                    self.view.print_displayed_prints()
+                    self.view.print_emit_intercepts()
                     self.view.print_choices()
 
                     self.gameparser.remove_module_vars()
@@ -777,10 +776,11 @@ class GameLoop:
                 else:
                     if do_lookaheads:
                         # TODO: Don't allow non-web view to get here
-                        # Web view currently not supported with lookaheads
+                        # CLI view currently not supported with lookaheads
                         new_gamesession_info = lookahead_gamesession_info[command[0]]
 
-                        self.gamestate.update(new_gamesession_info["state"])
+                        #self.gamestate.update(new_gamesession_info["state"])
+                        self.gamestate.apply_diffs(lookahead_gamesession_info[command[0]]["diffs"])
                         self.gameparser.add_module_vars()
                         self.view.do_emits(new_gamesession_info["view"].lookahead_emits)
 

@@ -1,0 +1,1 @@
+There's [[Characters/Orphans/Troy|Troy]] again, this time you get to interact with him more deeply with a one-on-one question. (Maybe if you've rejected him twice this doesn't happen/something else happens.)

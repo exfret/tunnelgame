@@ -1,0 +1,1 @@
+Some encounters have "vertical depth", where each visit something new happens in the same location. Others have "horizontal depth", where each visit you can explore a new part of the encounter. Either way, the vast majority of encounters should have a lot of some type of depth.

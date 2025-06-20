@@ -1,0 +1,1 @@
+You can have various clothes that you change in and out of at home base, like [[Locations/Orphanage/Rooms/Lily|Lily's Room]]. Clothes can influence some encounters, like some characters' opinions of you or dialogue.

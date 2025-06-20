@@ -2,6 +2,7 @@ from flask import Flask, render_template, jsonify, session, request
 from flask_socketio import SocketIO, emit, join_room
 from uuid import uuid4
 
+
 class Server:
     def __init__(self):
         self.app = Flask(__name__)

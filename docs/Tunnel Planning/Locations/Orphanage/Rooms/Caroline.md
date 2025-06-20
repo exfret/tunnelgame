@@ -1,0 +1,3 @@
+Description: Caroline is a cheerful woman with long black hair. Her hair has strands that fall out a lot all over her room. She was cursed to forever have a child's mind. But she really likes playing with all the new stuff you get from the Tunnel, and watching that helps you learn/get experience.
+
+[[Locations/Orphanage/Rooms/Caroline|Caroline's]] room is primarily an experience source early on, and a sink for random things from the [[Tunnel]] that you get and don't know what to do with. She accepts most anything from the Tunnel, but after the first time she needs 10x more of that thing to be satisfied. I'm thinking it could be like even a massive list of choices for what to give her, now. She's not really found outside her room.

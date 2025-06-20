@@ -1,0 +1,3 @@
+Description: Next, you are all repairing a path in town with [[Ms. Bee]]. It's hard work, and you have to dig up a lot of rocks. In fact, you start wheezing and get lightheaded as you constantly pick up the pointy rocks.
+
+Next, there is a choice of some sort (right now, it's how much energy to expend on the trip, with more energy giving higher rewards, but I was wondering if another thing would be more appropriate).

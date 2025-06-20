@@ -1,0 +1,1 @@
+Although inventory items, tools are categorized by level (0 meaning you don't even own the tool). Most places have a max level that they can "upgrade" to. For example, a place that just sells a shovel, will only "upgrade" you to level 1 at max.

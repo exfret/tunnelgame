@@ -1,0 +1,1 @@
+Same place again as [[Trip 10]].

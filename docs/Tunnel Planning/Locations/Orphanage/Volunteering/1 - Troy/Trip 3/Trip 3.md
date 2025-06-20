@@ -1,0 +1,5 @@
+Description: You're back to work at [[Karo's Farm]]. It's hard work, but this time, [[Karo|Karo's]] son, [[Characters/Orphans/Troy]], is there to help. He's a little quiet and awkward, but he's warmed up to you recently. You're hard at work pulling up some weeds in the garden behind the house when Troy comes out and pipes up, "Hey, [[Characters/Orphans/Lily|Lily]]!" It causes you to jump a little at first, but then you calm when you see it's him. Troy is too caught up in sharing what he had to say that he doesn't even notice the fright he caused. "[[Karo]] made some extra tea so I wanted to see if you wanted any!"
+
+Then there are choices whether to accept or such, setting the tone of your disposition toward [[Characters/Orphans/Troy|Troy]].
+
+This trip sets a precedent of alternating between [[Karo's Farm]] and another area, at least until the thing happens.

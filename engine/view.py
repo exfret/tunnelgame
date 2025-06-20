@@ -60,7 +60,7 @@ feedback_msg = {
     "choice_missing_requirements": "Missing requirements.",
     "choice_enforce_false": "You can't make this choice.",
     "runtime_error_invalid_seed": "\033[33mWarning:\033[0m Seeded value doesn't correspond to valid choice in random block, stopping execution.",
-    "unrecognized_command": "Unrecognized command/choice. Type 'help' for commands or 'choices' for a list of choices.",
+    "unrecognized_command": "Unrecognized command/choice. Type 'help' for commands or 'info choices' for a list of choices.",
     "default": "Error: Invalid feedback message key.",
 }
 
@@ -552,6 +552,8 @@ class WebView(View):
         curr_addr = None
         if addr is None:
             curr_addr = self.addressing.get_curr_addr()
+            if curr_addr is False:
+                curr_addr = self.gamestate.light.last_address
         else:
             curr_addr = addr
 
@@ -697,11 +699,22 @@ class WebView(View):
 
 
     def print_choices(self, display_actions=False):
+        choices_to_print = {}
         effects_texts = {}
 
         # Fill effects texts (can't eval the python in the javascript)
         # TODO: Un-duplicate this code
         for choice_id, choice in self.gamestate.light.choices.items():
+            is_action = "action" in choice and choice["action"]
+
+            # Display only actions/choices, whichever is selected
+            if not display_actions and is_action:
+                continue
+            if display_actions and not is_action:
+                continue
+
+            choices_to_print[choice_id] = choice
+
             # First, expand tagged words in this choice text
             choice["text"] = self.expand_tagged_words(self.utility.format.vformat(choice["text"], (), self.utility.collect_vars(address=choice["choice_address"])), choice["choice_address"])
 
@@ -742,7 +755,7 @@ class WebView(View):
 
             effects_texts[choice_id] = effects_text
 
-        self.emit_message("print_choices", {"choices": self.gamestate.light.choices, "effects_texts": effects_texts}, self.uid)
+        self.emit_message("print_choices", {"choices": choices_to_print, "effects_texts": effects_texts}, self.uid)
 
 
     def print_completion_percentage(self, percentage):
@@ -779,7 +792,18 @@ class WebView(View):
 
 
     def print_vars_defined(self):
-        pass # TODO
+        # TODO: Remove duplicated logic
+        var_names = {}
+
+        curr_addr = self.addressing.get_block_part(self.gamestate.light.last_address)
+        for ind in range(len(curr_addr) + 1):
+            addr_to_check = curr_addr[:ind]
+
+            for var_name in self.gamestate.bulk.vars[addr_to_check].keys():
+                var_names[var_name] = True
+        
+        for name in sorted(var_names):
+            self.print_text(name)
 
 
     def print_var_modification(self, text_to_show_spec, dont_save_print=False):

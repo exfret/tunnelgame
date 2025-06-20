@@ -135,11 +135,14 @@ class Utility:
 
             return self.get_var(var_dict, var_name, curr_address[:-1])
     
+
     def collect_vars_with_dicts(self, address=None):
         var_dict = VarDict()
 
         if address is None:
             address = self.addressing.get_curr_addr()
+        if address is False:
+            address = self.gamestate.light.last_address
 
         for ind in range(len(address)):
             addr_to_check = address[:ind]
@@ -169,11 +172,13 @@ class Utility:
 
         return var_dict
     
+
     def collect_vars(self, address=None):
         var_dict = VarDictValues(self.collect_vars_with_dicts(address))
 
         return var_dict
     
+
     # Dereferences things in {}, can handle recursive nesting like {{foo}} where foo = "blop" and blop = "bar"
     def dereference_text(self, text):
         # Keep formatting until we've stabilized
@@ -220,11 +225,13 @@ class Utility:
                     if self.eval_conditional(subnode, address):
                         return True
                 return False
-            
+
+
     def set_val(self, var, new_val):
         # TODO: Throw exceptions if we try to set a var without value
         if "value" in var:
             var["value"] = new_val
+
 
     def localize(self, var_name, address=None, var_to_use=None):
         var = None

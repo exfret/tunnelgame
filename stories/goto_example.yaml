@@ -1,0 +1,46 @@
+_vars:
+  - rarity: 0
+  - obesity: 0
+  - refineness: 0
+  - soda_addiction: 0
+  - calcium: 0
+_shown:
+  - rarity
+  - obesity
+  - refineness
+  - soda_addiction
+  - calcium
+_content:
+  - goto: dinner
+dinner:
+  - Your mouth drops at the mouth-watering meal Thyme prepared for you.
+  - random:
+      option_1:
+        - goto: steak
+      option_3:
+        - goto: mcdonalds
+steak:
+  - It's a delicious rare steak! It's perfectly paired with your drink.
+  - set: rarity += 1
+  - random:
+      option_1:
+        - goto: wine
+      option_2:
+        - goto: milk
+mcdonalds:
+  - It's a fresh McDonald's Happy Meal! It's perfectly paired with your drink.
+  - set: obesity += 100
+  - random:
+      option_1:
+        - goto: soda
+      option_2:
+        - goto: milk
+wine:
+  - set: refineness += 3
+  - Wine will wash this meal down perfectly!
+soda:
+  - set: soda_addiction += 2
+  - Soda will wash this meal down perfectly!
+milk:
+  - set: calcium += 1
+  - Milk will wash this meal down perfectly!

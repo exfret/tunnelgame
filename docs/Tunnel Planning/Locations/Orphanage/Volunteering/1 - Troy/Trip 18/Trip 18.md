@@ -1,0 +1,1 @@
+Last trip before [[Karo|Karo's]] disappearance. Heads to that secondary location. Something happens that causes everyone to get kicked out (maybe [[Characters/Orphans/Jaz|Jaz]] steals something she's not supposed to), but at least there's always [[Karo's Farm]]! Until the next trip happens lol.

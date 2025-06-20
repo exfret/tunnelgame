@@ -1,1 +1,1 @@
-The outskirts have different buildings that you can access once you get enough experience.
+The outskirts have different buildings that you can access once you get enough experience. The [[Crumbling Corridor]] is the first area, though later areas may require more than just experience.
