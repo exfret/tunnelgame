@@ -1,0 +1,1 @@
+This is [[Locations/Dome/Orphanage/Rooms/Lily|Lily's]] room. There is a bed that gets messier as you sleep in it, which you can then make. You can also change [[Clothes]] here. You can also choose to [[Long Rest]].

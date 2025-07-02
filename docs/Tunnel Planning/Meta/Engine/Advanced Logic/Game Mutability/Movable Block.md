@@ -1,0 +1,1 @@
+It's possible for a [[Block]] to be moved during runtime under certain conditions, bringing any [[Instance|Instances]], sub-blocks, or other sub-things with it.

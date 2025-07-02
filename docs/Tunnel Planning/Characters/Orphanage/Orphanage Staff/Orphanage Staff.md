@@ -1,0 +1,1 @@
+The staff who work hard to run the [[Locations/Dome/Orphanage/Orphanage]]. There's three main characters I have for this right now, but I'm considering adding a part-time accountant or listing more benefactors for the orphanage as well.

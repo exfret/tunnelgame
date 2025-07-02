@@ -1,0 +1,3 @@
+Here, I'm hoping to do a broad overview of the progression in the story.
+
+First, you are [[Training]] with [[Characters/Orphanage/Orphans/George|George]], which introduces you to the core gameloop of [[Expeditions]] and main [[Locations]]. Then, there's the [[Green Pass]], which is a short stage before you get the [[Blue Pass]] in order to introduce you to the idea of the different [[World/Places/Layers|Layers]]. There is a significant hump before you reach the [[Yellow Pass]], after which I don't have much planned.

@@ -1,0 +1,1 @@
+Need to throw in a joke about how her favorite flower is actually [[Petunal Blossoms]], not [[Items/Gathered/Flowers/Rosalia|Rosalia]], despite her name. Rose has blonde hair and pale cheeks (not rosy ones). She has a light voice and a light touch, and never gets revenge.

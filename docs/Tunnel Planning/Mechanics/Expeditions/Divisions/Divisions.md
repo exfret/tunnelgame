@@ -1,0 +1,1 @@
+[[Expeditions|Expedition]] [[Location|Locations]] have a certain organizational system, first into [[Mechanics/Expeditions/Divisions/Layers|Layers]], then [[Regions]], which have [[Encounters]], then [[Areas]], possibly with subareas.

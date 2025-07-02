@@ -1,0 +1,1 @@
+A [[Keys|Key]] to the [[Maintenance|Maintenance Room]] in the [[Cliff]] [[Encounters|Encounter]] of [[Layer 1]]. Once you learn you can just knock (perhaps the [[Blacksmith]] tells you this), you can get in without needing this. But, you don't get to snoop around first, so the key is still useful.

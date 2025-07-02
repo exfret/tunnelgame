@@ -1,0 +1,1 @@
+These items usually have a specific use, such as for a sidequest or particular [[Encounters|Encounter]]. They can be gathered, but are also gotten via other means, giving them distinct flavor from the [[Gathered]] items.

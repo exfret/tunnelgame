@@ -1,0 +1,1 @@
+This is the first place where you can do [[Research]]. [[Mabel]] primarily takes care of the study and can be found here often. Researching books from this location requires [[Items/Gathered/Flowers/Rosalia|Rosalia]], which [[Mabel]] uses to grind into fine teas, which she sells to support the [[Locations/Dome/Orphanage/Orphanage]] financially.

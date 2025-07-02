@@ -1,0 +1,1 @@
+The flat, dry area of [[Layer 2]]. I think this area should mirror the [[Plains]] of [[Layer 1]] in that there are lots of things to gather??

@@ -1,0 +1,1 @@
+If you come across an [[Encounters|Encounter]] with tracks and you've unlocked tracking, you can answer certain questions about the game (such as where a certain [[Encounters|Encounter]] is located) for rewards. Of course, a lot of the questions will be trick questions.

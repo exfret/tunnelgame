@@ -1,3 +1,1 @@
-Description: Full of wildlife.
-
-The woods have encounters with shops and creatures you can battle. They are a more dangerous area, relatively speaking for layer 1.
+Full of wildlife. The woods have [[Encounters]] with [[Shop|Shops]] and [[World/Creatures/Creatures|Creatures]] you can [[Mechanics/Major/Fighting/Fighting|Fighting|Fight]]. They are a more dangerous [[Regions|Region]], relatively speaking for [[Layer 1]].

@@ -1,3 +1,3 @@
 This is a [[Next Expeditions|Training Encounter]].
 
-A shop that sells [[Keys]] to spots in [[Town]] in return for [[Special Dirt]]. Only one key can be bought at a time. If [[Characters/Orphans/George|George]] is there, you get a discount.
+A [[Shop]] that sells [[Keys]] to spots in [[Locations/Dome/Town/Town|Town]] in return for [[Special Dirt]], especially for spots in [[Crumbling Corridor]] (notably though, there is not the [[Abandoned Warehouse]] key here). Only one [[Keys|Key]] can be bought at a time. If [[Characters/Orphanage/Orphans/George|George]] is there, you get a discount.

@@ -1,0 +1,1 @@
+Some skills are related to gathering things, the description of these skills goes here.

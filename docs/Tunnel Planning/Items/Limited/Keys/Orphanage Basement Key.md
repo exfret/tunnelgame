@@ -1,0 +1,1 @@
+Used to unlock the door to the [[Basement]] of the [[Locations/Dome/Orphanage/Orphanage]], found in the hallway with the [[Rooms|Bedrooms]].

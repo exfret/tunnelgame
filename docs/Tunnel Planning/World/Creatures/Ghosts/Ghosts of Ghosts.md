@@ -1,0 +1,1 @@
+[[Ghosts]] can die themselves, in which case nothing remains. And not everything becomes an initial [[Ghosts|Ghost]] either. [[Characters/Orphanage/Orphans/George|George]] in the story draws an analogy to how a book can be burned, but it's not truly gone until all those who've read it have either forgotten it or themselves passed away.

@@ -1,0 +1,1 @@
+There are some [[Hills Giants]], with the option to [[Mechanics/Major/Fighting/Fighting|Fight]] them, but you need, like, incredibly high fighting stats to do so. In the [[Day|Morning]], they are sleeping, and you can loot their campgrounds or something like that I think.

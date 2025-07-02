@@ -1,1 +1,1 @@
-When snooping there's a gate in the back that leads somewhere. If [[Mark]] finds you, he doesn't let you in.
+This is the set of actions you get to choose from if you've snuck in with the [[Elevator Maintenance Key]]. When snooping there's a gate in the back that leads somewhere. If [[Mark]] finds you, he doesn't let go in there, though.

@@ -1,0 +1,1 @@
+Around this time, you follow [[Characters/Orphanage/Orphans/George|George's]] footsteps and depart the [[Locations/Dome/Orphanage/Orphanage]] as well.

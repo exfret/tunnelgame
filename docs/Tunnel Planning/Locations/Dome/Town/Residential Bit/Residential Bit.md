@@ -1,0 +1,1 @@
+A place where you can buy a house, or visit other people's houses. (Perhaps for when you have to move out of the [[Locations/Dome/Orphanage/Orphanage]] if I do that).

@@ -1,1 +1,1 @@
-The only exit from the [[Lore/Dome]].
+The [[World/Places/Tunnel|Tunnel]] is the only exit from the [[World/Places/Dome|Dome]].

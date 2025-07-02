@@ -1,0 +1,1 @@
+Research into different arts. The first one unlocks the arts and crafts room in the [[Lengthwidth Library]], and further ones maybe unlock an arts district in the [[City]].

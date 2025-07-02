@@ -1,0 +1,1 @@
+Unlocked by finding [[Mr. Fungi]] in [[Layer 1]] (who's a real yeast on the dance floor). The slogan is "keep your count to the beat". You can unlock better dances by finding [[Mr. Fungi]] in more [[Place|Places]].

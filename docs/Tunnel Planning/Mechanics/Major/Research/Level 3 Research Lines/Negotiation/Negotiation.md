@@ -1,0 +1,1 @@
+Decreases the costs of things in some [[Shop|Shops]]

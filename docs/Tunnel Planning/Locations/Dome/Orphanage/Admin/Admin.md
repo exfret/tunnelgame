@@ -1,0 +1,1 @@
+The main administrative area of the [[Locations/Dome/Orphanage/Orphanage]]. This is where you can usually find [[Directory Wicky]], who doesn't often stray outside the confines of his office or residence. Getting into this area requires a high level of [[Sneakiness]], though I'm thinking there should be alternate ways to get here as well.

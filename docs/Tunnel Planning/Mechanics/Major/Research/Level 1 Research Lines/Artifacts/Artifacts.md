@@ -1,0 +1,1 @@
+Gives information about where to find certain [[Mechanics/Major/Artifacts/Artifacts|Artifacts]], or even how to recognize them. Can also be needed to use certain [[Mechanics/Major/Artifacts/Artifacts|Artifacts]] correctly.

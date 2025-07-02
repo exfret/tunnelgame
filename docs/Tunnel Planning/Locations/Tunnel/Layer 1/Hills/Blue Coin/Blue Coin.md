@@ -1,3 +1,3 @@
 This is a [[Next Expeditions|Training Encounter]].
 
-A [[Items/Currencies/Blue Coin|Blue Coin]] stash that you find. There are only a limited number of blue coins here.
+A [[Items/Currencies/Blue Coin|Blue Coin]] stash that you find. There are only a limited number of [[Items/Currencies/Blue Coin|Blue Coins]] here. After they run out, you find a treasure map for a stash of [[Items/Currencies/Blue Coin|Blue Coins]] on an island, which happens to be the [[Island]] in the [[Scrolls]] [[Encounters|Encounter]]. Maybe after finding the treasure map, this is replaced with another [[Encounters|Encounter]] instead.

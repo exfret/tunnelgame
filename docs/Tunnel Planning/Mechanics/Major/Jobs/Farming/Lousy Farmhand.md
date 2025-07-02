@@ -1,0 +1,1 @@
+The first job available, which can be found at the [[Locations/Dome/Town/Town|Town's]] [[Job Board]]. A decent early game way to make [[Coin|Coins]], but it takes a lot of [[Mechanics/Major/Vigor/Vigor|Vigor]].

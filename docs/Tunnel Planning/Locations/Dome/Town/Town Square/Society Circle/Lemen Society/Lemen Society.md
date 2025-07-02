@@ -1,0 +1,1 @@
+The lemen society is unlocked by entering the [[Market]] with enough [[Items/Gathered/Flowers/Lemen|Lemens]]. The society gives great power to those who have many [[Items/Gathered/Flowers/Lemen|Lemens]], which ends up favoring those who simply have enough [[Coin|Coins]] to buy all those [[Items/Gathered/Flowers/Lemen|Lemens]].

@@ -1,0 +1,1 @@
+Unlocked after new books arriving at the [[Study]], but it doesn't require [[Reading I]].

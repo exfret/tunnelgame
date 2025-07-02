@@ -1,0 +1,7 @@
+You can engage in [[Locations/Dome/Orphanage/Volunteering/Volunteering|Volunteering]] at the orphanage, which advances certain storylines and gives something to do between [[Expeditions|Expedition]] trips. See that link for the specifics of each trip. You can do at most one volunteering trip between [[Expeditions]], and you can't "skip" doing volunteering twice in a row (so there are at most two [[Expeditions]] between volunteering trips). So, by the time you embark on your last training expedition (your 16th one as according to [[Next Expeditions]]), you can have at most 15 of the volunteering trips (between [[Expeditions]]), and need at least 7.
+
+Note: Now that volunteering is an unlock with [[Experience]], I wonder how to sensibly force [[Player|Players]] to do it in order to advance the [[Characters/Orphanage/Orphans/Troy|Troy]] storyline enough. Or maybe what happens to [[Characters/Orphanage/Orphans/Troy|Troy]] can just be time-based rather than triggered after a certain number of volunteering trips? Or maybe you just may not know [[Characters/Orphanage/Orphans/Troy|Troy]] when the events happen and it's time-based... yeah I think that last one is good.
+
+# TODO
+
+Having some major redesign thoughts with the volunteering trips.

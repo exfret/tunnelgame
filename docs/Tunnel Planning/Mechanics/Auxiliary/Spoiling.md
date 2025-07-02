@@ -1,0 +1,1 @@
+Some items have a chance to spoil every day. Or maybe every few days/weeks, some amount spoils. This decreases the amount in your inventory by some percentage amount. [[Items/Gathered/Flowers/Lemen|Lemens]] are an example of such an item.

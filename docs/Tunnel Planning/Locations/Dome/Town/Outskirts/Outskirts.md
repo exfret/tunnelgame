@@ -1,0 +1,1 @@
+The outskirts have different buildings that you can access once you get enough experience. The [[Crumbling Corridor]] is the first place, though later places may require more than just experience. I'm planning for them to unlock in alphabetical order.

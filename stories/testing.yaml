@@ -1,6 +1,5 @@
+_vars:
+  - test: "Did it work?"
 _content:
-  - hi
-  - choice: start
-    text: LOL
-    effects:
-      - Bye
+  - choice: test
+    action:

@@ -1,0 +1,1 @@
+A specific grouping of [[Squirrel Followers]], usually under a certain squirrel clan, like the one led by [[Alice]].

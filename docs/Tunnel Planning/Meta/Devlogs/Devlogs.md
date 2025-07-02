@@ -1,0 +1,1 @@
+Although these will primarily be published elsewhere, I will try keeping this up-to-date with longform discussion.

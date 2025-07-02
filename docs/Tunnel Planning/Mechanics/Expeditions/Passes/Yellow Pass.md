@@ -1,0 +1,1 @@
+While you are working on getting the Yellow Pass, [[Characters/Orphanage/Orphans/George|George]] transitions to full adulthood, moving completely out of the [[Locations/Dome/Orphanage/Orphanage]], and foreshadowing your departure as well.

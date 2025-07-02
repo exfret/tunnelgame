@@ -1,0 +1,1 @@
+A park in the center of [[Town Square]]. There's a [[World/Creatures/Squirrel/Squirrel|Squirrel]] you can give an [[Acorns|Acorn]] to for a [[Items/Currencies/Blue Coin|Blue Coin]]. Afterward, he sets out to engage in the [[Squirrel Wars]]. I'm still wondering about other things to do here. Maybe you can invite other characters to hang out with you here.

@@ -1,0 +1,1 @@
+The outside of the [[World/Places/Dome|Dome]] is lit by a mysterious force that follows normal real-life [[Day]]-night cycles. However, lighting is still needed for nighttime and the insides of buildings, usually through the usage of [[Items/Gathered/Flowers/Lemen|Lemens]].

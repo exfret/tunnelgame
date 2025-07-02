@@ -1,0 +1,1 @@
+Throughout the game, there will be gardens that you can plant seeds in, which will grow as [[Time]] goes on. This is another source of some things in the [[World/Places/Tunnel|Tunnel]] that are harder to get.

@@ -1,0 +1,1 @@
+For the [[Abandoned Warehouse]] in [[Locations/Dome/Town/Town|Town]].

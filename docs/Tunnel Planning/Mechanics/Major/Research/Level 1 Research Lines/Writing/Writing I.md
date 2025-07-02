@@ -1,0 +1,1 @@
+This first part unlocks the [[Journal]], which I technically don't have any gameplay-changing plans for, but I think it's a neat way to get it. Additionally, it's needed for later researches. It's one of the first researches you can do at the [[Study]].

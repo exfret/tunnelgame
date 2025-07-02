@@ -1,0 +1,1 @@
+A hilly rise to the mountains of [[Layer 4]]. I'm thinking as the gimmick that there can be some special events here, like [[Vampire Parties]], which happen every so often.

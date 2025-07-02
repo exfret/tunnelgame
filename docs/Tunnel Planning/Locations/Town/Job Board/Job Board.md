@@ -1,1 +1,0 @@
-Jobs can be done in multiple locations, so their description is located in [[Mechanics]].

@@ -1,0 +1,1 @@
+How sneaky you are. Initially, you can get this from some tips from [[Characters/Orphanage/Orphans/Jaz|Jaz]].

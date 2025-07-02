@@ -1,0 +1,1 @@
+A courtyard at the center of the [[Locations/Dome/Orphanage/Orphanage]]. There is a small graveyard, a pond that has never had fish in it for as long as [[Characters/Orphanage/Orphans/Lily|Lily]] remembers, and a tree. The grass is the color of dead grass. The courtyard is initially locked and needs a [[Orphanage Courtyard Key]] to get into.

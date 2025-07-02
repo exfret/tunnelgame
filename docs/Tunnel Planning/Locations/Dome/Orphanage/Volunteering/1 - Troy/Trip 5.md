@@ -1,0 +1,1 @@
+Another sweet interaction with [[Characters/Orphanage/Orphans/Troy|Troy]], maybe involving another orphan too that we could introduce, who you haven't met yet, probably [[Characters/Orphanage/Orphans/Rose]]. This unlocks more interactions with [[Characters/Orphanage/Orphans/Rose]].

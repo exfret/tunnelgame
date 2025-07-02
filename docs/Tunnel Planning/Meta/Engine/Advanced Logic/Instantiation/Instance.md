@@ -1,0 +1,1 @@
+An instance is essentially an instantion of a [[Block]] inside another, created with an [[Instruction]]. It then acts like a block in its own right, able to receive and send [[Message]]. A single instance can be given an [[Amount]].

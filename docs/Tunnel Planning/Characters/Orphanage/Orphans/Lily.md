@@ -1,0 +1,1 @@
+A red-haired orphan girl who is the main character and is controlled by the [[Player]]. Lily is strong-willed, fierce, and personable.

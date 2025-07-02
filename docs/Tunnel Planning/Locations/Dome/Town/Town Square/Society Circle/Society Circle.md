@@ -1,0 +1,1 @@
+An area to access societies you've unlocked. Most of them are secret and can only be unlocked in a special way.

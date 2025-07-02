@@ -1,0 +1,1 @@
+Commercial corner hosts some shopping, and also business talk with the [[Business Balbis]]. This is a more high-end part of town.

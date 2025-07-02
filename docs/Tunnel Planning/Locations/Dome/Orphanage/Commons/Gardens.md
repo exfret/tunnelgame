@@ -1,0 +1,1 @@
+The [[Locations/Dome/Orphanage/Orphanage]] hosts a small number of [[Mechanics/Auxiliary/Gardens|Gardens]] for the [[Player]] to get started on this mechanic, I'm thinking like 2 or 3. [[Ms. Bee]] is the primary maintainer of the gardens, just as [[Mabel]] maintains the [[Study]].

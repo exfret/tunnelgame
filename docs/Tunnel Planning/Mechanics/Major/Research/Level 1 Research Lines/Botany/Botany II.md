@@ -1,0 +1,1 @@
+Unlocked in the [[Lengthwidth Library]]. Used for recognizing certain plants in [[Layer 2]].

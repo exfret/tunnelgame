@@ -1,0 +1,1 @@
+There are initially six orphans at the [[Locations/Dome/Orphanage/Orphanage]], filling all available [[Rooms]] but one (the last one being potentially filled by [[Characters/Orphanage/Orphans/Troy|Troy]]). Throughout the story, some may come and go

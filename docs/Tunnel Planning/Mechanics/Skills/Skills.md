@@ -1,0 +1,1 @@
+This describes different stats that have skills levels that you can increase, some even having skill trees or other mechanics attached to them.

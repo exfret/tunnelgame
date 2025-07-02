@@ -1,0 +1,32 @@
+_content:
+  - choice: first
+    effects:
+      - Bye
+      - goto: .
+  - choice: second
+    effects:
+      - Bye
+      - goto: .
+  - choice: third
+    effects:
+      - Bye
+  - inject: injection
+    into_choices: first second
+    position: before
+  - inject: injection2
+    into_choices: second
+    position: after
+  - inject: injection3
+    into_choices: _all
+  - inject: injection4
+    into_choices:
+      except: first second
+injection:
+  - Hi
+injection2:
+  - afterward
+  - goto: ..
+injection3:
+  - First
+injection4:
+  - Something

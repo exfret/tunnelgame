@@ -1,0 +1,1 @@
+This folder holds words that have special meaning in the context of Tunnel, but aren't necessarily tied to a mechanic per se. It's more for being precise when I'm discussing things.

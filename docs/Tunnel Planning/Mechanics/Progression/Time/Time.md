@@ -1,0 +1,1 @@
+Passage of time is central in the story. It's tied to many mechanics.

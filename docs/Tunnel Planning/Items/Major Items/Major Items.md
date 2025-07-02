@@ -1,0 +1,1 @@
+Items that are used very frequently throughout the story, and thus are given special prominence here! Make sure to read through these if you want to get more understanding of the story.

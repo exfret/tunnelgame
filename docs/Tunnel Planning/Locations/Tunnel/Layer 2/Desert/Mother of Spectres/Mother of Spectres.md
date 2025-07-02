@@ -1,0 +1,1 @@
+There is a [[Flowers|Flower]] with translucent white petals here. It is extremely deadly to consume.

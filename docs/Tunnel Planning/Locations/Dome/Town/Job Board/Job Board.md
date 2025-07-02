@@ -1,0 +1,1 @@
+Most jobs can be done from multiple locations throughout the [[World/Places/Dome|Dome]], so their description is located in [[Jobs]] folder under [[Mechanics]]. This is the first place where you can access jobs, the initial one being work as a [[Lousy Farmhand]].

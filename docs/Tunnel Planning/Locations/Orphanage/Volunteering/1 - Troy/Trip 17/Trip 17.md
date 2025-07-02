@@ -1,1 +1,0 @@
-[[Karo]] is preparing for a big expedition, and [[Characters/Orphans/Troy|Troy]] is off in [[Market]] fetching supplies (maybe if you visit the market after this you can run into him!), so you don't see [[Characters/Orphans/Troy|Troy]] here at least. Some character development of [[Directory Wicky]] would be good here, seeing as to what events are about to transpire.

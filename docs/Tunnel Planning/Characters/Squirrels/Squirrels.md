@@ -1,0 +1,1 @@
+This documents named [[World/Creatures/Squirrel/Squirrel|Squirrels]].

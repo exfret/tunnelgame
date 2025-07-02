@@ -1,8 +1,0 @@
-_content:
-  - beginning
-  - choice: forward
-forward:
-  - forward
-  - choice: return
-    effects:
-      - back:

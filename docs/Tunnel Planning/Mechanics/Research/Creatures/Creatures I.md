@@ -1,1 +1,0 @@
-Allows you to understand [[World Features/Creatures/Squirrel|Squirrels]].

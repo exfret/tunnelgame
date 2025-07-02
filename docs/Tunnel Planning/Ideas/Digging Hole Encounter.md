@@ -1,0 +1,1 @@
+An [[Encounters|Encounter]] where you can dig a hole (requires more and more [[Shovel]] level each time), similar to the mountain [[Encounters|Encounter]] in the demo where you can pick up where you left off and dig more each time.

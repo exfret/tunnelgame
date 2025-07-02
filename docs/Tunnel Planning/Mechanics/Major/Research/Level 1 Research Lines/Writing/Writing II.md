@@ -1,0 +1,1 @@
+Mostly unlocks new researches and makes some other character comment on your writing being good.

@@ -1,0 +1,1 @@
+This line of research is required for building more intricate structures, especially in the [[Treehouse]] [[Encounters|Encounter]].

@@ -1,6 +1,0 @@
----
-story:
-  _header:
-    - print: This is a header.
-  _content:
-    - print: The story started.

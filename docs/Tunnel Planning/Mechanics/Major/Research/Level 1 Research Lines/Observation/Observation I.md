@@ -1,0 +1,1 @@
+The first level, not sure exactly what it should unlock. Maybe just warn you of when there way a "skill check", but not necessarily mroe info.

@@ -31,5 +31,5 @@ class Config:
         self.grammar_dir = self.local_dir / "engine" / "grammar.yaml"
 
         self.max_num_steps = 20000
-        self.max_macro_depth = 100
+        self.max_macro_depth = 10
         self.choices_between_autosaves = 20

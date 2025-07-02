@@ -1,0 +1,1 @@
+This [[Keys|Key]] is usually obtained by buying it from [[Characters/Orphanage/Orphans/Jaz|Jaz]], who stole it. Though, I want to add another way to get it as well. This unlocks the ability to go to the [[Courtyard]] which is locked at the start.

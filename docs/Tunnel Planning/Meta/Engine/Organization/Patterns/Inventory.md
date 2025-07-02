@@ -1,0 +1,1 @@
+The inventory is implemented as a [[Block]] within the [[Entourage]]. There is a special [[Instruction]] that opens [[Instance|Instances]] stored here to be used for [[Shop|Shops]].

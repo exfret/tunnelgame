@@ -1,0 +1,3 @@
+Required for getting into [[Layer 2]]. You can get this directly from [[Characters/Orphanage/Orphans/George|George]], unlike later [[Passes]], where you have to visit the [[Locations/Dome/Town/Town|Town's]] town hall, [[Helix Hall]], (or even more central government areas, like maybe in the [[City]]) to get them.
+
+This should require a certain amount of [[Experience]], as well as certain items from the [[World/Places/Tunnel|Tunnel]] that can only be gotten by doing different [[Encounters]] multiple times.

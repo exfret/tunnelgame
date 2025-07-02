@@ -1,0 +1,1 @@
+Allows you to interact with creatures in the [[World/Places/Tunnel|Tunnel]], like [[World/Creatures/Squirrel/Squirrel|Squirrels]] in more complex ways.

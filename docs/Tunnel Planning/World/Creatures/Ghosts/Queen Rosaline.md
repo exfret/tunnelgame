@@ -1,0 +1,1 @@
+The Queen of the [[Ghosts]]. Long dead; the [[Ghosts]] are trying to revive her with the [[Ghostly Orbs]].

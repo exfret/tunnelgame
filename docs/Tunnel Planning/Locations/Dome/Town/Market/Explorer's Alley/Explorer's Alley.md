@@ -1,0 +1,1 @@
+This is a place for shops involving exploration. A lot of places here upgrade your [[Tools]] or offer [[Items/Limited/Equipment/Equipment|Equipment]]. Some of them only accept [[Items/Currencies/Blue Coin|Blue Coins]], or at least accept them as alternative payment, due to those being a standard [[Currencies|Currency]] among explorers.

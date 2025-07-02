@@ -1,0 +1,1 @@
+Helix Hall is the Town Hall. It's where you go for your [[Yellow Pass]], and also will host a place from which you embark to other towns, or even later, the [[City]].

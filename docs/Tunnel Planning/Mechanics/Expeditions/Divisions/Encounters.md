@@ -1,0 +1,1 @@
+The basic unit of [[Expeditions]]. Each time you explore a [[Regions|Region]], you get a random encounter from the [[Bucket]] for that [[Regions|Region]]. As you come across an encounter more, you can discover more things about it, or even interact with it in ways that influence other encounters.

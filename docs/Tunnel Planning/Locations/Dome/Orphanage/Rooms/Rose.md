@@ -1,0 +1,1 @@
+[[Characters/Orphanage/Orphans/Rose|Rose's]] room. Maybe Rose doesn't answer the door until you see her in [[Mechanics/Progression/Volunteering|Volunteering]]?

@@ -1,3 +1,1 @@
-Description: Has plenty of flowers ripe for gathering.
-
-The plains have a lot of "gather" encounters, where the player receives flowers or some other sort of item.
+Has plenty of [[Flowers]] ripe for gathering. The plains have a lot of "gather" [[Encounters]], where the [[Characters/Orphanage/Orphans/Lily|Lily]] receives flowers or some other sort of item.

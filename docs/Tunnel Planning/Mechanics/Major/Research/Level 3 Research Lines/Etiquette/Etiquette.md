@@ -1,0 +1,1 @@
+Allows you to interact with higher-end society in more sophisticated ways. Maybe the first one is about fashion and allows you to wear better [[Hats]], or better [[Clothes]], or something.

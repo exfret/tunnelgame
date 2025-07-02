@@ -1,0 +1,189 @@
+# TODO: How to deal with instances inside instances? For example, coin in box in room?
+#    I think I should treat instances as first-class, they're like blocks that think they're real blocks, but really just have a pointer to the real block for their code and behavior, plus extra state info
+#    The actual blocks are like templates. Should we even need to initialize the story skeleton, like the locations?.. Maybe, I'm not sure.
+
+# num
+# |- stat
+# |  |- item
+
+# InstanceAddress:Block.InstanceVar
+# example... Lily:Lemen._amount
+_run:
+  # Now, if there is a unique block matching the first tag of a local address, it goes there no matter where it is
+  - goto: FirstTrainingEncounter
+#Logic:
+#  IncTimeOfDay:
+#    - temp: daytime_progression = [Morning, Afternoon, Evening, Night]
+#    # What is the instance here?
+#    # I'm unsure how to even phrase this...
+#    - set: World.time_of_day = next_cyclic(daytime_progression, World.time_of_day)
+World:
+  _properties:
+    - "time : Day"
+    - "time_of_day : TimeOfDay"
+  # The extra indentation here is fine because it would be in other files in the actual game anyways
+  Dome:
+    Town:
+      Orphanage:
+        _run:
+          - goto: Foyer
+        Foyer:
+          _run:
+            - image: foyer.png
+            - choice: Rooms "Go to the bedrooms"
+            - choice: Common "Go to the common hallway"
+        Rooms:
+          _run:
+            - choice: Foyer "Back to the foyer"
+            - choice: Lily "Visit my room"
+          Lily:
+            _properties:
+              - "time_bed_last_made : Day"
+            _run:
+              # Since temps can involve undefined vars, there is a fallback of default value for the type given (in this case, 0)
+              # That's why the type must be given
+              - temp: "dur_bed_unmade = time - time_bed_last_made : Day"
+              - if: dur_bed_unmade <= 5
+                then:
+                  - Your bed is pristine.
+              # elseif takes into account the result of the immediately preceding if statement (must come after an if or elseif, checked during parsetime)
+              - elseif: dur_bed_unmade <= 20
+                then:
+                  - Your bed is slightly messy.
+              # else's now work like elseif's in that they just come after an if or elseif
+              - else:
+                  - Your bed is very messy.
+              - if: dur_be_unmade > 5
+                then:
+                  - choice: make "Make your bed"
+                    result:
+                      - modify: set time_bed_last_made to time
+                      - goto: .
+              # Uses _default's values for this if available
+              # Think of :Vigor as "expanding" into an amount like "3 Vigor"
+              - if: :Vigor < :MaxVigor
+                then:
+                  - choice: rest "Take a week of rest"
+                    show: cost {ceil(:Experience / 10)} :Experience
+          George:
+            _run:
+              - if: :George.alive
+                then:
+                  # Put only works on entities, and treats the entity statically (that is, all properties/state come with it)
+                  # With entities, the default is the unique entity, so :George just takes the unique George
+                  - modify: put :George in .
+              - send: greet
+    Common:
+      _run:
+        - choice: foyer "Back to the foyer"
+  Tunnel:
+    _run:
+      - if: :PassLevel == TrainingPass
+        then: Training
+    Training:
+      _run:
+        - modify: increment :NumTrainingExpeditions
+        - switch: :NumTrainingExpeditions
+          "2":
+            - "{George} goes on another {Expedition} into the {Plains}."
+            - goto: ../Layer1/Plains
+      FirstTrainingEncounter:
+        _run:
+          # Increment NumTrainingExpeditions to account for this one
+          - modify: increment :NumTrainingExpeditions
+          - "{George} shows you a large patch of {Lemen|lemens}."
+          # Add 5 lemens to last defaulted block
+          - modify: add 5 :Lemen
+          - goto: Orphanage
+    Layer1:
+      Plains:
+        _run:
+          - random: Grave, Lemen, Rosalia, Starblossom
+            bucket:
+        Grave:
+          _content:
+            - goto: Grave
+          Grave:
+            - You come across the grave of a fallen explorer. {George} leaves a {Rosalia|rosalia} to pay respects.
+            - choice: respect "Pay your respects as well"
+              show: cost 1 :Rosalia
+              result:
+                - sub: /Logic/IncTimeOfDay
+Person:
+  Orphan:
+    # _entity is a unique thing (does not support amounts, only "where it is"
+    # This is unambiguous despite the room Lily because (except for addressing I guess), terminal/typed blocks are given priority
+    Lily(_entity):
+      # _prestart so that it gets done before things like PassLevel that check for main character
+      _prestart:
+        # Default sets default places for items to be moved in and out of, and also inits skills/other things
+        # Inventory sets default spot, main_character inits ALL stats
+        - default: _inventory, _main_character
+    George(_entity):
+      _properties:
+        - "alive = True : _bool"
+      _listeners:
+        greet:
+          # _self is for the instance's position
+          - if: _self:_curr_block.within(Orphanage)
+            then:
+              - choice: train "Go on a training expedition" --> Tunnel
+Item:
+  Gathered:
+    Flower:
+      # Items support adding/removing, automatically get charged/etc. from inventories/last defaulted block, no negative amounts?
+      # Maybe they can also support event listening, but only by doing each instruction many times rather than executing the whole thing many times?
+      # Note: this block is still named lemen, the (item) is just extra info in a concise format
+      # Items inherit from stat, think of this as the stat that is the "amount" of the item
+      Lemen(_item):
+Mechanic:
+  Major:
+    Vigor:
+      # Blocks can inherit from types, for example, this says vigor is a stat, which means it supports arithmetic operations, defaults to 0, maybe some other things
+      # Stats support amounts, even doubles, superclass of item, default to 0 amounts
+      # Like items, they automatically get added to last defaulted block
+      Vigor(_stat):
+        # init is called for stats on main_character
+        # This is more like a "post-init", it's for setting default values
+        _init:
+          - modify: set :Vigor to 10
+      MaxVigor(_stat):
+        _init:
+          - modify: set :MaxVigor to 10
+      VigorPoints(_stat):
+  Progression:
+    Experience:
+      Experience(_stat):
+    Pass:
+      # _union means it's one of some other things, which are themselves blocks
+      PassLevel(_union):
+        _cases: TrainingPass, GreenPass, BluePass, YellowPass, PioneerPass, EmeraldPass, CrimsonPass, RosePass
+        # This needs to be _start rather than _init since
+        _start:
+          # Default's a specific var to be from Lily
+          - default: _main_character
+          # Due to last instruction, this impacts Lily's pass
+          - modify: set :PassLevel to TrainingPass
+      TrainingPass:
+      GreenPass:
+      BluePass:
+      YellowPass:
+      PioneerPass:
+      EmeraldPass:
+      CrimsonPass:
+      RosePass:
+    Time:
+      # Numbers don't support amounts, as they represent things like time that aren't "had"; instead, they must use named properties
+      Day(_numerical):
+      TimeOfDay:
+        TimeOfDay(_union):
+          _cases: Morning, Afternoon, Evening, Night
+          _start:
+            - default: /World
+        Morning:
+        Afternoon:
+        Evening:
+        Night:
+Story:
+  Training:
+    NumTrainingExpeditions(_stat):

@@ -1,0 +1,1 @@
+I'm not sure what should go here yet, but you need the [[Ancient Shack Key]] to get in.

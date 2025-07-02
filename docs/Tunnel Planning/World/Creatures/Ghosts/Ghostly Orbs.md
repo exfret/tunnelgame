@@ -1,0 +1,1 @@
+There are some number of ghostly orbs, maybe like 6 (the number 7 is overrated), and [[Ghosts]] are trying to get them all in order to bring back [[Queen Rosaline]]. If you get them all, maybe you can bring back a dead character yourself? I only want the ability to bring back one though in the whole story.

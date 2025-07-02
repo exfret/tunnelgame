@@ -1,0 +1,1 @@
+Gives you immediate bonuses for researching this. An extra reward for spec-ing into quick researching.

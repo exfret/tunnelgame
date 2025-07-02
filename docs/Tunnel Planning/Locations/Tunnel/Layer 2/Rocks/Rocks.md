@@ -1,0 +1,1 @@
+A bunch of craggy rocks. Maybe make different rocks or sediments gatherable here?

@@ -1,0 +1,1 @@
+A shop is a [[Place]] whose purpose is primarily to provide an exchange of [[Instance|Instances]] in the 

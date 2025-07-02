@@ -1,1 +1,1 @@
-Layer 1 is tame, but well-looted, so it doesn't contain as many of the powerful [[Artifacts]] as the later layers. It has a lot of useful plants, particularly flowers like [[Items/Flowers/Lemen|Lemen]]s.
+Layer 1 is tame, but well-looted, so it doesn't contain as many of the powerful [[Mechanics/Major/Artifacts/Artifacts]] as the later [[World/Places/Layers|Layers]]. It has a lot of useful plants, particularly [[Flowers]] like [[Items/Gathered/Flowers/Lemen|Lemens]].

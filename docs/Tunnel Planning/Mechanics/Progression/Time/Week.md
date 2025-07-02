@@ -1,0 +1,1 @@
+A week is the most time that a single action can take. Notably, [[Long Rest|Long Rests]] take one week to complete.

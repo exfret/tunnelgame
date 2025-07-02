@@ -15,7 +15,7 @@ from tests.test_utility import utility_with_multiblock_game
 
 
 @pytest.fixture
-def gameparser_with_hardcoded_multiblock_game():
+def gameparser_with_hardcoded_multiblock_game(gamestate_with_multiblock_game, config_for_view_for_testing, addressing_with_multiblock_game, utility_with_multiblock_game):
     """
     GameParser object with gamestate determined by hardcoded values in gamestate_with_multiblock_game.
     """

@@ -1,0 +1,1 @@
+The market booths are not open in the winter [[Seasons|Season]], and their wares change out frequently (maybe every [[Month]] or even every [[Week]]). Once you've bought the wares for that time period, you can't buy anything more. If you miss one of the offerings, then you have to wait a year to see it again.

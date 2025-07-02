@@ -1,0 +1,1 @@
+The maximum amount of [[Mechanics/Major/Vigor/Vigor|Vigor]] you can have at a time.

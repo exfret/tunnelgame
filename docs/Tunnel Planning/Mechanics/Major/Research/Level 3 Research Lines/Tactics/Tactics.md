@@ -1,0 +1,1 @@
+Unlocks new tactics for controlling armies, such as with your [[Squirrel Followers]].

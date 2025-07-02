@@ -1,0 +1,28 @@
+_run:
+  # init: [Template from block address] in [Local instance address] as [Member name]
+  - init: World in _self as WorldInstance
+  # Enter the instance as if it were the story
+  - enter: /:WorldInstance
+World:
+  _init:
+    - init: Entourage in _self as EntourageInstance
+  _run:
+    - goto: PreFirstTraining
+  Dome:
+    Town:
+      Orphanage:
+        PreFirstTraining:
+          - "{George} flips a {Coin|coin} while waiting for you to finish packing for your first {Tunnel} {Expedition|expedition}."
+          - goto: FirstTraining
+  Tunnel:
+    Layer1:
+      FirstTraining:
+        - "{George} shows you a massive patch of {Lemen|lemens}."
+        # How to access Lily now? She should be inside World...
+        - set: :EntourageInstance:LilyInstance:InventoryInstance:LemenItemStackInstance += 1
+Entourage:
+  _init:
+    - init: Lily in _self as LilyInstance
+Lily:
+LemenItemStack:
+# Maybe instances have two-way relationships

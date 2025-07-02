@@ -1,0 +1,1 @@
+Lists major mechanics not directly tied to [[Progression]], but still occasionally required to progress.

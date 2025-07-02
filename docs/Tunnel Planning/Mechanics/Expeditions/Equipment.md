@@ -1,0 +1,1 @@
+Going on [[Expeditions]] requires [[Items/Major Items/Equipment|Equipment]], which is unlocked after a certain number of [[Next Expeditions|Training Expeditions]].

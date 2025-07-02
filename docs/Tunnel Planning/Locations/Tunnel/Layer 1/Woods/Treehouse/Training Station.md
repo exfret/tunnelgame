@@ -1,0 +1,1 @@
+At the training station, you can increased some [[Mechanics/Major/Fighting/Fighting|Fighting]] skills.

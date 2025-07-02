@@ -1,0 +1,1 @@
+Here, tea can be bought, which is a fluid and thus must be kept in tea boxes. Or something like that. I haven't figured out exactly what I want to do with it. I'm also not sure what tea should be used for, but I'd like it to be for something where the limited capacity between trips back to a tea shop creates an interesting dynamic. The owner of the tea shop is named Leif.

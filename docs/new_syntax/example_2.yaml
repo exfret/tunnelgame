@@ -1,7 +1,7 @@
 # There should be _on_enter and _on_exit events, also _on_choice
 # The _player (maybe not declared explicitly) is the player/where they are in the story, to attach characters and have them follow, instances of them are put in the _player
 # No wait, we could just do a custom container with _on_goto events
-player:
+entourage:
   # Indicate to the parser that this block can move around
   # Implement this in a more diff-y manner
   _meta: movable
@@ -31,18 +31,57 @@ _run:
   - goto: first_training
 world:
   orphanage:
+    # This alias is important to be able to reference this as just "orphanage" rather than /world/orphanage
+    _alias: orphanage
     _description: Where you live.
     _run:
       - You enter the @{orphanage}.
     rooms:
       _run:
-        - choice: george "To George's room"
+        - choice: george "To @{george|George's} room"
+        - choice: lily "To my room"
       george:
         - if: "(not george.alive) then (The room seems oddly vancant.; goto: ..)"
         # Lifetime default is block; this just says that George is in this scene
         - put: george in .
         # Send a "greet" message to this block and all its descendants
         - send: greet to ./**
+  town:
+    # Maybe the existence of a locale at least means to do the default pluralization and such, whereas otherwise it doesn't
+    _locale: town
+    _description: The town where the @{orphanage} is located.
+    _start:
+      # Tests if any tag is in the path is "dont_inject_leave_choices"
+      # This would be for things like taking the city hall test where we don't want them to leave in the middle of it
+      - into: '**.path.filter("not tag in {"dont_inject_leave_choices"}")'
+        inject:
+          _prerun:
+            - choice: home "Go back home" --> orphanage
+            # Print the innermost area/building that we're in
+            # For a type Block, thing there is a .path attribute returning BlockPath, which is a descending list of blocks (not necessarily contiguous)
+            # This and other things from "BlockCollection" (maybe BlockPath inherits from an intermediate BlockList) have a .filter, which takes a filter or string, the string automatically turned into a filter
+            # If a string, it's passed to create_block_filter(arg), and returns another BlockCollection/BlockList/BlockPath, then BlockPath (but not the others), specifically has an innermost attribute returning the innermost block
+            - choice: 'back "Leave @{_curr_block.path.filter("tag in {"area", "building"}").innermost}" --> ..'
+    _run:
+      # I'm leaning toward no "greeting" text; the picture accomplishes that
+      #- Where in town would you like to go?
+      - choice: market
+    market:
+      _locale: the market
+      _tags: area
+      _run:
+        # Maybe no more text that's just always there
+        #- Where in the market would you like to go?
+        - choice: general "Go to @{general_store}"
+      general_store:
+        _locale: the general store
+        _description: The store for general stuff and things.
+        _tags: building
+        _run:
+          # Just now, I've decided effects should be for variable changes, and what used to be effects as outcome
+          - choice: equipment "Buy some equipment"
+            show: costs (9 coin), requires (mechanics/expeditions/equipment), puts (10 equipment)
+            outcome: .
   tunnel:
     _description: Just an everyday Tunnel.
     _on_enter:
@@ -60,8 +99,9 @@ world:
         _run:
           - if: _visits == 1
             then:
-              - "@{george} shows you a large patch of @{lemen|plural}."
+              - "@{george|George} shows you a large patch of @{lemen|lemens}."
               # If where to put things is not specified, it's in whatever block was last opened (and not closed)
+              # Put always does objects (objects are instances of blocks)
               - put: 5 lemen
               - goto:
           # Ability to do conditions like this, testing if this block has any George instances
@@ -86,9 +126,11 @@ people:
           lifetime: block
       _listeners:
         greet:
-          - George smiles back at you. "How can I help you?"
+          # I'm against greetings now, but this is just for demonstration anyways
+          - '@{George} smiles back at you. "How can I help you?"'
           # If we're in the orphanage, offer choice for tunnel exploration
           # Experiment with using the tag for the condition
+          # Note: This specific logic would allow it from volunteering, since that's nested in orphanage...
           - if: orphanage in _instance_location.ancestors
             then:
               # Possible --> syntax for effects

@@ -1,1 +1,0 @@
-Unlocks a new area in [[Layer 1]]: the [[Valley]].

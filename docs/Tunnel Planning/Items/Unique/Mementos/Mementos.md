@@ -1,0 +1,1 @@
+Permanent unique items that you get from important story events. These are mostly sentimental and for story purposes.

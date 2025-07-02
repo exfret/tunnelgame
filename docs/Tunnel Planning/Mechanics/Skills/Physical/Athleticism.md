@@ -1,0 +1,1 @@
+Represents your athletic skill, required for some choices.

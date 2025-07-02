@@ -1,1 +1,0 @@
-This time [[Characters/Orphans/Troy|Troy]] isn't there to switch it up. But maybe you do get to talk to someone else who hasn't been as developed yet.

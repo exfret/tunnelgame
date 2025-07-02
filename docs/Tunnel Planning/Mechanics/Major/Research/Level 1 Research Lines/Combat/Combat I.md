@@ -1,0 +1,1 @@
+Unlike other researches, this is unlocked at the [[Study]] simply by reaching the appropriate age for [[Mechanics/Major/Fighting/Fighting|Fighting]].

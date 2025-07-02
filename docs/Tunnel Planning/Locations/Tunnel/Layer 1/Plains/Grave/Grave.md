@@ -1,5 +1,13 @@
 This is a [[Next Expeditions|Training Encounter]].
 
-If you're with [[Characters/Orphans/George|George]], he leaves a [[Items/Flowers/Rosalia|Rosalia]] at the grave, which you can pick up. You can also leave your own [[Items/Flowers/Rosalia|Rosalia]] at the grave at any time.
+You come across the grave of a fallen explorer. If you're with [[Characters/Orphanage/Orphans/George|George]], he leaves a [[Items/Gathered/Flowers/Rosalia|Rosalia]] at the grave, which you can pick up (which is disrespectful, but hey you get a single [[Items/Gathered/Flowers/Rosalia|Rosalia]]). You can also leave your own [[Items/Gathered/Flowers/Rosalia|Rosalia]] at the grave, which improves future relations with [[Ghosts]]. If not with [[Characters/Orphanage/Orphans/George|George]], there is also an option to destroy the grave, which brings some sort of consequences. You can also mourn at the grave if not with him as well.
 
-After the grave you enter a [[Field]].
+After the grave you enter a [[Field]]. (This is a Horizontal/Linear [[Encounters|Encounter]] at high level, with the individual stages having visit-based vertical complexity, see [[Vertical and Horizontal Depth]]).
+
+# Next times
+
+The second time you get this encounter, you come across the grave of the [[Ghosts|Ghost]] of the explorer in the last grave. If with [[Characters/Orphanage/Orphans/George|George]], he explains graves of [[Ghosts]] don't need [[Items/Gathered/Flowers/Rosalia|Rosalia]] as long as you put one on the original explorer's grave. If you ask him how a [[Ghosts|Ghost]] can die, he just gives you a quizzical look as if it's obvious and moves on. If you ask him if the [[Ghosts|Ghost]] has its own [[Ghosts|Ghost]], he draws an analogy to books: when a book is burned, it loses its physical form, but still lives on in the minds of those who've read it. But once everyone has forgotten its contents, that's when it's truly gone. (See [[Ghosts of Ghosts]]).
+
+Then, the third time, maybe there's a [[World/Creatures/Squirrel/Squirrel|Squirrel]] cemetery, but [[Characters/Orphanage/Orphans/George|George]] doesn't recognize it as such and says they're just [[World/Creatures/Squirrel/Squirrel|Squirrels]] if you point them out (that is, if you're even still with [[Characters/Orphanage/Orphans/George|George]]).
+
+I also want a fourth time thing so that this is off-sync with the things that happen in the [[Field]]. Note that [[Characters/Orphanage/Orphans/George|George]] won't be with you for that because with the [[Bucket]] system, and the fact that you can only visit the [[Plains]] 10 times during training, you can only come across a single encounter in the [[Plains]] 3 times before you get the [[Green Pass]].

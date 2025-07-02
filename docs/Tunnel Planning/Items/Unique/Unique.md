@@ -1,0 +1,1 @@
+[[Items]] which are technically part of your inventory, but don't act like normal [[Items]] in that you can only have one at a time. For example, [[Mementos]] are permanent one-time additions to show important events in the story, and [[Tools|Tool]] amounts represent the level of a single tool, not the amount of that tool you have.

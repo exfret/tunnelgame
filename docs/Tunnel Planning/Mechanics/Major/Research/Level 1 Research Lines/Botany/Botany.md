@@ -1,0 +1,1 @@
+Needed for recognizing some plants and certain [[Mechanics/Auxiliary/Gardens|Gardening]] skills.

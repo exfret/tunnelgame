@@ -1,0 +1,1 @@
+The commons hallway of the [[Locations/Dome/Orphanage/Orphanage]]. Along this hall are most of the orphanage's special-purpose rooms, like the [[Study]] and [[Locations/Dome/Orphanage/Commons/Gardens|Gardens]].

@@ -1,0 +1,1 @@
+Some [[Block|Blocks]] are meant to have only one reachable [[Instance]] at a time, or at least appear this way to the [[Player]].

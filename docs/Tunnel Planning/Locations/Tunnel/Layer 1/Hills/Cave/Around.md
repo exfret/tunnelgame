@@ -6,4 +6,4 @@ Later Visits: You randomly get one of the following...
 * (25% chance) Find [[Alice]] doing patrols
 * (25% chance) You find some tracks for [[Tracking]]
 
-I'm thinking these should be bucketed, with a pool of size 4. Alice does not appear (and is replaced by tracking) if you're with [[Characters/Orphans/George|George]].
+I'm thinking these should be [[Bucket|Bucketed]], with a pool of size 4. [[Alice]]/[[Tracking]] do not appear (and is replaced by [[Petunal Blossoms|Petunal Blossom]]) if you're with [[Characters/Orphanage/Orphans/George|George]].

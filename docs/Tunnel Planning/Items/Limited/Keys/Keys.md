@@ -1,0 +1,1 @@
+Keys are keys. They unlock things. What else would a key do?

@@ -1,7 +1,30 @@
+2025/06/29
+- Un-broke things a little bit
+- Added help panel
+- Added help strings to individual commands
+- Various small todo/todo list cleanup
+- Removed extraneous instructions and commands
+- Worked on version 0.3 of documentation
+
+2025/06/27
+- Fixed saving/loading
+- Modularized gameloop functionality
+- Cleanup of some old gameloop functionality, like exec's
+
+2025/06/26
+- Worked on new object-oriented syntax more
+
+2025/06/24
+- Worked on object-oriented syntax, devlog about getting rid of variables
+
+2025/06/22
+- Working on story docs/spec, got them into a shareable state, streamed
+
 2025/06/20
 - Fixing a bunch of things from optimizations, streaming
 - Fixed text disappearing on reloads
 - Fixed broken view commands
+- A lot more story planning, preparing for others to be able to see
 
 2025/06/19
 - Story planning

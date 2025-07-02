@@ -1,0 +1,1 @@
+A strict woman in her 30's, often found in the [[Study]] and known for her love of [[Items/Gathered/Flowers/Rosalia|Rosalia]] tea. She makes some of the best tea in the entire [[World/Places/Dome|Dome]].

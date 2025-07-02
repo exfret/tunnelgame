@@ -1,0 +1,1 @@
+Essentially "home base" (at least for the first major part of the story, still deciding about whether they're forced to move out later). Whenever you return here, you are sent to the [[Foyer]].

@@ -3,7 +3,6 @@ from flask_socketio import join_room, emit
 import sys
 
 
-import copy
 import os
 import pickle
 import yaml

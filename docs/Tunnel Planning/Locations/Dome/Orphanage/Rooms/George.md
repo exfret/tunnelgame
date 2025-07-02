@@ -1,0 +1,1 @@
+This is [[Characters/Orphanage/Orphans/George|George's]] room. This is where you embark on [[Expeditions]] when you are still [[Training]].

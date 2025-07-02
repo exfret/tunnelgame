@@ -1,0 +1,1 @@
+The place where all [[Coin|Coins]] are mined for usage in the [[World/Places/Dome]]

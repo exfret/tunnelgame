@@ -1,0 +1,1 @@
+[[Items]] used for [[Mechanics/Major/Fighting/Fighting|Fighting]].

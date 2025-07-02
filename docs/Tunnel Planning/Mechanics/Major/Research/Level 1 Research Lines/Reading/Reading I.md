@@ -1,0 +1,1 @@
+This is planned to be one of the initial books at the [[Study]], where it unlocks your next batch of researches. This is expected to happen before the [[Locations/Dome/Orphanage/Orphanage]] gets more books as an [[Unlocks|Unlock]] from [[Experience]], but technically could happen afterward if the [[Player]] is neglecting [[Research]].

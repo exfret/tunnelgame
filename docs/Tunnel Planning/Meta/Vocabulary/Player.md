@@ -1,0 +1,1 @@
+The player is the person behind the screen playing the story, which contrasts to [[Characters/Orphanage/Orphans/Lily|Lily]], who is the character the player plays as. The player is referenced with regards to user experience, such as UI, but story flow or stats checks involve [[Characters/Orphanage/Orphans/Lily|Lily]].

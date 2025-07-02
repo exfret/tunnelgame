@@ -1,0 +1,1 @@
+From here, you can control personally loyal [[Squirrel Followers]] to attack certain places. Most places can't be attacked, but I can code a few in here.

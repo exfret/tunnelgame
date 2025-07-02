@@ -1,0 +1,1 @@
+Unlocks a new [[Regions|Region]] in [[Layer 1]]: the [[Valley]]. This is unlocked for the [[Study]] after you do [[Reading I]] and after more books have arrived at the [[Study]] during that [[Unlocks|Unlock]].

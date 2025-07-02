@@ -1,0 +1,1 @@
+Requires the [[Square Hat]] to visit. Contains a lot of special locations in [[Locations/Dome/Town/Town|Town]], especially ones that are less [[Shop]] focused as with the [[Market]].

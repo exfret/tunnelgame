@@ -1,0 +1,1 @@
+The senior staff to [[Mabel]], and just as strict. Often found wandering the [[Commons]] hallways, monitoring the [[Foyer]], or discussing administrative matters in the [[Admin]] area with [[Directory Wicky]].

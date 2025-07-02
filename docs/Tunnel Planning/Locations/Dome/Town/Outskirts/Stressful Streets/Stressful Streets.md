@@ -1,0 +1,1 @@
+This is the "bad" part of [[Locations/Dome/Town/Town|Town]], although in order to fit with the story's whimsical nature, nothing is actually dangerous here. A lot of the "crime" is silly stuff like jaywalking, but talked about like it's serious business.

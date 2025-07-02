@@ -1,0 +1,1 @@
+The town [[Blacksmith]]. Brother of [[Mark]], which he mentions at some points in the story.

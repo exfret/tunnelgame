@@ -1,0 +1,1 @@
+[[Locations/Tunnel/Tunnel|Tunnel]] [[Mechanics/Expeditions/Divisions/Layers|Layers]] are split into [[Regions]], each with a unique vibe from the [[Encounters]] they have in their [[Bucket]]. For example, one region may have more [[Shop|Shops]] and another more puzzles.

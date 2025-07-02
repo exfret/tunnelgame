@@ -1,0 +1,1 @@
+The bookmark is a part of [[Gamestate]] that represents "where" in the [[Game]] we are. In these documents, we may use it to refer to other miscellaneous parts of [[Gamestate]] that track "where we are", like variables for our last address between [[Choice|Choices]], since the specifics aren't important for these documents. Just think of this as our location within the [[Game]].

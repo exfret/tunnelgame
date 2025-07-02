@@ -1,0 +1,1 @@
+Unlocks [[Tracking]]. Can be researched at the [[Study]], but requires [[Reading I]] and for you to have gotten the [[Unlocks|Unlock]] from [[Experience]] for more books to have arrived (so it's a later [[Research]] there).

@@ -1,0 +1,1 @@
+There are [[Events]] that happen at fixed times, many occurring regularly. This is to give some feel to the world, and a sense of the passage of [[Time]] other than just it being an abstract variable.

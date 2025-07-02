@@ -1,0 +1,1 @@
+This is an area for more general shops.

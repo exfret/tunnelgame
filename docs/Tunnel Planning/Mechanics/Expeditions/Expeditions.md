@@ -1,0 +1,1 @@
+The central game loop of the story involves going on expeditions into the [[World/Places/Tunnel|Tunnel]], coming back, and then going on more expeditions.

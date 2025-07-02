@@ -9,7 +9,7 @@ from tests.test_addressing import addressing_with_multiblock_game
 
 
 @pytest.fixture
-def utility_with_multiblock_game():
+def utility_with_multiblock_game(gamestate_with_multiblock_game, addressing_with_multiblock_game):
     """
     Takes a multiblock game and makes a simple Utility object from it.
     """

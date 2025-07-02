@@ -1,0 +1,1 @@
+Specialized equipment generally used for exploring the [[World/Places/Tunnel|Tunnel]]. Note that there is also [[Items/Major Items/Equipment|Equipment]], which represents all the basic necessities you need for each [[Expeditions|Expedition]].

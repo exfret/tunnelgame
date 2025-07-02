@@ -1,0 +1,1 @@
+A relatively dark, but not completely dark last layer. I'm not sure if having this one adds much; maybe remove?

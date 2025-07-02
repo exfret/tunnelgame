@@ -1,0 +1,3 @@
+This is an initial area where buildings get unlocked as you get more [[Experience]]. Some of these are [[Shop]]-like, but less so than in the [[Market]] as they may have special conditions about how you exchange goods, and generally come with more options than just buying/selling.
+
+Most areas here require purchase of a [[Keys|Key]] from the [[Key Shop]]. I think the [[Gym]] and maybe the [[Tea Shop]] can start unlocked, but the rest should require a [[Keys|Key]].

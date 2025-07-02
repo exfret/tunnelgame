@@ -1,0 +1,1 @@
+[[Encounters]] are bucketed, so that you receive a set number of each, just in a random order (as if they're being pulled from a bucket without being put back). When the bucket is empty, the [[Encounters]] are added back into the bucket, ensuring that randomness doesn't screw you over too much.

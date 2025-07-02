@@ -1,0 +1,1 @@
+Amy is a [[Vampire]]. She appears at a few of the wedding [[Events]] in [[Locations/Dome/Town/Town|Town]].

@@ -1,0 +1,1 @@
+A [[Keys|Key]] to the [[Shack|Ancient Shack]] in the [[Scrolls]] [[Encounters|Encounter]] in [[Layer 1]].

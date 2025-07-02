@@ -1,0 +1,1 @@
+A sentient snappy mushroom you can find throughout the layers. You get some sort of unlock for finding all his locations.

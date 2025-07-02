@@ -11,7 +11,7 @@ from tests.test_utility import utility_with_multiblock_game
 
 
 @pytest.fixture
-def view_with_multiblock_game():
+def view_with_multiblock_game(gamestate_with_multiblock_game, config_for_view_for_testing, addressing_with_multiblock_game, utility_with_multiblock_game):
     """
     A ViewForTesting object based on multiblock gameobject.
     """

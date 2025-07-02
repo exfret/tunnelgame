@@ -1,3 +1,3 @@
 ID: coin
 
-The primary currency of the [[Lore/Dome|Dome]].
+The primary currency of the [[World/Places/Dome|Dome]].

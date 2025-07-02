@@ -1,0 +1,1 @@
+The [[World/Places/Tunnel|Tunnel]] is divided into [[World/Places/Layers|Layers]], which you can traverse through in your [[Expeditions]]. See [[World/Places/Layers|Layers]] for the main explanation.

@@ -17,17 +17,32 @@ feedback_msg = {
     "completion_not_supported": "This story doesn't support completion percentage.",
     "autocomplete_no_possibilities": "No possibilities for autocompleting invalid command.",
     "autocomplete_multiple_possibilities": "Multiple possibilities for autocompleting invalid command.",
+    "confirm_nothing_to_confirm": "There is nothing to confirm.",
     "define_no_name_given": "Must give a name for the macro.",
     "define_successful": "Macro successfully bound.",
-    "exec_no_story_given": "Must give path to story to execute.",
-    "exec_invalid_file_given": "Story to be loaded not found.",
-    "exec_error_running_game": "Error occurred while running game. Changes to state may have still occurred. Resuming outer game.",
     "flag_no_flag_given": "Must provide flag.",
     "flag_invalid_flag": "Invalid flag given.",
     "flag_set_successfully": "Flag set successfully",
     "goto_invalid_address_given": "Incorrect address given.",
     "goto_no_address_given": "Must give an address.",
-    "help": "Valid commands are 'clear', 'define', 'exec', 'exit', 'flag', 'goto', 'help', 'info', 'input', 'inspect', 'load', 'repeat', 'restart', revert', 'save', 'set', 'settings', 'undefine', 'unflag'.",
+    "help": "Valid commands are...<br> • <b>clear:</b> For clearing text.<br> • <b>define/undefine:</b> For defining and undefining macros.<br> • <b>flag/unflag:</b> For setting/unsetting flags in the story.<br> • <b>goto:</b> For going to a specific spot in the story.<br> • <b>help:</b> You better know what this does now.<br> • <b>info:</b> For information like word count and other tidbits.<br> • <b>input:</b> To input multiple commands in one line.<br> • <b>inspect:</b> For inspecting the value of variables in the story.<br> • <b>repeat:</b> For repeating a command many times.<br> • <b>restart:</b> For those too lazy to press the restart button.<br> • <b>revert:</b> To go back one step in the story.<br> • <b>save/load:</b> To save or load your spot in the story.<br> • <b>set:</b> For setting the value of a story variable to a desired new value.",
+    "help_clear": "Usage: 'clear'",
+    "help_define": "Usage: 'define [macro name] [macro expansion (can be many words)]'<br>Macro name is a single word that, whenever encountered, will be replaced by the macro expansion. Macros are expanded recursively, and so can contain other macros, or even loops. Use with care; the server CPU is a potato.",
+    "help_flag": "Usage: 'flag [flag name]'<br>Sets a flag in the story to true. Flags are like variables but are global and with only boolean values.",
+    "help_goto": "Usage: 'goto [block address'<br>Sends you to the spot in the story specified by the given address. Addresses are written like file paths with forward slashes '/'.",
+    "help_help": "Usage: 'help [command]'<br>Help me, I'm trapped in a help command factory!",
+    "help_info": "Usage: 'info [option]'<br>Type 'info' to see what you can get information on.",
+    "help_input": "Usage: 'input [command_1], [command_2], ...'<br>Input many commands at once. Useful for macros, the repeat command, and possibly other things. Each of command_1, command_2, ... can be multiple words separated by spaces. The commas separate the individual commands. Example: 'input help, set energy 10, goto /orphanage'.",
+    "help_inspect": "Usage: 'inspect [var_name]'<br>Prints value of the given variable. Use 'info vars' to see a list of all variables.",
+    "help_load": "Usage: 'load [save_name]'<br>Loads progress under save file named [save_file]. Saves currently seem to be getting deleted after each update. I'm trying to fix this. Apologies!",
+    "help_repeat": "Usage: 'repeat [num_times] [command]'<br>Repeats the multi-word command for num_times times. If you want to repeat many commands, use the input command.",
+    "help_restart": "Usage: 'restart'<br>Restarts the game entirely. Warning: Does ask for confirmation!",
+    "help_revert": "Usage: 'revert'<br>Undos one choice/step in the story.",
+    "help_save": "Usage: 'save [save_name]'<br>Saves progress under file named [save_name]. If no save_name is specified, uses the last savefile's name. Saves are global to all users everywhere, so use a unique save file name!",
+    "help_set": "Usage: 'set [var_name] [new_value]'<br>Sets variable with name var_name to new value new_value. See 'info vars' for a list of variables in the game, or 'inspect [var_name]' for the current value of a variable.",
+    "help_undefine": "Usage 'undefine [macro name]'<br>Undefines a macro. See 'help define' for information about what a macro is and how to use them.",
+    "help_unflag": "Usage 'unflag [flag name]'<br>Sets a flag in the story to false. See 'help flag' for information about flags.",
+    "help_invalid_command": "That isn't a valid command or doesn't have a help page.",
     "info_options": "Valid options for info are 'actions', 'choices', 'completion', 'macros', 'vars', 'word_count', and 'words_seen'.",
     "info_invalid_option": "Invalid option given for info. Type 'info' for valid options.",
     "info_no_macros": "No macros defined",
@@ -41,14 +56,11 @@ feedback_msg = {
     "revert_no_reversions": "Can't revert any further.",
     "save_no_default_name_given": "Must supply default save name.",
     "save_completed": "Save complete!",
+    "save_override": "Save file already exists. Type 'confirm' next to confirm saving. (Hint: Use 'save' (without filename) to override last save filename).",
     "set_no_variable_given": "Must supply a variable to set the value of.",
     "set_no_value_given": "Must supply a new value for the variable.",
     "set_invalid_variable_given": "Invalid variable given to set value of.",
     "set_command_successful": "Successfully set variable to new value.",
-    "settings_no_setting_given": "Must give a setting to give a new value to or test the current value of. Here is a list of settings:",
-    "settings_autocomplete_invalid_val": "That's not an allowed value of descriptiveness. Allowed values are 'on' and 'off'.'",
-    "settings_descriptiveness_invalid_val": "That's not an allowed value of descriptiveness. Allowed values are 'descriptive', 'moderate', and 'minimal'.",
-    "settings_flavor_invalid_val": "That's not an allowed value of show_flavor_text. Allowed values are 'always', 'once', and 'never'.",
     "unflag_no_flag_given": "Must provide flag.",
     "unflag_invalid_flag": "Invalid flag given.",
     "unflag_set_successfully": "Flag unset successfully",
@@ -211,8 +223,8 @@ class CLIView(View):
                         self.print("\t" + self.utility.localize(var, vars_address) + ":\t" + str(var_dict_vals[var]))
 
 
-    def print_var(self, text):
-        self.print(text)
+    def print_var(self, text, dont_save_print=False):
+        self.print(text, dont_save_print=dont_save_print)
 
 
     def print_var_modification(self, text_to_show_spec, dont_save_print=False):
@@ -419,20 +431,16 @@ class ViewForTesting(View):
 
         super().__init__(gamestate, config, addressing, utility)
 
-        self.num_choices_made = 0
-        self.choice_list = choice_list
-        self.commands_called = []
-
 
     def update_choice_list(self, choice_list):
-        self.num_choices_made = 0
-        self.choice_list = choice_list
-        self.commands_called = []
+        self.gamestate.light.view.testing_num_choices_made = 0
+        self.gamestate.light.view.testing_choice_list = choice_list
+        self.gamestate.light.view.testing_commands_called = []
 
 
     def get_sub_commands_called(self, id):
         sub_commands_called = []
-        for command in self.commands_called:
+        for command in self.gamestate.light.view.testing_commands_called:
             if command["id"] == id:
                 sub_commands_called.append(command)
         return sub_commands_called
@@ -440,74 +448,74 @@ class ViewForTesting(View):
 
     def get_text_commands_called(self):
         text_commands_called = []
-        for command in self.commands_called:
+        for command in self.gamestate.light.view.testing_commands_called:
             if command["id"] == "print_text":
                 text_commands_called.append(command["text"])
         return text_commands_called
 
 
-    def clear(self):
-        self.commands_called.append({"id": "clear"})
+    def clear(self, dont_reset_displayed_text=False):
+        self.gamestate.light.view.testing_commands_called.append({"id": "clear"})
 
 
     def clear_var_view(self):
-        self.commands_called.append({"id": "clear_var_view"})
+        self.gamestate.light.view.testing_commands_called.append({"id": "clear_var_view"})
 
 
     def print_choices(self, display_actions = False):
-        self.commands_called.append({"id": "print_choices"})
+        self.gamestate.light.view.testing_commands_called.append({"id": "print_choices"})
 
 
-    def print_feedback_message(self, msg_type):
-        self.commands_called.append({"id": "print_feedback_message", "msg": msg_type})
+    def print_feedback_message(self, msg_type, dont_save=True):
+        self.gamestate.light.view.testing_commands_called.append({"id": "print_feedback_message", "msg": msg_type})
 
 
     def print_flavor_text(self, text, dont_save_print=False):
-        self.commands_called.append({"id": "print_flavor_text", "text": text})
+        self.gamestate.light.view.testing_commands_called.append({"id": "print_flavor_text", "text": text})
 
 
     def print_settings(self):
-        self.commands_called.append({"id": "print_settings"})
+        self.gamestate.light.view.testing_commands_called.append({"id": "print_settings"})
 
 
     def print_settings_flavor_text_get(self):
-        self.commands_called.append({"id": "print_settings_flavor_text_get"})
+        self.gamestate.light.view.testing_commands_called.append({"id": "print_settings_flavor_text_get"})
 
 
     def print_settings_flavor_text_set(self, new_value):
-        self.commands_called.append({"id": "print_settings_flavor_text_set", "new_value": new_value})
+        self.gamestate.light.view.testing_commands_called.append({"id": "print_settings_flavor_text_set", "new_value": new_value})
 
 
     def print_shown_vars(self, shown_vars, vars_address):
-        self.commands_called.append({"id": "print_shown_vars", "shown_vars": shown_vars, "vars_address": vars_address})
+        self.gamestate.light.view.testing_commands_called.append({"id": "print_shown_vars", "shown_vars": shown_vars, "vars_address": vars_address})
 
 
     def print_stat_change(self, text):
-        self.commands_called.append({"id": "print_stat_change", "text": text})
+        self.gamestate.light.view.testing_commands_called.append({"id": "print_stat_change", "text": text})
 
 
     def print_table(self, tbl_to_display, dont_save_print=False):
-        self.commands_called.append({"id": "print_table", "tbl": tbl_to_display})
+        self.gamestate.light.view.testing_commands_called.append({"id": "print_table", "tbl": tbl_to_display})
 
 
     def print_text(self, text, style, dont_save_print=False):
-        self.commands_called.append({"id": "print_text", "text": self.utility.format.vformat(text, (), self.utility.collect_vars()), "style": style})
+        self.gamestate.light.view.testing_commands_called.append({"id": "print_text", "text": self.utility.format.vformat(text, (), self.utility.collect_vars()), "style": style})
 
 
     def print_var_modification(self, text_to_show_spec, dont_save_print=False):
-        self.commands_called.append({"id": "print_var_modifications", "text": text_to_show_spec})
+        self.gamestate.light.view.testing_commands_called.append({"id": "print_var_modifications", "text": text_to_show_spec})
 
 
     def print_var_value(self, var_value):
-        self.commands_called.append({"id": "print_var_value", "var_value": var_value})
+        self.gamestate.light.view.testing_commands_called.append({"id": "print_var_value", "var_value": var_value})
 
 
     def get_input(self):
-        if self.num_choices_made >= len(self.choice_list):
+        if self.gamestate.light.view.testing_num_choices_made >= len(self.gamestate.light.view.testing_choice_list):
             return "exit".split()
 
-        self.num_choices_made += 1
-        return self.choice_list[self.num_choices_made - 1].split()
+        self.gamestate.light.view.testing_num_choices_made += 1
+        return self.gamestate.light.view.testing_choice_list[self.gamestate.light.view.testing_num_choices_made - 1].split()
 
 
 class WebView(View):
@@ -689,7 +697,7 @@ class WebView(View):
             self.emit_message("set_image", {"path": "static/graphics/" + self.gamestate.light.curr_image}, self.uid)
 
 
-    def print_var(self, text):
+    def print_var(self, text, dont_save_print=False):
         self.emit_message("print_var", {"text": text}, self.uid)
 
 

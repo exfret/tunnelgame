@@ -1,0 +1,1 @@
+I have plans on allowing you to start a business in the game as a mechanic. Maybe there are also other businesses here.

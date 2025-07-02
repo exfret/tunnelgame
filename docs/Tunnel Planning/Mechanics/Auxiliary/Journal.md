@@ -1,0 +1,1 @@
+There is a journal that describes what you've done over time. It is unlocked by [[Writing I]], and I don't have current plans for gameplay impact, but it would be a cool way for the [[Player]] to reflect on what's happened.

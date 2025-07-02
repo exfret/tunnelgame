@@ -94,7 +94,7 @@ class GameParser:
         self.gamestate.game = contents
     
 
-    def construct_game(self, node, story_path, address=()):
+    def construct_game(self, node, story_path=None, address=()):
         if "_include" in node:
             for block_name, file_name in node["_include"].items():
                 subgame = yaml.safe_load((story_path.parent / file_name).read_text())
@@ -102,77 +102,6 @@ class GameParser:
                 self.gamestate.game_data.file_homes[address + (block_name,)] = True
         if not "_meta" in node:
             node["_meta"] = {}
-
-        # Need to do manual world checking since we populate state["world"] at parsetime
-        # TODO: Finish implementing object system... not sure where to go with this, currently just parses
-        if "_world" in node:
-            if not isinstance(node["_world"], list):
-                print(f"\033[31mError:\033[0m _world is not instance of list at {address} node {node}")
-                raise IncorrectTypeError()
-            for detail in node["_world"]:
-                if not isinstance(detail, dict):
-                    print(f"\033[31mError:\033[0m DETAIL is not instance of dict at {address} node {node}")
-                    raise IncorrectTypeError()
-                if "object" in detail:
-                    if not isinstance(detail["object"], str):
-                        print(f"\033[31mError:\033[0m OBJECT_ID is not instance of str at {address} node {node}")
-                        raise IncorrectTypeError()
-                    # TODO: World in gamestate
-                    #self.gamestate.state["world"]["objects"][detail["object"]] = {"notes": [], "descriptors": [], "relationships": []}
-                    #curr = self.gamestate.state["world"]["objects"][detail["object"]]
-
-                    # Don't check for extraneous tags here when it's too much hassle, we can have the grammar do that
-                    if "_notes" in detail:
-                        if not isinstance(detail["_notes"], list):
-                            print(f"\033[31mError:\033[0m OBJECT_NOTES is not instance of list at {address} node {node}")
-                            raise IncorrectTypeError()
-                        for note in detail["_notes"]:
-                            if not isinstance(note, str):
-                                print(f"\033[31mError:\033[0m OBJECT_NOTE is not instance of str at {address} node {node}")
-                                raise IncorrectTypeError()
-                            #curr["notes"].append(note)
-                    if "_descriptors" in detail:
-                        if not isinstance(detail["_descriptors"], list):
-                            print(f"\033[31mError:\033[0m OBJECT_DESCRIPTORS is not instance of list at {address} node {node}")
-                            raise IncorrectTypeError()
-                        for descriptor in detail["_descriptors"]:
-                            if not isinstance(descriptor, str):
-                                print(f"\033[31mError:\033[0m OBJECT_DESCRIPTOR is not instance of str at {address} node {node}")
-                                raise IncorrectTypeError()
-                            #curr["descriptors"].append(descriptor)
-                    if "_relationships" in detail:
-                        if not isinstance(detail["_relationships"], list):
-                            print(f"\033[31mError:\033[0m OBJECT_RELATIONSHIP is not instance of list at {address} node {node}")
-                            raise IncorrectTypeError()
-                        for relationship in detail["_relationships"]:
-                            if not isinstance(relationship, dict):
-                                print(f"\033[31mError:\033[0m OBJECT_RELATIONSHIP is not instance of dict at {address} node {node}")
-                                raise IncorrectTypeError()
-                            if not "by" in relationship or not "to" in relationship:
-                                print(f"\033[31mError:\033[0m OBJECT_RELATIONSHIP has missing tags {address} node {node}")
-                                raise MissingRequiredTagError()
-                            if len(relationship) > 2:
-                                print(f"\033[31mError:\033[0m OBJECT_RELATIONSHIP has invalid tags at {address} node {node}")
-                                raise InvalidTagError()
-                            if not isinstance(relationship["by"], str) or not isinstance(relationship["to"], str):
-                                print(f"\033[31mError:\033[0m Incorrect type for 'by' or 'to' tag in RELATIONSHIP at {address} node {node}")
-                                raise IncorrectTypeError()
-                            #curr["relationships"].append({"by": relationship["by"], "to": relationship["to"]})
-                elif "descriptor" in detail:
-                    if not isinstance(detail["descriptor"], str):
-                        print(f"\033[31mError:\033[0m DESCRIPTOR is not instance of str at {address} node {node}")
-                        raise IncorrectTypeError()
-                    # TODO: World in gamestate
-                    #self.gamestate.state["world"]["objects"][detail["descriptor"]] = {}
-                elif "relationship" in detail:
-                    if not isinstance(detail["relationship"], str):
-                        print(f"\033[31mError:\033[0m RELATIONSHIP is not instance of str at {address} node {node}")
-                        raise IncorrectTypeError()
-                    # TODO: World in gamestate
-                    #self.gamestate.state["world"]["objects"][detail["relationship"]] = {}
-                else:
-                    print(f"\033[31mError:\033[0m Invalid DETAIL disjunct at {address} node {node}")
-                    raise InvalidDisjunctError()
 
         for key, subnode in node.items():
             if not key[0] == "_":  # Only recurse into sub-blocks
@@ -182,28 +111,6 @@ class GameParser:
                 else:
                     self.construct_game(subnode, story_path, address + (key,))  # Note: This can result in exponentially long games with the right setups...
                     # TODO: Smarter stitching that does not just duplicate everything
-    
-
-    def expand_macros(self, node):
-        def add_footers(node, footer):
-            for key, subnode in node.items():
-                # If this is a terminal block or _content node
-                if (key == "_content" or key[0] != "_") and isinstance(subnode, list):
-                    subnode.extend(footer)
-                if isinstance(subnode, dict):
-                    add_footers(subnode, footer)
-
-        if isinstance(node, list):
-            for subnode in node:
-                self.expand_macros(subnode)
-        elif isinstance(node, dict):
-            for key, subnode in node.items():
-                if key == "_footer":
-                    add_footers(node, subnode)
-                else:
-                    self.expand_macros(subnode)
-            if "_footer" in node:
-                del node["_footer"]
 
     
     def add_flags(self, node):
@@ -219,6 +126,7 @@ class GameParser:
                     self.gamestate.bulk.vars["flags"][subnode] = False
 
                 self.add_flags(subnode)
+    
     
     def add_vars_with_address(self, node, address, default_hide=False):  # TODO: Finish up so that it has the other extra features of vars too
         if isinstance(node, list):  # In this case, the inner part of the node is just content
@@ -345,6 +253,7 @@ class GameParser:
             if tag[0] != "_":
                 self.add_vars_with_address(subnode, address + (tag,))
     
+    
     def add_module_vars(self):
         # Add special variables
         self.gamestate.bulk.vars["random"] = random
@@ -356,6 +265,7 @@ class GameParser:
 
 
     def remove_module_vars(self):
+        self.gamestate.light.action_to_confirm = None
         del self.gamestate.bulk.vars["random"]
         del self.gamestate.bulk.vars["rand"]
         del self.gamestate.bulk.vars["math"]
@@ -702,6 +612,9 @@ class GameParser:
 
         # Special checking
         if context == "CHOICE":
+            if not len(node["choice"].split()) == 1:
+                print(f"\033[31mError:\033[0m Choice ID is multiple words at address {address} node {node}")
+                raise WrongFormattingError()
             if not ("effects" in node):  # If effects doesn't exist, this should be an address
                 if node["choice"] == "_back":
                     # Special indicator for "back" choice, fill in the syntactic sugar

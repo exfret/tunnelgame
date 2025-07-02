@@ -1,0 +1,1 @@
+This unlocks the ability to build treehouse walls for the [[Treehouse]]. Locked behind [[Reading I]] and "more books arriving at the [[Study]].

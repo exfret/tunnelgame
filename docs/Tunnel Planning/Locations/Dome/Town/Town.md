@@ -1,0 +1,1 @@
+The town that the [[Locations/Dome/Orphanage/Orphanage]] is in. Never named in the story, and simply referred to as "Town" despite there being other towns.

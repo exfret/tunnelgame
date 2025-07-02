@@ -1,0 +1,1 @@
+Unlocks some new survival mechanic in the [[World/Places/Tunnel|Tunnel]], not sure what.

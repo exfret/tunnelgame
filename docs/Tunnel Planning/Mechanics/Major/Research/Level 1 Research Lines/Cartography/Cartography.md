@@ -1,0 +1,1 @@
+Allows the [[Player]] more control over where they go for [[Encounters]]. Maybe a direct-travel option for certain "pinned" [[Encounters]].

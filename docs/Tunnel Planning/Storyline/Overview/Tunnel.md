@@ -1,0 +1,1 @@
+Tunnel is the game/story that the [[Engine]] is made for. In Tunnel, you guide your character, [[Characters/Orphanage/Orphans/Lily|Lily]], through an open-world text-based game in a strange world where humanity has been confined to a large [[World/Places/Dome|Dome]] with a massive [[World/Places/Tunnel|Tunnel]] being the only escape. 

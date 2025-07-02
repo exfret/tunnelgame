@@ -1,0 +1,1 @@
+The shrine of good can only be interacted with properly if you haven't done anything bad for a long time. It has very high expectations though, like even expecting you to make your bed, or not jaywalking.

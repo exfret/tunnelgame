@@ -369,8 +369,43 @@
             /* optional: centre when it doesn’t fill    */
         }
 
-        /* ─── encyclopedia overlay ────────────────────────── */
-        #encyclopedia-panel {
+        .hidden {
+            display: none;
+        }
+
+        body.overlay-panel {
+            display: block;
+        }
+
+        /* while encyclopedia is open, hide the normal UI */
+        body.overlay-panel .container,
+        body.overlay-panel footer {
+            filter: blur(3px);
+            pointer-events: none;
+            /* prevents accidental clicks behind */
+            user-select: none;
+        }
+
+        /* ─── make #main-container the containing block ─────────── */
+        #main-container {
+            position: relative;
+        }
+
+        /* ✧ a single class that ANY fullscreen pop-up can use */
+        .overlay-panel {
+            position: absolute;
+            inset: 24px 32px;
+            /* gap to the edges of #main-container */
+            padding: 24px 32px;
+
+            background: #fafafa;
+            border: 2px solid #4169E1;
+            border-radius: 8px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, .30);
+
+            overflow-y: auto;
+            z-index: 5;
+
             position: fixed;
             inset: 70px 40px 40px 40px;
             /* leave space for header/footer */
@@ -384,57 +419,8 @@
             /* high enough to sit on top */
         }
 
-        .hidden {
-            display: none;
-        }
-
-        body.encyclopedia #encyclopedia-panel {
-            display: block;
-        }
-
-        /* while encyclopedia is open, hide the normal UI */
-        body.encyclopedia .container,
-        body.encyclopedia footer {
-            filter: blur(3px);
-            pointer-events: none;
-            /* prevents accidental clicks behind */
-            user-select: none;
-        }
-
-        /* ─── make #main-container the containing block ─────────── */
-        #main-container {
-            position: relative;
-        }
-
-        /* ─── encyclopedia panel: fills the container with padding ─ */
-        #encyclopedia-panel {
-            position: absolute;
-            inset: 0;
-            top: 24px;
-            /* vertical gap */
-            bottom: 24px;
-            left: 32px;
-            /* horizontal gap */
-            right: 32px;
-            /* stretch to all four edges */
-            padding: 24px 32px;
-            /* ← your requested padding */
-
-            background: #fafafa;
-            border: 2px solid #4169E1;
-            border-radius: 8px;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, .3);
-            overflow-y: auto;
-            z-index: 5;
-            /* only needs to beat siblings */
-        }
-
-        .hidden {
-            display: none;
-        }
-
-        /* while open, blur the OTHER children of #main-container */
-        #main-container.ency-open> :not(#encyclopedia-panel) {
+        /* when a panel is open ⇒ blur the rest of #main-container */
+        #main-container.overlay-open> :not(.overlay-panel):not(script) {
             filter: blur(3px);
             pointer-events: none;
             user-select: none;
@@ -458,6 +444,9 @@
                 <button class="button nav-button" id="restartButton">Restart</button>
                 <button class="button nav-button" id="encyclopediaButton">
                     Encyclopedia
+                </button>
+                <button class="button nav-button" id="helpButton">
+                    Help
                 </button>
             </div>
         </div>
@@ -492,7 +481,7 @@
             <div id="stats-board" class="tree"></div>
         </div>
 
-        <div id="encyclopedia-panel" class="hidden">
+        <div id="encyclopedia-panel" class="overlay-panel hidden">
             <h2>Encyclopedia</h2>
             <p style="margin-bottom:12px;font-style:italic">
                 Click a term below to read about it.
@@ -501,6 +490,31 @@
                 Back to story
             </button>
             <div id="encyclopedia-list"></div>
+        </div>
+        <div id="help-panel" class="overlay-panel hidden">
+            <h2>Help</h2>
+            <br>
+            <p style="margin-bottom:12px">
+                Click on choice buttons in the story view (under the images/info box) to navigate through the story.
+                Alternatively, you can type the choice ID (on the choice button) into the console. The console also has
+                a few commands for advanced interaction. Type "help" into the console to see a list of commands, or
+                "help [command]" to see how to use the given command.
+            </p>
+            <br>
+            <h3>Keywords</h3>
+            <br>
+            <p style="margin-bottom:12px">
+                Some keywords will appear highlighted throughout the story. Hover over or click on them to read more
+                background information about that word, or look up the word later in the encyclopedia once you've found
+                it.
+            </p>
+            <h3>Stats Panel</h3>
+            <br>
+            <p style="margin-bottom:12px">
+                On the right is a statistics panel with item counts, tool levels, etc. Some statistics are categorized
+                into drop downs; click the drop down to expand or collapse it.
+            </p>
+            <button id="backFromHelp" class="button">Back to story</button>
         </div>
     </div>
 
@@ -664,15 +678,15 @@
 
         /* ---------- NAV BUTTONS -------------------------------------- */
         document.getElementById("restartButton").addEventListener("click", () => {
+            closePanel()
             socket.emit("restart", {});
-            closeEncyclopedia();
             window.location.reload();
         });
         // Messaged to restart
         socket.on("restart_html", msg => {
             // Send a message for view to also restart
+            closePanel()
             socket.emit("restart", {});
-            closeEncyclopedia();
             window.location.reload();
         });
 
@@ -738,7 +752,6 @@
         const encyPanel = document.getElementById('encyclopedia-panel');
         const encyList = document.getElementById('encyclopedia-list');
         const mainCont = document.getElementById('main-container');
-        let isEncyclopediaMode = false
 
         let glossary = new Map();   // term → description
 
@@ -768,22 +781,41 @@
                 });
         }
 
-        // open / close helpers
-        function openEncyclopedia() {
-            isEncyclopediaMode = true
-            renderEncyclopedia();
-            mainCont.classList.add('ency-open');
-            encyPanel.classList.remove('hidden');
-        }
-        function closeEncyclopedia() {
-            isEncyclopediaMode = false
-            mainCont.classList.remove('ency-open'); // <── was body.classList…
-            encyPanel.classList.add('hidden');
-        }
+        /* === generic overlay management ============================== */
+        let activePanel = null;            // currently open overlay, if any
 
-        // wire up buttons
-        encyBtn.addEventListener('click', openEncyclopedia);
-        backBtn.addEventListener('click', closeEncyclopedia);
+        function openPanel(panel) {
+            if (activePanel) closePanel();    // only one at a time
+            panel.classList.remove('hidden');
+            mainCont.classList.add('overlay-open');
+            activePanel = panel;
+        }
+        function closePanel() {
+            if (!activePanel) return;
+            activePanel.classList.add('hidden');
+            mainCont.classList.remove('overlay-open');
+            activePanel = null;
+        }
+        /* Escape key closes whichever is open */
+        window.addEventListener('keydown', e => {
+            if (e.key === 'Escape') closePanel();
+        });
+
+        /* === ENCYCLOPEDIA ============================================ */
+
+        encyBtn.addEventListener('click', () => {
+            renderEncyclopedia();             // your existing builder
+            openPanel(encyPanel);
+        });
+        backBtn.addEventListener('click', closePanel);
+
+        /* === HELP ===================================================== */
+        const helpBtn = document.getElementById('helpButton');
+        const helpPanel = document.getElementById('help-panel');
+        const backHelp = document.getElementById('backFromHelp');
+
+        helpBtn.addEventListener('click', () => openPanel(helpPanel));
+        backHelp.addEventListener('click', closePanel);
 
         // hook into your existing keyword events ----------------------------------
         // Every time you hover‑preview or click‑lock, register the term.

@@ -1,0 +1,1 @@
+Research in relationship to rocks and rock processing. Allows you to find different rocks on your journeys. Maybe [[Layer 2]] can be a major place to find rocks, especially in the [[Rocks]] [[Regions|Region]].

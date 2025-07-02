@@ -1,0 +1,1 @@
+A recent assassination and political turmoil has caused a power vacuum in squirrel kingdom in [[Layer 5]]. [[Characters/Orphanage/Orphans/Lily|Lily]] can greatly influence the events of these wars by getting different [[Squirrel Faction|Squirrel Factions]] to align with the [[Squirrel Prince|Squirrel Princes]] that claim the throne.

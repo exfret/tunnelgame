@@ -1,0 +1,1 @@
+A game is an authored piece of interactive fiction written in the YAML-based programming language 

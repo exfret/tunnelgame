@@ -1,0 +1,12 @@
+_content:
+  - choice: first
+    effects:
+      - yay
+      - flag: dont_stop
+      - goto: .
+  - if: not dont_stop
+    then:
+      - stop:
+  - choice: second
+    effects:
+      - nay

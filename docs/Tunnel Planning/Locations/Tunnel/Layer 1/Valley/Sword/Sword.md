@@ -1,0 +1,1 @@
+I'm planning a storyling with a sword in a rock.

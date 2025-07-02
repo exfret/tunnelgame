@@ -1,11 +1,11 @@
 This is a [[Next Expeditions|Training Encounter]].
 
-Description: You come across some rocks that stick straight up and lean on each other like a house of cards, leaving a hole between them. This hole is the entrance to a dark cave. The ground slopes toward the hole, as if to invite you in.
+Some rocks that stick straight up and lean on each other like a house of cards, leaving a hole between them. This hole is the entrance to a dark cave. The ground slopes toward the hole, as if to invite you in.
 
-Subareas:
+[[Areas]]:
 - [[Around]]
 - [[Inside]] (requires 1 [[Lemen Lantern]])
-- [[Locations/Tunnel/Layer 1/Hills/Cave/Top]]
+- [[Locations/Tunnel/Layer 1/Hills/Cave/Top|Top]]
 
 Extra choices:
 - Gather Resource

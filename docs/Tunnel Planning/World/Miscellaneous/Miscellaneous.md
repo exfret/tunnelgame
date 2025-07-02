@@ -1,0 +1,1 @@
+Explanations for world features that I couldn't categorize another way.

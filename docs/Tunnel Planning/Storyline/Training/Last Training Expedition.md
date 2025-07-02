@@ -1,0 +1,1 @@
+In this [[Expeditions|Expedition]], you are given a [[Clackadoo Feather]] by suprise from [[Characters/Orphanage/Orphans/George|George]] for completing your training.

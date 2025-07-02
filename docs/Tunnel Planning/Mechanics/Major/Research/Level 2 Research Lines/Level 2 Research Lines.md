@@ -1,0 +1,1 @@
+Focused around more things to do in [[Locations/Dome/Town/Town|Town]], like education for [[Jobs]].

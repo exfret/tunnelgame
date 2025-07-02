@@ -1,0 +1,1 @@
+This is a folder for more organized thoughts about the game's design, but not as completely formed as to make a [[Devlogs|Devlog]].

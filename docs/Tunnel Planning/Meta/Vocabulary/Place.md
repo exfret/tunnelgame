@@ -1,0 +1,1 @@
+A place is a specific block in the story. This usually corresponds to a specific file, but not any other files within the same folder.

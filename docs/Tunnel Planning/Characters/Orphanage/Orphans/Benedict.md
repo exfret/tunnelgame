@@ -1,0 +1,1 @@
+Benedict seems up-tight at first, like his name implies. But once you get to know him, he's actually quite chill. He's not super fond of [[Characters/Orphanage/Orphans/Lily|Lily]], but I want to write in a fair reason for this so that he doesn't come across as a bad guy. He's also still friendly, unless you bother him too much.

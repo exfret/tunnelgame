@@ -1,0 +1,1 @@
+The room where [[Characters/Orphanage/Orphans/Benedict|Benedict]] stays. He initially isn't super friendly toward you, especially if you try knocking on his door a lot in a single [[Day]].

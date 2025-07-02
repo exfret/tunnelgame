@@ -1,0 +1,1 @@
+The [[World/Places/Dome|Dome]] and [[World/Places/Tunnel|Tunnel]] have a variety of different items exchanged for goods and services. [[Coin|Coins]] are the most common (and actually put in [[Major Items]] instead due to just how frequent they are), but there are also other types of coins and currencies that certain characters prefer or even exclusively accept.

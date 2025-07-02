@@ -1,0 +1,1 @@
+This is the last [[Passes|Pass]] that you can achieve, after which you are able to explore the last parts of the [[World/Places/Tunnel|Tunnel]] and reach the end. It requires special permission from the [[World/Places/Dome|Dome's]] government.

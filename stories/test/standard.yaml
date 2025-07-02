@@ -1,0 +1,30 @@
+_vars:
+  - test: 0
+_content:
+  - started
+  - choice: begin
+  - choice: nah
+    effects:
+      - ah
+      - goto: lol
+lol:
+  - choice: up
+    effects: ..
+begin:
+  - set: test += 1
+  - storypoint: first
+  - made
+  - choice: next
+next:
+  - set: test += 1
+  - okay
+  - choice: after
+  - choice: branch1
+  - choice: branch2
+after:
+  - hi
+branch1:
+  - hi1
+branch2:
+  - hi2
+  - flag: this_is_a_flag

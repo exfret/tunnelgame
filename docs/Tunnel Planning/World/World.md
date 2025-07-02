@@ -1,0 +1,1 @@
+For description of the fundamental things you can come across in the [[World/Places/Tunnel|Tunnel]].

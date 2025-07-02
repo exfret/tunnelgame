@@ -1,0 +1,1 @@
+This is for [[Characters]] that primarily are in the [[Locations/Dome/Town/Town|Town]], mostly shopkeepers and the like. Includes only human characters.

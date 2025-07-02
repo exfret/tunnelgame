@@ -1,0 +1,1 @@
+Lore background for different places (as opposed to what's in those places currently, which you'd find in [[Locations]]).

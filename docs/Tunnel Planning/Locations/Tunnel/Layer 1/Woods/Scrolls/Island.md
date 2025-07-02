@@ -1,6 +1,5 @@
-Description: You arrive at the {scene = "tunnel", layer = 1, encounter = "scrolls", area = "lake", subarea = "island"} portion of my story. Congratulations!
+Description: You arrive at the {scene = "tunnel", layer = 1, encounter = "scrolls", region = "lake", area = "island"} portion of my story. Congratulations!
 
-Note: The {scene = ...} thing does not actually correspond to any bits of code; it's just meant to give the player a laugh.
+Note: The {scene = ...} thing does not actually correspond to any bits of code; it's just meant to give the [[Player]] a laugh.
 
-Choices:
-- If you have a good enough [[Shovel]], you can dig for a reward. Maybe a bunch of [[Coin]], but something else special like an [[Artifacts]] might also work.
+If you've gotten the treasure map from collecting all the blue coins in [[Locations/Tunnel/Layer 1/Hills/Blue Coin/Blue Coin|Blue Coin]] [[Encounters|Encounter]], and if you have a high [[Shovel]] level, you can dig here for a lot of [[Items/Currencies/Blue Coin|Blue Coins]].

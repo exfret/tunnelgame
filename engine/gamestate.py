@@ -44,12 +44,19 @@ class ViewData:
     emit_intercepts : list
     shown_vars : list
     story_text : str
+    # Only used for ViewForTesting
+    testing_choice_list : list[str]
+    testing_commands_called : list[dict]
+    testing_num_choices_made : int
 
 
     def __init__(self):
         self.emit_intercepts = []
         self.shown_vars = []
         self.story_text = ""
+        self.testing_choice_list = []
+        self.testing_commands_called = []
+        self.testing_num_choices_made = 0
 
 
 class LightData:
@@ -58,6 +65,7 @@ class LightData:
     This is deepcopied when whenever a GameState needs to be passed on.
 
     Attributes:
+        action_to_confirm: Function that will be called if "confirm" is written into console
         bookmark: Where you are in the story
         choices: The current choices presented to the user, including actions
         closed: Whether the game is closed
@@ -76,6 +84,7 @@ class LightData:
     """
 
 
+    action_to_confirm : Any
     bookmark : tuple[tuple]
     choices: dict[str, Any]
     closed : bool
@@ -95,6 +104,7 @@ class LightData:
 
 
     def __init__(self):
+        self.action_to_confirm = None
         self.bookmark = ()
         self.choices = {
             # This choice is made automatically and is currently only seen if the program needs to rewind due to too many instructions executed or something similar
@@ -287,11 +297,13 @@ class GameState:
 
     
     def reverse_last_diffs(self):
-        if len(self.diffs) == 1:
-            return False
+        # TODO: Figure out better hotfix for revert
+        # Repopulating last diffs with first diffs is counterintuitive and harder to test
+        #if len(self.diffs) == 1:
+        #    return False
         last_diff_list = self.diffs.pop()
-        if len(self.diffs) == 1:
-            self.diffs.append([last_diff_list[0]])
+        #if len(self.diffs) == 1:
+        #    self.diffs.append([last_diff_list[0]])
 
         while len(last_diff_list) > 0:
             last_diff = last_diff_list.pop()

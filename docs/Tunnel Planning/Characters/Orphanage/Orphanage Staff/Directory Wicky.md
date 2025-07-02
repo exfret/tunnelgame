@@ -1,0 +1,1 @@
+Frugal director and primary benefactor to the [[Locations/Dome/Orphanage/Orphanage]]. Makes tough decisions that make him seem cold-hearted, but truly he does care.

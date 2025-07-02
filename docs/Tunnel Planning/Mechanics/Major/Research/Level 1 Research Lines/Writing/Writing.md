@@ -1,0 +1,1 @@
+Needed for some researches. The first one unlocks the journal. Next is focused on creative writing and allows you to do something with regards to that?

@@ -1,0 +1,1 @@
+Very rare items are put here. You can acquire multiple, but even having one can be a great deal of effort. They are usually only given during big story events or for very specific series of actions.

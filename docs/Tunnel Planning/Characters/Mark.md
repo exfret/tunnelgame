@@ -1,1 +1,1 @@
-The maintainer of the [[Cliff]] elevator.
+The maintainer of the [[Cliff]] elevator, found in the [[Maintenance|Maintenance Room]]. Friendly, although not fond of surprise guests. Mark is [[Marty|Marty's]] brother.

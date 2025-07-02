@@ -1,0 +1,1 @@
+This goes over writing patterns often used in stories.

@@ -1,0 +1,1 @@
+There are four seasons, just like in real life locations that have temperate climates.

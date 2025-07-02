@@ -1,0 +1,3 @@
+This is the first part of the story, where your character is training with [[Characters/Orphanage/Orphans/George|George]] to upgrade their [[Training Pass]] to a [[Green Pass]]. This involves a series of training expeditions, as described in [[First Expedition]], [[Next Expeditions]], and [[Last Training Expedition]].
+
+Every training expedition done gives +3 [[Experience]], but after that I'm not sure what to do with future [[Expeditions]] with regards to [[Experience]].

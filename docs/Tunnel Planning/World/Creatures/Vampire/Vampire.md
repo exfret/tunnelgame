@@ -1,0 +1,1 @@
+There are friendly vampires in the [[World/Places/Tunnel|Tunnel]], although some are not so friendly (those ones tend to be more reclusive, and are found in later [[World/Places/Layers|Layers]]). They like to have parties, like one that happens pretty consistently in [[Layer 3]].

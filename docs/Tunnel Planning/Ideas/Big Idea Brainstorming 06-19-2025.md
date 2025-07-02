@@ -1,3 +1,3 @@
-You do your training, which opens up the major world areas. In this phase, you are gaining a lot of experience, unlocking things, and advancing progression in the Tunnel encounters. Major stats include vigor, coin, equipment, and experience, along with some inventory things like the flowers and keys. You should be advancing in volunteering too.
+You do your training, which opens up the major [[Layer 1]] [[Regions]]. In this phase, you are gaining a lot of experience, unlocking things, and advancing progression in the Tunnel [[Encounters]]. Major stats include vigor, coin, equipment, and experience, along with some inventory things like the flowers and keys. You should be advancing in volunteering too.
 
-You then unlock a couple more areas after training, get the clackadoo feather. 
+You then unlock a couple more [[Regions]] after training, get the clackadoo feather. 

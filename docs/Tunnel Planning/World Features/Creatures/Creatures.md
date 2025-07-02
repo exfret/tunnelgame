@@ -1,1 +1,0 @@
-Includes animals like [[World Features/Creatures/Squirrel|Squirrels]], but also other animate things like [[Ghosts]].

@@ -1,1 +1,0 @@
-Artifacts are special objects with significant effects. There is only one copy of each artifact in the whole game, and their location is tracked.

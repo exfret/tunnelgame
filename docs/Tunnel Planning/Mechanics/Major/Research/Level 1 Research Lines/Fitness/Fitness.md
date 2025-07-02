@@ -1,0 +1,1 @@
+Unlocks new training programs at the [[Gym]]. Maybe some other things?

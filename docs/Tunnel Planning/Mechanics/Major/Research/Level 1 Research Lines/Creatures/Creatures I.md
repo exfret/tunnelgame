@@ -1,0 +1,1 @@
+Allows you to understand [[World/Creatures/Squirrel/Squirrel|Squirrels]]. One of the first researches available at the [[Study]].

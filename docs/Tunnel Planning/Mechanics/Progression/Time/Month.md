@@ -1,0 +1,1 @@
+The game has the standard 12 months of our normal calendar, plus a thirteenth month, [[Octember]].

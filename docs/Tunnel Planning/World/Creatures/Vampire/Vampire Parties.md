@@ -1,0 +1,1 @@
+Vampires like to throw ragers, though they're a bit more sophisticated about them than [[Hills Giants]]. I'm thinking there can be a pretty big regularly ongoing one in [[Layer 3]].

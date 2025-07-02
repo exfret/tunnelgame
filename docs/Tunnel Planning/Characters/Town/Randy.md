@@ -1,0 +1,1 @@
+The annoying owner of the [[Gas Station]]. Cheats you out of your [[Coin]]. Used to own [[Varik]], before he had to release him due to not being able to support a pet anymore.

@@ -1,0 +1,3 @@
+A basic weapon, you can find one in the [[Field]] [[Encounters|Encounter]], or buy one when you get old enough from a shop in the [[Market]]. It provides minimal offensive capabilities, but at least allows you the option of attacking things once you get one.
+
+Daggers are one-handed, meaning you can have two contributing to your offensive damage rather than just one (anything past two does nothing more).

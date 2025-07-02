@@ -1,0 +1,1 @@
+Many stories have an entourage [[Block]] starting at the [[Root]]. The entourage is coded as a [[Movable Block]] that follows the [[Bookmark]] so that [[Instance|Instances]] that should "follow" you, like [[Characters/Orphanage/Orphans/George|George]] during [[Training]].

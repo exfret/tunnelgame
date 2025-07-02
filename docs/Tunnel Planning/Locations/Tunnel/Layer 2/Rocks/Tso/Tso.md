@@ -1,1 +1,1 @@
-You find a note from [[Characters/Orphans/George|George's]] father, [[Characters/Tso|Tso]].
+You find a note from [[Characters/Orphanage/Orphans/George|George's]] father, [[Characters/Tso|Tso]]. Once you find a second note (I'm not sure where yet), [[Characters/Orphanage/Orphans/George|George]] goes on an expedition to find his father, which doesn't end well.

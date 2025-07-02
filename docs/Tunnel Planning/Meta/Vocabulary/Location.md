@@ -1,0 +1,1 @@
+A location is a block representing a place in the world, including all its ancestors. In the context of these notes, this usually corresponds to the entire contents of a folder.

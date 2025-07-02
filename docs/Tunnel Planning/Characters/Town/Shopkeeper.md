@@ -1,0 +1,1 @@
+Runs the [[General Store]]. Has a dapper hat. Only referred to as the shopkeeper, despite there being many people running shops, and despite being relatively important as far as the shopkeepers go.

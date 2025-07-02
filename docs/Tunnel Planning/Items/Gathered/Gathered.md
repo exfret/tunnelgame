@@ -1,0 +1,1 @@
+Gathered items, usually from the [[World/Places/Tunnel|Tunnel]]. Most "normal" items that don't fall into other categories are here.

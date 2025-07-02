@@ -1,0 +1,33 @@
+_vars:
+  - time: 0
+  - logic_param_1: 0
+_content:
+  - goto: foyer
+logic:
+  inc_day:
+    - set: time += 1
+    - return:
+  find_jaz_location:
+    - switch: time % 4
+      "0":
+        - set: logic_param_1 = "rooms"
+      "1":
+        - set: logic_param_1 = "rooms"
+      "2":
+        - set: logic_param_1 = "admin"
+      "3":
+        - set: logic_param_1 = "courtyard"
+foyer:
+rooms:
+  lily:
+    - pass:
+  caroline:
+    - pass:
+common:
+  _content:
+    - pass:
+  courtyard:
+    - sub: /logic/find_jaz_location
+    - if: logic_param_1 = "courtyard"
+      then:
+        - Jaz is in the courtyard.

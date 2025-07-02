@@ -1,0 +1,48 @@
+How to do instances within instances?
+ex.- Might have an instance of Lily, and she has instance of Lemen inside, representing having those Lemens
+2nd ex.- If there are Box things, there can be instances (all based off the same code), but each Box has a different collection of things inside, showing need for instances within instances
+
+We could have blocks as instances, and just copy-paste the blocks.
+    Shop:
+    Shop2:
+    Box:
+    Lemen:
+Then we put a Box inside Shop, and then a Box inside Shop2:
+    Shop:
+        Box:
+    Shop2:
+        Box:
+    Box:
+    Lemen:
+Then we put a Lemen inside each Box:
+    Shop:
+        Box:
+            Lemen:
+    Shop2:
+        Box:
+            Lemen
+    Box:
+    Lemen:
+That doesn't seem too bad? I guess I was worried about the following:
+What if Box, has a lot of complex stuff in it?
+In this case, we are copying that under the hood each time.
+Instead, we can copy a reference to the original, but then what if that changes?
+i.e.- we put a Lemen inside the original Box?
+    Shop:
+        Box:
+    Shop2:
+        Box:
+    Box:
+        Lemen:
+    Lemen:
+Say we had those boxes originally. The lemen inside the template Box messes up the diffs.
+We need a difference between object world (where things are initialized FROM)...
+And between instance world (where they are PUT).
+    * (Future idea: Choices emit messages... they don't do gotos?)
+This is what I do in example_4, but there I'm allowing instance worlds inside instance worlds, which is weird-ish.
+Instead, I can copy-paste from template world, always into instance world, but instance
+world is still its own thing. So the instance world is essentially its own game.
+So there's a separation between the objects and the world.
+I can probably write some of the story this way? I'll story example_5.yaml
+
+So, initially, you're running the instance, but there's no instance to run!

@@ -1,0 +1,1 @@
+Researches related to observing more in the world around you. Having observation researches under your belt gives tips and unlocks new things that you can notice on your [[Expeditions]]/

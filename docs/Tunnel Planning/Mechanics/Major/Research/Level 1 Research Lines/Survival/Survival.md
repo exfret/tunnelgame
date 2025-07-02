@@ -1,0 +1,1 @@
+Unlocks various survival-related mechanics, like [[Tracking]]. These mechanics are primarily for [[World/Places/Tunnel|Tunnel]] exploration.

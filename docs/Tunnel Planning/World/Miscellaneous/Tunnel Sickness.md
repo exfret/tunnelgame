@@ -1,0 +1,1 @@
+As you go into the later [[World/Places/Layers|Layers]] of the [[World/Places/Tunnel|Tunnel]], it becomes not just a physical challenge, but also a mental one to keep going due to a mysterious force called Tunnel sickness. Places seem to move and people go mad.

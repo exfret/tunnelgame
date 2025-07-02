@@ -1,0 +1,1 @@
+This is alluded to before you can get to it, in particular by the [[Shopkeeper]]. People warn you not to go to the temple specifically, and the first time you try, [[Mabel]] even pulls you away.

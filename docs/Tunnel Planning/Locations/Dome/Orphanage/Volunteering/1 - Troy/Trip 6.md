@@ -1,0 +1,1 @@
+You meet the last orphan, probably [[Locations/Dome/Orphanage/Rooms/Benedict|Benedict]]. Maybe you're both playing a game? I don't know.

@@ -1,1 +1,0 @@
-At [[Karo's Farm]], [[Characters/Orphans/Troy|Troy]] is there, choice to talk to him? But maybe other orphans get developed first.

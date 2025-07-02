@@ -1,0 +1,203 @@
+# If modifications are ambiguous, just take most local one
+_run:
+  - goto: PreFirstTraining
+Location:
+  _start:
+    - init: . in /
+    - init: DayPhase in .
+  Dome:
+    Orphanage:
+      _run:
+        - goto: Foyer
+      PreFirstTraining:
+        # Parse time global vars
+        _parse:
+          - declare: num_training_expeditions_completed = 0
+        _run:
+          - "{George} flips a {Coin|coin} while waiting for you to finish packing for your first {Tunnel} {Expedition|expedition}."
+          - goto: FirstTraining
+      Foyer:
+        _run:
+          - image: foyer.png
+          - choice: rooms "Go to rooms" --> Rooms
+      Rooms:
+        _run:
+          - choice: foyer "Back to foyer" --> Foyer
+          - choice: lily "Go to my room" --> LilyRoom
+          - choice: george "Go to {George|George's} room" --> GeorgeRoom
+        LilyRoom:
+          _properties:
+            - time_bed_last_made: 0
+          _run:
+            - temp: dur_bed_unmade = DaysPassed - LilyRoom.time_bed_last_made
+            - if: dur_bed_unmade <= 5
+              then:
+                - Your bed is pristine.
+            - elseif: dur_bed_unmade <= 15
+              then:
+                - Your bed is slightly mess.
+            - else:
+                - Your bed is a complete mess.
+            - if: dur_bed_unmade > 5
+              then:
+                - choice: make "Make your bed"
+                  result:
+                    - modify: set time_bed_last_made to DaysPassed
+            # Need some sort of way to address through instance world easily!
+            # If we want to add 10 to George's Vigor, we would need to know where his instance is!
+            # Or maybe promise there's a unique George?
+            # How do we track down instances/refer to them?
+            # Could create anchor instances that I can start
+            # Could also choose most local one
+            - if: Vigor < MaxVigor
+              then:
+                - choice: rest "Take a week of rest"
+                  # show: cost {Experience} Experience
+                  show: cost {ceil(Experience)} Experience, get {MaxVigor - Vigor} Vigor
+                  result:
+                    # Need to increase days passed by 7
+                    - times: 7
+                      repeat:
+                        - sub: GoToNextDay
+                    - goto: .
+        GeorgeRoom:
+          _run:
+            - choice: expedition "Go on another training expedition"
+              result:
+                - switch: _Global.num_training_expeditions_completed
+                  "1":
+                    - goto: Tunnel/Layer1/Plains
+  Tunnel:
+    # TODO: Figure out behavior for footers if you leave their block
+    _footer:
+      - into: choices
+        where: advances_time in tags
+        position: after
+        inject:
+          - sub: GoToNextDayPhase
+          - if: DayPhase is Night
+            then:
+              # Gotos with addresses that require dereferencing are unsafe, and must be wrapped in a try catch
+              - try:
+                  # .path returns not just a BlockList, but something of type Path, which has an innermost()
+                  - goto: '{_curr_block.path.filter("has tag region").innermost() / "camp"}'
+                except:
+                  - goto: Layer1
+    Layer1:
+      FirstTraining:
+        _run:
+          - "{George} shows you a massive patch of {Lemen|lemens}."
+          - modify: add 5 to Lemen
+            show:
+          # Maybe a _Global special "block" to hold global variables
+          - modify: increment _Global.num_training_expeditions_completed
+          - goto: Orphanage
+      Plains:
+        _tags: region
+        _run:
+          - random: Grave, Lemen, Rosalia, Starblossom
+            bucket:
+        Grave:
+          _run:
+            - You come across the grave of a fallen explorer. {George} leaves a {Rosalia|rosalia} to pay respects.
+            # --> is executed last, even after "after" injections (unless you goto out of the choice result)
+            # i.e.- The --> is what's executed if you reach the end of the choice result
+            - choice: respect "Pay your respects as well" --> Plains
+              show: cost 1 Rosalia
+              tags: advances_time
+            - choice: continue "Continue without paying respects" --> Plains
+              tags: advances_time
+        Lemen:
+          _run:
+            - You find some {Lemen|lemens}!
+            - modify: add 1 to SkillGatherLemen
+              show:
+            - modify: add {SkillGatherLemen} to Lemen
+              show:
+            - choice: next --> Plains
+              tags: advances_time
+        Rosalia:
+          _run:
+            - You find some {Rosalia|rosalia}!
+            - modify: add 3 to Rosalia
+              show:
+            - choice: next --> Plains
+              tags: advances_time
+        Starblossom:
+          _run:
+            - You find a {Starblossom|starblossom}! Unfortunately, you need a {Shovel|shovel} level of at least 3 to harvest it.
+            # TODO
+Item:
+  # TODO: A way to recursively assign _item type to everything inside a block?
+  # _item extends _stat
+  Lemen(_item):
+    _description: A glowing flower.
+  Rosalia(_item):
+  Starblossom(_item):
+People:
+  George:
+  Lily:
+    _start:
+      - init: . in /
+      - default: _inventory, _character
+Mechanic:
+  Time:
+    _prereqs: Location
+    _start:
+      # Need to figure out which DayPhase, probably do leaf ones in case of ambiguity
+      - init: DaysPassed, DayPhase in Location
+      # TODO: GoToNextDay and...
+    DaysPassed:
+      _properties:
+        - days_passed: 0
+          _default:
+      # _subroutine blocks come with a built-in subreturn at the end, and don't count for last location, maybe something like that?
+      GoToNextDay(_subroutine):
+        # Does this need to be like DaysPassed.days_passed? Or like ...days_passed (.. .days_passed)
+        - modify: increment days_passed
+    DayPhase:
+      DayPhase(_union):
+        # Maybe first case can be the default?
+        _cases: Morning, Afternoon, Evening, Night
+        GoToNextDayPhase(_subroutine):
+          # Note that after initialization, this is an instance, and will be an instance of one of the four _cases, no long an instance of DayPhase
+          - switch: DayPhase._case
+            Morning:
+              # Really unsure about how to switch the "case"; the cases may just need to be strings
+              - cast: . to Afternoon
+            Afternoon:
+              - cast: . to Evening
+            Evening:
+              - cast: . to Night
+            Night:
+              - cast: . to Morning
+      Morning:
+      Afternoon:
+      Evening:
+      Night:
+  Vigor:
+    # Maybe instead of this, we can just auto-initialize stats in the _character when they come across a check/cost/shown etc. modifier for the stat
+    # Start can take a list of handlers, which specify other handlers that have to be completed first
+    _prereqs: Lily
+    _start:
+      - init: Vigor, MaxVigor in Lily
+    # _stat come with a .amount property (either of float or int type) by default, which is integrated with shops
+    Vigor(_stat):
+      _properties:
+        # Setting amount explicitly makes it 10
+        - amount: 10
+    MaxVigor(_stat):
+      _properties:
+        - amount: 10
+  Experience:
+    _prereqs: Lily
+    _start:
+      - init: Experience in .
+    Experience(_stat):
+      _properties:
+        - amount: 10
+  Skill:
+    Gather:
+      SkillGatherLemen(_stat):
+    Tool:
+      Shovel(_stat):

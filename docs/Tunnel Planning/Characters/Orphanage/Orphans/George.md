@@ -1,0 +1,1 @@
+George is your friend, and [[Training|Trains]] you to become a [[World/Places/Tunnel|Tunnel]] explorer. Although he shares your freckles, he does not share your red hair. Though we'll forgive him for that.

@@ -1,4 +1,0 @@
-Layer 1
-
-1. Cave: There is a cave; you can go around, inside, or on top of it
-    Around: You find a flower, maybe other rewards or encounters?

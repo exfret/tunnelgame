@@ -1,0 +1,1 @@
+This is [[Characters/Orphanage/Orphans/Caroline|Caroline's]] room.

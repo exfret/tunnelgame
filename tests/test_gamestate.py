@@ -37,7 +37,7 @@ gameobject_multiblock = {
     "_content": [
         "Hello, World!",
         {
-            "if": True,
+            "if": "True",
             "then": [
                 "This should spill!"
             ]

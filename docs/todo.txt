@@ -1,70 +1,30 @@
 Currently:
+  - Documentation for old syntax + commands
+    - Run new stories (and old ones) to make sure they run as promised
+
   - Huge refactor with diffs
-    - Rename seed command
-
-  - Optimization
-    - Need to do tests to make sure things still work, like saving/loading/etc.
-      - First need to decide what tests to do
-
-  - Lookaheads
+    - Fixing gameloop commands with testing (next is restart, then revert)
+    - Fix revert at first choice in story
+    - Rename seed command (to what? changerng?)
     - Make lookaheads not work for choices with args, etc.
-    - Test saving/loading capabilities with lookaheads
 
   - Big refactor to class-based approach
-      - Create new classes
-      - Make initial Flask declaration outside View
-      - Store uid with view rather than having to pass it in (each user gets their own view anyways)
-      - Local emit rooms
-      - Pass through chatGPT
-      - Getting tests running
-      - Refactor state into a class?
-    - Make View class not depend on Game or State? (pass in information as needed)
     - Unit tests for addressing and such
-    - Add new tests
     - Removed unused instructions
-    - Reorganize imports
-    - Clean up story loading
-    - Clean up project directory organization
-    - Make view's web_state just a web_state rather than dictionary of uid to web_state (we already have the dictionary in the __main__ layer)
-
-  - Make requirements not met different color? Maybe bolded and red yeah
-  - Implementing view print messages
-  - Organize and go through "Old Currently"
-  - Encyclopedia
-  - Styled text for UI
-
-Old Currently:
-  - Connection instruction for moving between locations
-  - Block location/locales
-  - "check" tag for choices that activates at the same time as require and has custom message for what was missing
-
-  - Game objects
-    - Test for duplicate objects
-
-  - Refresh persistence for web view
-    - Need to save text and print saved text
-  - Restricting possible values? (just finished parsing, need to check that starting value is possible)
-
-  - Block moving
-    - New way to check for whether address id's work
-    - except tags with handling content for instructions that can raise errors
-    - Getting block metadata by id
-    - Deal with cyclic moves
-  - Migration function!
-  - Plenty of tests
-  - References to blocks so they can be in multiple spots at the same time?
-  
-  - Get rid of passing game and state everywhere
-  - Working on expanding lemeny version
-    - Note: allow exec'ing a given file
-    - "Try" statements on run?
-    - Allow story to be given that's exec'd (have to test for story's existence)
-    - Undo storypoint modifications (since they're not named like they should be...)
+    - Make sure all other view print messages for web view are actually implemented
 
 Big Todo:
-  - UI
+  - Testing
+  - New syntax
 
 
+254. Custom checking that injections make sense and won't crash interpreter
+253. Repeat 5 start then restarts seem to not be clearing the command buffer
+252. Scumvm look up and stuff
+251. Test info subcommands
+250. Info command for listing save names
+249. Max length for macros
+248. Make view's web_state just a web_state rather than dictionary of uid to web_state (we already have the dictionary in the __main__ layer)
 247. Limit diff list size
 246. Implement savefile_names in SavesData
 245. Make choices into their own class
@@ -170,50 +130,19 @@ Big Todo:
 137. Consider whether to make game and state into classes
 136. Rename print in View back to normal (I don't like overriding it)
 135. Remove old commands like flavor, once, and gosub
-134. Fix back command... it went back to the root of the story once?
-133. Definitely do search along for blocks with certain names (maybe option to disable)
-132. Warning for choice/effects without gotos
-131. Persistent stats about a story, like how much completion you've achieved across all your runs of it
-130. Composite repo logic that looks in both built-in and non-built-in stories
-128. Test cases for stop commands
-127. Compound instructions (separated by ;?)
-125. Warnings for = in text (for set statements)
-124. Var printing in text of choices?
-123. Test dereferencing abilities
-122. Ability to name vars based on the current block?
-121. Change gosub to persist through choices
-120. Create/Global keyword for locally defined vars
-119. Give inform a look for object features
-118. "all the eggs" talks about all eggs
-117. Warning for choices that lead to "todo" sections
-116. Special ways to access variables, for example, from different scopes with custom parsing of variables in {} curly braces
-115. Tag/filter system... filter only for blocks with a certain tag when doing instructions/commands
-114. Make list of definitive features to test
-113. Ability to organize vars more into "var blocks" that are just for organizational purposes
-112. Tags about story elements for debugging? What would these do? Maybe built-in changelogs and messages
-111. Make random number generator deterministic
-108. Overwrite confirmation for saving over an old file?
-107. Default load value too?
-106. State organization overhaul?
-105. Exception handling when load tries to load something from a different story
-104. Implement pytest test cases for shops
-103. Catch exceptions from run command
-102. Colored title text for intro
-101. Print unlock function
-100. Going back with story re-running
-99. Make headers/footers proper blocks too
-98. Execute command for executing instructions from command console (more flexibility with changing state, etc.)
-96. Local flags
-95. "Disable-able" choices
-94. Make _footer's back into distinguished blocks not macros (or maybe a special type of block)
-92. Info tag for instructions when you're in a block/reminders (maybe combine with actions)
-91. Add footers to effects sections too (maybe move back to ending footers)
-90. Titles for locations
-89. Fix gameparser for requirement specifications
-88. Make sure "help" string is up to date
-81. Error on choices in story that are more than one word
 
 DONE
+128. Test cases for stop commands
+124. Var printing in text of choices
+121. Change gosub to persist through choices (just create sub command)
+119. Give inform a look for object features
+108. Overwrite confirmation for saving over an old file
+112. Tags about story elements for debugging? What would these do? Maybe built-in changelogs and messages
+111. Make random number generator deterministic
+106. State organization overhaul
+104. Implement pytest test cases for shops
+81. Error on choices in story that are more than one word
+88. Make sure "help" string is up to date (also added help strings for commands)
 126. Fix goto command (I think broken in choice effects)
 158. Named storypoints
 109. Attach which game "id" each save is from
@@ -279,6 +208,26 @@ DONE
 1. Checking that story is formatted correctly
 
 NOT DOING
+132. Warning for choice/effects without gotos
+131. Persistent stats about a story, like how much completion you've achieved across all your runs of it
+130. Composite repo logic that looks in both built-in and non-built-in stories
+127. Compound instructions (separated by ;?)
+125. Warnings for = in text (for set statements)
+123. Test dereferencing abilities
+122. Ability to name vars based on the current block
+120. Create/Global keyword for locally defined vars
+117. Warning for choices that lead to "todo" sections
+116. Special ways to access variables, for example, from different scopes with custom parsing of variables in {} curly braces
+115. Tag/filter system... filter only for blocks with a certain tag when doing instructions/commands
+114. Make list of definitive features to test
+107. Default load value too
+102. Colored title text for intro
+101. Print unlock function
+99. Make headers/footers proper blocks too
+98. Execute command for executing instructions from command console (more flexibility with changing state, etc.)
+95. "Disable-able" choices
+91. Add footers to effects sections too (maybe move back to ending footers)
+90. Titles for locations
 80. Iteration loops: iterate through a list and do something for each thing in the list (Need some concept of a list before I can make loops over one)
 87. Change "stop" to "wait" statement? Maybe "pause". Make wait keep execution stack and stop get rid of it. How to do headers?
 74. Write a story that allows the reader to write their own story, just for the meta-ness nerd cred (the call command is probably hopelessly broken now, not to mention basically useless, and fixing it scares me)
@@ -305,6 +254,10 @@ NOT DOING
 2. Unify actions and choices with actions as just "default choices"
 
 I FORGET WHAT THIS MEANS
+133. Definitely do search along for blocks with certain names (maybe option to disable)
+100. Going back with story re-running
+92. Info tag for instructions when you're in a block/reminders (maybe combine with actions)
+89. Fix gameparser for requirement specifications
 43. Automatic log of variable changes
 67. Actually write the tests
 13. Allow specification file for author-defined commands
@@ -315,6 +268,13 @@ I FORGET WHAT THIS MEANS
 57. Automatic stopping outside of effects blocks!
 
 DEFUNCT
+134. Fix back command... it went back to the root of the story once?
+118. "all the eggs" talks about all eggs
+113. Ability to organize vars more into "var blocks" that are just for organizational purposes
+105. Exception handling when load tries to load something from a different story
+103. Catch exceptions from run command
+96. Local flags
+94. Make _footer's back into distinguished blocks not macros (or maybe a special type of block)
 129. Print error for too many args in commands?
 75. Should "stops" deconstruct the call stack like they do now? In general, how could we do choices within a gosub? (I ended up using sub commands instead, so I think I ended up resolving this in a different way)
 37. Add special lib var that is a library accessible to expressions but doesn't get saved with the state

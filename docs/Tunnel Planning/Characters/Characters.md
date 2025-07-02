@@ -1,0 +1,1 @@
+A list of all characters in the game. A character is a single setient entity that is mentioned anywhere in the story
